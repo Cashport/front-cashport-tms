@@ -54,8 +54,7 @@ export const DriverFormTab = ({
   handleFormState = () => {},
   documentsTypesList,
   vehiclesTypesList,
-  isLoadingSubmit,
-  messageApi
+  isLoadingSubmit
 }: DriverFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);

@@ -1,9 +1,6 @@
 "use client";
 import { message, Skeleton } from "antd";
-
 import { useRouter } from "next/navigation";
-
-import "./createDriver.scss";
 import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
 import { addDriver } from "@/services/logistics/drivers";
 import { IFormDriver } from "@/types/logistics/schema";
@@ -22,45 +19,28 @@ type Props = {
 
 export const CreateDriverView = ({ params }: Props) => {
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const onCreateDriver = async (data: IFormDriver) => {
     data.general.company_id = params.id;
+    setIsLoadingSubmit(true);
     try {
-      setIsLoadingSubmit(true);
       const response = await addDriver(
         data.general,
         data.logo as any,
         data?.files as DocumentCompleteType[]
       );
       if (response.status === 200) {
-        messageApi
-          .open({
-            type: "success",
-            content: "El conductor fue creado exitosamente.",
-            duration: 2
-          })
-          .then(() => {
-            push(`/logistics/providers/${params.id}/driver`);
-          });
+        setIsLoadingSubmit(false);
+        message.success("Conductor creado", 2, () =>
+          push(`/logistics/providers/${params.id}/driver`)
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message,
-          duration: 3
-        });
-      } else {
-        messageApi.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta mas tarde.",
-          duration: 3
-        });
-      }
-    } finally {
       setIsLoadingSubmit(false);
+      message.error("Error al crear conductor", 2, () =>
+        push(`/logistics/providers/${params.id}/driver`)
+      );
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
@@ -74,19 +54,15 @@ export const CreateDriverView = ({ params }: Props) => {
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   return (
-    <>
-      {contextHolder}
-      <Skeleton active loading={isLoadingDocuments || isLoadingVehicles}>
-        <DriverFormTab
-          isLoadingSubmit={isLoadingSubmit}
-          onSubmitForm={onCreateDriver}
-          statusForm={"create"}
-          params={params}
-          documentsTypesList={documentsType ?? []}
-          vehiclesTypesList={vehiclesTypesData?.data ?? []}
-          messageApi={messageApi}
-        />
-      </Skeleton>
-    </>
+    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles}>
+      <DriverFormTab
+        isLoadingSubmit={isLoadingSubmit}
+        onSubmitForm={onCreateDriver}
+        statusForm={"create"}
+        params={params}
+        documentsTypesList={documentsType ?? []}
+        vehiclesTypesList={vehiclesTypesData ?? []}
+      />
+    </Skeleton>
   );
 };

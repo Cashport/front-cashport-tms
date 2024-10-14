@@ -6,6 +6,8 @@ import styles from "./ConfirmClose.module.scss";
 import { getAceptBilling } from "@/services/billings/billings";
 import { MessageInstance } from "antd/es/message/interface";
 import { formatNumber } from "@/utils/utils";
+import { TabEnum } from "@/components/organisms/logistics/transfer-orders/TransferOrders";
+import { useRouter } from "next/navigation";
 interface ConfirmClose {
   setSelectedView: (value: SetStateAction<ViewEnum>) => void;
   onClose: () => void;
@@ -24,27 +26,21 @@ const ConfirmClose = ({
   idBilling
 }: ConfirmClose) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { push } = useRouter();
 
   const aceptBilling = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await getAceptBilling(idBilling);
       if (response) {
-        messageApi?.open({
-          type: "success",
-          content: "Se aceptó el cierre correctamente",
-          duration: 3
-        });
+        setIsLoading(false);
+        onClose();
+        message.success(`TR No. ${idTR} aceptada`, 2, () => push(`/facturacion`));
       }
-    } catch (error) {
-      messageApi?.open({
-        type: "error",
-        content: "Hubo un problema, vuelve a intentarlo",
-        duration: 3
-      });
-    } finally {
-      onClose();
+    } catch (error: any) {
       setIsLoading(false);
+      onClose();
+      message.error("Hubo un error aceptando la orden", 2);
     }
   };
   const handleConfirm = () => {

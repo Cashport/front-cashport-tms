@@ -1,10 +1,17 @@
 import axios, { AxiosResponse } from "axios";
 import config from "@/config";
-import { getIdToken } from "@/utils/api/api";
-import { CustomFile, IListData, IMaterial } from "@/types/logistics/schema";
+import { API, getIdToken } from "@/utils/api/api";
+import {
+  CustomFile,
+  IListData,
+  IMaterial,
+  IMaterialTransportType,
+  IMaterialType
+} from "@/types/logistics/schema";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { GenericResponse } from "@/types/global/IGlobal";
 
-export const getSearchMaterials = async (term:string): Promise<IListData> => {
+export const getSearchMaterials = async (term: string): Promise<IListData> => {
   const token = await getIdToken();
   try {
     const formData = new FormData();
@@ -40,61 +47,26 @@ export const getAllMaterials = async (): Promise<IListData> => {
   }
 };
 
-export const getAllMaterialType = async (): Promise<IListData> => {
-  const token = await getIdToken();
-  try {
-    const response: IListData = await axios.get(`${config.API_HOST}/material/all/type`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return response;
-  } catch (error) {
-    console.log("Error get all getAllMaterialType: ", error);
-    return error as any;
-  }
+export const getAllMaterialType = async (): Promise<IMaterialType[]> => {
+  const response: GenericResponse<IMaterialType[]> = await API.get(`/material/all/type`);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error al obtener listado de materiales");
 };
 
-export const getAllMaterialTransportType = async (): Promise<IListData> => {
-  const token = await getIdToken();
-  try {
-    const response: IListData = await axios.get(`${config.API_HOST}/material/all/transport`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return response;
-  } catch (error) {
-    console.log("Error get all getAllMaterialTransportType: ", error);
-    return error as any;
-  }
+export const getAllMaterialTransportType = async (): Promise<IMaterialTransportType[]> => {
+  const response: GenericResponse<IMaterialTransportType[]> =
+    await API.get(`/material/all/transport`);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error al obtener listado de materiales de transporte");
 };
 
-export const getMaterialById = async (id:string): Promise<IListData> => {
-  const token = await getIdToken();
-  try {
-    const response: IListData = await axios.get(`${config.API_HOST}/material/`+ id, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return response;
-  } catch (error) {
-    console.log("Error getMaterialById: ", error);
-    return error as any;
-  }
+export const getMaterialById = async (id: string): Promise<IMaterial[]> => {
+  const response: GenericResponse<IMaterial[]> = await API.get(`${config.API_HOST}/material/` + id);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error al obtener el material por id");
 };
 
-
-export const createMaterialForm =( 
-  data: IMaterial,
-  formImages: CustomFile[]
-) => {
+export const createMaterialForm = (data: IMaterial, formImages: CustomFile[]) => {
   const form = new FormData();
   const body: any = { ...data };
   // const hasImage = formImages.length > 0
@@ -105,7 +77,7 @@ export const createMaterialForm =(
   body.images = formImages?.map((file: any, index) => ({
     docReference: file.docReference || `image${index + 1}`,
     uid: file?.uid,
-    url_archive: file?.url_archive,
+    url_archive: file?.url_archive
   }));
 
   form.append("body", JSON.stringify(body));
@@ -118,15 +90,15 @@ export const createMaterialForm =(
     }
   });
 
-  return form
-}
+  return form;
+};
 
 export const addMaterial = async (
   data: IMaterial,
   formImages: CustomFile[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
-   const form = createMaterialForm(data, formImages)
+    const form = createMaterialForm(data, formImages);
     const response = await axios.post(`${config.API_HOST}/material/create`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -144,13 +116,14 @@ export const updateMaterial = async (
   formImages: CustomFile[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
-    const form = createMaterialForm(data, formImages)
+    const form = createMaterialForm(data, formImages);
     const response = await axios.put(`${config.API_HOST}/material/update`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
         Accept: "application/json, text/plain, */*"
       }
     });
+    console.log("RESPONSE updateMaterial", response);
     return response;
   } catch (error) {
     console.log("Error updating material: ", error);
@@ -159,12 +132,13 @@ export const updateMaterial = async (
 };
 
 export const updateMaterialStatus = async (
-  location_id:string, active:string
+  location_id: string,
+  active: string
 ): Promise<AxiosResponse<any, any>> => {
   try {
     const form = new FormData();
-    const body: any = { "material_id":location_id, "active":active };
-    form.append("body", JSON.stringify(body));  
+    const body: any = { material_id: location_id, active: active };
+    form.append("body", JSON.stringify(body));
     const response = await axios.put(`${config.API_HOST}/material/updatestatus`, form, {
       headers: {
         "Content-Type": "multipart/form-data",

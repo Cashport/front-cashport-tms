@@ -124,57 +124,40 @@ export const finishTransferRequest = async (data: TransferRequestFinish) => {
 };
 
 export const getAcceptedTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
-  try {
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-order`
-    );
-    if (response.success) return response.data;
-    return [];
-  } catch (error) {
-    console.error("Error get transfer-request-order/: ", error);
-    throw error as any;
-  }
+  const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
+    `/transfer-request/transfer-request-order`
+  );
+  if (response.success) return response.data;
+  console.log("getAcceptedTransferRequest", response);
+  throw new Error(response?.message || "Error");
 };
 
 export const getOnRouteTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
-  try {
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-on-route`
-    );
-    if (response.success) return response.data;
-    return [];
-  } catch (error) {
-    console.error("Error get transfer-request-on-route/: ", error);
-    throw error as any;
-  }
+  const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
+    `/transfer-request/transfer-request-on-route`
+  );
+  if (response.success) return response.data;
+  console.log("getOnRouteTransferRequest", response);
+  throw new Error(response?.message || "Error");
 };
 
 export const getFinishedTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
-  try {
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-finished`
-    );
-    if (response.success) return response.data;
-    return [];
-  } catch (error) {
-    console.error("Error get transfer-request-finished/: ", error);
-    throw error as any;
-  }
+  const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
+    `/transfer-request/transfer-request-finished`
+  );
+  if (response.success) return response.data;
+  console.log("getFinishedTransferRequest", response);
+  throw new Error(response?.message || "Error");
 };
 
 export const getTransferRequestDetail = async (
   id: number
 ): Promise<ITransferRequestDetail | {}> => {
-  try {
-    const { success, data }: GenericResponse<ITransferRequestResponse> = await API.get(
-      `/transfer-request/details/${id}`
-    );
-    if (success) return data;
-    return {};
-  } catch (error) {
-    console.error("Error get request/details/:id/: ", error);
-    throw error as any;
-  }
+  const response: GenericResponse<ITransferRequestResponse> = await API.get(
+    `/transfer-request/details/${id}`
+  );
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error");
 };
 
 export const updateTransferRequestStatus = async (
@@ -202,23 +185,16 @@ export const downloadCsvTransferOrders = async () => {
 };
 
 export const deleteOrders = async (trIds: number[], toIds: number[]): Promise<any> => {
-  try {
-    const customConfig = {
-      data: {
-        transferRequestIds: trIds,
-        transferOrderIds: toIds
-      }
-    };
-    const response: GenericResponse<any> = await API.delete(
-      `/transfer-request/delete-to-tr`,
-      customConfig
-    );
-    if (response.success) return response.data;
-  } catch (error) {
-    let errorMsg;
-    if (error instanceof Error) {
-      errorMsg = error?.message;
-    } else errorMsg = "Error al borrar servicios, intente nuevamente";
-    throw new Error(errorMsg);
-  }
+  const customConfig = {
+    data: {
+      transferRequestIds: trIds,
+      transferOrderIds: toIds
+    }
+  };
+  const response: GenericResponse<any> = await API.delete(
+    `/transfer-request/delete-to-tr`,
+    customConfig
+  );
+  if (response.success) return response.success;
+  throw new Error(response?.message || "Error");
 };

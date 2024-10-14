@@ -1,10 +1,18 @@
 "use client";
-import { message } from "antd";
+import { message, Skeleton } from "antd";
 import { useRouter } from "next/navigation";
 import "../../../../../../styles/_variables_logistics.css";
 import "./createLocation.scss";
 import { LocationFormTab } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab";
-import { addLocation } from "@/services/logistics/locations";
+import {
+  addLocation,
+  getAllDocumentsType,
+  getAllGroupByLocation,
+  getAllLocationTypes,
+  getAllStatesByCountry
+} from "@/services/logistics/locations";
+import { useState } from "react";
+import useSWR from "swr";
 
 type Props = {
   params: {
@@ -15,44 +23,73 @@ type Props = {
 
 export const CreateLocationView = ({ params }: Props) => {
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const handleSubmit = async (data: any) => {
+    setIsLoadingSubmit(true);
     try {
-        const response = await addLocation(
-          {...data}, 
-          data.files
-        );  
+      const response = await addLocation({ ...data }, data.files);
       if (response && response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: `La ubicación fue creada exitosamente.`
-        });
-        push(`/logistics/configuration/locations/all`); //${response.data.data.id}
+        setIsLoadingSubmit(false);
+        message.success(`Ubicación creada`, 2, () =>
+          push(`/logistics/configuration/locations/all`)
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message
-        });
-      } else {
-        message.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta más tarde."
-        });
-      }
-    } 
+      setIsLoadingSubmit(false);
+      message.error(
+        error instanceof Error ? error.message : "Hubo un error al crear ubicación",
+        2,
+        () => push(`/logistics/configuration/locations/all`)
+      );
+    }
   };
+  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
+    "documents-types",
+    getAllDocumentsType,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+  const { data: locationTypesData, isLoading: isLoadingLocationTypes } = useSWR(
+    "location-type",
+    getAllLocationTypes,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+  const { data: groupLocationData, isLoading: isLoadingGroupLocation } = useSWR(
+    "group-location",
+    getAllGroupByLocation,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+  const { data: statesData, isLoading: isLoadingStates } = useSWR(
+    "states-data",
+    getAllStatesByCountry,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+
   return (
-    <>
-      {contextHolder}
+    <Skeleton
+      active
+      loading={
+        isLoadingDocuments || isLoadingLocationTypes || isLoadingGroupLocation || isLoadingStates
+      }
+    >
       <LocationFormTab
         onSubmitForm={handleSubmit}
         statusForm={"create"}
         params={params}
+        isLoadingSubmit={isLoadingSubmit}
+        documentsType={documentsType ?? []}
+        locationTypesData={locationTypesData ?? []}
+        statesData={statesData ?? []}
+        groupLocationData={groupLocationData ?? []}
       />
-    </>
+    </Skeleton>
   );
 };
-

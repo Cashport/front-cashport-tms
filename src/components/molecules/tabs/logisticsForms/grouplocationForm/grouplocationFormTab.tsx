@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { Button, Card, Col, Flex, Row, Switch, Typography, message } from "antd";
+import { useEffect, useState } from "react";
+import { Button, Col, Flex, Row, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, FileArrowUp, Pencil, Plus, PlusCircle, XCircle } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, Pencil, PlusCircle } from "phosphor-react";
 import { auth } from "../../../../../../firebase";
 
 // components
@@ -11,23 +11,20 @@ import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStat
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 
 import {
-  _onSubmitLocation,
   normalizeLocationData,
   validationButtonText,
   LocationFormTabProps
 } from "./grouplocationFormTab.mapper";
 import "./grouplocationformtab.scss";
-import { ICity, IFormLocation, IGroupLocation, IState } from "@/types/logistics/schema";
+import { ICity, IFormLocation, IState } from "@/types/logistics/schema";
 import useSWR from "swr";
 // get deptos munis, grups , tipos
-import { addLocation, updateLocation, getAllStatesByCountry, getAllCitiesByState, getAllGroupByLocation} from "@/services/logistics/locations";
-import { useRouter } from "next/navigation";
+import { getAllCitiesByState } from "@/services/logistics/locations";
 import Link from "next/link";
-import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export const GroupLocationFormTab = ({
   data,
@@ -37,44 +34,29 @@ export const GroupLocationFormTab = ({
   statusForm = "create",
   onActiveLocation = () => {},
   onDesactivateLocation = () => {},
-  params
+  params,
+  statesData,
+  isLoadingSubmit
 }: LocationFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();  
   const [isSelectedState, setIsSelectedState] = useState(false);
   const [selectedState, setSelectedState] = useState<any>(null);
 
-  const { data: statesData, isLoading: isLoadingStates } = useSWR(
-    "1",
-    getAllStatesByCountry,
-    { revalidateIfStale:false,
-      revalidateOnFocus:false,
-      revalidateOnReconnect:false
-    }
-  );
-
   const { data: citiesData, isLoading: isLoadingCities } = useSWR(
-    isSelectedState? 'city-'+selectedState: null,
+    isSelectedState ? "city-" + selectedState : null,
     getAllCitiesByState,
-    { revalidateIfStale:false,
-      revalidateOnFocus:false,
-      revalidateOnReconnect:false
-    }
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
 
   useEffect(() => {
-    const subscription = watch((data, {name, type}) =>{
-        //console.log(data, name, type);
-        if(name == 'general.state_id'){
-          setIsSelectedState(true);
-          setSelectedState(data.general?.state_id)
-        }        
+    const subscription = watch((data, { name, type }) => {
+      //console.log(data, name, type);
+      if (name == "general.state_id") {
+        setIsSelectedState(true);
+        setSelectedState(data.general?.state_id);
       }
-    )
-    return () => subscription.unsubscribe()
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   const defaultValues = statusForm === "create" ? {} : normalizeLocationData(data as any);
@@ -91,206 +73,197 @@ export const GroupLocationFormTab = ({
   } = useForm<IFormLocation>({
     defaultValues,
     disabled: statusForm === "review",
-    mode: 'onChange' 
+    mode: "onChange"
   });
-  const { push } = useRouter();
 
   const cuser = auth.currentUser;
-  const username:string = String(cuser?.email);
-  setValue("general.user",username);
+  const username: string = String(cuser?.email);
+  setValue("general.user", username);
 
   const isFormCompleted = () => {
     return isValid;
-  }
-  const isSubmitButtonEnabled = isFormCompleted() && !loading
+  };
+  const isSubmitButtonEnabled = isFormCompleted() && !isLoadingSubmit;
 
   useEffect(() => {
     console.log(errors);
   }, [errors]);
 
-
   useEffect(() => {
-    if (statusForm === "review"){
-      setIsOpenModal(false)
-    
-      setTimeout(()=>{
+    if (statusForm === "review") {
+      setIsOpenModal(false);
 
-        const state_id:number = Number(data?.state_id?.valueOf());
+      setTimeout(() => {
+        const state_id: number = Number(data?.state_id?.valueOf());
         setValue("general.state_id", data?.state_id);
         setIsSelectedState(true);
-        setSelectedState(state_id)
+        setSelectedState(state_id);
 
-        setTimeout(()=>{
-          const city_id:number = Number(data?.city_id?.valueOf());
+        setTimeout(() => {
+          const city_id: number = Number(data?.city_id?.valueOf());
           setValue("general.city_id", city_id);
-        },500)
-
-      },500);
-
+        }, 500);
+      }, 500);
     }
   }, [statusForm, data]);
-
 
   const onSubmit = async (data: any) => {
     const locationData: any = {
       ...data.general
-    };    
-    _onSubmitLocation(
-      locationData,
-      setLoading,
-      onSubmitForm
-    )
+    };
+    onSubmitForm({ ...locationData });
   };
 
   const convertStatesToSelectOptions = (states: IState[]) => {
     return states?.map((state) => ({
       value: state.description,
-      id: state.id,
+      id: state.id
     }));
   };
 
   const convertCitiesToSelectOptions = (cities: ICity[]) => {
     return cities?.map((city) => ({
       value: city.description,
-      id: city.id,
+      id: city.id
     }));
   };
 
   return (
     <>
-      {contextHolder}
       <form className="locationFormTab" onSubmit={handleSubmit(onSubmit)}>
         <Flex component={"header"} className="headerProyectsForm">
-            <Link href={`/logistics/configuration/grouplocations/all`} passHref>
+          <Link href={`/logistics/configuration/grouplocations/all`} passHref>
+            <Button
+              type="text"
+              size="large"
+              className="buttonGoBack"
+              icon={<CaretLeft size={"1.45rem"} />}
+            >
+              Ver Grupos de ubicación
+            </Button>
+          </Link>
+          <Flex gap={"1rem"}>
+            {(statusForm === "review" || statusForm === "edit") && (
               <Button
-                type="text"
-                size="large"
-                className="buttonGoBack"
-                icon={<CaretLeft size={"1.45rem"} />}
+                className="buttons"
+                htmlType="button"
+                disabled={statusForm === "review"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsOpenModal(true);
+                }}
               >
-                Ver Grupos de ubicación
+                Cambiar Estado
+                <ArrowsClockwise size={"1.2rem"} />
               </Button>
-            </Link>
-              <Flex gap={"1rem"}>
-              {(statusForm === "review" || statusForm === "edit") && (
-                <Button
-                  className="buttons"
-                  htmlType="button"
-                  disabled={statusForm === "review"}  
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsOpenModal(true);
-                  }}
-                >
-                  Cambiar Estado
-                  <ArrowsClockwise size={"1.2rem"} />
-                </Button>
-              )}
-              {statusForm === "review" ? (
-                <Button
-                  className="buttons -edit"
-                  htmlType="button"
-                  onClick={(e) => {
-                    handleFormState("edit")
-                    e.preventDefault();
-                  }}
-                >
-                  {validationButtonText(statusForm)}
-                  <Pencil size={"1.2rem"} />
-                </Button>
-              ) : (
-                ""
-              )}
-              {statusForm === "edit" ? (
-                <Button
-                  className="buttons -edit"
-                  htmlType="button"
-                  onClick={(e) => {
-                    handleFormState("review")
-                    e.preventDefault();
-                    reset()
-                  }}
-                >
-                  {"Cancelar edición"}
-                </Button>
-              ) : (
-                ""
-              )}
-            </Flex>
+            )}
+            {statusForm === "review" ? (
+              <Button
+                className="buttons -edit"
+                htmlType="button"
+                onClick={(e) => {
+                  handleFormState("edit");
+                  e.preventDefault();
+                }}
+              >
+                {validationButtonText(statusForm)}
+                <Pencil size={"1.2rem"} />
+              </Button>
+            ) : (
+              ""
+            )}
+            {statusForm === "edit" ? (
+              <Button
+                className="buttons -edit"
+                htmlType="button"
+                onClick={(e) => {
+                  handleFormState("review");
+                  e.preventDefault();
+                  reset();
+                }}
+              >
+                {"Cancelar edición"}
+              </Button>
+            ) : (
+              ""
+            )}
+          </Flex>
         </Flex>
         <Flex component={"main"} flex="3" vertical>
-          <Row gutter={[16,16]}>
-            <Col span={12} >  {/* Columna Informacion general */}
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              {" "}
+              {/* Columna Informacion general */}
               <Title className="title" level={4}>
                 Informacion General
               </Title>
-              <Row gutter={[16,16]}>
+              <Row gutter={[16, 16]}>
                 <Col span={24}>
                   <InputForm
                     titleInput="Nombre"
                     placeholder="Ingresar nombre"
                     nameInput="general.description"
                     control={control}
-                    disabled={statusForm === "review"}  
+                    disabled={statusForm === "review"}
                     error={errors.general?.description}
                   />
-                </Col>                
-                
+                </Col>
               </Row>
             </Col>
-          </Row>  
-          <Row  style={{marginTop:'1rem'}}> {/* Fila Informacion Adicional */}
+          </Row>
+          <Row style={{ marginTop: "1rem" }}>
+            {" "}
+            {/* Fila Informacion Adicional */}
             <Col span={24}>
               <Title className="title" level={4}>
                 Ubicaciones
               </Title>
-              <Row gutter={[16,16]}>
-                <Col span={12}  className="selectButton">
+              <Row gutter={[16, 16]}>
+                <Col span={12} className="selectButton">
                   <Title className="title" level={5}>
                     Departamento
                   </Title>
-                   <Controller
+                  <Controller
                     name="general.state_id"
                     control={control}
-                    disabled={statusForm === "review"} 
+                    disabled={statusForm === "review"}
                     rules={{ required: true }}
                     render={({ field }) => (
                       <SelectInputForm
-                      placeholder="Selecciona departamento"
-                      error={errors?.general?.state_id}
-                      field={field}
-                      loading={isLoadingStates}
-                      options={convertStatesToSelectOptions((statesData?.data.data as any) || [])}       
-                      showSearch={true}
+                        placeholder="Selecciona departamento"
+                        error={errors?.general?.state_id}
+                        field={field}
+                        options={convertStatesToSelectOptions(statesData)}
+                        showSearch={true}
                       />
-                    )}                    
-                  /> 
+                    )}
+                  />
                 </Col>
-                <Col span={12}  className="selectButton">
+                <Col span={12} className="selectButton">
                   <Title className="title" level={5}>
                     Municipio
                   </Title>
-                   <Controller
+                  <Controller
                     name="general.city_id"
                     control={control}
-                    disabled={statusForm === "review"} 
+                    disabled={statusForm === "review"}
                     rules={{ required: true }}
                     render={({ field }) => (
                       <SelectInputForm
-                      placeholder="Selecciona ciudad"
-                      error={errors?.general?.city_id}
-                      field={field}
-                      loading={isLoadingCities}
-                      options={convertCitiesToSelectOptions((citiesData?.data.data as any) || [])}
-                      showSearch={true}
+                        placeholder="Selecciona ciudad"
+                        error={errors?.general?.city_id}
+                        field={field}
+                        loading={isLoadingCities}
+                        options={convertCitiesToSelectOptions(citiesData ?? [])}
+                        showSearch={true}
                       />
-                    )}                    
-                  /> 
+                    )}
+                  />
                 </Col>
-              </Row>                
+              </Row>
             </Col>
           </Row>
-          <Row style={{ marginTop: "2rem", marginBottom:"2rem" }}>
+          <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             <Col span={24} style={{ display: "flex", justifyContent: "flex-end" }}>
               <Flex align="center" justify="center">
                 <PlusCircle size={24} />
@@ -300,16 +273,16 @@ export const GroupLocationFormTab = ({
               </Flex>
             </Col>
           </Row>
-            {["edit", "create"].includes(statusForm) && (
-              <Row justify={"end"}>
-                <SubmitFormButton
-                    loading={loading}
-                    text={validationButtonText(statusForm)}
-                    disabled={!isSubmitButtonEnabled}
-                    onClick={handleSubmit(onSubmit)}
-                />
-              </Row>
-            )}    
+          {["edit", "create"].includes(statusForm) && (
+            <Row justify={"end"}>
+              <SubmitFormButton
+                loading={isLoadingSubmit}
+                text={validationButtonText(statusForm)}
+                disabled={!isSubmitButtonEnabled}
+                onClick={handleSubmit(onSubmit)}
+              />
+            </Row>
+          )}
         </Flex>
       </form>
       <ModalChangeStatus

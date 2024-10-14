@@ -1,10 +1,14 @@
 "use client";
-import { message } from "antd";
+import { message, Skeleton } from "antd";
 import { useRouter } from "next/navigation";
-import "../../../../../../styles/_variables_logistics.css";
-import "./createMaterial.scss";
 import { MaterialFormTab } from "@/components/molecules/tabs/logisticsForms/materialForm/materialFormTab";
-import { addMaterial } from "@/services/logistics/materials";
+import {
+  addMaterial,
+  getAllMaterialTransportType,
+  getAllMaterialType
+} from "@/services/logistics/materials";
+import { useState } from "react";
+import useSWR from "swr";
 
 type Props = {
   params: {
@@ -15,44 +19,44 @@ type Props = {
 
 export const CreateMaterialView = ({ params }: Props) => {
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const handleSubmit = async (data: any) => {
+    setIsLoadingSubmit(true);
     try {
-        const response = await addMaterial(
-          {...data}, 
-          data.images
-        );  
+      const response = await addMaterial({ ...data }, data.images);
       if (response && response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: `El material fue creada exitosamente.`
-        });
-        push(`/logistics/configuration/materials/all`);//${response.data.data.id}
+        setIsLoadingSubmit(false);
+        message.success(`Material creado`, 2, () => push(`/logistics/configuration/materials/all`));
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message
-        });
-      } else {
-        message.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta más tarde."
-        });
-      }
-    } 
+      setIsLoadingSubmit(false);
+      message.error(error instanceof Error ? error.message : "Hubo un error al crear material", 2);
+    }
   };
+
+  const { data: materialsTypesData, isLoading: loadingMaterialsTypes } = useSWR(
+    "materialtypes",
+    getAllMaterialType,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+
+  const { data: materialsTransportTypesData, isLoading: loadingMaterialsTransportTypes } = useSWR(
+    "materialtransporttypes",
+    getAllMaterialTransportType,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+
   return (
-    <>
-      {contextHolder}
+    <Skeleton active loading={loadingMaterialsTypes || loadingMaterialsTransportTypes}>
       <MaterialFormTab
         onSubmitForm={handleSubmit}
         statusForm={"create"}
         params={params}
+        isLoadingSubmit={isLoadingSubmit}
+        materialsTransportTypesData={materialsTransportTypesData ?? []}
+        materialsTypesData={materialsTypesData ?? []}
       />
-    </>
+    </Skeleton>
   );
 };
-

@@ -1,12 +1,5 @@
-import { useEffect, useState } from "react";
-import {
-  Button,
-  Col,
-  Flex,
-  Form,
-  Row,
-  Typography
-} from "antd";
+import { useState } from "react";
+import { Button, Col, Flex, Form, Row, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
 
@@ -17,21 +10,11 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 
 import "./materialformtab.scss";
 import {
-  _onSubmit,
   dataToProjectFormData,
   validationButtonText,
   MaterialFormTabProps
 } from "./materialFormTab.mapper";
-import {  IFormMaterial, IMaterialType, IMaterialTransportType, IMaterialTransportByMaterial, IMaterialTypeByMaterial } from "@/types/logistics/schema";
-
-import {
-  FileObject
-} from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-
-import useSWR from "swr";
-import { getDocumentsByEntityType } from "@/services/logistics/certificates";
-import { getAllMaterialType, getAllMaterialTransportType } from "@/services/logistics/materials";
-
+import { IFormMaterial, IMaterialType, IMaterialTransportType } from "@/types/logistics/schema";
 import Link from "next/link";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
@@ -52,29 +35,11 @@ export const MaterialFormTab = ({
   handleFormState = () => {},
   onActiveMaterial = () => {},
   onDesactivateMaterial = () => {},
+  isLoadingSubmit,
+  materialsTransportTypesData,
+  materialsTypesData
 }: MaterialFormTabProps) => {
-
   const [isOpenModal, setIsOpenModal] = useState(false);
-
-  const { data: materialsTypesData, isLoading: loadingMaterialsTypes } = useSWR(
-    "materialtypes",
-    getAllMaterialType,
-    { revalidateIfStale:false,
-      revalidateOnFocus:false,
-      revalidateOnReconnect:false
-    }
-  );
-
-  const { data: materialsTransportTypesData, isLoading: loadingMaterialsTransportTypes } = useSWR(
-    "materialtransporttypes",
-    getAllMaterialTransportType,
-    { revalidateIfStale:false,
-      revalidateOnFocus:false,
-      revalidateOnReconnect:false
-    }
-  );
-
-  const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   //const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
@@ -110,7 +75,7 @@ export const MaterialFormTab = ({
     return isValid; //&& hasImages();
   };
 
-  const isSubmitButtonEnabled = isFormCompleted() && !loading;
+  const isSubmitButtonEnabled = isFormCompleted() && !isLoadingSubmit;
 
   const convertToSelectOptions = (materialTypes: IMaterialType[]) => {
     if (!Array.isArray(materialTypes)) return [];
@@ -122,13 +87,13 @@ export const MaterialFormTab = ({
 
   const convertToSelectOptionsData = (materialTypes: IMaterialType[]) => {
     if (materialTypes.length == 0) return [];
-    const results:OptionType[] = []
-    data?.material_type.forEach(matty => {
-      const matfilter = materialTypes?.filter(f => f.id == matty.id_material_type);
-      const option: OptionType={
+    const results: OptionType[] = [];
+    data?.material_type.forEach((matty) => {
+      const matfilter = materialTypes?.filter((f) => f.id == matty.id_material_type);
+      const option: OptionType = {
         value: matfilter[0].id,
         label: matfilter[0].description
-      }
+      };
       results.push(option);
     });
     return results;
@@ -142,37 +107,29 @@ export const MaterialFormTab = ({
     }));
   };
 
-  const convertToSelectOptionsTransportData = (materialTransportTypes: IMaterialTransportType[]) => {
+  const convertToSelectOptionsTransportData = (
+    materialTransportTypes: IMaterialTransportType[]
+  ) => {
     if (materialTransportTypes.length == 0) return [];
-    const results:OptionType[] = []
-    data?.material_transport.forEach(mattr => {
-      const matfilter = materialTransportTypes?.filter(f => f.id == mattr.id_material_transport_type);
-      const option: OptionType={
+    const results: OptionType[] = [];
+    data?.material_transport.forEach((mattr) => {
+      const matfilter = materialTransportTypes?.filter(
+        (f) => f.id == mattr.id_material_transport_type
+      );
+      const option: OptionType = {
         value: matfilter[0].id,
         label: matfilter[0].description
-      }
+      };
       results.push(option);
     });
     return results;
   };
 
   const onSubmit = async (data: any) => {
-
-    // const hasImage = data.images.length > 0;
-    // if (!hasImage){
-    //   setImageError(true);
-    //   return;
-    // } 
-
-    const  formImages:any[] = (data.images ? [...data.images] : [])
+    const formImages: any[] = data.images ? [...data.images] : [];
     setImages(Array(5).fill({ file: undefined }));
-    _onSubmit(
-      data,
-      formImages,
-      setImageError,
-      setLoading,
-      onSubmitForm
-    );
+    setImageError(false);
+    onSubmitForm({ ...data, images: formImages });
   };
 
   return (
@@ -248,28 +205,28 @@ export const MaterialFormTab = ({
               <Row>
                 <Col span={24} className="colfoto">
                   <UploadImg
-                      disabled={statusForm === "review"}
-                      imgDefault={formImages ? formImages[0]?.url_archive : undefined}
-                      setImgFile={(file) => {
-                        const currentUrlArchive = formImages ? formImages[0]?.url_archive : undefined; // obtener el valor actual de url_archive
-                        if (currentUrlArchive) {
-                          (file as any).url_archive = currentUrlArchive;
-                          setValue(`images.${0}`, file);
-                        } else {
-                          setValue(`images.${0}`, file);
-                        }
-                        setImages((prev) =>
-                          prev.map((img, index) => (index === 0 ? { ...img, file } : img))
-                        );
-                        if (file) {
-                          //console.log(file)
-                          setImageError(false);
-                        }
-                      }}
-                    />
-                    {imageError && (                    
-                      <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>
-                    )}
+                    disabled={statusForm === "review"}
+                    imgDefault={formImages ? formImages[0]?.url_archive : undefined}
+                    setImgFile={(file) => {
+                      const currentUrlArchive = formImages ? formImages[0]?.url_archive : undefined; // obtener el valor actual de url_archive
+                      if (currentUrlArchive) {
+                        (file as any).url_archive = currentUrlArchive;
+                        setValue(`images.${0}`, file);
+                      } else {
+                        setValue(`images.${0}`, file);
+                      }
+                      setImages((prev) =>
+                        prev.map((img, index) => (index === 0 ? { ...img, file } : img))
+                      );
+                      if (file) {
+                        //console.log(file)
+                        setImageError(false);
+                      }
+                    }}
+                  />
+                  {imageError && (
+                    <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>
+                  )}
                 </Col>
               </Row>
               <Row gutter={16}>
@@ -332,7 +289,7 @@ export const MaterialFormTab = ({
                   />
                 </Col>
                 <Col span={6}>
-                  <InputForm                  
+                  <InputForm
                     typeInput="number"
                     titleInput="Alto (m)"
                     nameInput="general.mt_height"
@@ -373,59 +330,61 @@ export const MaterialFormTab = ({
           {/* ----------------------------------Vehiculos--------------------------------- */}
 
           <Row style={{ width: "100%", marginTop: "2rem" }}>
-              <Col span={24}>
-                <Title className="title" level={4}>
-                  Características
-                </Title>
-                <Row style={{ width: "100%", marginTop: "2rem" }}>
-                  <Col span={12}>
-                    <Controller
-                      name="general.material_transport"
-                      control={control}
-                      rules={{ required: false }}
-                      render={({ field }) => 
-                        <MultiSelectTags
-                          field={field}
-                          placeholder="Seleccionar"
-                          title="Características de transporte"
-                          errors={errors?.general?.material_transport}
-                          defaultValue={convertToSelectOptionsTransportData((materialsTransportTypesData?.data.data as any) || [])}
-                          options={convertToSelectOptionsTransport((materialsTransportTypesData?.data.data as any) || [])}
-                          disabled={statusForm === "review"} 
-                          layout="vertical"
-                        />
-                      }
-                    />
-                  </Col>
-                  <Col span={12}>
-                    <Controller
-                      name="general.material_type"
-                      control={control}
-                      rules={{ required: false }}
-                      render={({ field }) => 
-                        <MultiSelectTags
-                          field={field}
-                          placeholder="Seleccionar"
-                          title="Características de seguridad"
-                          errors={errors?.general?.material_type}
-                          defaultValue={convertToSelectOptionsData((materialsTypesData?.data.data as any) || [])}
-                          options={convertToSelectOptions((materialsTypesData?.data.data as any) || [])}
-                          disabled={statusForm === "review"} 
-                          layout="vertical"
-                        />
-                      }
-                    />
-                  </Col>                  
-                </Row>
-              </Col>              
+            <Col span={24}>
+              <Title className="title" level={4}>
+                Características
+              </Title>
+              <Row style={{ width: "100%", marginTop: "2rem" }}>
+                <Col span={12}>
+                  <Controller
+                    name="general.material_transport"
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field }) => (
+                      <MultiSelectTags
+                        field={field}
+                        placeholder="Seleccionar"
+                        title="Características de transporte"
+                        errors={errors?.general?.material_transport}
+                        defaultValue={convertToSelectOptionsTransportData(
+                          materialsTransportTypesData
+                        )}
+                        options={convertToSelectOptionsTransport(materialsTransportTypesData)}
+                        disabled={statusForm === "review"}
+                        layout="vertical"
+                      />
+                    )}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Controller
+                    name="general.material_type"
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field }) => (
+                      <MultiSelectTags
+                        field={field}
+                        placeholder="Seleccionar"
+                        title="Características de seguridad"
+                        errors={errors?.general?.material_type}
+                        defaultValue={convertToSelectOptionsData(materialsTypesData)}
+                        options={convertToSelectOptions(materialsTypesData)}
+                        disabled={statusForm === "review"}
+                        layout="vertical"
+                      />
+                    )}
+                  />
+                </Col>
+              </Row>
+            </Col>
           </Row>
-
           {["edit", "create"].includes(statusForm) && (
-            <Row justify={"end"} style={{marginTop:'2rem'}}>
+            <Row justify={"end"} style={{ marginTop: "2rem" }}>
               <SubmitFormButton
                 text={validationButtonText(statusForm)}
                 disabled={!isSubmitButtonEnabled}
                 onClick={handleSubmit(onSubmit)}
+                loading={isLoadingSubmit}
               />
             </Row>
           )}

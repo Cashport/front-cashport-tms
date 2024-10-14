@@ -16,7 +16,13 @@ import {
   validationButtonText,
   UserFormTabProps
 } from "./userFormTab.mapper";
-import { ICarrier, IFormUser, IPsl, ITransferOrderCostCenter, ITransferOrderPsls } from "@/types/logistics/schema";
+import {
+  ICarrier,
+  IFormUser,
+  IPsl,
+  ITransferOrderCostCenter,
+  ITransferOrderPsls
+} from "@/types/logistics/schema";
 import useSWR, { mutate } from "swr";
 import Link from "next/link";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
@@ -36,35 +42,37 @@ export const UserFormTab = ({
   onActiveUser = () => {},
   onDesactivateUser = () => {},
   params,
-  handleFormState = () => {}
+  handleFormState = () => {},
+  isLoadingSubmit
 }: UserFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const { data: rolesType, isLoading: isLoadingRoles, } = useSWR("getAllRoles", getAllRoles,{ 
-    revalidateIfStale:false,
-    revalidateOnFocus:false,
-    revalidateOnReconnect:false
-  } );
-  const { data: carriersType, isLoading: isLoadingCarriers } = useSWR("getAllCarriers", getAllCarriers,{ 
-    revalidateIfStale:false,
-    revalidateOnFocus:false,
-    revalidateOnReconnect:false
-  } );
-  const { data: pslsType, isLoading: isLoadingPsls } = useSWR("getAllPsl", getAllPsl,{ 
-    revalidateIfStale:false,
-    revalidateOnFocus:false,
-    revalidateOnReconnect:false
-  } );
+  const { data: rolesType, isLoading: isLoadingRoles } = useSWR("getAllRoles", getAllRoles, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
+  const { data: carriersType, isLoading: isLoadingCarriers } = useSWR(
+    "getAllCarriers",
+    getAllCarriers,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+  const { data: pslsType, isLoading: isLoadingPsls } = useSWR("getAllPsl", getAllPsl, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
 
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
-  const defaultValues =
-    statusForm === "create"
-      ? {}
-      : dataToProjectFormData(data);
+  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data);
   const {
     watch,
     setValue,
@@ -84,20 +92,20 @@ export const UserFormTab = ({
   const isSubmitButtonEnabled = isFormCompleted() && !loading;
 
   useEffect(() => {
-    if (statusForm === "review") {      
-      if(data?.carrier){
-        const carrier_id:string = data.carrier.id_carrier;
+    if (statusForm === "review") {
+      if (data?.carrier) {
+        const carrier_id: string = data.carrier.id_carrier;
         setValue("general.carrier_id", carrier_id);
       }
-      if(data?.psl){
-        const psl_id:string = data.psl.id_psl;        
+      if (data?.psl) {
+        const psl_id: string = data.psl.id_psl;
         setValue("general.psl_id", psl_id);
-        getAllCostCenterByPsl(psl_id).then((cc)=>{
+        getAllCostCenterByPsl(psl_id).then((cc) => {
           setCostCenters(convertCostCenterToSelectOptions(cc.data.data));
-          setValue("general.cost_center_id", data.psl.id_cost_center);  
-        })
-      }      
-      setIsActive(Boolean(data?.ACTIVE == '0'?false:true));
+          setValue("general.cost_center_id", data.psl.id_cost_center);
+        });
+      }
+      setIsActive(Boolean(data?.ACTIVE == "0" ? false : true));
     }
   }, [statusForm]);
 
@@ -130,26 +138,24 @@ export const UserFormTab = ({
   const convertCostCenterToSelectOptions = (costcenters: any[]) => {
     return costcenters?.map((costcenter) => ({
       value: costcenter.description,
-      id: costcenter.id,
+      id: costcenter.id
     }));
   };
 
   useEffect(() => {
-    const subscription = watch((data, {name, type}) =>{
-        //console.log(data, name, type);
-        if(name == 'general.psl_id'){
-          const psl_id:any = data.general?.psl_id?.toString();
-          getAllCostCenterByPsl(psl_id).then((cc)=>{
-            setCostCenters(convertCostCenterToSelectOptions(cc.data.data));
-          })
-        }
+    const subscription = watch((data, { name, type }) => {
+      //console.log(data, name, type);
+      if (name == "general.psl_id") {
+        const psl_id: any = data.general?.psl_id?.toString();
+        getAllCostCenterByPsl(psl_id).then((cc) => {
+          setCostCenters(convertCostCenterToSelectOptions(cc.data.data));
+        });
       }
-    )
-    return () => subscription.unsubscribe()
+    });
+    return () => subscription.unsubscribe();
   }, [pslsType]);
 
   const onSubmit = (data: any) => {
-
     _onSubmit(
       data,
       imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
@@ -226,7 +232,7 @@ export const UserFormTab = ({
               {" "}
               {/* Columna Foto de usuario*/}
               <Title className="title" level={4}>
-                Foto del usuario 
+                Foto del usuario
               </Title>
               <UploadImg
                 disabled={statusForm === "review"}
@@ -256,7 +262,7 @@ export const UserFormTab = ({
                     nameInput="general.user_name"
                     control={control}
                     error={errors?.general?.user_name}
-                    disabled={statusForm === "review"} 
+                    disabled={statusForm === "review"}
                   />
                 </Col>
                 <Col span={8}>
@@ -265,7 +271,7 @@ export const UserFormTab = ({
                     nameInput="general.email"
                     control={control}
                     error={errors?.general?.email}
-                    disabled={statusForm !== "create"} 
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -274,10 +280,10 @@ export const UserFormTab = ({
                     nameInput="general.phone"
                     control={control}
                     error={errors?.general?.phone}
-                    typeInput="number"                    
-                    validationRules={{required: true, maxLength:10}}
-                    oninputInterceptor={(e) => e.target.value = e.target.value.slice(0, 10)}
-                    disabled={statusForm === "review"} 
+                    typeInput="number"
+                    validationRules={{ required: true, maxLength: 10 }}
+                    oninputInterceptor={(e) => (e.target.value = e.target.value.slice(0, 10))}
+                    disabled={statusForm === "review"}
                   />
                 </Col>
                 <Col span={8}>
@@ -286,7 +292,7 @@ export const UserFormTab = ({
                     nameInput="general.position"
                     control={control}
                     error={errors?.general?.position}
-                    disabled={statusForm === "review"} 
+                    disabled={statusForm === "review"}
                   />
                 </Col>
                 <Col span={8}>
@@ -298,13 +304,13 @@ export const UserFormTab = ({
                       name="general.rol_id"
                       control={control}
                       rules={{ required: true }}
-                      disabled={statusForm === "review"} 
+                      disabled={statusForm === "review"}
                       render={({ field }) => (
                         <SelectInputForm
                           placeholder="Selecciona Rol"
                           error={errors?.general?.rol_id}
                           field={field}
-                          loading={isLoadingRoles}                          
+                          loading={isLoadingRoles}
                           options={converRolestToSelectOptions((rolesType?.data.data as any) || [])}
                           showSearch={true}
                         />
@@ -321,14 +327,16 @@ export const UserFormTab = ({
                       name="general.carrier_id"
                       control={control}
                       rules={{ required: false }}
-                      disabled={statusForm === "review"} 
+                      disabled={statusForm === "review"}
                       render={({ field }) => (
                         <SelectInputForm
                           placeholder="Selecciona Proveedor"
                           error={errors?.general?.carrier_id}
                           field={field}
                           loading={isLoadingCarriers}
-                          options={converCarrierstToSelectOptions((carriersType?.data.data as any) || [])}
+                          options={converCarrierstToSelectOptions(
+                            (carriersType?.data.data as any) || []
+                          )}
                           allowClear={true}
                           showSearch={true}
                         />
@@ -345,7 +353,7 @@ export const UserFormTab = ({
                       name="general.psl_id"
                       control={control}
                       rules={{ required: true }}
-                      disabled={statusForm === "review"} 
+                      disabled={statusForm === "review"}
                       render={({ field }) => (
                         <SelectInputForm
                           placeholder="Selecciona Psl"
@@ -368,7 +376,7 @@ export const UserFormTab = ({
                       name="general.cost_center_id"
                       control={control}
                       rules={{ required: true }}
-                      disabled={statusForm === "review"} 
+                      disabled={statusForm === "review"}
                       render={({ field }) => (
                         <SelectInputForm
                           placeholder="Selecciona centro de costos"
@@ -380,9 +388,8 @@ export const UserFormTab = ({
                       )}
                     />
                   </Flex>
-                </Col>                                
+                </Col>
               </Row>
-
             </Col>
           </Row>
           {["edit", "create"].includes(statusForm) && (
@@ -391,6 +398,7 @@ export const UserFormTab = ({
                 text={validationButtonText(statusForm)}
                 disabled={!isSubmitButtonEnabled}
                 onClick={handleSubmit(onSubmit)}
+                loading={isLoadingSubmit || loading}
               />
             </Row>
           )}

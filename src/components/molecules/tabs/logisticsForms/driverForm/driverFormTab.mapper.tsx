@@ -7,7 +7,6 @@ import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { UseFormSetValue } from "react-hook-form";
 import utc from "dayjs/plugin/utc";
-import { MessageInstance } from "antd/es/message/interface";
 dayjs.extend(utc);
 
 export type StatusForm = "review" | "create" | "edit";
@@ -28,7 +27,6 @@ export interface DriverFormTabProps {
   documentsTypesList: CertificateType[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
-  messageApi: MessageInstance;
 }
 
 export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICertificates[] };

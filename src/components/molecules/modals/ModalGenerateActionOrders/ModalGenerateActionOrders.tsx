@@ -56,13 +56,14 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
   const handleDeleteOrders = async () => {
     setIsLoading(true);
     try {
-      await deleteOrders(trsIds, ordersId);
-      message.open({ content: "Operación realizada con éxito", type: "success" });
+      const success = await deleteOrders(trsIds, ordersId);
+      success && message.open({ content: "Operación realizada con éxito", type: "success" });
       onClose();
     } catch (error) {
-      if (error instanceof Error)
-        message.open({ content: error.message, type: "error", duration: 5 });
-      else message.open({ content: "Error al realizar la operación", type: "error" });
+      message.open({
+        type: "error",
+        content: error instanceof Error ? error.message : "Error al realizar la operación"
+      });
     } finally {
       setIsLoading(false);
     }

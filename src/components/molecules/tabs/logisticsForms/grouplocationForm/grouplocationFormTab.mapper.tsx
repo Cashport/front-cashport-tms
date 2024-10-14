@@ -1,11 +1,8 @@
-import { ICertificates, ILocation } from "@/types/logistics/schema";
-import { MessageInstance } from "antd/es/message/interface";
+import { ICertificates, ILocation, IState } from "@/types/logistics/schema";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
-import { UseFormReset, UseFormSetValue } from "react-hook-form";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 
-export type StatusForm = "review" | "create" | "edit"
+export type StatusForm = "review" | "create" | "edit";
 
 export interface LocationFormTabProps {
   idLocationForm?: string;
@@ -13,7 +10,7 @@ export interface LocationFormTabProps {
   disabled?: boolean;
   onEditLocation?: () => void;
   onSubmitForm?: (data: any) => void;
-  handleFormState?: (newFormState: StatusForm) => void
+  handleFormState?: (newFormState: StatusForm) => void;
   onActiveLocation?: () => void;
   onDesactivateLocation?: () => void;
   statusForm: "create" | "edit" | "review";
@@ -21,6 +18,8 @@ export interface LocationFormTabProps {
     id: string;
     groupLocationId: string;
   };
+  statesData: IState[];
+  isLoadingSubmit: boolean;
 }
 
 export type LocationData = ILocation & { licence?: string } & { documents?: ICertificates[] };
@@ -31,7 +30,6 @@ export interface FileObject {
 }
 
 export const normalizeLocationData = (data: any): any => {
-
   if (!data) return {};
 
   const documents = data?.documents?.map((doc: any) => ({
@@ -40,7 +38,6 @@ export const normalizeLocationData = (data: any): any => {
       url: doc.template
     }
   }));
-
 
   return {
     general: {
@@ -72,11 +69,11 @@ export const normalizeLocationData = (data: any): any => {
 export const _onSubmitLocation = (
   data: any,
   setloading: (value: SetStateAction<boolean>) => void,
-  onSubmitForm: (data: any) => void,
+  onSubmitForm: (data: any) => void
 ) => {
   setloading(true);
   try {
-    onSubmitForm({...data});
+    onSubmitForm({ ...data });
   } catch (error) {
     console.warn({ error });
   } finally {

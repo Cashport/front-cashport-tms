@@ -1117,10 +1117,7 @@ export const CreateOrderView = () => {
         isformvalid = false;
         messageApi.error("Debe agregar por lo menos un vehículo sugerido");
       }
-      if (dataPsl.length == 0) {
-        isformvalid = false;
-        messageApi.error("Debe agregar por lo menos un PSL");
-      }
+
       const checkPercentages = (psls: IOrderPsl[]) => {
         const totalPslPercent = psls.reduce((total, psl) => total + psl.percent, 0);
         if (totalPslPercent !== 100) {
@@ -1141,6 +1138,7 @@ export const CreateOrderView = () => {
         if (contact.contact_number.length === 0 || contact.name.length === 0) {
           const type = contact.contact_type == 1 ? "origen" : "destino";
           isformvalid = false;
+
           messageApi.error(`Debe registrar información del contacto de ${type}`);
         } else if (contact.contact_number.length < 10) {
           isformvalid = false;
@@ -1275,23 +1273,22 @@ export const CreateOrderView = () => {
 
     console.log("DATA PARA POST: ", data);
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
-      if (response.status === SUCCESS) {
-        messageApi.open({
+      const newTO = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
+      if (newTO) {
+        message.open({
           type: "success",
-          content: "El viaje fue creado exitosamente.",
+          content: `TO No. ${newTO.id} ha sido creada`,
           duration: 2
         });
-        push("/logistics/orders/details/" + response.data.data.id);
+        push("/logistics/orders/details/" + newTO.id);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.error(error.message);
-      } else {
-        messageApi.error("Oops, hubo un error por favor intenta mas tarde.");
-      }
+      message.open({
+        type: "error",
+        content: "La solicitud no ha sido creada"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -2280,6 +2277,7 @@ export const CreateOrderView = () => {
             <Flex gap="middle" align="flex-end">
               <Button
                 disabled={!isButtonSubmitEnabled}
+                loading={isLoading}
                 className="active"
                 style={{ fontWeight: "bold" }}
                 onClick={() => {

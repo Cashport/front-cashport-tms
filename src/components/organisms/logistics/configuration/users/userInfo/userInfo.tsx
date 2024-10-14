@@ -1,15 +1,13 @@
 "use client";
-import { Typography, message, Spin } from "antd";
+import { message, Skeleton } from "antd";
 import React, { useCallback, useState } from "react";
 import "../../../../../../styles/_variables_logistics.css";
 import "./userInfo.scss";
-import { getLocationById, updateLocation, updateLocationStatus } from "@/services/logistics/locations";
 import { IFormUser, IUser } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab.mapper";
-import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { UserFormTab } from "@/components/molecules/tabs/logisticsForms/userForm/userFormTab";
-import { getUserById, updateUser, updateUserStatus} from "@/services/logistics/users";
+import { getUserById, updateUser, updateUserStatus } from "@/services/logistics/users";
 interface Props {
   params: {
     id: string;
@@ -18,111 +16,76 @@ interface Props {
 }
 
 export const UserInfoView = ({ params }: Props) => {
-  const [messageApi, contextHolder] = message.useMessage();
-  const [statusForm, setStatusForm]= useState<StatusForm>("review")
-  const { push } = useRouter();
+  const [statusForm, setStatusForm] = useState<StatusForm>("review");
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  //console.log(params)
-  const handleFormState = useCallback((newFormState:StatusForm) => {
+  const handleFormState = useCallback((newFormState: StatusForm) => {
     setStatusForm(newFormState);
   }, []);
 
-  const fetcher = async ({ id, key }: { id: string; key: string }) => {
+  const fetcher = async () => {
     return getUserById(params.id);
   };
 
-  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher,     
-    { revalidateIfStale:false,
-    revalidateOnFocus:false,
-    revalidateOnReconnect:false
+  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
   });
 
   const handleSubmitForm = async (dataform: any) => {
-    const sendata:IFormUser={
+    const sendata: IFormUser = {
       general: dataform as unknown as IUser,
       logo: dataform.logo
-    }
+    };
     sendata.general.id = Number(params.id);
+    setIsLoadingSubmit(true);
     try {
-
-      const response = await updateUser(
-        {...dataform}, 
-        dataform.logo
-      );  
+      const response = await updateUser({ ...dataform }, dataform.logo);
       if (response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: "El usuario fue editado exitosamente."
-        });
-        setStatusForm('review');
-        push(`/logistics/configuration/users/all`);
+        setIsLoadingSubmit(false);
+        message.success("Usuario editado", 2, () => setStatusForm("review"));
       }
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
-      });
+      setIsLoadingSubmit(false);
+      message.error("Error al editar usuario", 2, () => setStatusForm("review"));
     }
   };
 
-  const handleActivation= async() =>{
-    console.log('active')
+  const handleActivation = async () => {
     try {
-      const response = await updateUserStatus(params.id,'1');
+      const response = await updateUserStatus(params.id, "1");
       if (response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: "El usuario fue editado exitosamente."
-        });
-        setStatusForm('review');
-        push(`/logistics/configuration/users/all`);
+        message.success("Usuario activado", 2, () => setStatusForm("review"));
       }
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
-      });
+      message.error("Error al activar usuario", 2, () => setStatusForm("review"));
     }
   };
 
-  const handleDesactivation= async() =>{
-    console.log('desactive')
+  const handleDesactivation = async () => {
     try {
-      const response = await updateUserStatus(params.id,'0');
+      const response = await updateUserStatus(params.id, "0");
       if (response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: "El usuario fue editado exitosamente."
-        });
-        setStatusForm('review');
-        push(`/logistics/configuration/users/all`);
+        message.success("Usuario desactivado", 2, () => setStatusForm("review"));
       }
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
-      });
+      message.error("Error al desactivar usuario", 2, () => setStatusForm("review"));
     }
   };
 
   return (
-    <>
-      {contextHolder}
-      <>
-      {isLoading ? (
-          <Spin/>
-        ) : (
-          <UserFormTab
-            onSubmitForm={handleSubmitForm}
-            data={data?.data?.data as unknown as IUser}
-            params={params}
-            statusForm={statusForm}
-            handleFormState={handleFormState}
-            onActiveUser={handleActivation}
-            onDesactivateUser={handleDesactivation}
-          />
-        )}
-      </>
-    </>
+    <Skeleton active loading={isLoading}>
+      <UserFormTab
+        onSubmitForm={handleSubmitForm}
+        data={data?.data?.data as unknown as IUser}
+        params={params}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        onActiveUser={handleActivation}
+        onDesactivateUser={handleDesactivation}
+        isLoadingSubmit={isLoadingSubmit}
+      />
+    </Skeleton>
   );
 };

@@ -72,7 +72,7 @@ export const TransferOrderDetails = () => {
 
   const [tripId, setTripId] = useState<number | null>(null);
   const [form, setForm] = useState<IForm>({
-    noeltyTypeId: null || 0,
+    noeltyTypeId: 0,
     quantity: 0,
     observation: "",
     value: 0,
@@ -194,6 +194,7 @@ export const TransferOrderDetails = () => {
     if (data) {
       findDetails();
       setOpenDrawer(false);
+      message.success(`Novedad ${isApprobe ? "aceptada" : "rechazada"}`);
     }
   };
 
@@ -228,8 +229,9 @@ export const TransferOrderDetails = () => {
         if (update) {
           await createNoveltyEvidences(novelty.id, formEvidences);
           setOpenDrawer(false);
+          message.success("Novedad actualizada");
           setForm({
-            noeltyTypeId: null || 0,
+            noeltyTypeId: 0,
             quantity: 0,
             observation: "",
             value: 0,
@@ -242,9 +244,10 @@ export const TransferOrderDetails = () => {
         const create = await createNovelty(body);
         if (create) {
           await createNoveltyEvidences(create.id, formEvidences);
+          message.success("Novedad creada");
           setOpenDrawer(false);
           setForm({
-            noeltyTypeId: null || 0,
+            noeltyTypeId: 0,
             quantity: 0,
             observation: "",
             value: 0,
@@ -272,7 +275,7 @@ export const TransferOrderDetails = () => {
     setOpenDrawer(false);
     setNovelty(null);
     setForm({
-      noeltyTypeId: null || 0,
+      noeltyTypeId: 0,
       quantity: 0,
       observation: "",
       value: 0

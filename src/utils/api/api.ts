@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import config from "@/config";
 import { auth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -49,11 +49,20 @@ export const fetcher = async (url: string) => {
       }
     });
 };
+// Extender AxiosInstance para agregar sendFormData
+interface CustomAxiosInstance extends AxiosInstance {
+  sendFormData: (
+    url: string,
+    formData: FormData,
+    method?: "post" | "put" | "patch" | "delete"
+  ) => Promise<any>;
+}
 
+// Crear la instancia de Axios personalizada
 const API = axios.create({
   responseType: "json",
   baseURL: config.API_HOST
-});
+}) as CustomAxiosInstance;
 
 export const setProjectInApi = (projectId: number) => {
   API.interceptors.request.use((request) => {
@@ -88,12 +97,25 @@ API.interceptors.response.use(
   function (error) {
     error.success = false;
     const response = error.response;
+    console.log("API- RESPONSE ERROR,", response);
     if (response?.data?.message) {
       error.message = response.data.message;
     }
     return Promise.resolve(error);
   }
 );
+// Definir los métodos HTTP permitidos
+type HttpMethod = "post" | "put" | "patch" | "delete";
 
+API.sendFormData = async (url: string, formData: FormData, method: HttpMethod = "post") => {
+  return API({
+    method, // Aquí se configura el método HTTP
+    url,
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data" // Para FormData
+    }
+  });
+};
 export { API };
 export default instance;

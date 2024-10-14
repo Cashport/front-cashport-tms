@@ -1,10 +1,13 @@
 "use client";
-import { message } from "antd";
+import { message, Skeleton } from "antd";
 import { useRouter } from "next/navigation";
 import "../../../../../../styles/_variables_logistics.css";
 import "./createGrouplocation.scss";
 import { GroupLocationFormTab } from "@/components/molecules/tabs/logisticsForms/grouplocationForm/grouplocationFormTab";
 import { addMaterial } from "@/services/logistics/materials";
+import { useState } from "react";
+import useSWR from "swr";
+import { getAllStatesByCountry } from "@/services/logistics/locations";
 
 type Props = {
   params: {
@@ -15,44 +18,46 @@ type Props = {
 
 export const CreateGroupLocationView = ({ params }: Props) => {
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const handleSubmit = async (data: any) => {
+    setIsLoadingSubmit(true);
     try {
-        const response = await addMaterial(
-          {...data}, 
-          data.images
-        );  
+      const response = await addMaterial({ ...data }, data.images);
       if (response && response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: `El grupo de ubicaciones fue creado exitosamente.`
-        });
-        push(`/logistics/configuration/grouplocations/all`);//${response.data.data.id}
+        setIsLoadingSubmit(false);
+        message.success(`Grupo de ubicaciónes creado`, 2, () =>
+          push(`/logistics/configuration/grouplocations/all`)
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message
-        });
-      } else {
-        message.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta más tarde."
-        });
-      }
-    } 
+      setIsLoadingSubmit(false);
+      message.error(
+        error instanceof Error ? error.message : "Hubo un error al crear grupo de ubicaciones",
+        2
+      );
+    }
   };
+
+  const { data: statesData, isLoading: isLoadingStates } = useSWR(
+    "states-data",
+    getAllStatesByCountry,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+
   return (
-    <>
-      {contextHolder}
+    <Skeleton active loading={isLoadingStates}>
       <GroupLocationFormTab
         onSubmitForm={handleSubmit}
         statusForm={"create"}
         params={params}
+        isLoadingSubmit={isLoadingSubmit}
+        statesData={statesData ?? []}
       />
-    </>
+    </Skeleton>
   );
 };
-
