@@ -1,18 +1,21 @@
-import { Flex, message, Skeleton } from "antd";
+import { Flex, Input, message } from "antd";
 import FooterButtons from "../FooterButtons/FooterButtons";
 import { ViewEnum } from "../ModalBillingAction";
-import { Dispatch, SetStateAction, useState } from "react";
+import { SetStateAction, useState } from "react";
 import styles from "./ConfirmClose.module.scss";
-import { getAceptBilling } from "@/services/billings/billings";
-import { MessageInstance } from "antd/es/message/interface";
+import { getAceptBilling, postRejectBilling } from "@/services/billings/billings";
 import { formatNumber } from "@/utils/utils";
+
+type ActionTypeClose = "ACCEPT" | "REJECT";
+
 interface ConfirmClose {
+  // eslint-disable-next-line no-unused-vars
   setSelectedView: (value: SetStateAction<ViewEnum>) => void;
   onClose: () => void;
   idTR: number;
   idBilling: number;
   totalValue: number;
-  messageApi: MessageInstance;
+  actionType: ActionTypeClose;
 }
 
 const ConfirmClose = ({
@@ -20,47 +23,71 @@ const ConfirmClose = ({
   onClose,
   totalValue,
   idTR,
-  messageApi,
-  idBilling
+  idBilling,
+  actionType
 }: ConfirmClose) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [observation, setObervation] = useState<string>("");
 
   const aceptBilling = async () => {
     try {
       setIsLoading(true);
       const response = await getAceptBilling(idBilling);
       if (response) {
-        messageApi?.open({
-          type: "success",
-          content: "Se aceptó el cierre correctamente",
-          duration: 3
-        });
+        message.success("Se aceptó el cierre correctamente", 2);
       }
     } catch (error) {
-      messageApi?.open({
-        type: "error",
-        content: "Hubo un problema, vuelve a intentarlo",
-        duration: 3
-      });
+      message.error("Hubo un problema, vuelve a intentarlo", 2);
     } finally {
       onClose();
       setIsLoading(false);
     }
   };
+
+  const rejectBilling = async () => {
+    try {
+      setIsLoading(true);
+      const response = await postRejectBilling(idBilling, observation);
+      if (response) {
+        message.success(response, 3);
+      }
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al rechazar", 3);
+    } finally {
+      onClose();
+      setIsLoading(false);
+    }
+  };
+
   const handleConfirm = () => {
-    aceptBilling();
+    actionType === "ACCEPT" ? aceptBilling() : rejectBilling();
   };
 
   return (
-    <Skeleton active loading={isLoading}>
-      <Flex vertical gap={24}>
-        <p className={styles.subtitle}>
-          Estas confirmando la finalización de la <b>{`TR #${idTR}`}</b> por valor de{" "}
-          <b>{`$${formatNumber(totalValue, 2)}`}</b>
-        </p>
-        <FooterButtons titleConfirm="Confirmar" onClose={onClose} handleOk={handleConfirm} />
-      </Flex>
-    </Skeleton>
+    <Flex vertical gap={24}>
+      <p className={styles.subtitle}>
+        Estas {actionType === "ACCEPT" ? "confirmando" : "rechazando"} la finalización de la{" "}
+        <b>{`TR #${idTR}`}</b> por valor de <b>{`$${formatNumber(totalValue, 2)}`}</b>
+      </p>
+      {actionType === "REJECT" && (
+        <Input
+          placeholder="Observación (*)"
+          className="puntoOrigen dateInputForm"
+          key={"observacion"}
+          value={observation}
+          onChange={(e) => {
+            setObervation(e.target.value);
+          }}
+        />
+      )}
+      <FooterButtons
+        titleConfirm="Confirmar"
+        onClose={onClose}
+        handleOk={handleConfirm}
+        isConfirmDisabled={actionType === "REJECT" && observation === ""}
+        isConfirmLoading={isLoading}
+      />
+    </Flex>
   );
 };
 export default ConfirmClose;

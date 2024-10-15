@@ -53,6 +53,21 @@ export const getAceptBilling = async (idBilling: number): Promise<boolean | unde
   }
 };
 
+export const postRejectBilling = async (
+  idBilling: number,
+  observation: string
+): Promise<string | undefined> => {
+  const body = {
+    observation
+  };
+  const response: GenericResponse<string> = await API.post(
+    `/logistic-billing/reject/${idBilling}`,
+    body
+  );
+  if (response.success) return response.message;
+  throw new Error(response?.message);
+};
+
 export const getPreauthorizedInfo = async (idBilling: number): Promise<any | undefined> => {
   try {
     const response: GenericResponse<any> = await API.get(
