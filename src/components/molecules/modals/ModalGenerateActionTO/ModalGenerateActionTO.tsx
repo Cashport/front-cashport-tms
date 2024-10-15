@@ -88,7 +88,16 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
           />
         );
       default:
-        return <ActionList setSelectedView={setSelectedView} canPreauthorize={false} />;
+        return (
+          <ActionList
+            setSelectedView={setSelectedView}
+            canPreauthorize={false}
+            canFinalizeTrip={false}
+            canChangeStatusToPorLegalizar={false}
+            handleChangeStatus={handleChangeStatus}
+            onClose={onClose}
+          />
+        );
     }
   };
 
