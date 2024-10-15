@@ -26,10 +26,22 @@ type PropsModalGenerateActionTO = {
   messageApi: MessageInstance;
   canFinalizeTrip: boolean;
   statusTrId?: string;
+  canChangeStatusToPorLegalizar: boolean;
+  handleChangeStatus?: (statusId: string) => Promise<void>;
 };
 
 export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerateActionTO>) {
-  const { isOpen, onClose, idTR, carriersData, messageApi, canFinalizeTrip, statusTrId } = props;
+  const {
+    isOpen,
+    onClose,
+    idTR,
+    carriersData,
+    messageApi,
+    canFinalizeTrip,
+    statusTrId,
+    canChangeStatusToPorLegalizar,
+    handleChangeStatus
+  } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT_ACTION);
   const [selectedCarrier, setSelectedCarrier] = useState<number | null>(null);
   const billingsInStatusAcepted = carriersData.filter(
@@ -44,6 +56,9 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             setSelectedView={setSelectedView}
             canPreauthorize={billingsInStatusAcepted.length > 0}
             canFinalizeTrip={canFinalizeTrip}
+            canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
+            handleChangeStatus={handleChangeStatus}
+            onClose={onClose}
           />
         );
       case ViewEnum.SELECT_CARRIER:

@@ -94,9 +94,6 @@ export const TransferOrderDetails = () => {
   const validateDisabled = transferRequest
     ? validateDisabledByStatus.includes(transferRequest.status_id)
     : false;
-  const validateCreateDisabled = transferRequest
-    ? [...validateDisabledByStatus, STATUS.TR.POR_LEGALIZAR].includes(transferRequest.status_id)
-    : false;
 
   const findNoveltyDetail = async (id: number) => {
     setIsCreateNovelty(false);
@@ -126,6 +123,17 @@ export const TransferOrderDetails = () => {
     ? canFinalizeJourney(transferJournies) && transferRequest?.status_id == STATUS.BNG.POR_LEGALIZAR
     : false;
 
+  const inProgressStatus = [
+    STATUS.TR.SIN_INICIAR,
+    STATUS.TR.CARGANDO,
+    STATUS.TR.EN_CURSO,
+    STATUS.TR.DESCARGANDO,
+    STATUS.TR.STAND_BY,
+    STATUS.TR.DETENIDO
+  ];
+
+  const canChangeStatusToPorLegalizar = inProgressStatus.includes(transferRequest?.status_id ?? "");
+
   const handleBillingTableViewDetails = (id: number) => {
     setIsModalBillingVisible(true);
     setBillingId(id);
@@ -145,7 +153,7 @@ export const TransferOrderDetails = () => {
             handleOpenMTModal={handleOpenMTModal}
             setTripData={setTripData}
             resetNovelty={() => setNovelty(null)}
-            validateDisabled={validateCreateDisabled}
+            validateDisabled={validateDisabled}
           />
         );
       case NavEnum.VEHICLES:
@@ -403,6 +411,8 @@ export const TransferOrderDetails = () => {
         messageApi={messageApi}
         canFinalizeTrip={canFinalizeTrip}
         statusTrId={transferRequest?.status_id}
+        canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
+        handleChangeStatus={handleChangeStatus}
       />
       <ModalBillingMT
         isOpen={isModalMTVisible}

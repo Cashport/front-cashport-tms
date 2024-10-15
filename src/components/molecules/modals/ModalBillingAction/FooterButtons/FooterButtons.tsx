@@ -7,13 +7,15 @@ const FooterButtons = ({
   isConfirmDisabled = false,
   onClose,
   handleOk,
-  showLeftButton = true
+  showLeftButton = true,
+  isConfirmLoading = false
 }: {
   titleConfirm?: string;
   isConfirmDisabled?: boolean;
   onClose: () => void;
   handleOk: () => void;
   showLeftButton?: boolean;
+  isConfirmLoading?: boolean;
 }) => {
   if (!showLeftButton)
     return (
@@ -29,12 +31,17 @@ const FooterButtons = ({
   return (
     <Row style={{ width: "100%" }}>
       <Col span={12} style={{ paddingRight: 8, minHeight: 48 }}>
-        <SecondaryButton fullWidth onClick={onClose}>
+        <SecondaryButton fullWidth onClick={onClose} disabled={isConfirmLoading}>
           Cancelar
         </SecondaryButton>
       </Col>
       <Col span={12} style={{ paddingLeft: 8, minHeight: 48 }}>
-        <PrincipalButton fullWidth onClick={handleOk} disabled={isConfirmDisabled}>
+        <PrincipalButton
+          fullWidth
+          onClick={handleOk}
+          disabled={isConfirmDisabled || isConfirmLoading}
+          loading={isConfirmLoading}
+        >
           {titleConfirm ?? "Confirmar"}
         </PrincipalButton>
       </Col>
