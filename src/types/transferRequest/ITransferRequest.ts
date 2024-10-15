@@ -47,7 +47,7 @@ export interface ITransferRequestDetail {
 }
 
 export interface ITransferRequestResponse {
-  statusId: string;
+  statusId: string; // uuid
   transferType: string;
   items: ITransferRequest[];
 }

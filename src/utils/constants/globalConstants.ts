@@ -39,7 +39,7 @@ export const STATUS = {
     RECHAZADA: "da258586-c04b-4603-bea5-f9bce49687e0"
   },
   TR: {
-    PROCESADO: "a48b8b32-8699-4b6f-b56c-277238a656bc",
+    ASIGNANDO_VEHICULO: "a48b8b32-8699-4b6f-b56c-277238a656bc",
     ESPERANDO_PROVEEDOR: "a312eb37-9a20-4e46-a010-3ee8d5cb2d94",
     SIN_INICIAR: "d33e062f-51a5-457e-946e-a45cbbffbf95",
     CARGANDO: "0f7cccf5-1764-44c6-bb2a-874f419bc8f1",

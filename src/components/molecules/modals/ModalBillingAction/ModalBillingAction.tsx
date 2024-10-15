@@ -11,6 +11,7 @@ import { BillingStatusEnum } from "@/types/logistics/billing/billing";
 export enum ViewEnum {
   "SELECT" = "SELECT",
   "CONFIRM_CLOSE" = "CONFIRM_CLOSE",
+  "CONFIRM_REJECT" = "CONFIRM_REJECT",
   "UPLOAD_INVOICE" = "UPLOAD_INVOICE"
 }
 
@@ -55,8 +56,19 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
             onClose={onClose}
             idTR={idTR}
             totalValue={totalValue}
-            messageApi={messageApi}
             idBilling={idBilling}
+            actionType="ACCEPT"
+          />
+        );
+      case ViewEnum.CONFIRM_REJECT:
+        return (
+          <ConfirmClose
+            setSelectedView={setSelectedView}
+            onClose={onClose}
+            idTR={idTR}
+            totalValue={totalValue}
+            idBilling={idBilling}
+            actionType="REJECT"
           />
         );
       case ViewEnum.UPLOAD_INVOICE:
@@ -83,6 +95,13 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
           <Flex gap={8} align="center">
             <CaretLeft size={20} onClick={() => setSelectedView(ViewEnum.SELECT)} />
             <p className={styles.actionTitle}>Aceptar cierre de TR</p>
+          </Flex>
+        );
+      case ViewEnum.CONFIRM_REJECT:
+        return (
+          <Flex gap={8} align="center">
+            <CaretLeft size={20} onClick={() => setSelectedView(ViewEnum.SELECT)} />
+            <p className={styles.actionTitle}>Rechazar cierre de TR</p>
           </Flex>
         );
       case ViewEnum.UPLOAD_INVOICE:

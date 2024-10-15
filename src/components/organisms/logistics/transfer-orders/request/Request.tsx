@@ -95,7 +95,7 @@ export const Request: FC<IRequestProps> = ({
     STATUS.TO.SIN_PROCESAR, // Sin procesar
     STATUS.TO.PROCESANDO, // Procesando
     STATUS.TO.PROCESADO, // Procesando
-    STATUS.TR.PROCESADO, // Procesado
+    STATUS.TR.ASIGNANDO_VEHICULO, // Procesado
     STATUS.TR.ESPERANDO_PROVEEDOR // Esperando proveedor
   ];
 
@@ -119,7 +119,8 @@ export const Request: FC<IRequestProps> = ({
       };
       redirect = "/logistics/orders/details";
     }
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Procesado")?.id) {
+    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO];
+    if (trDeleteable.includes(item.statusId)) {
       aditionalRow = {
         title: "",
         dataIndex: "checkbox",

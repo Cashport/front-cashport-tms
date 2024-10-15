@@ -1,20 +1,23 @@
-import { Flex, message, Skeleton } from "antd";
+import { Flex, Input, message } from "antd";
 import FooterButtons from "../FooterButtons/FooterButtons";
 import { ViewEnum } from "../ModalBillingAction";
-import { Dispatch, SetStateAction, useState } from "react";
+import { SetStateAction, useState } from "react";
 import styles from "./ConfirmClose.module.scss";
-import { getAceptBilling } from "@/services/billings/billings";
-import { MessageInstance } from "antd/es/message/interface";
+import { getAceptBilling, postRejectBilling } from "@/services/billings/billings";
 import { formatNumber } from "@/utils/utils";
 import { TabEnum } from "@/components/organisms/logistics/transfer-orders/TransferOrders";
 import { useRouter } from "next/navigation";
+
+type ActionTypeClose = "ACCEPT" | "REJECT";
+
 interface ConfirmClose {
+  // eslint-disable-next-line no-unused-vars
   setSelectedView: (value: SetStateAction<ViewEnum>) => void;
   onClose: () => void;
   idTR: number;
   idBilling: number;
   totalValue: number;
-  messageApi: MessageInstance;
+  actionType: ActionTypeClose;
 }
 
 const ConfirmClose = ({
@@ -22,41 +25,78 @@ const ConfirmClose = ({
   onClose,
   totalValue,
   idTR,
-  messageApi,
-  idBilling
+  idBilling,
+  actionType
 }: ConfirmClose) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { push } = useRouter();
+  const [observation, setObervation] = useState<string>("");
 
   const aceptBilling = async () => {
     setIsLoading(true);
     try {
       const response = await getAceptBilling(idBilling);
       if (response) {
-        setIsLoading(false);
-        onClose();
-        message.success(`TR No. ${idTR} aceptada`, 2, () => push(`/facturacion`));
+        message.success(`TR No. ${idTR} aceptada`, 3, () => push(`/facturacion`));
       }
-    } catch (error: any) {
-      setIsLoading(false);
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Hubo un problema, vuelve a intentarlo",
+        3
+      );
+    } finally {
       onClose();
-      message.error("Hubo un error aceptando la orden", 2);
+      setIsLoading(false);
     }
   };
+
+  const rejectBilling = async () => {
+    setIsLoading(true);
+    try {
+      const response = await postRejectBilling(idBilling, observation);
+      if (response) {
+        message.success(`TR No. ${idTR} rechazada`, 3, () => push(`/facturacion`));
+      }
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Hubo un problema, vuelve a intentarlo",
+        3
+      );
+    } finally {
+      onClose();
+      setIsLoading(false);
+    }
+  };
+
   const handleConfirm = () => {
-    aceptBilling();
+    actionType === "ACCEPT" ? aceptBilling() : rejectBilling();
   };
 
   return (
-    <Skeleton active loading={isLoading}>
-      <Flex vertical gap={24}>
-        <p className={styles.subtitle}>
-          Estas confirmando la finalización de la <b>{`TR #${idTR}`}</b> por valor de{" "}
-          <b>{`$${formatNumber(totalValue, 2)}`}</b>
-        </p>
-        <FooterButtons titleConfirm="Confirmar" onClose={onClose} handleOk={handleConfirm} />
-      </Flex>
-    </Skeleton>
+    <Flex vertical gap={24}>
+      <p className={styles.subtitle}>
+        Estas {actionType === "ACCEPT" ? "confirmando" : "rechazando"} la finalización de la{" "}
+        <b>{`TR #${idTR}`}</b> por valor de <b>{`$${formatNumber(totalValue, 2)}`}</b>
+      </p>
+      {actionType === "REJECT" && (
+        <Input
+          placeholder="Observación (*)"
+          className="puntoOrigen dateInputForm"
+          key={"observacion"}
+          value={observation}
+          onChange={(e) => {
+            setObervation(e.target.value);
+          }}
+        />
+      )}
+      <FooterButtons
+        titleConfirm="Confirmar"
+        onClose={onClose}
+        handleOk={handleConfirm}
+        isConfirmDisabled={actionType === "REJECT" && observation === ""}
+        isConfirmLoading={isLoading}
+      />
+    </Flex>
   );
 };
 export default ConfirmClose;

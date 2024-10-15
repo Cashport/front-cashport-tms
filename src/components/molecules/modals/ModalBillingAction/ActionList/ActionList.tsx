@@ -25,6 +25,12 @@ const ActionList = ({
         onClick={() => setSelectedView(ViewEnum.CONFIRM_CLOSE)}
       />
       <ButtonGenerateAction
+        disabled={!canAccept}
+        icon={<MapPinLine size={20} />}
+        title="Rechazar cierre de TR"
+        onClick={() => setSelectedView(ViewEnum.CONFIRM_REJECT)}
+      />
+      <ButtonGenerateAction
         disabled={!canUploadInvoices}
         icon={<Receipt size={20} />}
         title="Cargar factura"

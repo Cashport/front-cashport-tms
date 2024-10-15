@@ -4,18 +4,35 @@ import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/Bu
 import { ArrowsClockwise, MapPinLine, MinusCircle } from "phosphor-react";
 import { ViewEnum } from "../ModalGenerateActionTO";
 import { Gavel } from "@phosphor-icons/react";
+import { STATUS } from "@/utils/constants/globalConstants";
 
 const ActionList = ({
   setSelectedView,
   canPreauthorize,
-  canFinalizeTrip = true
+  canFinalizeTrip = true,
+  canChangeStatusToPorLegalizar,
+  handleChangeStatus,
+  onClose
 }: {
   setSelectedView: Dispatch<SetStateAction<ViewEnum>>;
   canPreauthorize: boolean;
   canFinalizeTrip?: boolean;
+  canChangeStatusToPorLegalizar: boolean;
+  // eslint-disable-next-line no-unused-vars
+  handleChangeStatus?: (statusId: string) => Promise<void>;
+  onClose: () => void;
 }) => {
   return (
     <Flex style={{ width: "100%", height: "100%" }} gap={12} vertical>
+      <ButtonGenerateAction
+        disabled={!canChangeStatusToPorLegalizar}
+        icon={<MapPinLine size={20} />}
+        title="Enviar a Por legalizar"
+        onClick={() => {
+          handleChangeStatus?.(STATUS.BNG.POR_LEGALIZAR);
+          onClose();
+        }}
+      />
       <ButtonGenerateAction
         disabled={!canFinalizeTrip}
         icon={<MapPinLine size={20} />}
