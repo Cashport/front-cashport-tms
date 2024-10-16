@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Flex, Form, Row, Select, Typography } from "antd";
 import { useForm } from "react-hook-form";
-import { CaretLeft} from "phosphor-react";
+import { CaretLeft } from "phosphor-react";
 
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
@@ -59,8 +59,8 @@ export const CarrierFormTab = ({
     defaultValues,
     disabled: statusForm === "review"
   });
-   /*archivos*/
-   interface FileObject {
+  /*archivos*/
+  interface FileObject {
     docReference: string;
     file: File | undefined;
   }
@@ -84,13 +84,14 @@ export const CarrierFormTab = ({
     }
   }, [files, documentsType]);
 
-
-  useEffect(()=>{
-    console.log(files)
-  }, [files])
+  useEffect(() => {
+    console.log(files);
+  }, [files]);
 
   const onSubmit = (data: any) => {
-    data.general.license_categorie = licences.data.find((item) => item.id === data.general.license_category)?.value;
+    data.general.license_categorie = licences.data.find(
+      (item) => item.id === data.general.license_category
+    )?.value;
     data.general.rh = bloodTypes.data.find((item) => item.id === data.general.rh)?.value;
     _onSubmit(
       data,
@@ -116,25 +117,34 @@ export const CarrierFormTab = ({
             Ver Proveedores
           </Button>
         </Flex>
-        <Flex component={"main"} flex="1" vertical style={{paddingRight: "1rem"}}>
+        <Flex component={"main"} flex="1" vertical style={{ paddingRight: "1rem" }}>
           <Row gutter={16}>
-            <Col span={5}>  {/* Columna Logo */}
+            <Col span={5}>
+              {" "}
+              {/* Columna Logo */}
               <Title className="title" level={4}>
                 Logo
               </Title>
               <UploadImg
                 disabled={statusForm === "review"}
-                imgDefault={watch("general.photo") ?? "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"}
+                imgDefault={
+                  watch("general.photo") ??
+                  "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"
+                }
                 setImgFile={setImageFile}
                 uploadInstructionsText="*Sube la foto del logo"
               />
-              {imageError && <Text className="textError">{"foto del conductor es obligatorio *"}</Text>}
+              {imageError && (
+                <Text className="textError">{"foto del conductor es obligatorio *"}</Text>
+              )}
             </Col>
-            <Col span={19}> {/* Columna Informacion General */}
+            <Col span={19}>
+              {" "}
+              {/* Columna Informacion General */}
               <Title className="title" level={4}>
                 Informacion General
               </Title>
-              <Row gutter={[16,16]}>
+              <Row gutter={[16, 16]}>
                 <Col span={8}>
                   <InputForm
                     titleInput="Nit"
@@ -142,16 +152,16 @@ export const CarrierFormTab = ({
                     control={control}
                     error={undefined}
                   />
-                  </Col>
-                <Col span={8}>  
+                </Col>
+                <Col span={8}>
                   <InputForm
                     titleInput="Nombre"
                     nameInput="general.description"
                     control={control}
                     error={undefined}
                   />
-                  </Col>
-                <Col span={8}>  
+                </Col>
+                <Col span={8}>
                   <InputForm
                     titleInput="Tipo de proveedor"
                     nameInput="general.carrier_type"
@@ -159,7 +169,7 @@ export const CarrierFormTab = ({
                     error={undefined}
                   />
                 </Col>
-                <Col span={8}>  
+                <Col span={8}>
                   <InputForm
                     titleInput="Razon social"
                     nameInput="general.description"
@@ -167,7 +177,7 @@ export const CarrierFormTab = ({
                     error={undefined}
                   />
                 </Col>
-                <Col span={8}>  
+                <Col span={8}>
                   <InputForm
                     titleInput="Correo de facturacion"
                     nameInput="general.description"
@@ -175,7 +185,7 @@ export const CarrierFormTab = ({
                     error={undefined}
                   />
                 </Col>
-                <Col span={8}>  
+                <Col span={8}>
                   <InputForm
                     titleInput="Correo de comunicacion"
                     nameInput="general.carrier_type"
@@ -184,10 +194,12 @@ export const CarrierFormTab = ({
                   />
                 </Col>
               </Row>
-              <Title className="title" level={4} style={{marginTop: "1rem"}}>
+              <Title className="title" level={4} style={{ marginTop: "1rem" }}>
                 Datos de Contacto
               </Title>
-              <Row gutter={[16,16]}>  {/* Fila Datos de contacto*/}
+              <Row gutter={[16, 16]}>
+                {" "}
+                {/* Fila Datos de contacto*/}
                 <Col span={8}>
                   <InputForm
                     titleInput="Nombres y apellidos"
@@ -199,38 +211,41 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     typeInput="tel"
-                    titleInput="Telefono"
+                    titleInput="Teléfono"
                     nameInput="general.description"
                     control={control}
                     error={errors?.general?.description}
                     validationRules={{
-                    pattern: {
-                      value: /^\+?\d+$/,
-                      message: "Solo se permiten números y un signo '+' al comienzo"
-                    }
+                      pattern: {
+                        value: /^\+?\d+$/,
+                        message: "Solo se permiten números y un signo '+' al comienzo"
+                      }
                     }}
                   />
                 </Col>
               </Row>
             </Col>
           </Row>
-          <Row style={{marginTop: "2rem", marginBottom: "2rem"}}> {/* Fila Documentos */}
-              <Col span={8}>
-                <Title className="title" level={4}>
-                  Documentos
-                </Title>
-              </Col>
-              <Col span={8} offset={8} style={{display: "flex", justifyContent: "flex-end"}}>
-                {statusForm === "create" && (
-                  <LoadDocumentsButton 
-                    text="Cargar documentos" 
-                    onClick={() => {}}
-                  />
-                )}
-              </Col>
-            <Row style={{marginTop: "1rem", width: "100%"}} >
+          <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
+            {" "}
+            {/* Fila Documentos */}
+            <Col span={8}>
+              <Title className="title" level={4}>
+                Documentos
+              </Title>
+            </Col>
+            <Col span={8} offset={8} style={{ display: "flex", justifyContent: "flex-end" }}>
+              {statusForm === "create" && (
+                <LoadDocumentsButton text="Cargar documentos" onClick={() => {}} />
+              )}
+            </Col>
+            <Row style={{ marginTop: "1rem", width: "100%" }}>
               {selectedFiles.map((file, index) => (
-                <Col span={12} key={`file-${file.id}`}  style={{ marginBottom: "16px", paddingRight: index % 2 === 0 ? "16px" : "0"  }}>
+                <Col
+                  span={12}
+                  key={`file-${file.id}`}
+                  style={{ marginBottom: "16px", paddingRight: index % 2 === 0 ? "16px" : "0" }}
+                >
                   <UploadDocumentButton
                     key={file.id}
                     title={file.description}
@@ -256,9 +271,9 @@ export const CarrierFormTab = ({
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
               <SubmitFormButton
-                  text={validationButtonText(statusForm)}
-                  disabled={!isDirty}
-                  onClick={handleSubmit(onSubmit)}
+                text={validationButtonText(statusForm)}
+                disabled={!isDirty}
+                onClick={handleSubmit(onSubmit)}
               />
             </Row>
           )}

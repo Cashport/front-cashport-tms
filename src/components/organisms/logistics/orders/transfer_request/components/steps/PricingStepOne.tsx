@@ -109,7 +109,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       showSorterTooltip: false
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "contact_number",
       key: "contact_number",
       render: (text) => <Text>{text}</Text>,

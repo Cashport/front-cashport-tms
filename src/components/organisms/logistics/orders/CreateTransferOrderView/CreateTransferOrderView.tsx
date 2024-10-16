@@ -419,7 +419,7 @@ export const CreateTransferOrderView = () => {
       key: "name"
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "phone",
       key: "phone"
     },

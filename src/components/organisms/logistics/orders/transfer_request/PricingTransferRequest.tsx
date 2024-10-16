@@ -574,7 +574,7 @@ export default function PricingTransferRequest({
       showSorterTooltip: false
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "contact_number",
       key: "contact_number",
       render: () => <Text>a</Text>,

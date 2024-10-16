@@ -61,7 +61,7 @@ export default function Trip(props: TripProps) {
       showSorterTooltip: false
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "contact_number",
       key: "contact_number",
       render: (text) => <Text>{text}</Text>,
@@ -73,7 +73,7 @@ export default function Trip(props: TripProps) {
       key: "psl_desc",
       dataIndex: "psl_desc",
       render: (text) => <Text>{text}</Text>,
-      sorter: (a, b) =>a.psl_desc.localeCompare(b.psl_desc),
+      sorter: (a, b) => a.psl_desc.localeCompare(b.psl_desc),
       showSorterTooltip: false
     },
     {

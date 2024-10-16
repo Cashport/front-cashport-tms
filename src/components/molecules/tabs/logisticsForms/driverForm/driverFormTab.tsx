@@ -382,7 +382,7 @@ export const DriverFormTab = ({
                   <InputPhone
                     name="general.phone"
                     control={control}
-                    titleInput="Telefono"
+                    titleInput="Teléfono"
                     placeholder="Ingrese un teléfono"
                     error={errors?.general?.phone}
                     validationRules={{
@@ -526,7 +526,7 @@ export const DriverFormTab = ({
                   <InputPhone
                     name="general.emergency_number"
                     control={control}
-                    titleInput="Telefono"
+                    titleInput="Teléfono"
                     placeholder="Ingrese un teléfono"
                     error={errors?.general?.emergency_number}
                     validationRules={{
