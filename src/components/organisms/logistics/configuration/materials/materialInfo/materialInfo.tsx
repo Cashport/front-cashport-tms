@@ -48,7 +48,7 @@ export const MaterialInfoView = ({ params }: Props) => {
       if (response.status === 200) {
         setIsLoadingSubmit(false);
         message.success(`Material editado`, 2, () => setStatusForm("review"));
-        //mutate({ id: params, key: "1" }, response, false);
+        mutate({ id: params, key: "1" });
       }
     } catch (error) {
       message.error(`Hubo un error por favor intenta mas tarde.`, 2, () => setStatusForm("review"));

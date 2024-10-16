@@ -12,6 +12,7 @@ import {
 } from "@/types/logistics/schema";
 import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { GenericResponse } from "@/types/global/IGlobal";
+import { LocationData } from "@/components/molecules/tabs/logisticsForms/grouplocationForm/grouplocationFormTab.mapper";
 
 export const getAllLocations = async (): Promise<IListData> => {
   const token = await getIdToken();
@@ -32,8 +33,8 @@ export const getAllLocations = async (): Promise<IListData> => {
   }
 };
 
-export const getLocationById = async (id: string): Promise<ILocationTypes[]> => {
-  const response: GenericResponse<ILocationTypes[]> = await API.get(
+export const getLocationById = async (id: string): Promise<LocationData[]> => {
+  const response: GenericResponse<LocationData[]> = await API.get(
     `/logistic-location/location/` + id
   );
   if (response.success) return response.data;

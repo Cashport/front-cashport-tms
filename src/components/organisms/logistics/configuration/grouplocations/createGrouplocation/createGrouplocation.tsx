@@ -39,15 +39,11 @@ export const CreateGroupLocationView = ({ params }: Props) => {
     }
   };
 
-  const { data: statesData, isLoading: isLoadingStates } = useSWR(
-    "states-data",
-    getAllStatesByCountry,
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false
-    }
-  );
+  const { data: statesData, isLoading: isLoadingStates } = useSWR("1", getAllStatesByCountry, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
 
   return (
     <Skeleton active loading={isLoadingStates}>

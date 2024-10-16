@@ -4,11 +4,13 @@ import {
   IVehicle,
   IListDataVehicheDetail,
   CustomFile,
-  VehicleType
+  VehicleType,
+  VihicleDetail
 } from "@/types/logistics/schema";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { VehicleData } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
 
 export const getAllVehicles = async ({ id }: { id: string }): Promise<any[]> => {
   const response: GenericResponse<any[]> = await API.get(`/vehicle/provider/${id}`);
@@ -22,22 +24,12 @@ export const getVehicleType = async (): Promise<VehicleType[]> => {
   throw new Error(response?.message || "Error");
 };
 
-export const getVehicleById = async (id: string): Promise<IListDataVehicheDetail> => {
-  try {
-    const response: AxiosResponse<IListDataVehicheDetail> = await axios.get(
-      `${config.API_HOST}/vehicle/${id}`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*"
-        }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.log("Error get vehicle vehicles: ", error);
-    return error as any;
-  }
+export const getVehicleById = async (id: string): Promise<VehicleData> => {
+  const response: GenericResponse<VehicleData> = await API.get(`/vehicle/${id}`);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error");
 };
+
 export const createVehicleForm = (
   data: IVehicle,
   files: DocumentCompleteType[],

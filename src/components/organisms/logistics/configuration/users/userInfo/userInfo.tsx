@@ -5,7 +5,7 @@ import "../../../../../../styles/_variables_logistics.css";
 import "./userInfo.scss";
 import { IFormUser, IUser } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab.mapper";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { UserFormTab } from "@/components/molecules/tabs/logisticsForms/userForm/userFormTab";
 import { getUserById, updateUser, updateUserStatus } from "@/services/logistics/users";
 interface Props {
@@ -45,6 +45,7 @@ export const UserInfoView = ({ params }: Props) => {
       if (response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Usuario editado", 2, () => setStatusForm("review"));
+        mutate({ id: params, key: "1" });
       }
     } catch (error) {
       setIsLoadingSubmit(false);
@@ -52,25 +53,17 @@ export const UserInfoView = ({ params }: Props) => {
     }
   };
 
-  const handleActivation = async () => {
+  const handleChangeStatus = async (newStatus: boolean) => {
+    console.log("active");
     try {
-      const response = await updateUserStatus(params.id, "1");
+      const response = await updateUserStatus(params.id, newStatus ? "1" : "0");
       if (response.status === 200) {
-        message.success("Usuario activado", 2, () => setStatusForm("review"));
+        message.success(`Usuario ${newStatus ? "activado" : "inactivado"}`, 2, () =>
+          setStatusForm("review")
+        );
       }
     } catch (error) {
-      message.error("Error al activar usuario", 2, () => setStatusForm("review"));
-    }
-  };
-
-  const handleDesactivation = async () => {
-    try {
-      const response = await updateUserStatus(params.id, "0");
-      if (response.status === 200) {
-        message.success("Usuario desactivado", 2, () => setStatusForm("review"));
-      }
-    } catch (error) {
-      message.error("Error al desactivar usuario", 2, () => setStatusForm("review"));
+      message.error(`Hubo un error por favor intenta mas tarde.`, 2, () => setStatusForm("review"));
     }
   };
 
@@ -82,8 +75,8 @@ export const UserInfoView = ({ params }: Props) => {
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}
-        onActiveUser={handleActivation}
-        onDesactivateUser={handleDesactivation}
+        onActiveUser={() => handleChangeStatus(true)}
+        onDesactivateUser={() => handleChangeStatus(false)}
         isLoadingSubmit={isLoadingSubmit}
       />
     </Skeleton>

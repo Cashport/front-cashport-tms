@@ -89,7 +89,7 @@ export const UserFormTab = ({
   const isFormCompleted = () => {
     return isValid; // && (imageFile || getValues("general.photo"));
   };
-  const isSubmitButtonEnabled = isFormCompleted() && !loading;
+  const isSubmitButtonEnabled = isFormCompleted() && !loading && !isLoadingSubmit;
 
   useEffect(() => {
     if (statusForm === "review") {

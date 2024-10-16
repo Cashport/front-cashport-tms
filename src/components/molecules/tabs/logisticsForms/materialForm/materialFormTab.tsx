@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Flex, Form, Row, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
@@ -36,8 +36,8 @@ export const MaterialFormTab = ({
   onActiveMaterial = () => {},
   onDesactivateMaterial = () => {},
   isLoadingSubmit,
-  materialsTransportTypesData,
-  materialsTypesData
+  materialsTransportTypesData: transportFeaturesOptions,
+  materialsTypesData: securityFeaturesOptions
 }: MaterialFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -65,7 +65,6 @@ export const MaterialFormTab = ({
     defaultValues,
     disabled: statusForm === "review"
   });
-
   const formImages = watch("images");
 
   const hasImages = () => {
@@ -77,45 +76,25 @@ export const MaterialFormTab = ({
 
   const isSubmitButtonEnabled = isFormCompleted() && !isLoadingSubmit;
 
-  const convertToSelectOptions = (materialTypes: IMaterialType[]) => {
-    if (!Array.isArray(materialTypes)) return [];
-    return materialTypes?.map((materialType) => ({
-      label: materialType.description,
-      value: materialType.id
+  const convertToSelectOptions = (options: IMaterialTransportType[] | IMaterialType[]) => {
+    if (!Array.isArray(options)) return [];
+    return options?.map((option) => ({
+      label: option.description,
+      value: option.id
     }));
   };
 
-  const convertToSelectOptionsData = (materialTypes: IMaterialType[]) => {
-    if (materialTypes.length == 0) return [];
+  const convertToSelectDefaults = (
+    options: IMaterialTransportType[] | IMaterialType[],
+    type: "transport" | "security"
+  ): any => {
+    if (options.length == 0) return [];
     const results: OptionType[] = [];
-    data?.material_type.forEach((matty) => {
-      const matfilter = materialTypes?.filter((f) => f.id == matty.id_material_type);
-      const option: OptionType = {
-        value: matfilter[0].id,
-        label: matfilter[0].description
-      };
-      results.push(option);
-    });
-    return results;
-  };
-
-  const convertToSelectOptionsTransport = (materialTransportTypes: IMaterialTransportType[]) => {
-    if (!Array.isArray(materialTransportTypes)) return [];
-    return materialTransportTypes?.map((materialTransportType) => ({
-      label: materialTransportType.description,
-      value: materialTransportType.id
-    }));
-  };
-
-  const convertToSelectOptionsTransportData = (
-    materialTransportTypes: IMaterialTransportType[]
-  ) => {
-    if (materialTransportTypes.length == 0) return [];
-    const results: OptionType[] = [];
-    data?.material_transport.forEach((mattr) => {
-      const matfilter = materialTransportTypes?.filter(
-        (f) => f.id == mattr.id_material_transport_type
-      );
+    const dataFromAPI: any = type === "transport" ? data?.material_transport : data?.material_type;
+    const propToFilterName =
+      type === "transport" ? "id_material_transport_type" : "id_material_type";
+    dataFromAPI?.forEach((d: any) => {
+      const matfilter = options?.filter((option) => option.id == d[propToFilterName]);
       const option: OptionType = {
         value: matfilter[0].id,
         label: matfilter[0].description
@@ -131,6 +110,23 @@ export const MaterialFormTab = ({
     setImageError(false);
     onSubmitForm({ ...data, images: formImages });
   };
+  useEffect(() => {
+    if (data?.material_transport) {
+      setValue(
+        "general.material_transport",
+        convertToSelectDefaults(transportFeaturesOptions, "transport")
+      );
+    }
+  }, [data, transportFeaturesOptions, setValue]);
+
+  useEffect(() => {
+    if (data?.material_type) {
+      setValue(
+        "general.material_type",
+        convertToSelectDefaults(securityFeaturesOptions, "security")
+      );
+    }
+  }, [data, securityFeaturesOptions, setValue]);
 
   return (
     <>
@@ -346,10 +342,8 @@ export const MaterialFormTab = ({
                         placeholder="Seleccionar"
                         title="Características de transporte"
                         errors={errors?.general?.material_transport}
-                        defaultValue={convertToSelectOptionsTransportData(
-                          materialsTransportTypesData
-                        )}
-                        options={convertToSelectOptionsTransport(materialsTransportTypesData)}
+                        defaultValue={null}
+                        options={convertToSelectOptions(transportFeaturesOptions)}
                         disabled={statusForm === "review"}
                         layout="vertical"
                       />
@@ -367,8 +361,8 @@ export const MaterialFormTab = ({
                         placeholder="Seleccionar"
                         title="Características de seguridad"
                         errors={errors?.general?.material_type}
-                        defaultValue={convertToSelectOptionsData(materialsTypesData)}
-                        options={convertToSelectOptions(materialsTypesData)}
+                        defaultValue={null}
+                        options={convertToSelectOptions(securityFeaturesOptions)}
                         disabled={statusForm === "review"}
                         layout="vertical"
                       />

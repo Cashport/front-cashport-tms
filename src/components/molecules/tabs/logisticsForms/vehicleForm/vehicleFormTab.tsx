@@ -206,14 +206,19 @@ export const VehicleFormTab = ({
   };
 
   const convertToSelectOptions = (vehicleTypes: VehicleType[]) => {
-    console.log("convertToSelectOptions vehicleTypes", vehicleTypes);
+    if (!Array.isArray(vehicleTypes)) return [];
     const newValues = vehicleTypes?.map((vehicleType) => ({
       value: vehicleType.description,
       id: Number(vehicleType.id)
     }));
-    console.log("convertToSelectOptions newValues", newValues);
     return newValues;
   };
+
+  useEffect(() => {
+    if (data?.id_vehicle_type) {
+      setValue("general.id_vehicle_type", data?.id_vehicle_type);
+    }
+  }, [data, setValue]);
 
   return (
     <>

@@ -37,41 +37,29 @@ export const CreateLocationView = ({ params }: Props) => {
       }
     } catch (error) {
       setIsLoadingSubmit(false);
-      message.error(
-        error instanceof Error ? error.message : "Hubo un error al crear ubicación",
-        2,
-        () => push(`/logistics/configuration/locations/all`)
-      );
+      message.error(error instanceof Error ? error.message : "Hubo un error al crear ubicación", 2);
     }
   };
-  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "documents-types",
-    getAllDocumentsType,
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false
-    }
-  );
+  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR("2", getAllDocumentsType, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
   const { data: locationTypesData, isLoading: isLoadingLocationTypes } = useSWR(
     "location-type",
     getAllLocationTypes,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   const { data: groupLocationData, isLoading: isLoadingGroupLocation } = useSWR(
-    "group-location",
+    "grouplocation",
     getAllGroupByLocation,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  const { data: statesData, isLoading: isLoadingStates } = useSWR(
-    "states-data",
-    getAllStatesByCountry,
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false
-    }
-  );
+  const { data: statesData, isLoading: isLoadingStates } = useSWR("1", getAllStatesByCountry, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
 
   return (
     <Skeleton

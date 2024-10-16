@@ -4,7 +4,7 @@ import "../../../../../styles/_variables_logistics.css";
 import "./vehicleInfo.scss";
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
 import { getVehicleById, getVehicleType, updateVehicle } from "@/services/logistics/vehicle";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { useCallback, useState } from "react";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
@@ -43,10 +43,11 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Vehículo editado", 2, () => setStatusForm("review"));
+        mutate({ id: params, key: "1" });
       }
     } catch (error) {
       setIsLoadingSubmit(false);
-      message.error("Error al editar vehículo", 2, () => setStatusForm("review"));
+      message.error(error instanceof Error ? error.message : "Error al editar vehículo", 2);
     }
   };
 
@@ -66,7 +67,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
       <VehicleFormTab
         statusForm={statusForm}
         handleFormState={handleFormState}
-        data={data?.data as any}
+        data={data}
         params={params}
         onSubmitForm={handleSubmit}
         documentsTypesList={documentsType ?? []}

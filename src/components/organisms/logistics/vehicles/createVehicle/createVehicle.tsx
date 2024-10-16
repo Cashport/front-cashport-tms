@@ -26,15 +26,13 @@ export const CreateVehicleView = ({ params }: Props) => {
       const response = await addVehicle({ ...data }, data.files, data.images);
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
-        message.success("Vehículo creado", 2, () =>
+        message.success("Vehículo creado", 3, () =>
           push(`/logistics/providers/${params.id}/vehicle`)
         );
       }
     } catch (error) {
       setIsLoadingSubmit(false);
-      message.error("Error al crear vehículo", 2, () =>
-        push(`/logistics/providers/${params.id}/vehicle`)
-      );
+      message.error(error instanceof Error ? error.message : "Error al crear vehículo", 3);
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
