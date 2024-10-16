@@ -3,6 +3,8 @@
   justify-content: center;
 
   .stateContent {
+    display: flex;
+    align-items: center;
     padding: 6px 12px;
     border-radius: 8px;
     background-color: #969696;

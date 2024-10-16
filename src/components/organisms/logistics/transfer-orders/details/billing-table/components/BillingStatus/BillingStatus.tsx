@@ -1,6 +1,7 @@
 import { Tooltip, Typography } from "antd";
 import styles from "./BillingStatus.module.scss"; // Importar los estilos si es un archivo SCSS separado
 import { BillingStatusEnum } from "@/types/logistics/billing/billing";
+import { WarningCircle } from "phosphor-react";
 
 const { Text } = Typography;
 
@@ -41,19 +42,26 @@ const BillingStatus: React.FC<BillingStatusProps> = ({ status, tooltipText }) =>
   };
   const showTooltip = status === BillingStatusEnum.RechazadoProveedor;
 
-  const content = (
-    <div className={styles.stateContainer}>
-      <div style={{ backgroundColor: getBgColor(status) }} className={styles.stateContent}>
-        <Text style={{ color: getColor(status) }} className={styles.text}>
-          {status}
-        </Text>
+  const content = (icon?: React.ReactNode) => {
+    return (
+      <div className={styles.stateContainer}>
+        <div style={{ backgroundColor: getBgColor(status) }} className={styles.stateContent}>
+          <Text style={{ color: getColor(status) }} className={styles.text}>
+            {status}
+          </Text>
+          {icon && (
+            <span style={{ marginLeft: 8, display: "flex", alignItems: "center" }}>{icon}</span>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
   return showTooltip ? (
-    <Tooltip title={`Observación: ${tooltipText ?? ""}`}>{content}</Tooltip>
+    <Tooltip title={`Observación: ${tooltipText ?? ""}`}>
+      {content(<WarningCircle size={16} color={getColor(BillingStatusEnum.RechazadoProveedor)} />)}
+    </Tooltip>
   ) : (
-    content
+    content()
   );
 };
 
