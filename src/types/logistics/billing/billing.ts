@@ -4,7 +4,8 @@ export enum BillingStatusEnum {
   PorAceptar = "Por aceptar",
   Aceptadas = "Aceptadas",
   Preautorizado = "Preautorizado",
-  Facturado = "Facturado"
+  Facturado = "Facturado",
+  RechazadoProveedor = "Rechazado proveedor"
 }
 
 export interface IBillingsRequestList {
@@ -52,6 +53,7 @@ export interface BillingByCarrier {
   vehicle_quantity: number;
   subtotal: number;
   overcost: number;
+  rejectObservation?: string;
 }
 
 export interface IBillingRequestDetail extends IBillingRequestsListDetail {
