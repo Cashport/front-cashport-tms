@@ -16,6 +16,7 @@ export interface ITripJourney {
   novelties: INovelty[];
   id_vehicle_type: number;
   vehicle_type?: string;
+  edit_novelties: 0 | 1;
 }
 
 export interface ITransferJourney {
