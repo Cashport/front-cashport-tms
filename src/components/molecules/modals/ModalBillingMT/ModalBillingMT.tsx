@@ -20,10 +20,11 @@ type PropsModalBillingMT = {
   isOpen: boolean;
   onClose: () => void;
   messageApi: MessageInstance;
+  mode: "view" | "edit";
 };
 
 export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
-  const { isOpen, onClose, idTrip, messageApi } = props;
+  const { isOpen, onClose, idTrip, messageApi, mode } = props;
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [vehicleInfo, setVehicleInfo] = useState<IVehicleAPI>(emptyVehicle);
@@ -173,6 +174,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
           <Flex vertical key={`vehicle-1`}>
             <p className={styles.vehicleName}>Vehículo {formValues.plate}</p>
             <DocumentFields
+              mode={mode}
               control={control}
               register={register}
               handleOnChangeDocument={handleOnChangeDocument}
@@ -197,9 +199,9 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
         !isLoading && (
           <FooterButtons
             isConfirmDisabled={isConfirmDisabled}
-            titleConfirm="Finalizar viaje"
+            titleConfirm={mode === "edit" ? "Finalizar viaje" : "Cerrar"}
             onClose={onClose}
-            handleOk={handleSubmit(onSubmit)}
+            handleOk={mode === "edit" ? handleSubmit(onSubmit) : onClose}
           />
         )
       }

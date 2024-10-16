@@ -11,13 +11,15 @@ export function DocumentFields({
   register,
   handleOnDeleteDocument,
   handleOnChangeDocument,
-  currentDocuments
+  currentDocuments,
+  mode
 }: Readonly<{
   control: any;
   register: any;
   handleOnDeleteDocument: (documentIndex: number) => void;
   handleOnChangeDocument: (fileToSave: any, documentIndex: number) => void;
   currentDocuments: FileWithLink[];
+  mode: "view" | "edit";
 }>) {
   const {
     fields: documentFields,
@@ -65,14 +67,16 @@ export function DocumentFields({
           );
         })}
       </Flex>
-      <Flex justify="flex-end">
-        <AddRemoveButton
-          type="add"
-          onClick={() => appendDocument({ docReference: "", file: undefined, aditionalData: {} })}
-          disabled={false}
-          text="Agregar otro documento"
-        />
-      </Flex>
+      {mode === "edit" && (
+        <Flex justify="flex-end">
+          <AddRemoveButton
+            type="add"
+            onClick={() => appendDocument({ docReference: "", file: undefined, aditionalData: {} })}
+            disabled={false}
+            text="Agregar otro documento"
+          />
+        </Flex>
+      )}
     </div>
   );
 }

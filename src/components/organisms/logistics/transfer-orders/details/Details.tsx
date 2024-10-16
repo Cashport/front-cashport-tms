@@ -408,6 +408,7 @@ export const TransferOrderDetails = () => {
         setNav={setNav}
       />
       <ModalBillingMT
+        mode="edit"
         isOpen={isModalMTVisible}
         onClose={() => setIsModalMTVisible(false)}
         idTR={id as string}

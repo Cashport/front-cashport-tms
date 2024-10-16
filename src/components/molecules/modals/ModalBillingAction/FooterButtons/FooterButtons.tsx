@@ -8,7 +8,7 @@ const FooterButtons = ({
   onClose,
   handleOk,
   showLeftButton = true,
-  isConfirmLoading = false
+  isConfirmLoading = false,
 }: {
   titleConfirm?: string;
   isConfirmDisabled?: boolean;
