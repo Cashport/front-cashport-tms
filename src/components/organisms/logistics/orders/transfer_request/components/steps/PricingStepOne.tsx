@@ -12,6 +12,7 @@ import TabPane from "antd/es/tabs/TabPane";
 import { Responsibles } from "../../../DetailsOrderView/components/Responsibles/Responsibles";
 import AditionalInfo from "@/components/organisms/logistics/acept_carrier/detail/components/AditionalInfo/AditionalInfo";
 import { formatNumber } from "@/utils/utils";
+import MaterialTableFooter from "../../../CreateOrderView/components/MaterialTableFooter/MaterialTableFooter";
 
 const { Title, Text } = Typography;
 
@@ -49,7 +50,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       title: "Volumen",
       dataIndex: "m3_volume",
       key: "address",
-      render: (amount, record) => <Text>{formatNumber(amount * record.quantity)}</Text>,
+      render: (amount) => <Text>{formatNumber(amount)}</Text>,
       sorter: (a, b) => a.m3_volume - b.m3_volume,
       showSorterTooltip: false
     },
@@ -81,7 +82,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       title: "Peso",
       key: "address",
       dataIndex: "kg_weight",
-      render: (amount, record) => <Text>{formatNumber(amount * record.quantity)} kg</Text>,
+      render: (amount) => <Text>{formatNumber(amount)} kg</Text>,
       sorter: (a, b) => a.kg_weight - b.kg_weight,
       showSorterTooltip: false
     },
@@ -229,6 +230,17 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
                 quantity: tm.quantity
               }))}
               pagination={false}
+              footer={() => {
+                let totalVolume = 0;
+                let totalWeight = 0;
+
+                orderRequest?.transfer_order_material?.forEach((item) => {
+                  const material = item.material[0]; // Obtener el primer material
+                  totalVolume += material.m3_volume * item.quantity;
+                  totalWeight += material.kg_weight * item.quantity;
+                });
+                return <MaterialTableFooter totalVolume={totalVolume} totalWeight={totalWeight} />;
+              }}
             />
           )}
           {orderRequest?.id_service_type == 3 && (
