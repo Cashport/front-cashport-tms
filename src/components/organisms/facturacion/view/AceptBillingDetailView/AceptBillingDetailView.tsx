@@ -187,7 +187,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     return {
       id: incident.id,
       trip_id: incident.id_trip,
-      novelty_type: incident.id_incident_type.toString(),
+      novelty_type: incident.incident_type_name,
       observation: incident.description,
       value: incident.fare,
       status: incident.status_description,
