@@ -1,6 +1,6 @@
 import { Flex, Modal } from "antd";
 import { CaretLeft, X } from "phosphor-react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./ModalGenerateActionTO.module.scss";
 import { MessageInstance } from "antd/es/message/interface";
 import ActionList from "./ActionList/ActionList";
@@ -8,6 +8,7 @@ import CarrierList from "./CarrierList/CarrierList";
 import PreauthorizeTrip from "./PreauthorizeTrip/PreauthorizeTrip";
 import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/billing";
 import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
+import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 
 export enum ViewEnum {
   "SELECT_ACTION" = "SELECT_ACTION",
@@ -28,6 +29,7 @@ type PropsModalGenerateActionTO = {
   statusTrId?: string;
   canChangeStatusToPorLegalizar: boolean;
   handleChangeStatus?: (statusId: string) => Promise<void>;
+  setNav: Dispatch<SetStateAction<NavEnum>>;
 };
 
 export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerateActionTO>) {
@@ -40,7 +42,8 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
     canFinalizeTrip,
     statusTrId,
     canChangeStatusToPorLegalizar,
-    handleChangeStatus
+    handleChangeStatus,
+    setNav
   } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT_ACTION);
   const [selectedCarrier, setSelectedCarrier] = useState<number | null>(null);
@@ -85,6 +88,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             messageApi={messageApi}
             onClose={onClose}
             statusTrId={statusTrId}
+            setNav={setNav}
           />
         );
       default:

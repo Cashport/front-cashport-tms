@@ -405,6 +405,7 @@ export const TransferOrderDetails = () => {
         statusTrId={transferRequest?.status_id}
         canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
         handleChangeStatus={handleChangeStatus}
+        setNav={setNav}
       />
       <ModalBillingMT
         isOpen={isModalMTVisible}
