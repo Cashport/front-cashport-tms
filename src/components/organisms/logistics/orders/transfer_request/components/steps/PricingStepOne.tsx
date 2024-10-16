@@ -49,7 +49,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       title: "Volumen",
       dataIndex: "m3_volume",
       key: "address",
-      render: (amount) => <Text>{formatNumber(amount)}</Text>,
+      render: (amount, record) => <Text>{formatNumber(amount * record.quantity)}</Text>,
       sorter: (a, b) => a.m3_volume - b.m3_volume,
       showSorterTooltip: false
     },
@@ -81,7 +81,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       title: "Peso",
       key: "address",
       dataIndex: "kg_weight",
-      render: (amount) => <Text>{formatNumber(amount)} kg</Text>,
+      render: (amount, record) => <Text>{formatNumber(amount * record.quantity)} kg</Text>,
       sorter: (a, b) => a.kg_weight - b.kg_weight,
       showSorterTooltip: false
     },
@@ -222,16 +222,14 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
             )}
           </div>
           {(orderRequest?.id_service_type == 1 || orderRequest?.id_service_type == 2) && (
-            <>
-              <Table
-                columns={columnsCarga}
-                dataSource={orderRequest?.transfer_order_material?.map((tm) => ({
-                  ...tm.material[0],
-                  quantity: tm.quantity
-                }))}
-                pagination={false}
-              />
-            </>
+            <Table
+              columns={columnsCarga}
+              dataSource={orderRequest?.transfer_order_material?.map((tm) => ({
+                ...tm.material[0],
+                quantity: tm.quantity
+              }))}
+              pagination={false}
+            />
           )}
           {orderRequest?.id_service_type == 3 && (
             <>
