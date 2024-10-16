@@ -62,8 +62,8 @@ export const TransferOrdersState = [
     bgColor: "#FF6B00"
   },
   {
-    id: "49e6c46e-5a57-4a38-8b13-955bbffb7279",
-    name: "Legalizado",
+    id: STATUS.TR.POR_ACEPTAR,
+    name: "Por aceptar",
     bgColor: "#A9BA43"
   },
   {
