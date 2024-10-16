@@ -27,6 +27,7 @@ export interface ICarrierAPI {
   carrier_id: number;
   provider: string;
   vehicles: IVehicleAPI[];
+  Observation: string;
 }
 
 const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTrip) => {
@@ -74,7 +75,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTr
                 }
               ]
       })),
-      adittionalComment: ""
+      adittionalComment: c.Observation !== "" ? c.Observation : undefined
     }));
     return {
       carriers: defaultValues
