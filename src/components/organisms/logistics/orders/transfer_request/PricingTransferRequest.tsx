@@ -336,8 +336,8 @@ export default function PricingTransferRequest({
   const [isNextStepActive, setIsNextStepActive] = useState<boolean>(true);
   const steps = [
     { title: "Solicitud de transferencia" },
-    { title: "Seleccion de vehiculos" },
-    { title: "Seleccion de proveedor" }
+    { title: "Selección de vehículos" },
+    { title: "Selección de proveedor" }
   ];
   const currentStepIndex = view === "solicitation" ? 0 : view === "vehicles" ? 1 : 2;
 
