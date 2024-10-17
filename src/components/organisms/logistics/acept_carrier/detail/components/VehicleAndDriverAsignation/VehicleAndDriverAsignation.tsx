@@ -146,7 +146,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
     <div>
       <div className={styles.wrapper}>
         <Flex justify="space-between">
-          <p className={styles.sectionTitle}>Vehiculo</p>
+          <p className={styles.sectionTitle}>Vehículo</p>
           {formMode === FormMode.EDIT && !canEditVehicle && (
             <AddRemoveButton type="edit" onClick={handleVehicleSelect} text="Editar vehículo" />
           )}
@@ -162,7 +162,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                   {...field}
                   disabled={!canEditVehicle}
                   showSearch
-                  placeholder="Seleccion el vehículo"
+                  placeholder="Seleccione el vehículo"
                   style={{ width: "25rem", height: "2.5rem" }}
                   optionLabelProp="label"
                   labelRender={(selectedValue) => (
@@ -259,7 +259,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                         {...field}
                         disabled={!canEditDrivers}
                         showSearch
-                        placeholder="Seleccion el conductor"
+                        placeholder="Seleccione el conductor"
                         style={{ width: "25rem", height: "2.5rem" }}
                         optionLabelProp="label"
                         labelRender={(selectedValue) => (

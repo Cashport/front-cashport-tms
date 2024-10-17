@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Crear Vehiculo",
-  description: "Crear Vehiculo"
+  title: "Crear Vehículo",
+  description: "Crear Vehículo"
 };
 
 export default function CreateVehicleLayout({ children }: { children: React.ReactNode }) {

@@ -115,11 +115,11 @@ export const _onSubmitVehicle = (
 export const validationButtonText = (statusForm: "create" | "edit" | "review") => {
   switch (statusForm) {
     case "create":
-      return "Crear nuevo vehiculo";
+      return "Crear nuevo vehículo";
     case "edit":
       return "Guardar Cambios";
     case "review":
-      return "Editar vehiculo";
+      return "Editar vehículo";
   }
 };
 

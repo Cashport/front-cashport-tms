@@ -33,7 +33,7 @@ export default function Buttons({
           style={{ cursor: isLeftButtonActive ? "pointer" : "not-allowed" }}
           onClick={handleBack}
         >
-          <b>Atras</b>
+          <b>Atrás</b>
         </button>
       </div>
       <Flex className={styles.right}>

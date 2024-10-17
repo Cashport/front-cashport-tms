@@ -14,7 +14,7 @@ export const SelectVehicleType = ({ errors, field, selected, options, loading }:
   return (
     <>
       <Select
-        placeholder="Selecciona Tipo de Vehiculo"
+        placeholder="Selecciona Tipo de Vehículo"
         className={
           errors?.general?.currencies ? "selectInputCurrenciesError" : "selectInputCurrencies"
         }

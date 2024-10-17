@@ -116,7 +116,7 @@ export const SummaryData = ({
       <Row>
         <Col span={12} style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <p className={styles.subtitleReg}>Tipo de viaje</p>
-          {vehiclesSuggested && <p className={styles.subtitleReg}>Vehiculos sugeridos</p>}
+          {vehiclesSuggested && <p className={styles.subtitleReg}>Vehículos sugeridos</p>}
         </Col>
         <Col
           span={12}
