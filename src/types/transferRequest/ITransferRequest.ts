@@ -2,6 +2,7 @@ export interface ITransferRequest {
   id: number;
   is_materials_problem: boolean;
   is_people_problem: boolean;
+  is_rejected: 1 | 0;
   start_location: string;
   end_location: string;
   start_date: Date;
