@@ -19,6 +19,16 @@ export interface ITimeLine {
   end_date: Date;
   start_date: Date;
   location: string;
+  service_type_id: number;
+}
+
+export interface IStep {
+  id: number;
+  id_transfer_request: number;
+  name: string;
+  order_nro: number;
+  consolidation_date: Date;
+  uuid_user: string;
 }
 
 export interface IGeometryResponse {
@@ -44,6 +54,7 @@ export interface ITransferRequestDetail {
   time_total: number;
   step: number;
   timeLine: ITimeLine[];
+  steps: IStep[];
   geometry: IGeometryResponse;
 }
 

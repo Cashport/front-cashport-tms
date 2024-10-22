@@ -337,7 +337,7 @@ export const TransferOrderDetails = () => {
           handleChangeStatus={handleChangeStatus}
           transferRequest={transferRequest}
         />
-        <Step step={transferRequest?.step || 1} />
+        <Step steps={transferRequest?.steps || []} />
       </div>
       <div className={styles.card} style={{ marginTop: "2rem" }}>
         <div className={styles.navContainer}>

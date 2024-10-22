@@ -13,8 +13,9 @@ import { formatMoney } from "@/utils/utils";
 import utc from "dayjs/plugin/utc";
 import { getTravelDuration } from "@/utils/logistics/maps";
 import { STATUS } from "@/utils/constants/globalConstants";
+import Image from "next/image";
 import "dayjs/locale/es-us";
-dayjs.extend(utc).locale("es-US");
+dayjs.extend(utc).locale("es-us");
 
 const Text = Typography;
 
@@ -223,6 +224,13 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
               <Text className={styles.dotText}>{item.location}</Text>
             </div>
             <Flex vertical gap={2}>
+              {item.service_type_id === 2 && (
+                <div className={styles.dotIconContainer}>
+                  <div className={styles.dotIcon}>
+                    <Image src="/images/logistics/izaje-icon.png" width={16} height={13} alt="" />
+                  </div>
+                </div>
+              )}
               <Text className={styles.dotText}>
                 {dayjs.utc(item.start_date).format("DD MMMM YYYY - HH:mm")}
               </Text>

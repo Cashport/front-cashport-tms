@@ -96,6 +96,20 @@
             font-size: 14px;
             font-weight: 300;
           }
+
+          .dotIconContainer {
+            display: flex;
+            justify-content: flex-end;
+            .dotIcon {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 24px;
+              height: 21.5px;
+              background-color: #3D3D3D;
+              border-radius: 4px;
+            }
+          }
         }
       }
     }
