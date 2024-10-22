@@ -111,7 +111,7 @@ export interface IGeometry {
   distance: number;
   legs: [];
   geometry: {
-    coordinates: number[];
+    coordinates: number[][];
   };
 }
 

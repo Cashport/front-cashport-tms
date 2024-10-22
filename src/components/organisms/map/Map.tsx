@@ -11,6 +11,10 @@ import { ISocketTrip } from '@/types/logistics/trips/TripsSchema';
 import Image from 'next/image';
 import dayjs from 'dayjs';
 import { TripState } from '@/utils/constants/tripState';
+import DetailTripMap from './detail/Detail';
+import { IDriverMap } from '@/types/logistics/driver/driver';
+import { API } from '@/utils/api/api';
+import { AxiosResponse } from 'axios';
 
 const mapStyles = {
   width: '100%',
@@ -35,12 +39,17 @@ const MapComponent = () => {
   const [isActive, setIsActive] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const [socketInfo, setSocketInfo] = useState<IMark[]>([]);
+  const [trip, setTrip] = useState<ISocketTrip | null>(null);
+  const [tripLat, setTripLat] = useState<number | null>(null);
+  const [tripLong, setTripLong] = useState<number | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [driver, setDriver] = useState<IDriverMap | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const mapsAccessToken = 'pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA';
-  const socket = io('https://qh3mhpqzz7.us-east-2.awsapprunner.com');
+  const socket = io('http://localhost:8080');
 
   const getStateColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);
@@ -52,8 +61,13 @@ const MapComponent = () => {
     return getState ? getState.textColor : '#141414';
   }
 
+  const getIconUrl = (stateId: string) => {
+    const getState = TripState.find((f) => f.id === stateId);
+    return getState ? getState.urlMap : '#141414';
+  }
+
   const updateUserLocation = (data: ISocketData) => {
-    if (!mapRef.current) {
+    if (!mapRef.current || !data.trip) {
       return;
     }
 
@@ -125,7 +139,7 @@ const MapComponent = () => {
       const width = 42;
       const height = 42;
       el.className = 'marker';
-      el.style.backgroundImage = `url(https://s3-alpha-sig.figma.com/img/1c2d/c12c/cd7abad34ead62ccbb4cb34bb5944883?Expires=1728259200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=MUIi~~qHZ9lP8WDFUBzAOe5wqDj6TU99jruWqFzDGFkjPyuNMEiFs44~3Oowc3mcM-or1qDPsPO3u-R7B~b-rEpCMkkXhPTj5w17n0ufDEp~6yjok23wEJxjaVECpv7Okv~ISKv9ExEcHnAEm4bahFcLYGBu4t6kocFpBtTwNFzB2HKtNn8QLAinWAEEws8ze4FfdotSE~q~MfpCVdCbo7L0k-E93fLFTUVslXsktAhWnZt6xdU7vds05mgiuZUTLqtGcRCVrkBFe4JTjNoR3SWAp8eJsPKWFV1MgAYeDgTcUM8aW8lnWpJ90MB902iVON3nHcbz0fEO9ZjEo06lNw__`;
+      el.style.backgroundImage = `url(${getIconUrl(data.trip.stateId)})`;
       el.style.width = `${width}px`;
       el.style.height = `${height}px`;
       el.style.backgroundSize = '100%';
@@ -137,6 +151,11 @@ const MapComponent = () => {
       if (getUser) {
         return prevSocketInfo.map((item) => {
           if (getUser.socketInfo.userId === item.socketInfo.userId) {
+
+            const markerElement = item.mark!.getElement();
+
+            markerElement.style.backgroundImage = `url(${getIconUrl(data.trip.stateId)})`;
+
             item.mark!.remove();
             return {
               mark: item.mark!.setLngLat([data.longitude, data.latitude]).setPopup(popup).addTo(mapRef.current!),
@@ -188,29 +207,86 @@ const MapComponent = () => {
         showCompass: true,
       });
       map.addControl(compassControl, "top-right");
+      setMapLoaded(true);
     });
-    // const el = document.createElement('div');
-    // const width = 42;
-    // const height = 42;
-    // el.className = 'marker';
-    // el.style.backgroundImage = `url(https://s3-alpha-sig.figma.com/img/1c2d/c12c/cd7abad34ead62ccbb4cb34bb5944883?Expires=1728259200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=MUIi~~qHZ9lP8WDFUBzAOe5wqDj6TU99jruWqFzDGFkjPyuNMEiFs44~3Oowc3mcM-or1qDPsPO3u-R7B~b-rEpCMkkXhPTj5w17n0ufDEp~6yjok23wEJxjaVECpv7Okv~ISKv9ExEcHnAEm4bahFcLYGBu4t6kocFpBtTwNFzB2HKtNn8QLAinWAEEws8ze4FfdotSE~q~MfpCVdCbo7L0k-E93fLFTUVslXsktAhWnZt6xdU7vds05mgiuZUTLqtGcRCVrkBFe4JTjNoR3SWAp8eJsPKWFV1MgAYeDgTcUM8aW8lnWpJ90MB902iVON3nHcbz0fEO9ZjEo06lNw__`;
-    // el.style.width = `${width}px`;
-    // el.style.height = `${height}px`;
-    // el.style.backgroundSize = '100%';
-    // el.style.display = 'block';
-    // el.style.border = 'none';
-    // el.style.borderRadius = '50%';
-    // el.style.cursor = 'pointer';
-
-    // new mapboxgl.Marker(el)
-    //   .setLngLat([-74.066928, 4.714720])
-    //   .addTo(map)
 
     return () => {
       socket.disconnect();
       map.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (!mapRef.current) {
+      return;
+    }
+    if (mapLoaded && trip) {
+      console.log('Entra en el trip loaded');
+
+      const compassControl = new mapboxgl.NavigationControl({
+        showCompass: true
+      });
+      mapRef.current.addControl(compassControl, "top-right");
+
+      const datajson: GeoJSON.Feature = {
+        type: "Feature",
+        geometry: trip?.geometry.geometry[0].geometry as any,
+        properties: {}
+      };
+
+      mapRef.current.addSource("route", {
+        type: "geojson",
+        data: datajson
+      });
+
+      mapRef.current.addLayer({
+        id: "route",
+        type: "line",
+        source: "route",
+        layout: {
+          "line-join": "round",
+          "line-cap": "round"
+        },
+        paint: {
+          "line-color": "#1f2228",
+          "line-width": 6
+        }
+      });
+
+      const bounds = trip?.geometry.geometry[0].geometry.coordinates.reduce(
+        (bounds: any, coord: any) => bounds.extend(coord),
+        new mapboxgl.LngLatBounds()
+      );
+
+      // Zoom out to fit the route within the map view
+      mapRef.current.fitBounds(bounds, {
+        padding: 50
+      });
+    } else if (trip === null) {
+      if (mapRef.current.getLayer("route")) {
+        mapRef.current.removeLayer("route");
+      }
+      if (mapRef.current.getSource("route")) {
+        mapRef.current.removeSource("route");
+      }
+
+      // Restablecer el centro y el zoom a los valores iniciales
+      mapRef.current.flyTo({
+        center: { lon: -74.07231699675322, lat: 4.66336863727521 },
+        zoom: 12
+      });
+    }
+  }, [trip, mapLoaded]);
+
+  const getDriverFromTrip = async (tripId: string, userId: string) => {
+    try {
+      const findDriver: AxiosResponse<IDriverMap, any> = await API.get(`/cashport/map-detail/${tripId}/${userId}`);
+      console.log(findDriver.data);
+      setDriver(findDriver.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <div className={styles.mainMap}>
@@ -229,61 +305,87 @@ const MapComponent = () => {
             ref={mapContainerRef}
             style={mapStyles}
           >
-            <div className={styles.mainCard}>
-              <div className={styles.titleContainer} onClick={() => setShowCards(!showCards)}>
-                <div className={styles.titleCard}>Estado de los viajes</div>
-                {showCards ? <CaretUp size={20} color="#FFFFFF" /> : <CaretDown size={20} color="#FFFFFF" />}
-              </div>
-              {showCards && (
-                <div className={styles.cardContainer}>
-                  {socketInfo.map((item, index) => (
-                    <div className={`${styles.card} ${index !== 7 && styles.bottomDivider}`} key={item.socketInfo.trip.id}>
-                      <div className={styles.leftSection}>
-                        {item.socketInfo.trip.imgUrl && (
-                          <Image width={51} height={51} className={styles.img} alt='' src={item.socketInfo.trip.imgUrl} />
-                        )}
-                        {!item.socketInfo.trip.imgUrl && (
-                          <div className={styles.img} />
-                        )}
-                        <div>
-                          <div className={styles.cardTitleContainer}>
-                            <div className={styles.cardTitle}>{item.socketInfo.trip.vehicle.behicleType}</div>
-                            <div className={styles.cardSubtitle}>{item.socketInfo.trip.vehicle.plateNumber}</div>
-                          </div>
-                          <div className={styles.cardBody}>
-                            <div className={styles.cardMarkContainer}>
-                              <div className={styles.cardMark} />
-                              <div className={styles.line}></div>
-                              <div>
-                                <div className={styles.cardDescription}>{item.socketInfo.trip.startAddress}</div>
-                                <div className={styles.cardDate}>{dayjs(item.socketInfo.trip.initRoute).format('DD MMM. YYYY')} - {dayjs(item.socketInfo.trip.initRoute).format('HH:mm')}</div>
-                              </div>
-                            </div>
-                            <div className={styles.cardMarkContainer}>
-                              <div className={styles.cardMark} />
-                              <div>
-                                <div className={styles.cardDescriptionStep}>{item.socketInfo.trip.endAddress}</div>
-                                <div className={styles.cardDateStep}>{dayjs(item.socketInfo.trip.endRoute).format('DD MMM. YYYY')} - {dayjs(item.socketInfo.trip.endRoute).format('HH:mm')}</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.rightSection}>
-                        <div className={styles.rightTitle}>TR {item.socketInfo.trip.transferRequestId}</div>
-                        <div className={styles.stateTag} style={{ backgroundColor: getStateColor(item.socketInfo.trip.stateId) }}>
-                          <CheckCircle size={16} color={getStateTextColor(item.socketInfo.trip.stateId)} />
-                          <div className={styles.state} style={{ color: getStateTextColor(item.socketInfo.trip.stateId) }}>{item.socketInfo.trip.state.name}</div>
-                        </div>
-                        <div className={styles.showBtn}>
-                          <Eye size={20} color='#CBE71E' />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+            {trip && (
+              <div className={styles.overlayCard}>
+                <div className={styles.mainCard}>
+                  <DetailTripMap
+                    trip={trip} onClose={() => {
+                      setTrip(null)
+                      setTripLat(null);
+                      setTripLong(null);
+                      setDriver(null);
+                    }}
+                    lat={tripLat}
+                    long={tripLong}
+                    driver={driver}
+                  />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+            {!trip && (
+              <div className={styles.overlayCard}>
+                <div className={styles.mainCard}>
+                  <div className={`${styles.titleContainer} ${styles.cursor}`} onClick={() => setShowCards(!showCards)}>
+                    <div className={styles.titleCard}>Estado de los viajes</div>
+                    {showCards ? <CaretUp size={20} color="#FFFFFF" /> : <CaretDown size={20} color="#FFFFFF" />}
+                  </div>
+                  {showCards && (
+                    <div className={styles.cardContainer}>
+                      {socketInfo.map((item, index) => (
+                        <div className={`${styles.card} ${index !== 7 && styles.bottomDivider}`} key={item.socketInfo.trip.id}>
+                          <div className={styles.leftSection}>
+                            {item.socketInfo.trip.imgUrl && (
+                              <Image width={51} height={51} className={styles.img} alt='' src={item.socketInfo.trip.imgUrl} />
+                            )}
+                            {!item.socketInfo.trip.imgUrl && (
+                              <div className={styles.img} />
+                            )}
+                            <div>
+                              <div className={styles.cardTitleContainer}>
+                                <div className={styles.cardTitle}>{item.socketInfo.trip.vehicle.behicleType}</div>
+                                <div className={styles.cardSubtitle}>{item.socketInfo.trip.vehicle.plateNumber}</div>
+                              </div>
+                              <div className={styles.cardBody}>
+                                <div className={styles.cardMarkContainer}>
+                                  <div className={styles.cardMark} />
+                                  <div className={styles.line}></div>
+                                  <div>
+                                    <div className={styles.cardDescription}>{item.socketInfo.trip.startAddress}</div>
+                                    <div className={styles.cardDate}>{dayjs(item.socketInfo.trip.initRoute).format('DD MMM. YYYY')} - {dayjs(item.socketInfo.trip.initRoute).format('HH:mm')}</div>
+                                  </div>
+                                </div>
+                                <div className={styles.cardMarkContainer}>
+                                  <div className={styles.cardMark} />
+                                  <div>
+                                    <div className={styles.cardDescriptionStep}>{item.socketInfo.trip.endAddress}</div>
+                                    <div className={styles.cardDateStep}>{dayjs(item.socketInfo.trip.endRoute).format('DD MMM. YYYY')} - {dayjs(item.socketInfo.trip.endRoute).format('HH:mm')}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={styles.rightSection}>
+                            <div className={styles.rightTitle}>TR {item.socketInfo.trip.transferRequestId}</div>
+                            <div className={styles.stateTag} style={{ backgroundColor: getStateColor(item.socketInfo.trip.stateId) }}>
+                              <CheckCircle size={16} color={getStateTextColor(item.socketInfo.trip.stateId)} />
+                              <div className={styles.state} style={{ color: getStateTextColor(item.socketInfo.trip.stateId) }}>{item.socketInfo.trip.state.name}</div>
+                            </div>
+                            <div onClick={() => {
+                              setTrip(item.socketInfo.trip);
+                              setTripLat(item.socketInfo.latitude);
+                              setTripLong(item.socketInfo.longitude);
+                              getDriverFromTrip(item.socketInfo.trip.id, item.socketInfo.userId);
+                            }} className={styles.showBtn}>
+                              <Eye size={20} color='#CBE71E' />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
