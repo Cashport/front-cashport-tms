@@ -1,4 +1,4 @@
-import { Checkbox, CollapseProps, Typography } from "antd";
+import { Checkbox, CollapseProps, Spin, Typography } from "antd";
 import styles from "./Request.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -7,6 +7,7 @@ import { getAcceptedTransferRequest } from "@/services/logistics/transfer-reques
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
+import Loader from "@/components/atoms/loaders/loader";
 
 const Text = Typography;
 
@@ -16,6 +17,7 @@ interface IRequestProps {
   ordersId: number[];
   trsIds: number[];
   handleCheckboxChangeTR: (id: number, checked: boolean) => void;
+  modalState: boolean;
 }
 
 export const Request: FC<IRequestProps> = ({
@@ -23,7 +25,8 @@ export const Request: FC<IRequestProps> = ({
   handleCheckboxChange,
   ordersId,
   trsIds,
-  handleCheckboxChangeTR
+  handleCheckboxChangeTR,
+  modalState
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
@@ -58,13 +61,19 @@ export const Request: FC<IRequestProps> = ({
   };
 
   useEffect(() => {
+    if (!modalState) {
+      getTransferRequestAccepted();
+    }
+  }, [modalState]);
+
+  useEffect(() => {
     getTransferRequestAccepted();
   }, []);
 
   if (isLoading)
     return (
       <div className={styles.emptyContainer}>
-        <Text className={styles.textEmpty}>No Content</Text>
+        <Spin size="large" />
       </div>
     );
 
@@ -73,7 +82,8 @@ export const Request: FC<IRequestProps> = ({
       const filteredItems = status.items.filter(
         (item) =>
           item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-          item.end_location.toLowerCase().includes(search.toLowerCase())
+          item.end_location.toLowerCase().includes(search.toLowerCase()) ||
+          item.id.toString().includes(search.toLowerCase())
       );
 
       return { ...status, items: filteredItems };
@@ -85,7 +95,7 @@ export const Request: FC<IRequestProps> = ({
     STATUS.TO.SIN_PROCESAR, // Sin procesar
     STATUS.TO.PROCESANDO, // Procesando
     STATUS.TO.PROCESADO, // Procesando
-    STATUS.TR.PROCESADO, // Procesado
+    STATUS.TR.ASIGNANDO_VEHICULO, // Procesado
     STATUS.TR.ESPERANDO_PROVEEDOR // Esperando proveedor
   ];
 
@@ -109,7 +119,8 @@ export const Request: FC<IRequestProps> = ({
       };
       redirect = "/logistics/orders/details";
     }
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Procesado")?.id) {
+    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO];
+    if (trDeleteable.includes(item.statusId)) {
       aditionalRow = {
         title: "",
         dataIndex: "checkbox",
@@ -125,7 +136,8 @@ export const Request: FC<IRequestProps> = ({
     if (item.statusId === TransferOrdersState.find((f) => f.name === "Esperando proveedor")?.id) {
       redirect = "/logistics/transfer-request/";
     }
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Procesando")?.id) {
+    const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
+    if (statusToDetailsTO.includes(item.statusId)) {
       redirect = "/logistics/orders/details";
     }
     return {

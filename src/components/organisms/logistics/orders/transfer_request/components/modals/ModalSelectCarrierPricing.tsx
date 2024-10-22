@@ -88,6 +88,7 @@ export default function ModalSelectCarrierPricing({
   }, [data]);
 
   const selectedTrip = tripsList[selectedTabIndex];
+
   const journey = selectedTrip?.journey;
 
   const filteredPricing =
@@ -155,10 +156,21 @@ export default function ModalSelectCarrierPricing({
             trip: {
               ...trip.trip,
               carriers_pricing: trip.trip.carriers_pricing.map((carrier) => {
-                return {
-                  ...carrier,
-                  checked: newState
-                };
+                if (searchTerm !== "") {
+                  const isFiltered = filteredPricing.some(
+                    (filteredCarrier) =>
+                      filteredCarrier.id_carrier_pricing === carrier.id_carrier_pricing
+                  );
+                  return {
+                    ...carrier,
+                    checked: isFiltered && newState
+                  };
+                } else {
+                  return {
+                    ...carrier,
+                    checked: newState
+                  };
+                }
               })
             }
           };
@@ -173,11 +185,13 @@ export default function ModalSelectCarrierPricing({
     setSearchTerm(value);
   };
 
-  const checkIfAllSelectedInTrip = (): boolean => {
+  const allSelected = (): boolean => {
     const currentTrip = selectedTrip?.trip;
     return currentTrip?.carriers_pricing?.every((carrier) => carrier.checked);
   };
-
+  const allSelectedInFiltered = (): boolean => {
+    return filteredPricing.every((fp) => fp.checked);
+  };
   const isConfirmEnabled = () => {
     if (view === "vehicles") {
       return tripsList.every((t) =>
@@ -188,6 +202,10 @@ export default function ModalSelectCarrierPricing({
         t.trip.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
       );
   };
+
+  const indeterminate = filteredPricing.filter((fp) => fp.checked).length > 0 && !allSelected();
+
+  const checkAll = searchTerm === "" ? allSelected() : allSelectedInFiltered();
 
   return (
     <Modal
@@ -287,9 +305,10 @@ export default function ModalSelectCarrierPricing({
           </Flex>
           <Flex vertical gap={8} className={styles.tripCarrierPricing} key={selectedTripId ?? 0}>
             <Checkbox
-              checked={checkIfAllSelectedInTrip()}
               style={{ marginLeft: "0.5rem" }}
               onChange={(e) => handleMasiveCheck(e.target.checked)}
+              checked={checkAll}
+              indeterminate={indeterminate}
             >
               <Text style={{ fontWeight: "500" }}>Seleccionar todos</Text>
             </Checkbox>

@@ -419,7 +419,7 @@ export const CreateTransferOrderView = () => {
       key: "name"
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "phone",
       key: "phone"
     },
@@ -437,7 +437,7 @@ export const CreateTransferOrderView = () => {
 
   const columnsCargaVehiculo = [
     {
-      title: "Vehiculo",
+      title: "Vehículo",
       dataIndex: "vehicle",
       key: "vehicle"
     },
@@ -602,10 +602,10 @@ export const CreateTransferOrderView = () => {
                           title: "Solicitud de transferencia"
                         },
                         {
-                          title: "Seleccion de vehiculos"
+                          title: "Selección de vehículos"
                         },
                         {
-                          title: "Seleccion de proveedor"
+                          title: "Selección de proveedor"
                         }
                       ]}
                     />

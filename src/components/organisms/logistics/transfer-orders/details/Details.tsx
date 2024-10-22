@@ -65,9 +65,14 @@ export const TransferOrderDetails = () => {
   const [transferJournies, setTransferJournies] = useState<ITransferJourney[]>();
   const [novelty, setNovelty] = useState<INovelty | null>(null);
   const [billingList, setBillingList] = useState<BillingByCarrier[]>([]);
-  const [tripData, setTripData] = useState<{ idCarrier: number; idVehicleType: number }>({
+  const [tripData, setTripData] = useState<{
+    idCarrier: number;
+    idVehicleType: number;
+    canEditNovelties: boolean;
+  }>({
     idCarrier: 0,
-    idVehicleType: 0
+    idVehicleType: 0,
+    canEditNovelties: false
   });
 
   const [tripId, setTripId] = useState<number | null>(null);
@@ -82,21 +87,6 @@ export const TransferOrderDetails = () => {
 
   const { id } = useParams();
   const router = useRouter();
-
-  const validateDisabledByStatus = [
-    STATUS.TR.LEGALIZADO,
-    STATUS.BNG.POR_ACEPTAR,
-    STATUS.BNG.ACEPTADAS,
-    STATUS.BNG.PREAUTORIZADO,
-    STATUS.BNG.FACTURADO
-  ];
-
-  const validateDisabled = transferRequest
-    ? validateDisabledByStatus.includes(transferRequest.status_id)
-    : false;
-  const validateCreateDisabled = transferRequest
-    ? [...validateDisabledByStatus, STATUS.TR.POR_LEGALIZAR].includes(transferRequest.status_id)
-    : false;
 
   const findNoveltyDetail = async (id: number) => {
     setIsCreateNovelty(false);
@@ -126,6 +116,17 @@ export const TransferOrderDetails = () => {
     ? canFinalizeJourney(transferJournies) && transferRequest?.status_id == STATUS.BNG.POR_LEGALIZAR
     : false;
 
+  const inProgressStatus = [
+    STATUS.TR.SIN_INICIAR,
+    STATUS.TR.CARGANDO,
+    STATUS.TR.EN_CURSO,
+    STATUS.TR.DESCARGANDO,
+    STATUS.TR.STAND_BY,
+    STATUS.TR.DETENIDO
+  ];
+
+  const canChangeStatusToPorLegalizar = inProgressStatus.includes(transferRequest?.status_id ?? "");
+
   const handleBillingTableViewDetails = (id: number) => {
     setIsModalBillingVisible(true);
     setBillingId(id);
@@ -145,7 +146,6 @@ export const TransferOrderDetails = () => {
             handleOpenMTModal={handleOpenMTModal}
             setTripData={setTripData}
             resetNovelty={() => setNovelty(null)}
-            validateDisabled={validateCreateDisabled}
           />
         );
       case NavEnum.VEHICLES:
@@ -380,7 +380,7 @@ export const TransferOrderDetails = () => {
             novelty={novelty}
             handleEdit={handleEdit}
             approbeOrReject={approbeOrReject}
-            validateDisabled={validateDisabled}
+            canEdit={tripData.canEditNovelties}
           />
         ) : (
           <DrawerCreateBody
@@ -403,8 +403,12 @@ export const TransferOrderDetails = () => {
         messageApi={messageApi}
         canFinalizeTrip={canFinalizeTrip}
         statusTrId={transferRequest?.status_id}
+        canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
+        handleChangeStatus={handleChangeStatus}
+        setNav={setNav}
       />
       <ModalBillingMT
+        mode="edit"
         isOpen={isModalMTVisible}
         onClose={() => setIsModalMTVisible(false)}
         idTR={id as string}

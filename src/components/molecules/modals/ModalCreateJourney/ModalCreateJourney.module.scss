@@ -1,0 +1,30 @@
+.actionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.selectTitle {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.customBullet {
+  position: relative; /* Asegura que el pseudoelemento se posicione correctamente */
+  padding-left: 25px; /* Espacio para el bullet */
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.customBullet::before {
+  content: ''; /* Necesario para que el pseudoelemento se muestre */
+  position: absolute; /* Posiciona el bullet relativo al li */
+  left: 0; /* Alinea a la izquierda */
+  top: 50%; /* Centra verticalmente */
+  transform: translateY(-50%); /* Ajusta la posición del bullet */
+  width: 4px; /* Ancho del bullet */
+  height: 4px; /* Alto del bullet */
+  border-radius: 50%; /* Hace que el bullet sea circular */
+  background-color: black; /* Color del bullet */
+}

@@ -4,7 +4,7 @@ import { CarriersPricing, TripCarriersPricing } from "@/types/logistics/schema";
 import { CollapseProps } from "antd/lib";
 import { Star } from "phosphor-react";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 type Props = {
   carrier: CarriersPricing;
@@ -72,6 +72,7 @@ const TitleComponent = ({ carrier }: { carrier: CarriersPricing }) => (
       <Tag color={carrier.color} style={{ height: "fit-content" }}>
         {carrier.statusdesc}
       </Tag>
+        <Text style={{ fontSize: "12px", fontWeight: "600" }}>{carrier.id_transfer_request} - {carrier.order_nro}</Text>
     </Flex>
     <Title level={5}>${carrier.amount.toLocaleString("es-CO")}</Title>
   </Flex>

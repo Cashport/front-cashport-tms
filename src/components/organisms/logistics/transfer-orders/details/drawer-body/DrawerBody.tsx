@@ -28,7 +28,7 @@ interface IDrawerBodyProps {
   // eslint-disable-next-line no-unused-vars
   approbeOrReject: (id: number, isApprobe: boolean) => void;
   handleEdit: () => void;
-  validateDisabled: boolean;
+  canEdit: boolean;
 }
 
 export const DrawerBody: FC<IDrawerBodyProps> = ({
@@ -36,7 +36,7 @@ export const DrawerBody: FC<IDrawerBodyProps> = ({
   novelty,
   approbeOrReject,
   handleEdit,
-  validateDisabled
+  canEdit = true
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [evidence, setEvidence] = useState<INoveltyEvidenceBody | null>(null);
@@ -45,7 +45,7 @@ export const DrawerBody: FC<IDrawerBodyProps> = ({
     setEvidence(evidence);
     setIsModalOpen(true);
   };
-
+  console.log("can edit", canEdit, novelty);
   return (
     <div className={styles.mainDrawerBody}>
       <div onClick={onClose} className={styles.closeContainer}>
@@ -67,7 +67,7 @@ export const DrawerBody: FC<IDrawerBodyProps> = ({
                 approbeOrReject(novelty.id, false);
               }
             }}
-            disabled={validateDisabled || novelty?.status_id === STATUS.NOVELTY.RECHAZADA}
+            disabled={!canEdit || novelty?.status_id === STATUS.NOVELTY.RECHAZADA}
           >
             <X color="#141414" size={12} />
             <Text className={styles.approbeLabel}>Rechazar</Text>
@@ -80,7 +80,11 @@ export const DrawerBody: FC<IDrawerBodyProps> = ({
             }}
             type="text"
             className={styles.approbeBtn}
-            disabled={novelty?.status_id === STATUS.NOVELTY.ACEPTADA || novelty?.status_id === STATUS.NOVELTY.RECHAZADA}
+            disabled={
+              !canEdit ||
+              novelty?.status_id === STATUS.NOVELTY.ACEPTADA ||
+              novelty?.status_id === STATUS.NOVELTY.RECHAZADA
+            }
           >
             <Check color="#141414" size={12} />
             <Text className={styles.approbeLabel}>Aprobar</Text>
@@ -124,8 +128,12 @@ export const DrawerBody: FC<IDrawerBodyProps> = ({
             <Text className={styles.text}>{novelty?.created_by}</Text>
             <div
               onClick={() => {
-                if (novelty?.status_id !== STATUS.NOVELTY.ACEPTADA && novelty?.status_id !== STATUS.NOVELTY.RECHAZADA) {
-                  handleEdit()
+                if (
+                  novelty?.status_id !== STATUS.NOVELTY.ACEPTADA &&
+                  novelty?.status_id !== STATUS.NOVELTY.RECHAZADA &&
+                  canEdit
+                ) {
+                  handleEdit();
                 }
               }}
               className={styles.editBtn}

@@ -11,6 +11,7 @@ interface ButtonsProps {
   handleNext: () => void;
   handleBack: () => void;
   handleReject: () => void;
+  showRejectButton?: boolean;
 }
 
 export default function Buttons({
@@ -20,7 +21,8 @@ export default function Buttons({
   isLastStep,
   handleNext,
   handleBack,
-  handleReject
+  handleReject,
+  showRejectButton = true
 }: Readonly<ButtonsProps>) {
   return (
     <Flex className={styles.wrapper}>
@@ -31,13 +33,15 @@ export default function Buttons({
           style={{ cursor: isLeftButtonActive ? "pointer" : "not-allowed" }}
           onClick={handleBack}
         >
-          <b>Atras</b>
+          <b>Atrás</b>
         </button>
       </div>
       <Flex className={styles.right}>
-        <button className={styles.deleteButton} onClick={() => handleReject()}>
-          Rechazar
-        </button>
+        {showRejectButton && (
+          <button className={styles.deleteButton} onClick={() => handleReject()}>
+            Rechazar
+          </button>
+        )}
         {canContinue && (
           <button
             className={styles.nextButton}

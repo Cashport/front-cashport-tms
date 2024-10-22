@@ -108,6 +108,7 @@ export const TransferOrders = () => {
             ordersId={ordersId}
             trsIds={trsIds}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
+            modalState={isModalOpen}
           />
         );
       case TabEnum.IN_PROCESS:

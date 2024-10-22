@@ -1,6 +1,6 @@
 import { Flex, Modal } from "antd";
 import { CaretLeft, X } from "phosphor-react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./ModalGenerateActionTO.module.scss";
 import { MessageInstance } from "antd/es/message/interface";
 import ActionList from "./ActionList/ActionList";
@@ -8,6 +8,7 @@ import CarrierList from "./CarrierList/CarrierList";
 import PreauthorizeTrip from "./PreauthorizeTrip/PreauthorizeTrip";
 import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/billing";
 import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
+import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 
 export enum ViewEnum {
   "SELECT_ACTION" = "SELECT_ACTION",
@@ -26,10 +27,24 @@ type PropsModalGenerateActionTO = {
   messageApi: MessageInstance;
   canFinalizeTrip: boolean;
   statusTrId?: string;
+  canChangeStatusToPorLegalizar: boolean;
+  handleChangeStatus?: (statusId: string) => Promise<void>;
+  setNav: Dispatch<SetStateAction<NavEnum>>;
 };
 
 export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerateActionTO>) {
-  const { isOpen, onClose, idTR, carriersData, messageApi, canFinalizeTrip, statusTrId } = props;
+  const {
+    isOpen,
+    onClose,
+    idTR,
+    carriersData,
+    messageApi,
+    canFinalizeTrip,
+    statusTrId,
+    canChangeStatusToPorLegalizar,
+    handleChangeStatus,
+    setNav
+  } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT_ACTION);
   const [selectedCarrier, setSelectedCarrier] = useState<number | null>(null);
   const billingsInStatusAcepted = carriersData.filter(
@@ -44,6 +59,9 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             setSelectedView={setSelectedView}
             canPreauthorize={billingsInStatusAcepted.length > 0}
             canFinalizeTrip={canFinalizeTrip}
+            canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
+            handleChangeStatus={handleChangeStatus}
+            onClose={onClose}
           />
         );
       case ViewEnum.SELECT_CARRIER:
@@ -70,10 +88,20 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             messageApi={messageApi}
             onClose={onClose}
             statusTrId={statusTrId}
+            setNav={setNav}
           />
         );
       default:
-        return <ActionList setSelectedView={setSelectedView} canPreauthorize={false} />;
+        return (
+          <ActionList
+            setSelectedView={setSelectedView}
+            canPreauthorize={false}
+            canFinalizeTrip={false}
+            canChangeStatusToPorLegalizar={false}
+            handleChangeStatus={handleChangeStatus}
+            onClose={onClose}
+          />
+        );
     }
   };
 

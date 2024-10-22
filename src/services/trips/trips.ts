@@ -6,21 +6,11 @@ import { API, getIdToken } from "@/utils/api/api";
 import axios from "axios";
 
 export const getTripDetails = async (idTrip: number): Promise<any | undefined> => {
-  try {
-    console.log("getTripDetails", idTrip);
-    const response: GenericResponse<any> = await API.get(
-      `/transfer-request/trip-details/${idTrip}`
-    );
-    console.log("response getTripDetails", response);
-    if (response.data) {
-      return response?.data;
-    } else {
-      console.log(`Error getTripDetails: `);
-    }
-  } catch (error) {
-    console.log(`Error getTripDetails: `, error);
-    return error as any;
-  }
+  const response: GenericResponse<GenericResponse> = await API.get(
+    `/transfer-request/trip-details/${idTrip}`
+  );
+  if (response.success) return response.data;
+  throw new Error(response.message);
 };
 
 export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<boolean | undefined> => {

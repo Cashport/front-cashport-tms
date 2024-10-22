@@ -1668,7 +1668,22 @@ export const CreateOrderView = () => {
                       columns={columnsCarga}
                       dataSource={dataCarga}
                       pagination={false}
-                      footer={() => <MaterialTableFooter dataCarga={dataCarga} />}
+                      footer={() => {
+                        const totalVolume = dataCarga.reduce(
+                          (sum, material) => sum + material.m3_volume * material.quantity,
+                          0
+                        );
+                        const totalWeight = dataCarga.reduce(
+                          (sum, material) => sum + material.kg_weight * material.quantity,
+                          0
+                        );
+                        return (
+                          <MaterialTableFooter
+                            totalVolume={totalVolume}
+                            totalWeight={totalWeight}
+                          />
+                        );
+                      }}
                       rowKey={"id"}
                     />
                   </Col>

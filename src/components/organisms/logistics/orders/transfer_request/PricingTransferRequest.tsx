@@ -76,6 +76,8 @@ import ModalSelectCarrierPricing from "./components/modals/ModalSelectCarrierPri
 import TrackingDrawer from "./components/tracking/TrackingDrawer";
 import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
+import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
+import { CalendarX } from "phosphor-react";
 
 const { Title, Text } = Typography;
 
@@ -85,13 +87,15 @@ interface PricingTransferOrderRequestProps {
   // eslint-disable-next-line no-unused-vars
   mutateStepthree: (journey: ITransferRequestJourneyReview[]) => void;
   tracking: ITrackingResponse[];
+  handleRevalidate?: () => void;
 }
 
 export default function PricingTransferRequest({
   data: transferRequest,
   mode,
   mutateStepthree,
-  tracking
+  tracking,
+  handleRevalidate
 }: PricingTransferOrderRequestProps) {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
@@ -128,6 +132,13 @@ export default function PricingTransferRequest({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
   const [modalCarrier, setModalCarrier] = useState(false);
+  const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState<any>(null);
+  const [isDeleteAction, setIsDeleteAction] = useState<boolean>(false);
+
+  const openMultiStepModal = () => {
+    setIsModalMultiStepOpen(true);
+  };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -279,6 +290,39 @@ export default function PricingTransferRequest({
   /* Tipo de viaje */
   const [typeactive, setTypeActive] = useState("1");
 
+  function findInvalidTrip(trips: ITrackingResponse[]): number | null {
+    for (let i = 1; i < trips.length; i++) {
+      const previousTrip = trips[i - 1];
+      const currentTrip = trips[i];
+
+      const previousEndTime = new Date(previousTrip.end_date);
+      const currentStartTime = new Date(currentTrip.start_date);
+
+      // Calculamos la diferencia de tiempo en milisegundos
+      const timeDifferenceMs = Math.abs(currentStartTime.getTime() - previousEndTime.getTime());
+
+      // Convertimos la diferencia a horas
+      const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+
+      // Comprobamos si la diferencia de tiempo es mayor a media hora (0.5 horas)
+      const TOLERATE_TIME_DIFFERENCE = 0.5;
+      const timeMismatch = timeDifferenceHours > TOLERATE_TIME_DIFFERENCE;
+
+      // Comprobamos si el lugar de origen del trayecto actual no coincide con el destino del anterior
+      const locationMismatch = currentTrip.id_start_location !== previousTrip.id_end_location;
+
+      // Si hay un error, devolvemos el índice del trayecto actual (i)
+      if (timeMismatch || locationMismatch) {
+        return i;
+      }
+    }
+
+    // Si todos los trayectos son válidos, devolvemos null
+    return null;
+  }
+
+  const journeyWithErrors = findInvalidTrip(orders?.tracking ?? []);
+
   /* Agendamiento */
   const origin = useRef<any>([]);
   const destination = useRef<any>([]);
@@ -292,8 +336,8 @@ export default function PricingTransferRequest({
   const [isNextStepActive, setIsNextStepActive] = useState<boolean>(true);
   const steps = [
     { title: "Solicitud de transferencia" },
-    { title: "Seleccion de vehiculos" },
-    { title: "Seleccion de proveedor" }
+    { title: "Selección de vehículos" },
+    { title: "Selección de proveedor" }
   ];
   const currentStepIndex = view === "solicitation" ? 0 : view === "vehicles" ? 1 : 2;
 
@@ -530,7 +574,7 @@ export default function PricingTransferRequest({
       showSorterTooltip: false
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "contact_number",
       key: "contact_number",
       render: () => <Text>a</Text>,
@@ -557,7 +601,7 @@ export default function PricingTransferRequest({
 
   const columnsCargaVehiculo = [
     {
-      title: "Vehiculo",
+      title: "Vehículo",
       dataIndex: "vehicle",
       key: "vehicle"
     },
@@ -849,12 +893,75 @@ export default function PricingTransferRequest({
                   key="right"
                   footer={<></>}
                 >
-                  {tracking?.map((t, i) => (
-                    <>
-                      <TrackingDrawer key={`tracking-order-${t.order_to}`} trip={t} />
-                      {i !== tracking.length - 1 ? <div className="carddivider"></div> : null}
-                    </>
-                  ))}
+                  <Flex vertical gap={32}>
+                    <Flex vertical>
+                      {!!journeyWithErrors && (
+                        <Flex
+                          gap={16}
+                          style={{
+                            borderRadius: 8,
+                            border: "2px solid #F62A2A",
+                            backgroundColor: "#C8000026",
+                            alignItems: "center",
+                            padding: 12,
+                            marginBottom: 16
+                          }}
+                        >
+                          <CalendarX color="#F62A2A" size={16} weight="fill" />
+                          <p>Conflicto de fechas o ubicaciones.</p>
+                        </Flex>
+                      )}
+                      {orders?.tracking?.map((t, i) => (
+                        <>
+                          <Flex align="center" gap={4}>
+                            <TrackingDrawer
+                              key={`tracking-order-${t.order_to}`}
+                              trip={t}
+                              hasError={findInvalidTrip(orders.tracking) === i}
+                            />
+                            <Flex gap={4}>
+                              <button
+                                className="buttonTransparent"
+                                onClick={() => {
+                                  setIsDeleteAction(false);
+                                  setSelectedTrip(t);
+                                  openMultiStepModal();
+                                }}
+                                type="button"
+                              >
+                                <Pencil size={24} />
+                              </button>
+                              <button
+                                className="buttonTransparent"
+                                onClick={() => {
+                                  setSelectedTrip(t);
+                                  setIsDeleteAction(true);
+                                  openMultiStepModal();
+                                }}
+                                type="button"
+                              >
+                                <Trash size={24} />
+                              </button>
+                            </Flex>
+                          </Flex>
+                          {i !== orders?.tracking?.length - 1 ? (
+                            <div className="carddivider"></div>
+                          ) : null}
+                        </>
+                      ))}
+                    </Flex>
+                    <PrincipalButton
+                      disabled={false}
+                      loading={false}
+                      onClick={() => {
+                        setIsDeleteAction(false);
+                        setSelectedTrip(null);
+                        openMultiStepModal();
+                      }}
+                    >
+                      Agregar
+                    </PrincipalButton>
+                  </Flex>
                 </Drawer>
               </Flex>
             </Flex>
@@ -890,7 +997,7 @@ export default function PricingTransferRequest({
         </Flex>
         <Flex justify="space-between" style={{ marginTop: "24px", height: "53px" }}>
           <PrincipalButton type="default" onClick={handleBack}>
-            Atras
+            Atrás
           </PrincipalButton>
           <Flex gap="middle" align="flex-end">
             {/* view === "vehicles" && <Button className="saveButton">Guardar como draft</Button> */}
@@ -910,6 +1017,20 @@ export default function PricingTransferRequest({
         mutateStepthree={mutateStepthree}
         view={view}
         setView={setView}
+      />
+      <ModalCreateJourney
+        visible={isModalMultiStepOpen}
+        onClose={() => {
+          setIsModalMultiStepOpen(false);
+        }}
+        selectedTrip={selectedTrip}
+        nextJourneyOrder={orders?.tracking?.length ? orders.tracking.length + 1 : 1}
+        mode={mode}
+        setOrders={setOrders}
+        idTransferRequest={id}
+        messageApi={messageApi}
+        isDeleteAction={isDeleteAction}
+        handleRevalidate={handleRevalidate}
       />
     </>
   );

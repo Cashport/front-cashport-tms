@@ -1,51 +1,45 @@
 "use client";
 import { Col, Divider, Flex, message, Skeleton } from "antd";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Buttons from "../../detail/components/Buttons/Buttons";
-import { CaretLeft } from "@phosphor-icons/react";
 import SolicitationDetail from "../../detail/components/SolicitationDetail/SolicitationDetail";
 import VehicleAndDriverAsignation from "../../detail/components/VehicleAndDriverAsignation/VehicleAndDriverAsignation";
 import { formatMoney } from "@/utils/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./AceptCarrierDetailView.module.scss";
 import {
   getAceptCarrierRequestById,
   getDriverByCarrierId,
   getVehiclesByCarrierId,
   postCarrierReject,
-  postCarrierRequest
+  postCarrierRequest,
+  putEditCarrierRequest
 } from "@/services/logistics/acept_carrier";
 
 import { Confirmation } from "../../detail/components/Confirmation/Confirmation";
 import { useMapbox } from "@/utils/logistics/useMapBox";
 import { CustomStepper } from "../../detail/components/Stepper/Stepper";
-import { getTravelDuration, getTravelFreightDuration } from "@/utils/logistics/maps";
-import {
-  DataCarga,
-  DriverDocument,
-  IAceptCarrierAPI,
-  Material,
-  VehicleDocument
-} from "@/types/logistics/carrier/carrier";
+import { getTravelFreightDuration } from "@/utils/logistics/maps";
+import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier/carrier";
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
 
 interface AceptCarrierDetailProps {
   params: { id: string };
 }
-export type FormMode = "edit" | "view";
+export enum FormMode {
+  CREATE = "CREATE",
+  VIEW = "VIEW",
+  EDIT = "EDIT"
+}
 
 export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrierDetailProps>) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [view, setView] = useState<"detail" | "asignation" | "confirmation">("detail");
-  const [formMode, setFormMode] = useState<FormMode>("view");
-  const [isNextStepActive, setIsNextStepActive] = useState<boolean>(true);
+  const [formMode, setFormMode] = useState<FormMode>(FormMode.VIEW);
   const [vehicleSelected, setVehicleSelected] = useState<number | null>(null);
   const [driversSelected, setDriversSelected] = useState<Array<number | null>>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
-  //const [driversMandatoryDocs, setDriversMandatoryDocs] = useState<DriverDocument[]>([]);
-  //const [vehicleMandatoryDocs, setVehicleMandatoryDocs] = useState<VehicleDocument[]>([]);
+  const [canBeRejected, setCanBeRejected] = useState<boolean>(false);
 
   const [observation, setObservation] = useState<any>(null);
   const router = useRouter();
@@ -81,10 +75,19 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
   const setCurrentData = (data: IAceptCarrierAPI) => {
     const { drivers, vehicle, observation } = data;
-
     setVehicleSelected(vehicle?.id ?? null);
     setDriversSelected(drivers.map((d) => d.id ?? null));
     observation && setObservation(observation);
+  };
+
+  const getFormMode = (statusdesc: string): FormMode => {
+    if (statusdesc === "Por confirmar") {
+      return FormMode.CREATE;
+    } else if (statusdesc === "Aceptado" || statusdesc === "Asignadas") {
+      return FormMode.EDIT;
+    } else {
+      return FormMode.VIEW;
+    }
   };
 
   const loadTransferRequests = async () => {
@@ -95,8 +98,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       if (result) {
         const to: IAceptCarrierAPI = result;
         setCurrentData(to);
-        const canEdit = to?.statusdesc === "Por confirmar";
-        setFormMode(canEdit ? "edit" : "view");
+        setFormMode(getFormMode(to?.statusdesc));
+        setCanBeRejected(to?.statusdesc !== "Rechazado");
         const driversResult = await getDriverByCarrierId(to?.id_carrier);
         setDrivers(driversResult.data.data);
         const vehiclesResult = await getVehiclesByCarrierId(to?.id_carrier);
@@ -108,8 +111,6 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             setDataCarga((dataCarga) => [...dataCarga, { ...newvalue, quantity: mat.units }]);
           });
         });
-        // setDriversMandatoryDocs(to?.driver_documents);
-        // setVehicleMandatoryDocs(to?.vehicle_documents);
       }
     } catch (error) {
       console.error("Error loading transfer requests", error);
@@ -117,9 +118,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       setIsLoading(false);
     }
   };
-  const vehicleAndDriverRef = useRef<any>(null);
 
-  const submitCarrierRequest = async (
+  const handleAcceptCR = async (
     carrierId: string,
     requestId: string,
     vehicleId: string,
@@ -142,17 +142,31 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       setIsLoading(false);
     }
   };
-
-  const handleNext = async () => {
-    if (vehicleAndDriverRef.current) {
-      vehicleAndDriverRef.current.handleSubmitDriverVehicleForm();
+  const handleEditCR = async (
+    carrierId: string,
+    requestId: string,
+    vehicleId: string,
+    driverIds: string[]
+  ) => {
+    try {
+      setIsLoading(true);
+      const res = await putEditCarrierRequest(carrierId, requestId, vehicleId, driverIds);
+      message.open({
+        type: "success",
+        content: res.message
+      });
+      router.push("/logistics/acept_carrier");
+    } catch (error) {
+      if (error instanceof Error) messageApi.error(error.message);
+      else messageApi.error("Hubo un problema editando la orden");
+    } finally {
+      setIsLoading(false);
     }
-    if (view === "detail") {
-      setView("asignation");
-    } else if (view === "asignation") {
-      setView("confirmation");
-    } else {
-      await submitCarrierRequest(
+  };
+
+  const handleSubmit = async () => {
+    if (formMode === FormMode.CREATE) {
+      await handleAcceptCR(
         String(carrier?.id_carrier),
         params.id,
         String(vehicleSelected),
@@ -160,13 +174,13 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         "1",
         observation
       );
-    }
-  };
-
-  const handleBack = () => {
-    if (view === "detail") router.push("/logistics/acept_carrier");
-    if (view === "confirmation") setView("asignation");
-    else if (view === "asignation") setView("detail");
+    } else
+      await handleEditCR(
+        String(carrier?.id_carrier),
+        params.id,
+        String(vehicleSelected),
+        driversSelected.map(String)
+      );
   };
 
   const handleReject = async () => {
@@ -188,15 +202,28 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
     }
   };
 
-  const currentStepIndex = view === "detail" ? 0 : view === "asignation" ? 1 : 2;
-  const isLastStep = view === "confirmation";
-  const canContinue = formMode === "edit" || (formMode === "view" && !isLastStep);
+  const stepIndexMap: Record<string, number> = {
+    detail: 0,
+    asignation: 1,
+    default: 2
+  };
+  const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
   const steps = [
     { title: "Detalle solicitud", disabled: false },
     { title: "Asignación de vehículo y conductor", disabled: false },
     { title: "Confirmar servicio", disabled: false }
   ];
+  const hasFormValuesChanged = () => {
+    const hasVehiclesChanged = carrier?.vehicle != vehicleSelected;
+    const hasDriversChanged =
+      carrier?.drivers
+        .map((d) => d.id)
+        .toSorted()
+        .toString() !== driversSelected.toSorted().toString();
+
+    return hasVehiclesChanged || hasDriversChanged;
+  };
 
   const renderView = () => {
     switch (view) {
@@ -205,7 +232,6 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
           <SolicitationDetail
             providerDetail={carrier}
             dataCarga={dataCarga}
-            setIsNextStepActive={setIsNextStepActive}
             service_type={carrier?.service_type}
             geometry={routeGeometry}
             distance={distance}
@@ -215,35 +241,40 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
                 : getTravelFreightDuration(carrier?.start_date, carrier?.end_date)
             }
             mapContainerRef={mapContainerRef}
+            setView={setView}
+            showRejectButton={canBeRejected}
           />
         );
       case "asignation":
         return (
           <VehicleAndDriverAsignation
-            setIsNextStepActive={setIsNextStepActive}
             drivers={drivers}
             vehicles={vehicles}
             setDrivers={setDriversSelected}
             setVehicle={setVehicleSelected}
-            ref={vehicleAndDriverRef}
+            carrier={carrier}
             currentDrivers={driversSelected}
             currentVehicle={vehicleSelected}
             formMode={formMode}
-            // driversMandatoryDocs={driversMandatoryDocs}
-            // vehicleMandatoryDocs={vehicleMandatoryDocs}
+            setView={setView}
+            handleReject={handleReject}
+            showRejectButton={canBeRejected}
           />
         );
       case "confirmation":
       default:
         return (
           <Confirmation
-            setIsNextStepActive={setIsNextStepActive}
             driverSelected={drivers?.filter((driver) => driversSelected.includes(driver.id))}
             vehicleSelected={vehicles.find((a) => a.id === vehicleSelected)}
             setObservation={setObservation}
-            isNextStepActive={isNextStepActive}
+            hasFormValuesChanged={hasFormValuesChanged}
             formMode={formMode}
             currentObservation={observation}
+            setView={setView}
+            handleSubmit={handleSubmit}
+            handleReject={handleReject}
+            showRejectButton={canBeRejected}
           />
         );
     }
@@ -286,15 +317,6 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             </Col>
           </Flex>
           {renderView()}
-          <Buttons
-            canContinue={canContinue}
-            isRightButtonActive={isNextStepActive}
-            isLeftButtonActive={true}
-            handleNext={handleNext}
-            handleBack={handleBack}
-            handleReject={handleReject}
-            isLastStep={isLastStep}
-          />
         </Skeleton>
       </Flex>
     </>

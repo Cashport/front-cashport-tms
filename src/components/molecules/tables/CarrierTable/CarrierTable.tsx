@@ -47,16 +47,18 @@ export default function CarrierTable({
 
   const columns: TableProps<ICarrierRequestsListDetail>["columns"] = [
     {
-      title: "CR",
+      title: "TR",
       dataIndex: "id",
       key: "id",
       width: "6%",
-      render: (id) => (
+      render: (id, record) => (
         <Link
           href={`/logistics/acept_carrier/${id}`}
-          style={{ color: "blue", textDecorationLine: "underline" }}
+          style={{ color: "blue", textDecorationLine: "none" }}
         >
-          {id}
+          <Button type="link" style={{ padding: "0" }}>
+            {`${record.id_transfer_request} - ${record.order_nro}`}
+          </Button>
         </Link>
       ),
       sorter: (a, b) => a.id - b.id,

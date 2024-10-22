@@ -740,6 +740,8 @@ export interface ICarriersRequestList {
  */
 export interface ICarrierRequestsListDetail {
   id: number;
+  order_nro: number;
+  id_transfer_request: number;
   service_type: string;
   start_date: string;
   end_date: string;
@@ -1596,6 +1598,7 @@ export interface ITrackingResponse extends ITrackingPartial {
   type_service_desc: string;
   is_community?: 0 | 1;
   community_name?: string;
+  id?: number;
 }
 
 /**
@@ -1944,6 +1947,9 @@ export interface ITransferRequestJourneyInfo {
   trips: IVehiclesPricingTrips[];
   is_community?: 0 | 1;
   community_name?: string;
+  end_date_flexible: number;
+  start_date_flexible: number;
+  route: any;
 }
 /**
  * Exposes all fields present in transfer_request_journey_review as a typescript
@@ -1971,6 +1977,7 @@ export interface TripCarriersPricing {
 
 export interface CarriersPricing {
   carrier: string;
+  order_nro: number;
   plate_number: string;
   id_vehicle: number;
   driver: string;
@@ -3358,6 +3365,7 @@ export interface IIncident {
   id_trip: number;
   id_driver: number;
   id_incident_type: number;
+  incident_type_name: string;
   id_pricing: number | null;
   fare: number;
   units: number;

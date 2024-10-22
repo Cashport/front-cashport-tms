@@ -30,23 +30,26 @@ export const getAceptCarrierRequestList = async (): Promise<any> => {
 };
 
 export const getAceptCarrierRequestById = async (id: string): Promise<any> => {
-    const form = new FormData();
-    form.append("id", id);
-    const response: GenericResponse = await API.post(`/carrier/request/id`, form);
-    if (response.success) return response.data;
-    throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
+  const form = new FormData();
+  form.append("id", id);
+  const response: GenericResponse = await API.post(`/carrier/request/id`, form);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };
 
 export const getVehiclesByCarrierId = async (id: number): Promise<IListData> => {
   const token = await getIdToken();
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/vehicle/provider-active/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
+    const response: IListData = await axios.get(
+      `${config.API_HOST}/vehicle/provider-active/${id}`,
+      {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
+    );
     return response;
   } catch (error) {
     console.log("Error get all getAllTransferRequestList: ", error);
@@ -187,4 +190,20 @@ export const postCarrierReject = async (
     console.log("Error get getTransferRequestById: ", error);
     return error as any;
   }
+};
+export const putEditCarrierRequest = async (
+  id_carrier: string,
+  id_carrier_request: string,
+  id_vehicle: string,
+  id_drivers: string[]
+) => {
+  const body = {
+    id_carrier: id_carrier,
+    id_carrier_request: id_carrier_request,
+    id_vehicle: id_vehicle,
+    id_drivers: id_drivers
+  };
+  const response: GenericResponse = await API.put(`/carrier/request/edit`, body);
+  if (response.success) return response;
+  throw new Error(response?.message || "Error al editar la solicitud de carga");
 };

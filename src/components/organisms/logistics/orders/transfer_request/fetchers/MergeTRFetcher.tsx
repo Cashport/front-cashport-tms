@@ -7,8 +7,8 @@ import { MODE_PRICING } from "../constant/constants";
 import { useRouter } from "next/navigation";
 
 export default function MergeTRFetcher({ transferOrders }: { transferOrders: number[] }) {
-    const router = useRouter();
-  const { data, isLoading } = useSWR(
+  const router = useRouter();
+  const { data, isLoading, isValidating } = useSWR(
     { transferOrders },
     ({ transferOrders }) => transferOrderMerge(transferOrders),
     {
@@ -19,7 +19,7 @@ export default function MergeTRFetcher({ transferOrders }: { transferOrders: num
       }
     }
   );
-  if (isLoading || !data) return <Spin />;
+  if (isLoading || !data || isValidating) return <Spin />;
   return (
     <PricingTransferRequest
       data={{ stepOne: { transferOrders: data.orders } }}

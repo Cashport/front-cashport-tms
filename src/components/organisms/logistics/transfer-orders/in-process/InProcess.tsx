@@ -1,4 +1,4 @@
-import { CollapseProps, Typography } from "antd";
+import { CollapseProps, Spin, Typography } from "antd";
 import styles from "./InProcess.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -54,7 +54,8 @@ export const InProcess: FC<IInProcessProps> = ({ search }) => {
     const filteredItems = status.items.filter(
       (item) =>
         item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.end_location.toLowerCase().includes(search.toLowerCase())
+        item.end_location.toLowerCase().includes(search.toLowerCase()) ||
+        item.id.toString().includes(search.toLowerCase())
     );
 
     return { ...status, items: filteredItems };
@@ -72,7 +73,7 @@ export const InProcess: FC<IInProcessProps> = ({ search }) => {
   if (isLoading)
     return (
       <div className={styles.emptyContainer}>
-        <Text className={styles.textEmpty}>Loading...</Text>
+        <Spin size="large" />
       </div>
     );
 

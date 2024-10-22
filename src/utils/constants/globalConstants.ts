@@ -39,7 +39,7 @@ export const STATUS = {
     RECHAZADA: "da258586-c04b-4603-bea5-f9bce49687e0"
   },
   TR: {
-    PROCESADO: "a48b8b32-8699-4b6f-b56c-277238a656bc",
+    ASIGNANDO_VEHICULO: "a48b8b32-8699-4b6f-b56c-277238a656bc",
     ESPERANDO_PROVEEDOR: "a312eb37-9a20-4e46-a010-3ee8d5cb2d94",
     SIN_INICIAR: "d33e062f-51a5-457e-946e-a45cbbffbf95",
     CARGANDO: "0f7cccf5-1764-44c6-bb2a-874f419bc8f1",
@@ -48,7 +48,7 @@ export const STATUS = {
     DETENIDO: "9f37afd7-1852-457d-964b-378fa6150471",
     STAND_BY: "73ad61e3-395f-4ae4-8aef-9d24f3f917a9",
     POR_LEGALIZAR: "ce946d35-381e-4bf3-a54a-4d38fb1b5e92",
-    LEGALIZADO: "49e6c46e-5a57-4a38-8b13-955bbffb7279"
+    POR_ACEPTAR: "49e6c46e-5a57-4a38-8b13-955bbffb7279" // Ex legalizado
   },
   TRIP: {
     SIN_INICIAR: "5d6508db-a151-4b13-b0a7-61459fa953b4",

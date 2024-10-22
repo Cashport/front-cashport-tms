@@ -12,6 +12,7 @@ import TabPane from "antd/es/tabs/TabPane";
 import { Responsibles } from "../../../DetailsOrderView/components/Responsibles/Responsibles";
 import AditionalInfo from "@/components/organisms/logistics/acept_carrier/detail/components/AditionalInfo/AditionalInfo";
 import { formatNumber } from "@/utils/utils";
+import MaterialTableFooter from "../../../CreateOrderView/components/MaterialTableFooter/MaterialTableFooter";
 
 const { Title, Text } = Typography;
 
@@ -109,7 +110,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       showSorterTooltip: false
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "contact_number",
       key: "contact_number",
       render: (text) => <Text>{text}</Text>,
@@ -222,16 +223,25 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
             )}
           </div>
           {(orderRequest?.id_service_type == 1 || orderRequest?.id_service_type == 2) && (
-            <>
-              <Table
-                columns={columnsCarga}
-                dataSource={orderRequest?.transfer_order_material?.map((tm) => ({
-                  ...tm.material[0],
-                  quantity: tm.quantity
-                }))}
-                pagination={false}
-              />
-            </>
+            <Table
+              columns={columnsCarga}
+              dataSource={orderRequest?.transfer_order_material?.map((tm) => ({
+                ...tm.material[0],
+                quantity: tm.quantity
+              }))}
+              pagination={false}
+              footer={() => {
+                let totalVolume = 0;
+                let totalWeight = 0;
+
+                orderRequest?.transfer_order_material?.forEach((item) => {
+                  const material = item.material[0]; // Obtener el primer material
+                  totalVolume += material.m3_volume * item.quantity;
+                  totalWeight += material.kg_weight * item.quantity;
+                });
+                return <MaterialTableFooter totalVolume={totalVolume} totalWeight={totalWeight} />;
+              }}
+            />
           )}
           {orderRequest?.id_service_type == 3 && (
             <>

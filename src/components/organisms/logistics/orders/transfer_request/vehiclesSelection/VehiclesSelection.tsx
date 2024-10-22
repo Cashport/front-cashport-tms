@@ -86,7 +86,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
     setIsNextStepActive(!formState.dirtyFields?.trips?.length && !!fields.length);
     console.log(fields.length, formState.isDirty);
   }, [fields, formState.dirtyFields?.trips]);
-  const [openTabs, setOpenTabs] = useState<number[]>([]);
+  const [openTabs, setOpenTabs] = useState<number[]>([index]);
 
   const addVehiclesSections = () => {
     append({ id: 0, id_vehicle_type: 0, materialByTrip: [], personByTrip: [] });

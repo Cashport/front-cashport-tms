@@ -1,6 +1,6 @@
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import styles from "./completed.module.scss";
-import { CollapseProps, Typography } from "antd";
+import { CollapseProps, Spin, Typography } from "antd";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 import { FC, useEffect, useState } from "react";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
@@ -54,7 +54,8 @@ export const Completed: FC<ICompletedProps> = ({ search }) => {
     const filteredItems = status.items.filter(
       (item) =>
         item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.end_location.toLowerCase().includes(search.toLowerCase())
+        item.end_location.toLowerCase().includes(search.toLowerCase()) ||
+        item.id.toString().includes(search.toLowerCase())
     );
 
     return { ...status, items: filteredItems };
@@ -71,7 +72,7 @@ export const Completed: FC<ICompletedProps> = ({ search }) => {
   if (isLoading)
     return (
       <div className={styles.emptyContainer}>
-        <Text className={styles.textEmpty}>No Content</Text>
+        <Spin size="large" />
       </div>
     );
 

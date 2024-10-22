@@ -1,0 +1,23 @@
+.stateContainer {
+  display: flex;
+  justify-content: center;
+
+  .stateContent {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background-color: #969696;
+
+    .text {
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 18px;
+
+      &.blackColor {
+        color: #141414;
+      }
+    }
+  }
+}

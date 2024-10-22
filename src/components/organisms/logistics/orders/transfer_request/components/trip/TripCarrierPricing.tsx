@@ -16,11 +16,6 @@ type Props = {
   fields: any[];
 };
 export default function TripCarrierPricing({ trip, handleSelectCarrier, fields }: Props) {
-  const [value, setValue] = useState(1);
-
-  const handleChange = (value: number) => {
-    setValue(value);
-  };
   return (
     <>
       <Flex className={style.dataContainer} justify="space-between">

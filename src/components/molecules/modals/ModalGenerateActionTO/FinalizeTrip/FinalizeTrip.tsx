@@ -1,6 +1,6 @@
 import UiTabs from "@/components/ui/ui-tabs";
 import { Flex, Skeleton } from "antd";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./FinalizeTrip.module.scss";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { MessageInstance } from "antd/es/message/interface";
@@ -10,12 +10,14 @@ import TextArea from "antd/es/input/TextArea";
 import { VehicleFields } from "./components/VehicleFields";
 import { getCarriersTripsDetails, sendFinalizeTripAllCarriers } from "@/services/trips/trips";
 import { STATUS } from "@/utils/constants/globalConstants";
+import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 
 interface FinalizeTrip {
   idTR: string;
   onClose: () => void;
   messageApi: MessageInstance;
   statusTrId?: string;
+  setNav: Dispatch<SetStateAction<NavEnum>>;
 }
 
 export interface IVehicleAPI {
@@ -27,9 +29,10 @@ export interface ICarrierAPI {
   carrier_id: number;
   provider: string;
   vehicles: IVehicleAPI[];
+  Observation: string;
 }
 
-const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTrip) => {
+const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: FinalizeTrip) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -74,7 +77,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTr
                 }
               ]
       })),
-      adittionalComment: ""
+      adittionalComment: c.Observation !== "" ? c.Observation : undefined
     }));
     return {
       carriers: defaultValues
@@ -104,11 +107,13 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTr
       setIsLoading(true);
       const response = await sendFinalizeTripAllCarriers(form, Number(idTR));
       if (response) {
-        messageApi?.open({
-          type: "success",
-          content: "Viaje finalizado correctamente",
-          duration: 3
-        });
+        messageApi
+          ?.open({
+            type: "success",
+            content: "Viaje finalizado correctamente",
+            duration: 2
+          })
+          .then(() => setNav(NavEnum.BILLING));
       } else {
         messageApi?.open({
           type: "error",

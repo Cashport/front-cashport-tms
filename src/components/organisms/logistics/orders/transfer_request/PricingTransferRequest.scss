@@ -637,3 +637,15 @@
         border-radius: 0.25rem;
     }
 }
+.buttonTransparent {
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    &:disabled {
+      background-color: transparent; 
+      cursor: not-allowed;
+    }
+  }

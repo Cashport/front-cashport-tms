@@ -17,10 +17,7 @@ type Props = {
   };
   control: Control<TransferRequestFinish, any>;
 };
-export default function PricingStepThree({
-  data,
-  control
-}: Props) {
+export default function PricingStepThree({ data, control }: Props) {
   const { fields, append, update } = useFieldArray({
     control,
     name: "providers"
@@ -43,7 +40,7 @@ export default function PricingStepThree({
       update(index, cp);
     }
   };
-  const [openTabs, setOpenTabs] = useState<number[]>([]);
+  const [openTabs, setOpenTabs] = useState<number[]>(data.journey?.map((_, i) => i) || []);
   const tag = ({ trips }: { trips: TripCarriersPricing[] }) => (
     <Flex gap={24} vertical className={style.tripCarrierPricing}>
       {trips.map((trip, index) => (
@@ -58,18 +55,20 @@ export default function PricingStepThree({
   );
   return (
     <Flex gap={24} vertical>
-      {data.journey?.map((journey, index) => (
-        <JourneyCollapse
-          key={index}
-          index={index}
-          id_type_service={journey.service_type}
-          start_location_desc={journey.start_location_desc}
-          end_location_desc={journey.end_location_desc}
-          openTabs={openTabs}
-          setOpenTabs={setOpenTabs}
-          tag={tag({ trips: journey.trips })}
-        />
-      ))}
+      {data.journey?.map((journey, index) => {
+        return (
+          <JourneyCollapse
+            key={index}
+            index={index}
+            id_type_service={journey.service_type}
+            start_location_desc={journey.start_location_desc}
+            end_location_desc={journey.end_location_desc}
+            openTabs={openTabs}
+            setOpenTabs={setOpenTabs}
+            tag={tag({ trips: journey.trips })}
+          />
+        );
+      })}
     </Flex>
   );
 }

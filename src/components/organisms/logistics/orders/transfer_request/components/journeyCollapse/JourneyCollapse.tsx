@@ -30,9 +30,10 @@ export default function JourneyCollapse({
       setOpenTabs([...openTabs, index]);
     }
   };
+  const getKey = (index: number) => `journey-${index}`;
   const actionsOptionsVehiclesSelection: CollapseProps["items"] = [
     {
-      key: `journey-${index}`,
+      key: getKey(index),
       style: { border: "1px solid #dddddd", borderRadius: "4px" },
       label: (
         <TitleComponent
@@ -51,6 +52,6 @@ export default function JourneyCollapse({
     }
   ];
   return (
-    <Collapse expandIconPosition="end" ghost items={actionsOptionsVehiclesSelection} key={index} />
+    <Collapse defaultActiveKey={openTabs.map(getKey)} expandIconPosition="end" ghost items={actionsOptionsVehiclesSelection} key={index} />
   );
 }

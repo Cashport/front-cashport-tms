@@ -324,7 +324,7 @@ export const ProjectFormTab = ({
             />
             <InputForm
               typeInput="tel"
-              titleInput="Telefono"
+              titleInput="Teléfono"
               nameInput="contact.phone"
               control={control}
               error={errors.contact?.phone}

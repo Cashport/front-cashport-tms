@@ -1,5 +1,16 @@
 "use client";
-import { Button, Col, ConfigProvider, Flex, message, Modal, Row, Spin, Typography } from "antd";
+import {
+  Button,
+  Col,
+  ConfigProvider,
+  Drawer,
+  Flex,
+  message,
+  Modal,
+  Row,
+  Spin,
+  Typography
+} from "antd";
 import { CaretLeft, DotsThree, Truck, CraneTower, User } from "@phosphor-icons/react";
 import { getBillingDetailsById } from "@/services/billings/billings";
 import styles from "./AceptBillingDetailView.module.scss";
@@ -12,6 +23,10 @@ import { INovelty, IEvidence } from "@/types/novelty/INovelty";
 import { BillingStatusEnum } from "@/types/logistics/billing/billing";
 import { formatMoney, formatNumber } from "@/utils/utils";
 import { BackButton } from "@/components/organisms/logistics/orders/DetailsOrderView/components/BackButton/BackButton";
+import { getNoveltyDetail } from "@/services/logistics/novelty";
+import { DrawerBody } from "@/components/organisms/logistics/transfer-orders/details/drawer-body/DrawerBody";
+import ModalBillingMT from "@/components/molecules/modals/ModalBillingMT/ModalBillingMT";
+import { Receipt } from "phosphor-react";
 
 const { Text } = Typography;
 
@@ -24,6 +39,9 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
   const [billingData, setBillingData] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [billingStatus, setBillingStatus] = useState<BillingStatusEnum | null>(null);
+  const [openDrawer, setOpenDrawer] = useState<boolean>(false);
+  const [isModalMTVisible, setIsModalMTVisible] = useState(false);
+  const [tripId, setTripId] = useState<number | null>(null);
 
   const canMakeAnAction = billingStatus
     ? billingStatus === BillingStatusEnum.PorAceptar ||
@@ -31,7 +49,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     : false;
 
   const [messageApi, contextHolder] = message.useMessage();
-
+  const [novelty, setNovelty] = useState<INovelty | null>(null);
   const fetchBillingDetails = async () => {
     try {
       setLoading(true);
@@ -90,6 +108,18 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
       <br />
     </div>
   );
+
+  const findNoveltyDetail = async (id: number) => {
+    const data = await getNoveltyDetail(id);
+    if (Object.keys(data).length) {
+      setNovelty(data as INovelty);
+    }
+  };
+
+  const handleCloseDrawer = () => {
+    setOpenDrawer(false);
+    setNovelty(null);
+  };
 
   const TitleComponent = ({ id, journey }: { id: number; journey: IJourney }) => {
     const getServiceTypeDescription = (id_service_type: number) => {
@@ -157,7 +187,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     return {
       id: incident.id,
       trip_id: incident.id_trip,
-      novelty_type: incident.id_incident_type.toString(),
+      novelty_type: incident.incident_type_name,
       observation: incident.description,
       value: incident.fare,
       status: incident.status_description,
@@ -169,6 +199,9 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
       evidences: [evidence]
     };
   }
+  const handleOpenMTModal = () => {
+    setIsModalMTVisible(true);
+  };
 
   const tripDetailsWithNovelties =
     billingData?.journeys.flatMap((journey: IJourney) => {
@@ -184,9 +217,23 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
               <NoveltyTable
                 key={`novelty-table-${trip.id}`}
                 novelties={allIncidents}
-                openDrawer={() => {}}
-                handleShowDetails={() => {}}
+                openDrawer={() => setOpenDrawer(true)}
+                handleShowDetails={(t) => {
+                  findNoveltyDetail(t);
+                }}
               />
+              <Flex vertical justify="flex-end" align="flex-end">
+                <Button
+                  type="text"
+                  onClick={() => {
+                    handleOpenMTModal();
+                    setTripId(trip.id);
+                  }}
+                >
+                  <Receipt size={20} />
+                  <p>Ver MT</p>
+                </Button>
+              </Flex>
             </div>
           );
         })
@@ -256,6 +303,35 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         billingStatus={billingData?.billing?.statusDesc}
         messageApi={messageApi}
         idBilling={billingData?.billing?.id}
+      />
+      <Drawer
+        placement="right"
+        open={openDrawer}
+        onClose={handleCloseDrawer}
+        closable={false}
+        key="right"
+        width={592}
+        styles={{
+          body: {
+            backgroundColor: "#FFFFFF"
+          }
+        }}
+      >
+        <DrawerBody
+          onClose={handleCloseDrawer}
+          novelty={novelty}
+          handleEdit={() => {}}
+          approbeOrReject={() => {}}
+          canEdit={false}
+        />
+      </Drawer>
+      <ModalBillingMT
+        mode="view"
+        isOpen={isModalMTVisible}
+        onClose={() => setIsModalMTVisible(false)}
+        idTR={billingData?.billing?.idTransferRequest ?? 0}
+        idTrip={tripId ?? 0}
+        messageApi={messageApi}
       />
     </>
   );

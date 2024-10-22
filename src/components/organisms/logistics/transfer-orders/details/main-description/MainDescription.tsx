@@ -13,9 +13,9 @@ import { formatMoney } from "@/utils/utils";
 import utc from "dayjs/plugin/utc";
 import { getTravelDuration } from "@/utils/logistics/maps";
 import { STATUS } from "@/utils/constants/globalConstants";
-import "dayjs/locale/es-US";
 import Image from "next/image";
-dayjs.extend(utc).locale("es-US");
+import "dayjs/locale/es-us";
+dayjs.extend(utc).locale("es-us");
 
 const Text = Typography;
 
@@ -45,10 +45,6 @@ const items: MenuProps["items"] = [
   {
     key: "73ad61e3-395f-4ae4-8aef-9d24f3f917a9",
     label: "Stand by"
-  },
-  {
-    key: "ce946d35-381e-4bf3-a54a-4d38fb1b5e92",
-    label: "Por Legalizar"
   }
 ];
 

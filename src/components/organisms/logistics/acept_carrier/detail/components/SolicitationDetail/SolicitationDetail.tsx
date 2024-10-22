@@ -11,6 +11,9 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import { DataCarga, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
+import Buttons from "../Buttons/Buttons";
+import { useRouter } from "next/navigation";
+
 dayjs.locale("es");
 dayjs.extend(utc);
 
@@ -18,26 +21,29 @@ interface SolicitationDetailProps {
   providerDetail: IAceptCarrierAPI | undefined;
   dataCarga: DataCarga[];
   persons?: ICarrierRequestContacts[];
-  setIsNextStepActive: Dispatch<SetStateAction<boolean>>;
   service_type: string | undefined;
   geometry: any;
   distance: any;
   timetravel: any;
   mapContainerRef: any;
+  setView: Dispatch<SetStateAction<"detail" | "asignation" | "confirmation">>;
+  showRejectButton: boolean;
 }
 
 export default function SolicitationDetail({
   providerDetail,
   dataCarga,
-  setIsNextStepActive,
   service_type,
   persons,
   geometry,
   distance,
   timetravel,
-  mapContainerRef
+  mapContainerRef,
+  setView,
+  showRejectButton
 }: Readonly<SolicitationDetailProps>) {
-  console.log("SERVICE TYPE", service_type);
+  const router = useRouter();
+
   return (
     <Flex className={styles.wrapper}>
       <Flex className={styles.sectionWrapper} vertical>
@@ -87,7 +93,6 @@ export default function SolicitationDetail({
         title="Información adicional"
         documents={providerDetail?.carrier_request_documents ?? []}
         contacts={providerDetail?.carrier_request_contacts ?? []}
-        setIsNextStepActive={setIsNextStepActive}
         specialInstructions={providerDetail?.special_instructions}
       />
       {service_type !== "Personas" && (
@@ -97,6 +102,16 @@ export default function SolicitationDetail({
           <Materials materials={dataCarga} />
         </Flex>
       )}
+      <Buttons
+        canContinue={true}
+        isRightButtonActive={true}
+        isLeftButtonActive={true}
+        handleNext={() => setView("asignation")}
+        handleBack={() => router.push("/logistics/acept_carrier")}
+        handleReject={() => {}}
+        isLastStep={false}
+        showRejectButton={showRejectButton}
+      />
     </Flex>
   );
 }

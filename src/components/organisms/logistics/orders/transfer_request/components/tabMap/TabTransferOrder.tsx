@@ -28,7 +28,14 @@ export default function TabTransferOrder({ orderRequest }: PricingStepOneProps) 
     end_latitude: orderRequest?.end_location?.latitude ?? 0,
     centerMap: false
   });
+  let totalVolume = 0;
+  let totalWeight = 0;
 
+  orderRequest?.transfer_order_material?.forEach((item) => {
+    const material = item.material[0]; // Obtener el primer material
+    totalVolume += material.m3_volume * item.quantity;
+    totalWeight += material.kg_weight * item.quantity;
+  });
   return (
     <Flex vertical className="travelDataWrapper">
       <Flex>
@@ -68,14 +75,8 @@ export default function TabTransferOrder({ orderRequest }: PricingStepOneProps) 
               start_date_hour={dayjs.utc(orderRequest?.start_date).format("HH:mm") ?? ""}
               end_date={dayjs.utc(orderRequest?.end_date).format("YYYY-MM-DD")}
               end_date_hour={dayjs.utc(orderRequest?.end_date).format("HH:mm") ?? ""}
-              volume={orderRequest?.transfer_order_material?.reduce(
-                (acc, curr) => acc + curr.material[0].m3_volume,
-                0
-              )}
-              weight={orderRequest?.transfer_order_material?.reduce(
-                (acc, curr) => acc + curr.material[0].kg_weight,
-                0
-              )}
+              volume={totalVolume}
+              weight={totalWeight}
             />
           </Flex>
         </Col>
