@@ -49,7 +49,7 @@ const MapComponent = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const mapsAccessToken = 'pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA';
-  const socket = io('http://localhost:8080');
+  const socket = io('https://ppdaeqfxju.us-east-2.awsapprunner.com');
 
   const getStateColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);
