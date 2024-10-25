@@ -27,11 +27,13 @@ export default function Buttons({
           style={{ cursor: isLeftButtonActive ? "pointer" : "not-allowed" }}
           onClick={handleBack}
         >
-          <b>Atras</b>
+          <b>Atrás</b>
         </button>
       </div>
       <Flex className={styles.right}>
-        <button className={styles.deleteButton} onClick={() => handleReject()}>Rechazar</button>
+        <button className={styles.deleteButton} onClick={() => handleReject()}>
+          Rechazar
+        </button>
         <button
           className={styles.nextButton}
           disabled={!isRightButtonActive}

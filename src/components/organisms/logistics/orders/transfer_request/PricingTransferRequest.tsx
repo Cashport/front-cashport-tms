@@ -601,7 +601,7 @@ export default function PricingTransferRequest({
 
   const columnsCargaVehiculo = [
     {
-      title: "Vehiculo",
+      title: "Vehículo",
       dataIndex: "vehicle",
       key: "vehicle"
     },
@@ -997,7 +997,7 @@ export default function PricingTransferRequest({
         </Flex>
         <Flex justify="space-between" style={{ marginTop: "24px", height: "53px" }}>
           <PrincipalButton type="default" onClick={handleBack}>
-            Atras
+            Atrás
           </PrincipalButton>
           <Flex gap="middle" align="flex-end">
             {/* view === "vehicles" && <Button className="saveButton">Guardar como draft</Button> */}

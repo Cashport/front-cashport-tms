@@ -1,0 +1,98 @@
+.mainDocument {
+  display: flex;
+  flex-direction: column;
+  row-gap: 34px;
+
+  .itemContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .uploadDocuments {
+      display: flex;
+      align-items: center;
+      column-gap: 8px;
+      cursor: pointer;
+
+      .uploadDocumentText {
+        color: #FFF;
+        font-size: 16px;
+        font-weight: 400;
+      }
+    }
+
+    .titleContainer {
+      display: flex;
+      flex-direction: column;
+      row-gap: 4px;
+      width: 40%;
+
+      .title {
+        color: #FFFFFF;
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .subtitle {
+        color: #FFFFFF;
+        font-size: 12px;
+        font-style: italic;
+        font-weight: 300;
+      }
+    }
+
+    .uploadComponent {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      column-gap: 11px;
+      height: 68px;
+      max-width: 313px;
+      background-color: #F7F7F7;
+      border-radius: 8px;
+      padding: 0px 11px;
+      cursor: pointer;
+
+      .fileContentContainer {
+        display: flex;
+        flex: 1;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .iconContainer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 20px;
+        height: 20px;
+        background-color: #FE7A01;
+        border-radius: 4px;
+
+        &.green {
+          background-color: #CBE61E;
+        }
+      }
+
+      .fileTitle {
+        color: #818181;
+        font-size: 16px;
+        font-weight: 400;
+
+        &.bold {
+          color: #141414;
+        }
+      }
+
+      .fileSubtitle {
+        color: #818181;
+        font-size: 10px;
+        font-weight: 300;
+
+        &.bold {
+          color: #141414;
+        }
+      }
+    }
+  }
+}
