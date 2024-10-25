@@ -1,0 +1,51 @@
+.mainTimeLine {
+  margin-left: 42px;
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+
+    .title {
+      color: #FFF;
+      font-size: 16px;
+      font-weight: 300;
+
+      &.bold {
+        font-weight: 700;
+      }
+    }
+
+    .subtitle {
+      color: #A5A5A5;
+      font-size: 12px;
+      font-weight: 600;
+
+      &.light {
+        font-weight: 300;
+      }
+    }
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(203, 231, 30, 0.56);
+    border: 1px solid #CBE71E;
+    position: relative;
+
+    .camera {
+      position: absolute;
+      left: -42px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      background-color: #FFF;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
+}
