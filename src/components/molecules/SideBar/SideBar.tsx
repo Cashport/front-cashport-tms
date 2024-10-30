@@ -14,7 +14,8 @@ import {
   CurrencyCircleDollar,
   Receipt,
   Clipboard,
-  Bank
+  Bank,
+  TrendUp
 } from "phosphor-react";
 
 import "./sidebar.scss";
@@ -175,6 +176,20 @@ export const SideBar = () => {
           </Link>
         )}
 
+        {checkUserViewPermissions(project, "Contratos") && (
+          <Link href="/logistics/contracts/all" passHref legacyBehavior>
+            <Button
+              type="primary"
+              size="large"
+              icon={<TrendUp size={26} />}
+              className={
+                path.startsWith("/logistics/contracts") ? "buttonIcon" : "buttonIconActive"
+              }
+            >
+              {isSideBarLarge && "Ajustes"}
+            </Button>
+          </Link>
+        )}
         {checkUserViewPermissions(project, "Configuracion") && (
           <Link href="/" passHref legacyBehavior>
             <Button
