@@ -10,7 +10,8 @@ import {
   Button,
   Drawer,
   Card,
-  Spin
+  Spin,
+  Modal
 } from "antd";
 import React, { useRef, useEffect, useState } from "react";
 
@@ -77,7 +78,7 @@ import TrackingDrawer from "./components/tracking/TrackingDrawer";
 import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
-import { CalendarX } from "phosphor-react";
+import { CalendarX, X } from "phosphor-react";
 
 const { Title, Text } = Typography;
 
@@ -133,6 +134,7 @@ export default function PricingTransferRequest({
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
   const [modalCarrier, setModalCarrier] = useState(false);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
+
   const [selectedTrip, setSelectedTrip] = useState<any>(null);
   const [isDeleteAction, setIsDeleteAction] = useState<boolean>(false);
 
@@ -151,6 +153,10 @@ export default function PricingTransferRequest({
 
   const addVehiclesSections = () => {
     setVehiclesSections([...vehiclesSections, vehiclesSections.length]);
+  };
+
+  const addRequirement = () => {
+    console.log("abrir modal");
   };
 
   const removeVehiclesSection = (index: number) => {
@@ -784,9 +790,14 @@ export default function PricingTransferRequest({
             </div>
           ))}
           <div className="collapseButtons">
-            <Button className="collapseAddVehicleButton" onClick={addVehiclesSections}>
-              Agregar vehículo
-            </Button>
+            <Flex>
+              <Button className="collapseAddVehicleButton" onClick={addVehiclesSections}>
+                Agregar vehículosssss
+              </Button>
+              <Button className="collapseAddVehicleButton" onClick={addRequirement}>
+                Agregar requerimiento
+              </Button>
+            </Flex>
             <Button className="collapseSaveButton">Guardar</Button>
           </div>
         </div>
@@ -802,6 +813,41 @@ export default function PricingTransferRequest({
     console.log("nextIndex", nextIndex);
   };
 
+  interface GroupedOtherRequirements {
+    id_other_requeriments: number;
+    quantity: number;
+    other_requirement_desc: string;
+  }
+
+  function groupOtherRequirementsById(orders: ITransferOrdersRequest): GroupedOtherRequirements[] {
+    const groupedRequirements: Record<number, GroupedOtherRequirements> = {};
+
+    // Recorremos las órdenes
+    orders.orders.forEach((order) => {
+      // Verificamos si tiene otros requerimientos
+      if (order.transfer_order_other_requeriments) {
+        order.transfer_order_other_requeriments.forEach((requirement) => {
+          const { id_other_requeriments, quantity, other_requirement_desc } = requirement;
+
+          // Si el requerimiento ya existe en el grupo, sumamos la cantidad
+          if (groupedRequirements[id_other_requeriments]) {
+            groupedRequirements[id_other_requeriments].quantity += quantity;
+          } else {
+            // Si no existe, lo agregamos al grupo
+            groupedRequirements[id_other_requeriments] = {
+              id_other_requeriments,
+              quantity,
+              other_requirement_desc
+            };
+          }
+        });
+      }
+    });
+
+    // Devolvemos los requerimientos agrupados como un array
+    return Object.values(groupedRequirements);
+  }
+  const otherRequirements = orders && groupOtherRequirementsById(orders);
   return (
     <>
       {contextHolder}
@@ -840,22 +886,44 @@ export default function PricingTransferRequest({
                         : "Selección de proveedor"}
                   </Title>
                   {view === "vehicles" && (
-                    <Flex className="vehiclesSubtitle" gap={10}>
-                      <label className="vehiclesSubtitleSugestion">
-                        <p>Vehículos sugeridos</p>
-                      </label>
-                      {transferRequest.general?.transferRequestVehiclesSugest?.map((veh) => (
-                        <div className="vehiclesSubtitleInformation" key={veh.id}>
-                          <p className="vehiclesSubtitleInformationVehicle">
-                            {veh.vehicle_type_desc}
-                          </p>
-                          <label className="vehiclesSubtitleInformationQuantity">
-                            <p className="vehiclesSubtitleInformationQuantityNumber">
-                              {veh.units.toString().padStart(2, "0")}
+                    <Flex vertical gap={16}>
+                      <Flex className="vehiclesSubtitle" gap={10}>
+                        <label className="vehiclesSubtitleSugestion">
+                          <p>Vehículos sugeridos</p>
+                        </label>
+                        {transferRequest.general?.transferRequestVehiclesSugest?.map((veh) => (
+                          <div className="vehiclesSubtitleInformation" key={veh.id}>
+                            <p className="vehiclesSubtitleInformationVehicle">
+                              {veh.vehicle_type_desc}
                             </p>
-                          </label>
-                        </div>
-                      ))}
+                            <label className="vehiclesSubtitleInformationQuantity">
+                              <p className="vehiclesSubtitleInformationQuantityNumber">
+                                {veh.units.toString().padStart(2, "0")}
+                              </p>
+                            </label>
+                          </div>
+                        ))}
+                      </Flex>
+                      <Flex className="vehiclesSubtitle" gap={10}>
+                        <label className="vehiclesSubtitleSugestion">
+                          <p>Requerimientos adicionales</p>
+                        </label>
+                        {otherRequirements?.map((req) => (
+                          <div
+                            className="vehiclesSubtitleInformation"
+                            key={req.id_other_requeriments}
+                          >
+                            <p className="vehiclesSubtitleInformationVehicle">
+                              {req.other_requirement_desc}
+                            </p>
+                            <label className="vehiclesSubtitleInformationQuantity">
+                              <p className="vehiclesSubtitleInformationQuantityNumber">
+                                {req.quantity.toString().padStart(2, "0")}
+                              </p>
+                            </label>
+                          </div>
+                        ))}
+                      </Flex>
                     </Flex>
                   )}
                 </div>

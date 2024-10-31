@@ -10,7 +10,9 @@ import {
 } from "@/types/logistics/schema";
 import { TransferRequestFinish } from "@/types/logistics/transferRequest/transferRequest";
 import {
+  IRequirement,
   JourneyTripPricing,
+  RequirementsAPI,
   TripCreation,
   TripsCreation
 } from "@/types/logistics/trips/TripsSchema";
@@ -69,6 +71,17 @@ export const getTransferRequestVehicles = async (id_journey: number) => {
   );
 };
 
+export const getAditionalsRequirements = async (): Promise<RequirementsAPI[]> => {
+  const response: GenericResponse<RequirementsAPI[]> = await API.get(
+    `/carrier/all/other-requirements`
+  );
+  if (response.success) {
+    console.log("getAditionalsRequirements", response.data);
+    return response.data;
+  }
+  throw new Error(response?.message || "Error obteniendo el listado de requerimientos");
+};
+
 export const getTransferRequestSteps = async (
   transfer_request: number
 ): Promise<ITransferRequestCreation> => {
@@ -81,20 +94,41 @@ export const getTransferRequestSteps = async (
   );
 };
 
+export interface JourneyRequirement {
+  active: number;
+  createdAt: string;
+  createdBy: string;
+  fare: number;
+  id: number;
+  idCarrierRequest: number | null;
+  idJourney: number;
+  idPricing: number | null;
+  idRequirement: number;
+  idTransferRequest: number;
+  modifiedAt: string | null;
+  modifiedBy: string | null;
+  observations: string | null;
+  stateId: string;
+  units: number;
+  description: string;
+}
+
 export const submitTrips = async (
   id_transfer_request: number,
   id_journey: number,
-  trips: TripCreation[]
+  trips: TripCreation[],
+  otherRequirements: Omit<IRequirement, "description">[]
 ) => {
   const body: TripsCreation = {
     id_transfer_request,
     id_journey,
-    trips
+    trips,
+    other_requirements: otherRequirements
   };
-  const response: GenericResponse<IVehiclesPricingTrips[]> = await API.post(
-    `/trip/trips-material`,
-    body
-  );
+  const response: GenericResponse<{
+    trips: IVehiclesPricingTrips[];
+    otherRequirements: JourneyRequirement[];
+  }> = await API.post(`/trip/trips-material`, body);
   if (response.success) return response.data;
   throw new Error(
     response?.message || "Error obteniendo los pasos de la solicitud de transferencia"

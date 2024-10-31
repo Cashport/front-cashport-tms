@@ -5,7 +5,8 @@ import { ITransferRequestJourneyReview } from "@/types/logistics/schema";
 import {
   CarriersPricingModal,
   JourneyTripPricing,
-  MockedTrip
+  MockedTrip,
+  serviceType
 } from "@/types/logistics/trips/TripsSchema";
 import { Checkbox, Flex, message, Modal, Spin, Typography } from "antd";
 import { useParams } from "next/navigation";
@@ -62,7 +63,7 @@ export default function ModalSelectCarrierPricing({
 
   useEffect(() => {
     if (tripsList && tripsList.length > 0) {
-      setSelectedTripId(tripsList?.[selectedTabIndex]?.trip?.id_trip);
+      setSelectedTripId(tripsList?.[selectedTabIndex]?.trip?.id);
     }
   }, [selectedTabIndex, tripsList]);
 
@@ -73,16 +74,40 @@ export default function ModalSelectCarrierPricing({
   useEffect(() => {
     if (data && data.length > 0) {
       setTripsList(
-        data.flatMap((journey) =>
-          journey.trips.map((trip) => {
-            const j = { ...journey, trips: undefined };
-            delete j.trips;
-            return {
-              trip: { ...trip, checked: false },
-              journey: j as Omit<JourneyTripPricing, "trips">
-            };
-          })
-        )
+        data.flatMap((journey) => {
+          // Clonar el journey y eliminar las propiedades trips y other_requirements
+          const j = { ...journey, trips: undefined, other_requirements: undefined };
+          delete j.trips;
+          delete j.other_requirements;
+
+          // Combinar trips y other_requirements en un solo array con distinción de tipo
+          const tripsData = journey.trips.map((trip) => ({
+            type: "trip" as serviceType,
+            trip: {
+              id: trip.id_trip,
+              service_id: trip.vehicle_type,
+              service_description: trip.vehicle_type_desc,
+              carriers_pricing: trip.carriers_pricing,
+              checked: false
+            },
+            journey: j as Omit<JourneyTripPricing, "trips" | "other_requirements">
+          }));
+
+          const otherRequirementsData = journey.other_requirements.map((requirement) => ({
+            type: "other_requirement" as serviceType,
+            trip: {
+              id: requirement.id,
+              service_id: requirement.idRequirement,
+              service_description: requirement.descripcion,
+              carriers_pricing: requirement.carriers_pricing,
+              checked: false
+            },
+            journey: j as Omit<JourneyTripPricing, "trips" | "other_requirements">
+          }));
+
+          // Combinar ambos arrays
+          return [...tripsData, ...otherRequirementsData];
+        })
       );
     }
   }, [data]);
@@ -122,7 +147,7 @@ export default function ModalSelectCarrierPricing({
   const handleCheck = (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
     setTripsList((prevTrips) =>
       prevTrips.map((trip) => {
-        if (trip.trip.id_trip === selectedTripId) {
+        if (trip.trip.id === selectedTripId) {
           return {
             ...trip,
             trip: {
@@ -150,7 +175,7 @@ export default function ModalSelectCarrierPricing({
   const handleMasiveCheck = (newState: boolean) => {
     setTripsList((prevTrips) =>
       prevTrips.map((trip) => {
-        if (trip.trip.id_trip === selectedTripId) {
+        if (trip.trip.id === selectedTripId) {
           return {
             ...trip,
             trip: {
@@ -286,7 +311,7 @@ export default function ModalSelectCarrierPricing({
             </Flex>
           </Flex>
           <UiTabs
-            tabs={tripsList.map((mt) => mt.trip.vehicle_type_desc)}
+            tabs={tripsList.map((mt) => mt.trip?.service_description)}
             onTabClick={(index) => setSelectedTabIndex(index)}
             initialTabIndex={0}
             className={styles.scrollableTabsUI}
