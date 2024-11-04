@@ -24,9 +24,14 @@ export const addTransferOrder = async (
       }
     });
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error post transfer-order/: ", error);
-    throw error as any;
+    let msg = "";
+    if (Array.isArray(error?.response?.data?.data))
+      msg = error?.response?.data?.data.map((item: any) => item?.msg || "").join(" - ");
+    throw new Error(
+      msg || error?.response?.data?.message || "Ocurrio un error al crear la operacion"
+    ) as any;
   }
 };
 

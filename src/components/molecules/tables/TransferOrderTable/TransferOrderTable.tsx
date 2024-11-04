@@ -1,9 +1,9 @@
-import { Button, Checkbox, Table, Typography } from "antd";
+import { Button, Table, Tooltip, Typography } from "antd";
 import type { TableColumnsType } from "antd";
 
 import "./transferOrderTable.scss";
 import { Radioactive } from "@phosphor-icons/react";
-import { Eye, Warning } from "phosphor-react";
+import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import Link from "next/link";
 import { ITransferRequest } from "@/types/transferRequest/ITransferRequest";
 import { FC } from "react";
@@ -150,8 +150,25 @@ const columns = (showColumn: boolean, redirect?: string): TableColumnsType<DataT
     {
       title: "",
       dataIndex: "validator",
-      render: (text: { tr: string; ismaterialsproblem: boolean; ispeopleproblem: boolean }) => (
+      render: (text: {
+        tr: string;
+        ismaterialsproblem: boolean;
+        ispeopleproblem: boolean;
+        isRejected: boolean;
+      }) => (
         <div className="btnContainer">
+          {text.isRejected && (
+            <Button
+              className="btn"
+              type="text"
+              size="middle"
+              icon={
+                <Tooltip title="Esta orden tiene una factura rechazada">
+                  <WarningOctagon size={24} color="red" />
+                </Tooltip>
+              }
+            />
+          )}
           {!!text.ismaterialsproblem && (
             <Button className="btn" type="text" size="middle" icon={<Radioactive size={24} />} />
           )}
@@ -208,6 +225,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
         validator: {
           ismaterialsproblem: item.is_materials_problem,
           ispeopleproblem: item.is_people_problem,
+          isRejected: !!item.is_rejected,
           tr: String(item.id)
         }
       };

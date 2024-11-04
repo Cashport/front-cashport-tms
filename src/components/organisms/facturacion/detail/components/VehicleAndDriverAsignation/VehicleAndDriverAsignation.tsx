@@ -27,7 +27,7 @@ export default function VehicleAndDriverAsignation({
   setVehicle,
   setDriver,
   drivers,
-  vehicles,
+  vehicles
 }: VehicleAndDriverAsignationProps) {
   const { control, watch } = useForm<FormValues>({
     defaultValues: {
@@ -37,10 +37,10 @@ export default function VehicleAndDriverAsignation({
   });
 
   const [driverSections, setDriverSections] = useState<number[]>([0]);
-  console.log("driversPage:", drivers)
+  console.log("driversPage:", drivers);
 
   useEffect(() => {
-    setIsNextStepActive(false)
+    setIsNextStepActive(false);
   }, []);
 
   const addDriverSections = () => {
@@ -63,49 +63,50 @@ export default function VehicleAndDriverAsignation({
     >
       {items?.map((item, index) => (
         <>
-        {index !== 0 && <hr style={{ borderTop: "1px solid #f7f7f7" }}></hr>}
-        <Menu.Item key={item.id} className={styles.dropdownSelect}>
-          <Flex align="center" justify="space-between" style={{ padding: "0 4px" }}>
-            <Flex align="center" gap={8}>
-              {(Number(selectedVehicle) === item.id) ? <CheckCircle size={26} color="green"/> : <Circle size={26} />}
-              <div style={{marginLeft: "8px", padding: "2px 0"}}>
-                <Title level={5}>{item.vehicle_type}</Title>
-                <Flex gap={8}>
-                  <Flex>
-                  <Text>{item.brand}</Text>
-                  &nbsp;
-                  <Text>{item.line}</Text>
-                  &nbsp;
-                  <Text>{item.color}</Text>
+          {index !== 0 && <hr style={{ borderTop: "1px solid #f7f7f7" }}></hr>}
+          <Menu.Item key={item.id} className={styles.dropdownSelect}>
+            <Flex align="center" justify="space-between" style={{ padding: "0 4px" }}>
+              <Flex align="center" gap={8}>
+                {Number(selectedVehicle) === item.id ? (
+                  <CheckCircle size={26} color="green" />
+                ) : (
+                  <Circle size={26} />
+                )}
+                <div style={{ marginLeft: "8px", padding: "2px 0" }}>
+                  <Title level={5}>{item.vehicle_type}</Title>
+                  <Flex gap={8}>
+                    <Flex>
+                      <Text>{item.brand}</Text>
+                      &nbsp;
+                      <Text>{item.line}</Text>
+                      &nbsp;
+                      <Text>{item.color}</Text>
+                    </Flex>
+                    <p color="black">•</p>
+                    <Text>{item.plate_number}</Text>
                   </Flex>
-                  <p color="black">•</p>
-                  <Text>{item.plate_number}</Text>
-                </Flex>
-              </div>
+                </div>
+              </Flex>
+              <Flex
+                style={{
+                  backgroundColor: "#CBE71E",
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "2px"
+                }}
+                align="center"
+                justify="center"
+              >
+                <Check size={20} color="white" />
+              </Flex>
             </Flex>
-            <Flex
-              style={{
-                backgroundColor: "#CBE71E",
-                width: "24px",
-                height: "24px",
-                borderRadius: "2px"
-              }}
-              align="center"
-              justify="center"
-            >
-              <Check size={20} color="white" />
-            </Flex>
-          </Flex>
-        </Menu.Item>
+          </Menu.Item>
         </>
       ))}
     </Menu>
   );
 
-  const driversSelectionMenu = (
-    items: ICarrierRequestDrivers[] | null | undefined,
-    field: any
-  ) => (
+  const driversSelectionMenu = (items: ICarrierRequestDrivers[] | null | undefined, field: any) => (
     <Menu
       onClick={({ key }) => {
         const newDrivers = [...field.value];
@@ -124,33 +125,37 @@ export default function VehicleAndDriverAsignation({
     >
       {items?.map((item, index) => (
         <>
-        {index !== 0 && <hr style={{ borderTop: "1px solid #f7f7f7" }}></hr>}
-        <Menu.Item key={item.id} className={styles.dropdownSelect}>
-          <Flex align="center" justify="space-between" style={{ padding: "8px 4px" }}>
-            <Flex align="center" gap={8}>
-              {(Number(selectedDrivers) === item.id) ? <CheckCircle size={26}/> : <Circle size={26} />}
-              <>
-                <Text>{item.name}</Text>
-                &nbsp;
-                <Text>{item.last_name}</Text>
-                <p color="black">•</p>
-                <Text>{item.phone}</Text>
-              </>
+          {index !== 0 && <hr style={{ borderTop: "1px solid #f7f7f7" }}></hr>}
+          <Menu.Item key={item.id} className={styles.dropdownSelect}>
+            <Flex align="center" justify="space-between" style={{ padding: "8px 4px" }}>
+              <Flex align="center" gap={8}>
+                {Number(selectedDrivers) === item.id ? (
+                  <CheckCircle size={26} />
+                ) : (
+                  <Circle size={26} />
+                )}
+                <>
+                  <Text>{item.name}</Text>
+                  &nbsp;
+                  <Text>{item.last_name}</Text>
+                  <p color="black">•</p>
+                  <Text>{item.phone}</Text>
+                </>
+              </Flex>
+              <Flex
+                style={{
+                  backgroundColor: "#CBE71E",
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "2px"
+                }}
+                align="center"
+                justify="center"
+              >
+                <Check size={20} color="white" />
+              </Flex>
             </Flex>
-            <Flex
-              style={{
-                backgroundColor: "#CBE71E",
-                width: "24px",
-                height: "24px",
-                borderRadius: "2px"
-              }}
-              align="center"
-              justify="center"
-            >
-              <Check size={20} color="white" />
-            </Flex>
-          </Flex>
-        </Menu.Item>
+          </Menu.Item>
         </>
       ))}
     </Menu>
@@ -177,12 +182,17 @@ export default function VehicleAndDriverAsignation({
     description: boolean,
     plate: boolean
   ) => {
-    const selectedItem = items?.find(item => item.id === id);
-    
-    const descriptionText = selectedItem && description ? `${selectedItem.vehicle_type} • ${selectedItem.brand} ${selectedItem.line} ${selectedItem.color}` : `Seleccione el vehículo`;
-    const plateText = selectedItem && `${!description && selectedItem.plate_number !== undefined ? selectedItem.plate_number : ""}`
-  
-    return description ? descriptionText : plate && plateText
+    const selectedItem = items?.find((item) => item.id === id);
+
+    const descriptionText =
+      selectedItem && description
+        ? `${selectedItem.vehicle_type} • ${selectedItem.brand} ${selectedItem.line} ${selectedItem.color}`
+        : `Seleccione el vehículo`;
+    const plateText =
+      selectedItem &&
+      `${!description && selectedItem.plate_number !== undefined ? selectedItem.plate_number : ""}`;
+
+    return description ? descriptionText : plate && plateText;
   };
 
   const getSelectedDriver = (
@@ -191,19 +201,21 @@ export default function VehicleAndDriverAsignation({
     name: boolean,
     phone: boolean
   ) => {
-    const selectedItem = items?.find(item => item.id === id);
+    const selectedItem = items?.find((item) => item.id === id);
 
-    const nameText = selectedItem ? `${name ? selectedItem.name : selectedItem.phone}` : `Seleccione el conductor`;
+    const nameText = selectedItem
+      ? `${name ? selectedItem.name : selectedItem.phone}`
+      : `Seleccione el conductor`;
     const phoneText = selectedItem && `${!name && selectedItem.phone}`;
-  
-    return name ? nameText : phone && phoneText
+
+    return name ? nameText : phone && phoneText;
   };
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.title}>
         <p>
-          <b>Vehiculo</b>
+          <b>Vehículo</b>
         </p>
       </div>
       <div className={styles.container} style={{ gap: "6px" }}>
@@ -226,22 +238,14 @@ export default function VehicleAndDriverAsignation({
                   <Flex gap={12}>
                     <Flex align="center" gap={4}>
                       <Text>
-                        {getSelectedVehicle(
-                          Number(selectedVehicle),
-                          vehicles,
-                          true,
-                          false
-                        )}
+                        {getSelectedVehicle(Number(selectedVehicle), vehicles, true, false)}
                       </Text>
                     </Flex>
                   </Flex>
                   <Flex gap={24}>
-                    <Text>{getSelectedVehicle(
-                          Number(selectedVehicle),
-                          vehicles,
-                          false,
-                          true
-                        )}</Text>
+                    <Text>
+                      {getSelectedVehicle(Number(selectedVehicle), vehicles, false, true)}
+                    </Text>
                     <CaretDown size={20} color="black" />
                   </Flex>
                 </Flex>
@@ -330,7 +334,9 @@ export default function VehicleAndDriverAsignation({
                           </Flex>
                         </Flex>
                         <Flex gap={24}>
-                          <Text>{getSelectedDriver(Number(selectedDrivers[0]), drivers, false, true)}</Text>
+                          <Text>
+                            {getSelectedDriver(Number(selectedDrivers[0]), drivers, false, true)}
+                          </Text>
                           <CaretDown size={20} color="black" />
                         </Flex>
                       </Flex>

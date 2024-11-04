@@ -498,7 +498,7 @@ export const DriverFormTab = ({
               render={({ field }) => (
                 <MultiSelectTags
                   field={field}
-                  placeholder="Seleccione vehiculos"
+                  placeholder="Seleccione vehículos"
                   title="Vehículos que está autorizados a manejar"
                   errors={errors?.general?.vehicle_type}
                   options={convertToSelectOptions(vehiclesTypesList || [])}
