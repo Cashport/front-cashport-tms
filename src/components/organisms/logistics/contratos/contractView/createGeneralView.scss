@@ -1,0 +1,13 @@
+@import "../../../../../styles/variables.scss";
+
+.contractContainer {
+    height: 100%;
+    width: 100%;
+    margin: 0 0 auto 0;
+    background-color: $white;
+    padding: 2rem;
+    overflow-y: auto;
+    border-radius: 0.5rem;
+    border: 1px solid $dark-gray;
+    gap: 0.5rem;
+}
