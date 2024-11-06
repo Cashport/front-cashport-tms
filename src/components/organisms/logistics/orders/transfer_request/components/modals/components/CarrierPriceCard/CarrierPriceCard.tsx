@@ -3,7 +3,7 @@ import { Checkbox, Flex, Typography } from "antd"; // Assuming Ant Design is use
 import styles from "./CarrierPriceCard.module.scss"; // Custom styles (create a separate SCSS file if needed)
 
 import { Truck } from "phosphor-react"; // Icon library, adjust based on your setup
-import { CarriersPricingModal } from "@/types/logistics/trips/TripsSchema";
+import { CarriersPricingModal, serviceType } from "@/types/logistics/trips/TripsSchema";
 const { Text } = Typography;
 
 // Defining the props interface
@@ -12,13 +12,15 @@ interface CarrierPriceCardProps {
   currentTripId: number | null;
   isChecked: boolean;
   handleCheck: (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => void;
+  type: serviceType;
 }
 
 const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
   carrier,
   currentTripId,
   isChecked,
-  handleCheck
+  handleCheck,
+  type
 }) => {
   if (!currentTripId) return <></>;
   return (
@@ -51,11 +53,15 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
           </Flex>
         </label>
       </Flex>
-      <Flex gap={8} vertical align="end" justify="center">
+      <Flex vertical align="end" justify="center">
         <Text style={{ fontSize: "1.2rem" }}>${carrier.price?.toLocaleString("es-CO")}</Text>
-        <Text style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          {carrier.disponibility} <Truck size={16} weight="fill" />
-        </Text>
+        {type === "other_requirement" && carrier.pricing_description ? (
+          <Text>{carrier.pricing_description}</Text>
+        ) : (
+          <Text style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            {carrier.disponibility} <Truck size={16} weight="fill" />
+          </Text>
+        )}
       </Flex>
     </Flex>
   );

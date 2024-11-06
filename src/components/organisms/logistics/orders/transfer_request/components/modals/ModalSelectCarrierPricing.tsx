@@ -88,7 +88,8 @@ export default function ModalSelectCarrierPricing({
               service_id: trip.vehicle_type,
               service_description: trip.vehicle_type_desc,
               carriers_pricing: trip.carriers_pricing,
-              checked: false
+              checked: false,
+              units: null
             },
             journey: j as Omit<JourneyTripPricing, "trips" | "other_requirements">
           }));
@@ -100,7 +101,8 @@ export default function ModalSelectCarrierPricing({
               service_id: requirement.idRequirement,
               service_description: requirement.descripcion,
               carriers_pricing: requirement.carriers_pricing,
-              checked: false
+              checked: false,
+              units: requirement.units
             },
             journey: j as Omit<JourneyTripPricing, "trips" | "other_requirements">
           }));
@@ -232,6 +234,12 @@ export default function ModalSelectCarrierPricing({
 
   const checkAll = searchTerm === "" ? allSelected() : allSelectedInFiltered();
 
+  const tabsTitles = tripsList.map((mt) => {
+    if (mt.type === "other_requirement")
+      return `${mt.trip?.service_description} (${mt.trip?.units})`;
+    return mt.trip?.service_description;
+  });
+
   return (
     <Modal
       title={<Header />}
@@ -311,7 +319,7 @@ export default function ModalSelectCarrierPricing({
             </Flex>
           </Flex>
           <UiTabs
-            tabs={tripsList.map((mt) => mt.trip?.service_description)}
+            tabs={tabsTitles}
             onTabClick={(index) => setSelectedTabIndex(index)}
             initialTabIndex={0}
             className={styles.scrollableTabsUI}
@@ -344,6 +352,7 @@ export default function ModalSelectCarrierPricing({
                 currentTripId={selectedTripId}
                 isChecked={carrier?.checked ?? false}
                 handleCheck={handleCheck}
+                type={selectedTrip.type}
               />
             ))}
           </Flex>

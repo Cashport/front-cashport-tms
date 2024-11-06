@@ -41,6 +41,7 @@ export interface RequirementCarriersPricing {
   id: number;
   idRequirement: number;
   descripcion: string;
+  units: number;
   carriers_pricing: CarriersPricing[];
 }
 
@@ -55,6 +56,7 @@ export interface CarriersPricing {
   id_carrier: number;
   nit: string;
   fee_description: string;
+  pricing_description?: string;
 }
 
 export interface CarriersPricingModal extends CarriersPricing {
@@ -78,6 +80,7 @@ export interface Tab {
   service_id: number;
   service_description: string;
   carriers_pricing: CarriersPricingModal[];
+  units: number | null;
 }
 
 export interface Journey {

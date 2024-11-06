@@ -23,18 +23,28 @@ export const convertToSendCarrierRequest = (
   const carrierRequest: CarrierRequest[] = [];
 
   tripsLists.forEach((t) => {
-    const { trip } = t;
+    const { trip, type } = t;
 
     trip.carriers_pricing.forEach((pricing) => {
       if (pricing.checked) {
-        carrierRequest.push({
-          id_transfer_request,
-          id_carrier: pricing.id_carrier,
-          id_vehicle_type: trip.vehicle_type,
-          fare: pricing.price || 0,
-          id_trip: trip.id_trip,
-          id_pricing: pricing.id_carrier_pricing
-        });
+        if (type === "trip") {
+          carrierRequest.push({
+            id_transfer_request,
+            id_carrier: pricing.id_carrier,
+            id_vehicle_type: pricing.id_vehicle_type,
+            fare: pricing.price || 0,
+            id_trip: trip.id,
+            id_pricing: pricing.id_carrier_pricing
+          });
+        } else {
+          carrierRequest.push({
+            id_transfer_request,
+            id_carrier: pricing.id_carrier,
+            fare: pricing.price || 0,
+            id_requirement: trip.id,
+            id_pricing: pricing.id_carrier_pricing
+          });
+        }
       }
     });
   });
