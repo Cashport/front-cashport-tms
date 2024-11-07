@@ -1,5 +1,5 @@
 import { CarrierRequest, SendCarrierRequest } from "@/types/logistics/carrier/carrier";
-import { MockedTrip } from "@/types/logistics/trips/TripsSchema";
+import { ServiceTab } from "@/types/logistics/trips/TripsSchema";
 import { CraneTower } from "@phosphor-icons/react";
 import { Truck, User } from "phosphor-react";
 
@@ -17,23 +17,22 @@ export const getServiceType = (id_type_service: number) => {
 };
 
 export const convertToSendCarrierRequest = (
-  tripsLists: MockedTrip[],
+  tripsLists: ServiceTab[],
   id_transfer_request: number
 ): SendCarrierRequest => {
   const carrierRequest: CarrierRequest[] = [];
 
-  tripsLists.forEach((t) => {
-    const { trip, type } = t;
-
-    trip.carriers_pricing.forEach((pricing) => {
+  tripsLists.forEach((tab) => {
+    const { service } = tab;
+    service.carriers_pricing.forEach((pricing) => {
       if (pricing.checked) {
-        if (type === "trip") {
+        if (service.type === "trip") {
           carrierRequest.push({
             id_transfer_request,
             id_carrier: pricing.id_carrier,
             id_vehicle_type: pricing.id_vehicle_type,
             fare: pricing.price || 0,
-            id_trip: trip.id,
+            id_trip: service.id,
             id_pricing: pricing.id_carrier_pricing
           });
         } else {
@@ -41,7 +40,7 @@ export const convertToSendCarrierRequest = (
             id_transfer_request,
             id_carrier: pricing.id_carrier,
             fare: pricing.price || 0,
-            id_requirement: trip.id,
+            id_requirement: service.id,
             id_pricing: pricing.id_carrier_pricing
           });
         }

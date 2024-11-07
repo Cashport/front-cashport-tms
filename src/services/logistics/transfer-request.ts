@@ -143,7 +143,11 @@ export const getTransferRequestPricing = async ({
   const response: GenericResponse<JourneyTripPricing[]> = await API.get(
     `/transfer-request/pricing/${idTransferRequest}`
   );
-  if (response.success) return response.data;
+  if (response.success) {
+    console.log("response fata", response.data);
+    return response.data;
+  }
+
   throw new Error(
     response?.message || "Error obteniendo los pasos de la solicitud de transferencia"
   );

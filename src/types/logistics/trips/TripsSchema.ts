@@ -75,12 +75,14 @@ export interface Requirement {
   descripcion: string;
   carriers_pricing: CarriersPricingModal[];
 }
-export interface Tab {
+export type serviceType = "trip" | "other_requirement";
+export interface Service {
   id: number;
   service_id: number;
   service_description: string;
   carriers_pricing: CarriersPricingModal[];
   units: number | null;
+  type: serviceType;
 }
 
 export interface Journey {
@@ -94,10 +96,8 @@ export interface Journey {
   is_community: 0 | 1;
 }
 
-export type serviceType = "trip" | "other_requirement";
-export interface MockedTrip {
-  type: serviceType;
-  trip: Tab;
+export interface ServiceTab {
+  service: Service;
   journey: Omit<JourneyTripPricing, "trips" | "other_requirements">;
 }
 
