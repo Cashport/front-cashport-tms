@@ -170,7 +170,7 @@ const UploadInvoice = ({
   const getPendingInvoiceValue = (): number => {
     const currentInvoiceTotal =
       formValues?.pas?.reduce((total: number, pa: any) => {
-        if (pa.invoice.pdfFile?.file) {
+        if (pa.invoice.pdfFile?.file && pa.invoice.xmlFile?.file) {
           return total + Number(pa.invoice.value);
         }
         return total;
@@ -363,7 +363,7 @@ const UploadInvoice = ({
             </UploadDocumentButton>
           ) : (
             <UploadFileButton
-              isMandatory={false}
+              isMandatory={true}
               key={`${selectedTab}.${currentInvoice.id}.xml`}
               title={"XML Factura"}
               handleOnDelete={() => handleOnDeleteDocument("xmlFile")}
