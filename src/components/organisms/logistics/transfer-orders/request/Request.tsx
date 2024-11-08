@@ -119,7 +119,7 @@ export const Request: FC<IRequestProps> = ({
       };
       redirect = "/logistics/orders/details";
     }
-    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO];
+    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
     if (trDeleteable.includes(item.statusId)) {
       aditionalRow = {
         title: "",
