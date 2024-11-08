@@ -1,50 +1,42 @@
 import { useEffect, useState } from "react";
-import { Button, Flex, Table } from "antd";
-import { DotsThree, Plus, Triangle } from "phosphor-react";
+import { Button, Flex, message, Table } from "antd";
+import { DotsThree, Plus } from "phosphor-react";
 import UiSearchInput from "@/components/ui/search-input";
-import { mockedVehicleRates } from "./mocked-data";
 import { columns } from "./columns";
 import styles from "./VehiclesRatesTable.module.scss";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-
-export interface VehicleRate {
-  vehicleRateId: number;
-  sapDescription: string;
-  provider: string;
-  vehicle: string;
-  rateType: string;
-  from: string;
-  to: string;
-  value: number;
-  originLocation: string;
-}
+import { getAllVehiclesRates } from "@/services/logistics/contracts";
+import useSWR from "swr";
+import { VehicleRate } from "@/types/contracts/contractsTypes";
 
 export const VehiclesRatesTable = () => {
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [datasource, setDatasource] = useState<any[]>([]);
+  const [datasource, setDatasource] = useState<VehicleRate[]>([]);
 
+  const { data: vehicleRates, isLoading } = useSWR(
+    {
+      key: "vehicle-rates"
+    },
+    getAllVehiclesRates,
+    {
+      onError: (error: any) => {
+        console.error(error);
+        message.error(error.message);
+      },
+      refreshInterval: 30000
+    }
+  );
   useEffect(() => {
-    const data = mockedVehicleRates
-      .filter((vehicleRate) => {
+    const data =
+      vehicleRates?.filter((vehicleRate) => {
         if (!search) return true;
         return (
-          vehicleRate.sapDescription.toLowerCase().includes(search.toLowerCase()) ||
-          vehicleRate.rateType.toLowerCase().includes(search.toLowerCase()) ||
-          vehicleRate.provider.toLowerCase().includes(search.toLowerCase()) ||
-          vehicleRate.vehicle.toLowerCase().includes(search.toLowerCase())
+          vehicleRate?.vehicle?.toLowerCase().includes(search.toLowerCase()) ||
+          vehicleRate?.supplier?.toLowerCase().includes(search.toLowerCase())
         );
-      })
-      .map((contract) => ({
-        ...contract
-      }));
-
+      }) || [];
     setDatasource(data);
-  }, [search]);
-
-  const onChangePage = (pagePagination: number) => {
-    setPage(pagePagination);
-  };
+  }, [vehicleRates, search]);
 
   return (
     <div className={styles.mainContractsTable}>
@@ -75,21 +67,7 @@ export const VehiclesRatesTable = () => {
       <Table
         scroll={{ y: "61dvh", x: undefined }}
         columns={columns}
-        pagination={{
-          pageSize: 25,
-          onChange: onChangePage,
-          showSizeChanger: false,
-          itemRender: (page, type, originalElement) => {
-            if (type === "prev") {
-              return <Triangle size={".75rem"} weight="fill" className={styles.prev} />;
-            } else if (type === "next") {
-              return <Triangle size={".75rem"} weight="fill" className={styles.next} />;
-            } else if (type === "page") {
-              return <Flex className={styles.pagination}>{page}</Flex>;
-            }
-            return originalElement;
-          }
-        }}
+        loading={isLoading}
         dataSource={datasource}
       />
     </div>
