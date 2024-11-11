@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Flex, message, Table } from "antd";
 import { DotsThree, Plus } from "phosphor-react";
 import UiSearchInput from "@/components/ui/search-input";
@@ -8,10 +8,16 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import { getAllVehiclesRates } from "@/services/logistics/contracts";
 import useSWR from "swr";
 import { VehicleRate } from "@/types/contracts/contractsTypes";
+import ModalCreateVehicleRate from "@/components/molecules/modals/ModalCreateVehiculeRate/ModalCreateVehicleRate";
 
 export const VehiclesRatesTable = () => {
   const [search, setSearch] = useState("");
   const [datasource, setDatasource] = useState<VehicleRate[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  // Definir `openModal` usando `useCallback`
+  const openModal = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
 
   const { data: vehicleRates, isLoading } = useSWR(
     {
@@ -56,7 +62,7 @@ export const VehiclesRatesTable = () => {
           />
         </Flex>
         <PrincipalButton
-          onClick={() => console.log("CREAR TARIFA")}
+          onClick={openModal}
           className={styles.buttonNewContract}
           icon={<Plus size={20} />}
           iconPosition="end"
@@ -66,9 +72,14 @@ export const VehiclesRatesTable = () => {
       </Flex>
       <Table
         scroll={{ y: "61dvh", x: undefined }}
-        columns={columns}
+        columns={columns({ openModal })}
         loading={isLoading}
         dataSource={datasource}
+      />
+      <ModalCreateVehicleRate
+        closeModal={() => setIsModalOpen(false)}
+        isOpen={isModalOpen}
+        key={"Modal"}
       />
     </div>
   );

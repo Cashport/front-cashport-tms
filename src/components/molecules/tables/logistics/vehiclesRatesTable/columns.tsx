@@ -1,11 +1,13 @@
 import { VehicleRate } from "@/types/contracts/contractsTypes";
 import { formatMoney } from "@/utils/utils";
-import { Button, TableProps, Typography } from "antd";
+import { Button, Flex, TableProps, Typography } from "antd";
 
-import { Eye } from "phosphor-react";
+import { Eye, WarningCircle } from "phosphor-react";
 const { Text } = Typography;
-
-export const columns: TableProps<VehicleRate>["columns"] = [
+interface ColumnsProps {
+  openModal: () => void;
+}
+export const columns = ({ openModal }: ColumnsProps): TableProps<VehicleRate>["columns"] => [
   {
     title: "SAP Description",
     dataIndex: "sapDescription",
@@ -52,7 +54,7 @@ export const columns: TableProps<VehicleRate>["columns"] = [
     title: "Valor",
     dataIndex: "value",
     key: "value",
-    render: (amount) => <Text>{formatMoney(amount)}</Text>,
+    render: (amount) => <span>{formatMoney(amount)}</span>,
     sorter: (a, b) => a.value - b.value,
     showSorterTooltip: false
   },
@@ -66,13 +68,16 @@ export const columns: TableProps<VehicleRate>["columns"] = [
   {
     title: "",
     key: "buttonSee",
-    width: "54px",
+    width: "90px", // Ajusta el ancho si es necesario
     render: (_, { id }) => (
-      <Button
-        onClick={() => console.log("ABRIR MODAL")}
-        className="icon-detail"
-        icon={<Eye size={20} />}
-      />
+      <Flex gap={8}>
+        <Button
+          onClick={() => console.log("Open Details Modal")}
+          className="icon-detail"
+          icon={<WarningCircle size={20} />}
+        />
+        <Button onClick={openModal} className="icon-detail" icon={<Eye size={20} />} />
+      </Flex>
     )
   }
 ];
