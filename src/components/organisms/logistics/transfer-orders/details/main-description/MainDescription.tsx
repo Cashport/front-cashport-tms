@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { formatMoney } from "@/utils/utils";
 import utc from "dayjs/plugin/utc";
 import { getTravelDuration } from "@/utils/logistics/maps";
-import { STATUS } from "@/utils/constants/globalConstants";
+import { SOCKET_URI, STATUS } from "@/utils/constants/globalConstants";
 import Image from "next/image";
 import "dayjs/locale/es-us";
 dayjs.extend(utc).locale("es-us");
@@ -130,7 +130,7 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   };
 
   useEffect(() => {
-    const socket = io("https://ppdaeqfxju.us-east-2.awsapprunner.com");
+    const socket = io(SOCKET_URI || '');
     socket.on("changeLocation", (data) => {
       console.log("Ubicación recibida:", data);
       updateUserLocation(data);
