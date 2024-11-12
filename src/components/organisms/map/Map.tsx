@@ -15,6 +15,7 @@ import DetailTripMap from './detail/Detail';
 import { IDriverMap } from '@/types/logistics/driver/driver';
 import { API } from '@/utils/api/api';
 import { AxiosResponse } from 'axios';
+import { SOCKET_URI } from '@/utils/constants/globalConstants';
 
 const mapStyles = {
   width: '100%',
@@ -49,7 +50,7 @@ const MapComponent = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const mapsAccessToken = 'pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA';
-  const socket = io('https://ppdaeqfxju.us-east-2.awsapprunner.com');
+  const socket = io(SOCKET_URI || '');
 
   const getStateColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);

@@ -9,6 +9,8 @@ export const STORAGE_TOKEN = "token";
 
 export const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME;
 
+export const SOCKET_URI = process.env.NEXT_PUBLIC_SOCKET_URI;
+
 // ---
 export const CREATED = 201;
 export const SUCCESS = 200;
