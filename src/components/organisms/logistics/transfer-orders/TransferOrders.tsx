@@ -112,7 +112,14 @@ export const TransferOrders = () => {
           />
         );
       case TabEnum.IN_PROCESS:
-        return <InProcess search={search} />;
+        return (
+          <InProcess
+            search={search}
+            trsIds={trsIds}
+            modalState={isModalOpen}
+            handleCheckboxChangeTR={handleCheckboxChangeTR}
+          />
+        );
       case TabEnum.COMPLETED:
         return <Completed search={search} />;
       default:

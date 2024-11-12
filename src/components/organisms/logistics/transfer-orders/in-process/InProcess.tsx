@@ -1,4 +1,4 @@
-import { CollapseProps, Spin, Typography } from "antd";
+import { Checkbox, CollapseProps, Spin, Typography } from "antd";
 import styles from "./InProcess.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -6,14 +6,18 @@ import { FC, useEffect, useState } from "react";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import { getOnRouteTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
+import { STATUS } from "@/utils/constants/globalConstants";
 
 const Text = Typography;
 
 interface IInProcessProps {
   search: string;
+  trsIds: number[];
+  handleCheckboxChangeTR: (id: number, checked: boolean) => void;
+  modalState: boolean;
 }
 
-export const InProcess: FC<IInProcessProps> = ({ search }) => {
+export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxChangeTR, modalState }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
@@ -50,6 +54,12 @@ export const InProcess: FC<IInProcessProps> = ({ search }) => {
     getTransferRequestAccepted();
   }, []);
 
+  useEffect(() => {
+    if (!modalState) {
+      getTransferRequestAccepted();
+    }
+  }, [modalState]);
+
   const filteredData = transferRequest.map((status) => {
     const filteredItems = status.items.filter(
       (item) =>
@@ -62,11 +72,24 @@ export const InProcess: FC<IInProcessProps> = ({ search }) => {
   });
 
   const renderItems: CollapseProps["items"] = filteredData.map((item, index) => {
-    const hasItems = item.items.length > 0;
+    let aditionalRow = undefined;
+    const trDeleteable = [STATUS.TR.SIN_INICIAR];
+    if (trDeleteable.includes(item.statusId)) {
+      aditionalRow = {
+        title: "",
+        dataIndex: "checkbox",
+        render: (_: any, { tr }: any) => (
+          <Checkbox
+            checked={trsIds.includes(tr)}
+            onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+          />
+        )
+      };
+    }
     return {
       key: index,
       label: getTitile(item.statusId, item.items.length),
-      children: <TransferOrdersTable showColumn={false} items={item.items} />
+      children: <TransferOrdersTable showColumn={false} aditionalRow={aditionalRow} items={item.items} />
     };
   });
 
