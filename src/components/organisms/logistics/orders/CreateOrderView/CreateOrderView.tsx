@@ -121,8 +121,8 @@ export const CreateOrderView = () => {
   const origin = useRef<any>([]);
   const destination = useRef<any>([]);
   const [origenIzaje, setOrigenIzaje] = useState(false);
-  const [horasOrigenIzaje, setHorasOrigenIzaje] = useState<number>(0);
-  const [horasDestinoIzaje, setHorasDestinoIzaje] = useState<number>(0);
+  const [horasOrigenIzaje, setHorasOrigenIzaje] = useState<number | null>(null);
+  const [horasDestinoIzaje, setHorasDestinoIzaje] = useState<number | null>(null);
   const [destinoIzaje, setDestinoIzaje] = useState(false);
   const [fechaInicial, setFechaInicial] = useState<Dayjs | undefined>(undefined);
   const [horaInicial, setHoraInicial] = useState<Dayjs>();
@@ -446,10 +446,17 @@ export const CreateOrderView = () => {
     }
     const initialHour = horaInicial.get("h");
     const initialMinute = horaInicial.get("m");
-    let fechaFin = fechaInicial.hour(initialHour).minute(initialMinute).add(horasOrigenIzaje, "h");
+    let fechaFin = fechaInicial.hour(initialHour).minute(initialMinute);
+
+    if (horasOrigenIzaje) {
+      fechaFin = fechaFin.add(horasOrigenIzaje, "h");
+    }
 
     if (typeactive !== "2" && timetravelInSecs !== null) {
-      fechaFin = fechaFin.add(horasDestinoIzaje, "h").add(timetravelInSecs, "s");
+      if (horasDestinoIzaje) {
+        fechaFin = fechaFin.add(horasDestinoIzaje, "h");
+      }
+      fechaFin = fechaFin.add(timetravelInSecs, "s");
     }
 
     setHoraFinal(fechaFin);
@@ -469,6 +476,22 @@ export const CreateOrderView = () => {
     setTimetravelInSecs(duration);
   };
 
+  useEffect(() => {
+    if (origenIzaje) {
+      setHorasOrigenIzaje(1);
+    } else if (!origenIzaje) {
+      setHorasOrigenIzaje(null);
+    }
+  }, [origenIzaje]);
+
+  useEffect(() => {
+    if (destinoIzaje) {
+      setHorasDestinoIzaje(1);
+    } else if (!destinoIzaje) {
+      setHorasDestinoIzaje(null);
+    }
+  }, [destinoIzaje]);
+
   const resetFormValues = () => {
     origin.current = [];
     destination.current = [];
@@ -479,10 +502,10 @@ export const CreateOrderView = () => {
     setTimetravelInSecs(null);
     setLocationOrigin(null);
     setLocationDestination(null);
-    setHorasOrigenIzaje(0);
-    setHorasDestinoIzaje(0);
     setFechaInicial(undefined);
     setHoraInicial(undefined);
+    setHorasOrigenIzaje(null);
+    setHorasDestinoIzaje(null);
     setHoraFinal(undefined);
     setFechaFinal(undefined);
     setOrigenIzaje(false);
@@ -497,7 +520,10 @@ export const CreateOrderView = () => {
 
   useEffect(() => {
     resetFormValues();
-    if (typeactive == "2") setOrigenIzaje(true);
+    if (typeactive == "2") {
+      setOrigenIzaje(true);
+      setHorasOrigenIzaje(1);
+    }
   }, [typeactive]);
 
   /* Tipo de viaje  */
@@ -1182,8 +1208,8 @@ export const CreateOrderView = () => {
       end_date: fechaFinalToBody?.tz("GMT", true).toISOString(),
       start_freight_equipment: String(origenIzaje ? 1 : 0),
       end_freight_equipment: String(destinoIzaje ? 1 : 0),
-      freight_origin_time: origenIzaje ? horasOrigenIzaje : undefined,
-      freight_destination_time: destinoIzaje ? horasDestinoIzaje : undefined,
+      freight_origin_time: origenIzaje && !!horasOrigenIzaje ? horasOrigenIzaje : undefined,
+      freight_destination_time: destinoIzaje && !!horasDestinoIzaje ? horasDestinoIzaje : undefined,
       rotation: "0",
       start_date_flexible: fechaInicialFlexible ?? 0,
       end_date_flexible: fechaFinalFlexible ?? 0,
@@ -1374,7 +1400,7 @@ export const CreateOrderView = () => {
                       <Flex gap={"0.5rem"} align="center" justify="end">
                         <Text>Cuantas horas de izaje</Text>
                         <CustomTimeSelector
-                          initialValue={horasOrigenIzaje}
+                          initialValue={horasOrigenIzaje ?? 1}
                           onTimeChange={(value) => setHorasOrigenIzaje(value)}
                         />
                       </Flex>
@@ -1438,7 +1464,7 @@ export const CreateOrderView = () => {
                         <Flex gap={"0.5rem"} align="center" justify="end">
                           <Text>Cuantas horas de izaje</Text>
                           <CustomTimeSelector
-                            initialValue={horasDestinoIzaje}
+                            initialValue={horasDestinoIzaje ?? 1}
                             onTimeChange={(value) => setHorasDestinoIzaje(value)}
                           />
                         </Flex>
