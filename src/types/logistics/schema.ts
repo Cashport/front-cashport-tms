@@ -3513,3 +3513,42 @@ export interface IDocumentCompleted extends IDocumentsAPI {
   file?: File;
   expirationDate: any;
 }
+interface IFile {
+  id: number;
+  entity_type: number;
+  description: string;
+  optional: boolean;
+  id_location: number | null;
+  id_material_type: number | null;
+  expiry: boolean;
+  template: string;
+  active: boolean;
+  created_at: string; // ISO date string
+  created_by: string;
+  modified_at: string | null; // ISO date string or null
+  modified_by: string;
+  file: {
+    uid: string;
+  };
+  expirationDate: string; // ISO date string
+}
+export interface CreateDriver {
+  id: number;
+  phone: string;
+  email: string;
+  document_type: number;
+  document: string;
+  license: string;
+  license_categorie: string;
+  license_expiration: string; // ISO date string
+  name: string;
+  last_name: string;
+  emergency_number: string;
+  emergency_contact: string;
+  rh: string;
+  glasses: 1 | 0;
+  birth_date: string; // ISO date string
+  vehicle_type: number[];
+  company_id: string;
+  files: IFile[];
+}
