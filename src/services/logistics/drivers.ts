@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { IFormGeneralDriver, IListData } from "@/types/logistics/schema";
+import { CreateDriver, IFormGeneralDriver, IListData } from "@/types/logistics/schema";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
@@ -64,21 +64,20 @@ export const updateDriver = async (
   generalData: IFormGeneralDriver,
   logo: FileObject[],
   files: DocumentCompleteType[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<CreateDriver> => {
   try {
     const form = createDriverForm(generalData, logo, files);
-    const response = await axios.put(`${config.API_HOST}/driver/update`, form, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
-    return response;
+    const response: GenericResponse<CreateDriver> = await API.put(`/driver/update`, form);
+
+    if (response.success) {
+      return response.data;
+    }
+
+    throw new Error(response.message || "Error al editar un conductor");
   } catch (error) {
-    let errorMsg;
-    if (error instanceof Error) {
-      errorMsg = error?.message;
-    } else errorMsg = "Error al actualizar el conductor";
-    throw new Error(errorMsg);
+    throw new Error(
+      error instanceof Error ? error.message : "Error desconocido al editar un conductor"
+    );
   }
 };
 
@@ -86,22 +85,20 @@ export const addDriver = async (
   generalData: IFormGeneralDriver,
   logo: FileObject[],
   files: DocumentCompleteType[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<CreateDriver> => {
   try {
     const form = createDriverForm(generalData, logo, files);
-    const response = await axios.post(`${config.API_HOST}/driver/create`, form, {
-      headers: {
-        "content-type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
-      }
-    });
-    return response;
-  } catch (error: any) {
-    let errorMsg;
-    if (error instanceof Error) {
-      errorMsg = error?.message;
-    } else errorMsg = "Error al crear el conductor";
-    throw new Error(errorMsg);
+    const response: GenericResponse<CreateDriver> = await API.post(`/driver/create`, form);
+
+    if (response.success) {
+      return response.data;
+    }
+
+    throw new Error(response.message || "Error al crear un conductor");
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Error desconocido al crear un conductor"
+    );
   }
 };
 
