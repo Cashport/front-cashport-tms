@@ -49,12 +49,12 @@ export const DriverInfoView = ({ params }: Props) => {
         data.logo as any,
         data?.files as DocumentCompleteType[]
       );
-      message.success("El conductor fue editado exitosamente.", 2).then(() => {
+      message.success("Conductor editado", 2).then(() => {
         push(`/logistics/providers/${params.id}/driver/${response.id}`);
         setStatusForm("review");
       });
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al editar conductor", 4);
+      message.error(error instanceof Error ? error.message : "Error al editar conductor", 3);
     } finally {
       setIsLoadingSubmit(false);
     }
@@ -62,11 +62,15 @@ export const DriverInfoView = ({ params }: Props) => {
   const handlechangeStatus = async (status: boolean) => {
     try {
       await updateDriverStatus(params.driverId, status);
-      message.success("El conductor fue editado exitosamente.", 2).then(() => {
+      message.success(`Conductor ${status ? "activado" : "desactivado"}`, 2).then(() => {
         push(`/logistics/providers/${params.id}/driver`);
+        setStatusForm("review");
       });
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al editar conductor", 3);
+      message.error(
+        error instanceof Error ? error.message : "Error al editar estado del conductor",
+        3
+      );
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
@@ -90,7 +94,7 @@ export const DriverInfoView = ({ params }: Props) => {
         onActiveProject={() => handlechangeStatus(true)}
         onDesactivateProject={() => handlechangeStatus(false)}
         documentsTypesList={documentsType ?? []}
-        vehiclesTypesList={vehiclesTypesData?.data ?? []}
+        vehiclesTypesList={vehiclesTypesData ?? []}
         isLoadingSubmit={isLoadingSubmit}
       />
     </Skeleton>

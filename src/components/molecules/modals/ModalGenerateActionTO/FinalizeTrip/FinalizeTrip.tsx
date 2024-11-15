@@ -1,5 +1,5 @@
 import UiTabs from "@/components/ui/ui-tabs";
-import { Flex, Skeleton } from "antd";
+import { Flex, message, Skeleton } from "antd";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./FinalizeTrip.module.scss";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -107,29 +107,14 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
       setIsLoading(true);
       const response = await sendFinalizeTripAllCarriers(form, Number(idTR));
       if (response) {
-        messageApi
-          ?.open({
-            type: "success",
-            content: "Viaje finalizado correctamente",
-            duration: 2
-          })
-          .then(() => setNav(NavEnum.BILLING));
-      } else {
-        messageApi?.open({
-          type: "error",
-          content: "Hubo un error finalizando el viaje",
-          duration: 3
-        });
+        setIsLoading(false);
+        onClose();
+        message.success(`TR No. ${idTR} legalizada`, 2, () => setNav(NavEnum.BILLING));
       }
     } catch (error: any) {
-      messageApi?.open({
-        type: "error",
-        content: error?.message ?? "Hubo un error",
-        duration: 3
-      });
-    } finally {
       setIsLoading(false);
       onClose();
+      message.error("Hubo un error finalizando el viaje", 3);
     }
   }
 

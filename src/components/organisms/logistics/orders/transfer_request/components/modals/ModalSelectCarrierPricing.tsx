@@ -109,6 +109,7 @@ export default function ModalSelectCarrierPricing({
       if (response) {
         setIsSubmitting(false);
         handleModalCarrier(false);
+        message.success("Solicitudes enviadas");
         mutateStepthree(response.journey);
         if (view === "vehicles") setView("carrier");
       }

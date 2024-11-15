@@ -5,7 +5,7 @@ import { SetStateAction, useState } from "react";
 import styles from "./ConfirmClose.module.scss";
 import { getAceptBilling, postRejectBilling } from "@/services/billings/billings";
 import { formatNumber } from "@/utils/utils";
-
+import { useRouter } from "next/navigation";
 type ActionTypeClose = "ACCEPT" | "REJECT";
 
 interface ConfirmClose {
@@ -28,16 +28,19 @@ const ConfirmClose = ({
 }: ConfirmClose) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [observation, setObervation] = useState<string>("");
-
+  const { push } = useRouter();
   const aceptBilling = async () => {
     try {
       setIsLoading(true);
       const response = await getAceptBilling(idBilling);
       if (response) {
-        message.success("Se aceptó el cierre correctamente", 2);
+        message.success(`TR No. ${idTR} aceptada`, 3, () => push(`/facturacion`));
       }
     } catch (error) {
-      message.error("Hubo un problema, vuelve a intentarlo", 2);
+      message.error(
+        error instanceof Error ? error.message : "Hubo un problema, vuelve a intentarlo",
+        3
+      );
     } finally {
       onClose();
       setIsLoading(false);
@@ -49,10 +52,13 @@ const ConfirmClose = ({
       setIsLoading(true);
       const response = await postRejectBilling(idBilling, observation);
       if (response) {
-        message.success(response, 3);
+        message.success(`TR No. ${idTR} rechazada`, 3, () => push(`/facturacion`));
       }
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al rechazar", 3);
+      message.error(
+        error instanceof Error ? error.message : "Hubo un problema, vuelve a intentarlo",
+        3
+      );
     } finally {
       onClose();
       setIsLoading(false);
