@@ -3552,3 +3552,34 @@ export interface CreateDriver {
   company_id: string;
   files: IFile[];
 }
+
+export interface CreateOrderResponse {
+  id_user: number;
+  id_service_type: string;
+  id_start_location: number;
+  id_end_location: number;
+  start_date: string; // ISO string format
+  end_date: string; // ISO string format
+  start_freight_equipment: string;
+  end_freight_equipment: string;
+  rotation: string;
+  start_date_flexible: string;
+  end_date_flexible: string;
+  freight_destination_time: number;
+  freight_origin_time: number;
+  id_route: string;
+  id_company: string;
+  id_client: number;
+  status: string; // UUID format
+  id: number;
+  active: string; // "true" or "false"
+  created_at: string; // ISO string format
+  created_by: string;
+  modified_at: string; // ISO string format
+  modified_by: string;
+  observation: string | null;
+  user: string;
+  geometry: string;
+  service_type_desc: string;
+  client_desc: string;
+}

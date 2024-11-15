@@ -1,15 +1,23 @@
 "use client";
-import { Typography, message, Spin } from "antd";
+import { message, Skeleton } from "antd";
 import React, { useCallback, useState } from "react";
 import "../../../../../../styles/_variables_logistics.css";
 import "./locationInfo.scss";
-import { getLocationById, updateLocation, updateLocationStatus } from "@/services/logistics/locations";
+import {
+  getAllDocumentsType,
+  getAllGroupByLocation,
+  getAllLocationTypes,
+  getAllStatesByCountry,
+  getLocationById,
+  updateLocation,
+  updateLocationStatus
+} from "@/services/logistics/locations";
 import { IFormLocation, ILocation } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab.mapper";
-import { useRouter } from "next/navigation";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { LocationFormTab } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab";
+import { useRouter } from "next/navigation";
 
 interface Props {
   params: {
@@ -19,111 +27,113 @@ interface Props {
 }
 
 export const LocationInfoView = ({ params }: Props) => {
-  const [messageApi, contextHolder] = message.useMessage();
-  const [statusForm, setStatusForm]= useState<StatusForm>("review")
+  const [statusForm, setStatusForm] = useState<StatusForm>("review");
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const { push } = useRouter();
-
   //console.log(params)
-  const handleFormState = useCallback((newFormState:StatusForm) => {
+  const handleFormState = useCallback((newFormState: StatusForm) => {
     setStatusForm(newFormState);
   }, []);
 
-  const fetcher = async ({ id, key }: { id: string; key: string }) => {
+  const fetcher = async () => {
     return getLocationById(params.id);
   };
 
-  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher,     
-    { revalidateIfStale:false,
-    revalidateOnFocus:false,
-    revalidateOnReconnect:false
+  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
   });
 
   const handleSubmitForm = async (dataform: IFormLocation) => {
-    const sendata:IFormLocation={
+    const sendata: IFormLocation = {
       general: dataform as unknown as ILocation,
       images: [],
       IS_ACTIVE: true
-    }
+    };
     sendata.general.id = Number(params.id);
+    setIsLoadingSubmit(true);
     try {
       const response = await updateLocation(
         sendata.general,
         dataform?.files as DocumentCompleteType[]
       );
       if (response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: "La ubicación fue editada exitosamente."
+        setIsLoadingSubmit(false);
+        message.success(`Ubicación editada`, 2, () => {
+          push(`/logistics/configuration/locations/${params.id}`);
+          setStatusForm("review");
         });
-        setStatusForm('review');
-        push(`/logistics/configuration/locations/all`);
       }
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
-      });
+      setIsLoadingSubmit(false);
+      message.error(error instanceof Error ? error.message : "Error al editar ubicación", 3);
     }
   };
 
-  const handleActivation= async() =>{
-    console.log('active')
+  const handleChangeStatus = async (newStatus: boolean) => {
     try {
-      const response = await updateLocationStatus(params.id,'1');
+      const response = await updateLocationStatus(params.id, newStatus ? "1" : "0");
       if (response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: "La ubicación fue editada exitosamente."
+        message.success(`Ubicación ${newStatus ? "activada" : "inactivada"}`, 2, () => {
+          push(`/logistics/configuration/locations/${params.id}`);
+          setStatusForm("review");
         });
-        setStatusForm('review');
-        push(`/logistics/configuration/locations/all`);
       }
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
-      });
+      message.error(`Hubo un error, por favor intenta mas tarde.`, 3, () =>
+        setStatusForm("review")
+      );
     }
   };
 
-  const handleDesactivation= async() =>{
-    console.log('desactive')
-    try {
-      const response = await updateLocationStatus(params.id,'0');
-      if (response.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: "La ubicación fue editada exitosamente."
-        });
-        setStatusForm('review');
-        push(`/logistics/configuration/locations/all`);
-      }
-    } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "Oops, hubo un error por favor intenta mas tarde."
-      });
-    }
-  };
+  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR("2", getAllDocumentsType, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
+  const { data: locationTypesData, isLoading: isLoadingLocationTypes } = useSWR(
+    "location-type",
+    getAllLocationTypes,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+  const { data: groupLocationData, isLoading: isLoadingGroupLocation } = useSWR(
+    "grouplocation",
+    getAllGroupByLocation,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+  const { data: statesData, isLoading: isLoadingStates } = useSWR("1", getAllStatesByCountry, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
 
   return (
-    <>
-      {contextHolder}
-      <>
-      {isLoading ? (
-          <Spin/>
-        ) : (
-          <LocationFormTab
-            onSubmitForm={handleSubmitForm}
-            data={data?.data?.data[0]}
-            params={params}
-            statusForm={statusForm}
-            handleFormState={handleFormState}
-            onActiveLocation={handleActivation}
-            onDesactivateLocation={handleDesactivation}
-          />
-        )}
-      </>
-    </>
+    <Skeleton
+      active
+      loading={
+        isLoading ||
+        isLoadingDocuments ||
+        isLoadingLocationTypes ||
+        isLoadingGroupLocation ||
+        isLoadingStates
+      }
+    >
+      <LocationFormTab
+        onSubmitForm={handleSubmitForm}
+        data={data?.[0]}
+        params={params}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        onActiveLocation={() => handleChangeStatus(true)}
+        onDesactivateLocation={() => handleChangeStatus(false)}
+        documentsType={documentsType ?? []}
+        locationTypesData={locationTypesData ?? []}
+        statesData={statesData ?? []}
+        groupLocationData={groupLocationData ?? []}
+        isLoadingSubmit={isLoadingSubmit}
+        //isLoadingSelects={isLoadingSelects}
+      />
+    </Skeleton>
   );
 };

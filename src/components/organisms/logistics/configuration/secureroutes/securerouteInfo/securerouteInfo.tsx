@@ -3,7 +3,11 @@ import { Typography, message, Spin } from "antd";
 import React, { useCallback, useState } from "react";
 import "../../../../../../styles/_variables_logistics.css";
 import "./grouplocationInfo.scss";
-import { getMaterialById, updateMaterial, updateMaterialStatus } from "@/services/logistics/materials";
+import {
+  getMaterialById,
+  updateMaterial,
+  updateMaterialStatus
+} from "@/services/logistics/materials";
 import { CustomFile, IFormMaterial } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/materialForm/materialFormTab.mapper";
 import { useRouter } from "next/navigation";
@@ -20,10 +24,10 @@ interface Props {
 
 export const GroupLocationInfoView = ({ params }: Props) => {
   const [messageApi, contextHolder] = message.useMessage();
-  const [statusForm, setStatusForm]= useState<StatusForm>("review")
+  const [statusForm, setStatusForm] = useState<StatusForm>("review");
   const { push } = useRouter();
 
-  const handleFormState = useCallback((newFormState:StatusForm) => {
+  const handleFormState = useCallback((newFormState: StatusForm) => {
     setStatusForm(newFormState);
   }, []);
 
@@ -31,19 +35,16 @@ export const GroupLocationInfoView = ({ params }: Props) => {
     return getMaterialById(params.id);
   };
 
-  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher,     
-    { revalidateIfStale:false,
-    revalidateOnFocus:false,
-    revalidateOnReconnect:false
+  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
   });
 
   const handleSubmitForm = async (data: IFormMaterial) => {
     data.general.id = Number(params.id);
     try {
-      const response = await updateMaterial(
-        data.general,
-        data?.images as CustomFile[]
-      );
+      const response = await updateMaterial(data.general, data?.images as CustomFile[]);
       if (response.status === 200) {
         messageApi.open({
           type: "success",
@@ -59,16 +60,16 @@ export const GroupLocationInfoView = ({ params }: Props) => {
     }
   };
 
-  const handleActivation= async() =>{
-    console.log('active')
+  const handleActivation = async () => {
+    console.log("active");
     try {
-      const response = await updateMaterialStatus(params.id,'1');
+      const response = await updateMaterialStatus(params.id, "1");
       if (response.status === 200) {
         messageApi.open({
           type: "success",
           content: "El material fue editado exitosamente."
         });
-        setStatusForm('review');
+        setStatusForm("review");
         push(`/logistics/configuration/materials/${params.id}`);
       }
     } catch (error) {
@@ -79,16 +80,16 @@ export const GroupLocationInfoView = ({ params }: Props) => {
     }
   };
 
-  const handleDesactivation= async() =>{
-    console.log('desactive')
+  const handleDesactivation = async () => {
+    console.log("desactive");
     try {
-      const response = await updateMaterialStatus(params.id,'0');
+      const response = await updateMaterialStatus(params.id, "0");
       if (response.status === 200) {
         messageApi.open({
           type: "success",
           content: "El material fue editado exitosamente."
         });
-        setStatusForm('review');
+        setStatusForm("review");
         push(`/logistics/configuration/materials/${params.id}`);
       }
     } catch (error) {
@@ -99,22 +100,26 @@ export const GroupLocationInfoView = ({ params }: Props) => {
     }
   };
 
-  console.log(data)
+  console.log(data);
   return (
     <>
       {contextHolder}
       <>
-      {isLoading ? (
-          <Spin/>
+        {isLoading ? (
+          <Spin />
         ) : (
           <MaterialFormTab
             onSubmitForm={handleSubmitForm}
-            data={data?.data?.data[0]}
+            data={data?.[0]}
             params={params}
             statusForm={statusForm}
             handleFormState={handleFormState}
             onActiveMaterial={handleActivation}
             onDesactivateMaterial={handleDesactivation}
+            isLoadingSubmit={false}
+            materialsTypesData={[]}
+            onEditProject={() => {}}
+            materialsTransportTypesData={[]}
           />
         )}
       </>

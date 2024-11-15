@@ -1,4 +1,4 @@
-import { Divider, Flex, Skeleton } from "antd";
+import { Divider, Flex, message, Skeleton } from "antd";
 import { useState } from "react";
 import styles from "./PreauthorizeTrip.module.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -15,6 +15,8 @@ import { formatNumber } from "@/utils/utils";
 import { BillingByCarrier } from "@/types/logistics/billing/billing";
 import { downloadCSVFromEndpoint } from "@/services/logistics/download_csv";
 import { sendPreauthorizations } from "@/services/billings/billings";
+import { useRouter } from "next/navigation";
+import { TabEnum } from "@/components/organisms/logistics/transfer-orders/TransferOrders";
 
 interface PAtrip {
   idTR: string;
@@ -35,7 +37,7 @@ const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
   const { subtotal: totalValue, id: billingId, carrier: carrierName } = carrier;
   const [isLoading, setIsLoading] = useState(false);
   const [defaultValues, setDefaultValues] = useState<PreauthorizeTripForm>(defaultValueForm);
-
+  const { push } = useRouter();
   const {
     control,
     handleSubmit,
@@ -55,33 +57,23 @@ const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
 
   //Handle form submission
   async function sendForm(form: PreauthorizeTripForm) {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await sendPreauthorizations(form, billingId);
       if (response) {
-        messageApi?.open({
-          type: "success",
-          content: "Enviado correctamente",
-          duration: 3
-        });
-      } else {
-        messageApi?.open({
-          type: "error",
-          content: "Hubo un error",
-          duration: 3
-        });
+        setIsLoading(false);
+        onClose();
+        message.success(`TR No. ${idTR} preautorizada`, 2, () =>
+          push(`/logistics/transfer-orders?tab=${TabEnum.COMPLETED}`)
+        );
       }
     } catch (error: any) {
-      messageApi?.open({
-        type: "error",
-        content: error?.message ?? "Hubo un error",
-        duration: 3
-      });
-    } finally {
       setIsLoading(false);
       onClose();
+      message.error("Hubo un error preautorizando la orden", 2);
     }
   }
+
   // Handle document changes
   const handleOnChangeDocument = (fileToSave: any, index: number) => {
     const { file: rawFile } = fileToSave;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Flex, Row, Switch, Typography, message } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, Pencil, Plus } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -18,10 +18,7 @@ import {
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
 import { IFormVehicle, VehicleType } from "@/types/logistics/schema";
-import { getDocumentsByEntityType } from "@/services/logistics/certificates";
-import useSWR from "swr";
 import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
-import { addVehicle, getVehicleType, updateVehicle } from "@/services/logistics/vehicle";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
@@ -31,7 +28,6 @@ import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
-import { _onSubmit } from "../driverForm/driverFormTab.mapper";
 
 const { Title, Text } = Typography;
 
@@ -56,7 +52,6 @@ export const VehicleFormTab = ({
 
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
 
   const [images, setImages] = useState<ImageState[]>(
@@ -211,18 +206,22 @@ export const VehicleFormTab = ({
   };
 
   const convertToSelectOptions = (vehicleTypes: VehicleType[]) => {
-    console.log("convertToSelectOptions vehicleTypes", vehicleTypes);
+    if (!Array.isArray(vehicleTypes)) return [];
     const newValues = vehicleTypes?.map((vehicleType) => ({
       value: vehicleType.description,
       id: Number(vehicleType.id)
     }));
-    console.log("convertToSelectOptions newValues", newValues);
     return newValues;
   };
 
+  useEffect(() => {
+    if (data?.id_vehicle_type) {
+      setValue("general.id_vehicle_type", data?.id_vehicle_type);
+    }
+  }, [data, setValue]);
+
   return (
     <>
-      {contextHolder}
       <form className="vehiclesFormTab" onSubmit={handleSubmit(onSubmit)}>
         <Flex component={"header"} className="headerProyectsForm">
           <Link href={`/logistics/providers/${params.id}/vehicle`} passHref>

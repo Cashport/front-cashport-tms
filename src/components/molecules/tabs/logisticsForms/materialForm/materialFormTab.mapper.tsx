@@ -1,13 +1,18 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import { ICertificates, IMaterial} from "@/types/logistics/schema";
+import {
+  ICertificates,
+  IMaterial,
+  IMaterialTransportType,
+  IMaterialType
+} from "@/types/logistics/schema";
 import { IFormProject } from "@/types/projects/IFormProject";
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { SetStateAction } from "react";
 import { UseFormSetValue } from "react-hook-form";
 
-export type StatusForm = "review" | "create" | "edit"
+export type StatusForm = "review" | "create" | "edit";
 export interface MaterialFormTabProps {
   idProjectForm?: string;
   data?: MaterialData;
@@ -21,19 +26,21 @@ export interface MaterialFormTabProps {
     id: string;
     materialId: string;
   };
-  handleFormState?: (newFormState: StatusForm) => void
+  handleFormState?: (newFormState: StatusForm) => void;
+  isLoadingSubmit: boolean;
+  materialsTypesData: IMaterialType[];
+  materialsTransportTypesData: IMaterialTransportType[];
 }
 
 export interface MaterialImage {
-  id: number,
-  entity_type: number,
-  url_archive?: string,
-  file?: FileObject
+  id: number;
+  entity_type: number;
+  url_archive?: string;
+  file?: FileObject;
 }
-export type MaterialData = IMaterial & {images?: MaterialImage[]};
+export type MaterialData = IMaterial & { images?: MaterialImage[] };
 
 export const dataToProjectFormData = (data: any): any => {
-
   if (!data) return {};
 
   const images = data.images?.map((image: any) => {
@@ -44,7 +51,7 @@ export const dataToProjectFormData = (data: any): any => {
     return file;
   });
 
-  return {    
+  return {
     general: {
       id: data.id,
       description: data.description,
@@ -65,7 +72,7 @@ export const dataToProjectFormData = (data: any): any => {
       modified_by: data.created_by,
       icon: data.icon,
       restriction: data.restriction,
-      code_sku:data.code_sku
+      code_sku: data.code_sku
     },
     images: images,
     IS_ACTIVE: data.active
@@ -77,15 +84,15 @@ export const _onSubmit = (
   imageFiles: { docReference: string; file: File }[],
   setImageError: (value: SetStateAction<boolean>) => void,
   setloading: (value: SetStateAction<boolean>) => void,
-  onSubmitForm: (data: any) => void,
+  onSubmitForm: (data: any) => void
 ) => {
   setloading(true);
   try {
     setImageError(false);
-    onSubmitForm({...data, images: imageFiles});
+    onSubmitForm({ ...data, images: imageFiles });
   } catch (error) {
     console.warn({ error });
-  } finally{
+  } finally {
     setloading(false);
   }
 };
