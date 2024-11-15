@@ -39,7 +39,6 @@ export const CarrierTable = () => {
     loadCarriers();
   }, []);
 
-
   drivers.forEach((element) => {
     if (element.active) {
       element.status = true;
@@ -73,7 +72,7 @@ export const CarrierTable = () => {
       key: "type"
     },
     {
-      title: "Vehiculos",
+      title: "Vehículos",
       dataIndex: "vehicle",
       key: "vehicle"
     },

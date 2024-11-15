@@ -1,6 +1,6 @@
 import UiTabs from "@/components/ui/ui-tabs";
 import { Flex, message, Skeleton } from "antd";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./FinalizeTrip.module.scss";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { MessageInstance } from "antd/es/message/interface";
@@ -11,13 +11,14 @@ import { VehicleFields } from "./components/VehicleFields";
 import { getCarriersTripsDetails, sendFinalizeTripAllCarriers } from "@/services/trips/trips";
 import { STATUS } from "@/utils/constants/globalConstants";
 import { useRouter } from "next/navigation";
-import { TabEnum } from "@/components/organisms/logistics/transfer-orders/TransferOrders";
+import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 
 interface FinalizeTrip {
   idTR: string;
   onClose: () => void;
   messageApi: MessageInstance;
   statusTrId?: string;
+  setNav: Dispatch<SetStateAction<NavEnum>>;
 }
 
 export interface IVehicleAPI {
@@ -29,9 +30,10 @@ export interface ICarrierAPI {
   carrier_id: number;
   provider: string;
   vehicles: IVehicleAPI[];
+  Observation: string;
 }
 
-const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTrip) => {
+const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: FinalizeTrip) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -39,7 +41,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTr
   const [defaultValues, setDefaultValues] = useState<FinalizeTripForm>(emptyForm);
   const hasAlreadyFinalized = statusTrId === STATUS.BNG.LEGALIZADO;
   const [isEditable, setIsEditable] = useState(!hasAlreadyFinalized);
-  const { push } = useRouter();
+
   const { control, handleSubmit, setValue, reset, watch, trigger, register } =
     useForm<FinalizeTripForm>({
       defaultValues
@@ -76,7 +78,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTr
                 }
               ]
       })),
-      adittionalComment: ""
+      adittionalComment: c.Observation !== "" ? c.Observation : undefined
     }));
     return {
       carriers: defaultValues
@@ -108,14 +110,12 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "" }: FinalizeTr
       if (response) {
         setIsLoading(false);
         onClose();
-        message.success(`TR No. ${idTR} legalizada`, 2, () =>
-          push(`/logistics/transfer-orders?tab=${TabEnum.COMPLETED}`)
-        );
+        message.success(`TR No. ${idTR} legalizada`, 2, () => setNav(NavEnum.BILLING));
       }
     } catch (error: any) {
       setIsLoading(false);
       onClose();
-      message.error("Hubo un error finalizando el viaje", 2);
+      message.error("Hubo un error finalizando el viaje", 3);
     }
   }
 

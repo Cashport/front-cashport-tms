@@ -336,8 +336,8 @@ export default function PricingTransferRequest({
   const [isNextStepActive, setIsNextStepActive] = useState<boolean>(true);
   const steps = [
     { title: "Solicitud de transferencia" },
-    { title: "Seleccion de vehiculos" },
-    { title: "Seleccion de proveedor" }
+    { title: "Selección de vehículos" },
+    { title: "Selección de proveedor" }
   ];
   const currentStepIndex = view === "solicitation" ? 0 : view === "vehicles" ? 1 : 2;
 
@@ -575,7 +575,7 @@ export default function PricingTransferRequest({
       showSorterTooltip: false
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "contact_number",
       key: "contact_number",
       render: () => <Text>a</Text>,
@@ -602,7 +602,7 @@ export default function PricingTransferRequest({
 
   const columnsCargaVehiculo = [
     {
-      title: "Vehiculo",
+      title: "Vehículo",
       dataIndex: "vehicle",
       key: "vehicle"
     },
@@ -998,7 +998,7 @@ export default function PricingTransferRequest({
         </Flex>
         <Flex justify="space-between" style={{ marginTop: "24px", height: "53px" }}>
           <PrincipalButton type="default" onClick={handleBack}>
-            Atras
+            Atrás
           </PrincipalButton>
           <Flex gap="middle" align="flex-end">
             {/* view === "vehicles" && <Button className="saveButton">Guardar como draft</Button> */}

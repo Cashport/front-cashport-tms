@@ -1,22 +1,13 @@
-import { IMaterial } from "@/types/logistics/schema";
 import { formatNumber } from "@/utils/utils";
 import { Col, Divider, Flex, Row, Space, Typography } from "antd";
 import styles from "./MaterialTablleFooter.module.scss";
 const { Text } = Typography;
 interface IMaterialTableFooter {
-  dataCarga: IMaterial[];
+  totalVolume: number;
+  totalWeight: number;
 }
-const MaterialTableFooter = ({ dataCarga }: IMaterialTableFooter) => {
-  const totalVolume = dataCarga.reduce(
-    (sum, material) => sum + material.m3_volume * material.quantity,
-    0
-  );
+const MaterialTableFooter = ({ totalVolume, totalWeight }: IMaterialTableFooter) => {
   const formatedTotalVolume = formatNumber(totalVolume);
-
-  const totalWeight = dataCarga.reduce(
-    (sum, material) => sum + material.kg_weight * material.quantity,
-    0
-  );
   const formatedTotalWeight = formatNumber(totalWeight);
 
   return (

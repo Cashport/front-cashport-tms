@@ -7,37 +7,9 @@ import { formatNumber } from "@/utils/utils";
 import TotalFooter from "./components/TotalFooter/TotalFooter";
 import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/billing";
 import { STATUS } from "@/utils/constants/globalConstants";
+import BillingStatus from "./components/BillingStatus/BillingStatus";
 const { Text } = Typography;
 
-const getBgColor = (state: BillingStatusEnum) => {
-  switch (state) {
-    case BillingStatusEnum.Preautorizado:
-      return "#CBE71E";
-    case BillingStatusEnum.Facturado:
-      return "#FF6B00";
-    case BillingStatusEnum.Aceptadas:
-      return "#0085FF";
-    case BillingStatusEnum.PorAceptar:
-      return "#969696";
-    default:
-      return "#969696";
-  }
-};
-
-const getColor = (state: string) => {
-  switch (state) {
-    case BillingStatusEnum.Preautorizado:
-      return "#141414";
-    case BillingStatusEnum.Facturado:
-      return "#141414";
-    case BillingStatusEnum.Aceptadas:
-      return "#FFFFFF";
-    case BillingStatusEnum.PorAceptar:
-      return "#FFFFFF";
-    default:
-      return "#FFFFFF";
-  }
-};
 interface IBillingTableProps {
   supplierBillings: BillingByCarrier[];
   handleShowDetails: (id: number) => void;
@@ -53,14 +25,8 @@ export const BillingTable: FC<IBillingTableProps> = ({ supplierBillings, handleS
     {
       title: "Estado",
       dataIndex: "statusDesc",
-      render: (text: BillingStatusEnum) => (
-        <div className={styles.stateContainer}>
-          <div style={{ backgroundColor: getBgColor(text) }} className={styles.stateContent}>
-            <Text style={{ color: getColor(text) }} className={styles.text}>
-              {text}
-            </Text>
-          </div>
-        </div>
+      render: (text: BillingStatusEnum, record: BillingByCarrier) => (
+        <BillingStatus status={text} tooltipText={record.rejectObservation} />
       ),
       align: "center"
     },

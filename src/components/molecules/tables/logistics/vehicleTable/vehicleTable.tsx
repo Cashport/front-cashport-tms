@@ -53,7 +53,7 @@ export const VehicleTable = ({ params: { id } }: Props) => {
       key: "company"
     },
     {
-      title: "Tipo de Vehiculo",
+      title: "Tipo de Vehículo",
       dataIndex: "type",
       key: "type"
     },
@@ -100,7 +100,7 @@ export const VehicleTable = ({ params: { id } }: Props) => {
           <Button className="options" icon={<DotsThree size={"1.5rem"} />} />
           <Link href={`/logistics/providers/${id}/vehicle/new`}>
             <Button type="primary" className="buttonNewProject" size="large">
-              Nuevo Vehiculo
+              Nuevo Vehículo
               {<Plus weight="bold" size={14} />}
             </Button>
           </Link>

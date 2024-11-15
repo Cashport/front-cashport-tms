@@ -232,7 +232,7 @@ export const UserProjectForm = ({
                 />
                 <InputForm
                   typeInput="phone"
-                  titleInput="Telefono"
+                  titleInput="Teléfono"
                   control={control}
                   nameInput="info.phone"
                   error={errors.info?.phone}

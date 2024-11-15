@@ -619,13 +619,13 @@ export const CreateOrderView = () => {
   const dataPslDefault = [
     {
       key: 1,
-      idpsl: 1,
+      idpsl: 0,
       descpsl: "",
       percent: 100,
       costcenters: [
         {
           key: 1,
-          idpslcostcenter: 1,
+          idpslcostcenter: 0,
           descpslcostcenter: "",
           percent: 100
         }
@@ -677,13 +677,13 @@ export const CreateOrderView = () => {
     const createNewPsl = (key: number) => {
       return {
         key,
-        idpsl: 1,
+        idpsl: 0,
         descpsl: "",
         percent: 0,
         costcenters: [
           {
             key: 1,
-            idpslcostcenter: 1,
+            idpslcostcenter: 0,
             descpslcostcenter: "",
             percent: 0
           }
@@ -697,7 +697,7 @@ export const CreateOrderView = () => {
     const createNewCC = (key: number) => {
       return {
         key,
-        idpslcostcenter: 1,
+        idpslcostcenter: 0,
         descpslcostcenter: "",
         percent: 0
       };
@@ -1118,12 +1118,23 @@ export const CreateOrderView = () => {
         messageApi.error("Debe agregar por lo menos un vehículo sugerido");
       }
 
-      const checkPercentages = (psls: IOrderPsl[]) => {
+      const checkPSLs = (psls: IOrderPsl[]) => {
+        const hasValidPsl = psls.some(
+          (psl) => psl.idpsl !== 0 && psl.costcenters.some((cc) => cc.idpslcostcenter !== 0)
+        );
+
+        if (!hasValidPsl) {
+          isformvalid = false;
+          messageApi.error("Debe haber al menos un PSL válido con un centro de costo válido");
+          return;
+        }
+
         const totalPslPercent = psls.reduce((total, psl) => total + psl.percent, 0);
         if (totalPslPercent !== 100) {
           isformvalid = false;
           messageApi.error("La totalidad de los PSLs debe ser 100%");
         }
+
         for (const psl of psls) {
           const totalCcPercent = psl.costcenters.reduce((total, cc) => total + cc.percent, 0);
           if (totalCcPercent !== psl.percent) {
@@ -1132,7 +1143,9 @@ export const CreateOrderView = () => {
           }
         }
       };
-      checkPercentages(dataPsl);
+
+      checkPSLs(dataPsl);
+
       //datos de contacto
       dataContacts.forEach((contact) => {
         if (contact.contact_number.length === 0 || contact.name.length === 0) {
@@ -1665,7 +1678,22 @@ export const CreateOrderView = () => {
                       columns={columnsCarga}
                       dataSource={dataCarga}
                       pagination={false}
-                      footer={() => <MaterialTableFooter dataCarga={dataCarga} />}
+                      footer={() => {
+                        const totalVolume = dataCarga.reduce(
+                          (sum, material) => sum + material.m3_volume * material.quantity,
+                          0
+                        );
+                        const totalWeight = dataCarga.reduce(
+                          (sum, material) => sum + material.kg_weight * material.quantity,
+                          0
+                        );
+                        return (
+                          <MaterialTableFooter
+                            totalVolume={totalVolume}
+                            totalWeight={totalWeight}
+                          />
+                        );
+                      }}
                       rowKey={"id"}
                     />
                   </Col>

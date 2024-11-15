@@ -3365,6 +3365,7 @@ export interface IIncident {
   id_trip: number;
   id_driver: number;
   id_incident_type: number;
+  incident_type_name: string;
   id_pricing: number | null;
   fare: number;
   units: number;

@@ -69,7 +69,7 @@ export const UsersProjectTable: React.FC<Props> = ({
       render: (text) => <Text>{text}</Text>
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       key: "PHONE",
       dataIndex: "PHONE",
       render: (text) => <Text>{text}</Text>

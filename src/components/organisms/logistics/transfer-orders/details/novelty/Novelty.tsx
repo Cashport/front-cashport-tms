@@ -17,10 +17,13 @@ interface INoveltyProps {
   handleOpenCreateDrawer: () => void;
   transferJournies: ITransferJourney[];
   setTripId: (id: number) => void;
-  setTripData: (data: { idCarrier: number; idVehicleType: number }) => void;
+  setTripData: (data: {
+    idCarrier: number;
+    idVehicleType: number;
+    canEditNovelties: boolean;
+  }) => void;
   resetNovelty: () => void;
   handleOpenMTModal: () => void;
-  validateDisabled: boolean;
 }
 
 export const Novelty: FC<INoveltyProps> = ({
@@ -31,8 +34,7 @@ export const Novelty: FC<INoveltyProps> = ({
   setTripId,
   setTripData,
   resetNovelty,
-  handleOpenMTModal,
-  validateDisabled
+  handleOpenMTModal
 }) => {
   const [key, setKey] = useState<number | null>(null);
 
@@ -130,7 +132,8 @@ export const Novelty: FC<INoveltyProps> = ({
                           handleShowDetails={(t) => {
                             setTripData({
                               idCarrier: trip.id_provider,
-                              idVehicleType: trip.id_vehicle_type
+                              idVehicleType: trip.id_vehicle_type,
+                              canEditNovelties: !!trip.edit_novelties
                             });
                             handleShowDetails(t);
                           }}
@@ -143,7 +146,8 @@ export const Novelty: FC<INoveltyProps> = ({
                               setTripId(trip.id);
                               setTripData({
                                 idCarrier: trip.id_provider,
-                                idVehicleType: trip.id_vehicle_type
+                                idVehicleType: trip.id_vehicle_type,
+                                canEditNovelties: !!trip.edit_novelties
                               });
                             }}
                           >
@@ -157,12 +161,13 @@ export const Novelty: FC<INoveltyProps> = ({
                                 setTripId(trip.id);
                                 setTripData({
                                   idCarrier: trip.id_provider,
-                                  idVehicleType: trip.id_vehicle_type
+                                  idVehicleType: trip.id_vehicle_type,
+                                  canEditNovelties: !!trip.edit_novelties
                                 });
                                 resetNovelty();
                               }}
                               className={styles.btn}
-                              disabled={validateDisabled}
+                              disabled={trip.edit_novelties === 0}
                               type="text"
                               size="large"
                             >

@@ -72,7 +72,7 @@ export const CarrierTable = () => {
       key: "type"
     },
     {
-      title: "Vehiculos",
+      title: "Vehículos",
       dataIndex: "vehicle",
       key: "vehicle"
     },

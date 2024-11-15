@@ -1,4 +1,4 @@
-@import "../../../../../styles/variables.scss";
+@import "@/styles/variables.scss";
 
 .mainCreateOrder {
     width: 100%;
@@ -28,20 +28,29 @@
         font-weight: 600;
         cursor: pointer;
     }
-
+    .tabs {
+        .tab {
+            max-width: 100%;
+            font-size: var(--font-size-base) !important;
+            color: #141414 !important;
+            font-family: var(--font-poppins) !important;
+        }
+        color: #141414;
+    }
     .containerCreateOrder {
         width: 100%;
         padding: 2rem;
         height: auto;
+
         .titleName {
-					margin: auto;
-					font-weight: 600;
-					width: 398px;
-					height: 32px;
-					color:var(--Black, #141414);
-					line-height: 124%;
-					font-style: normal;
-          font-size: 24px;
+            margin: auto;
+            font-weight: 600;
+            width: 398px;
+            height: 32px;
+            color: var(--Black, #141414);
+            line-height: 124%;
+            font-style: normal;
+            font-size: 24px;
         }
 
         .subtitleNit {
@@ -61,24 +70,36 @@
         justify-content: space-between;
     }
 
-    .orderContainer {
+    .suppliersTabsContainer {
         width: 100%;
         height: auto;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
+        padding: 1.5rem;
         border-radius: 0.5rem;
         background-color: $white;
-        .ant-tabs-content,.ant-tabs-tabpane {
+
+        .ant-tabs-tab{
+            font-size: var(--font-size-base) !important;
+        }
+        .ant-tabs-content,
+        .ant-tabs-tabpane {
             height: 100%;
+        }
+
+        .tabs {
+            align-self: stretch;
+            max-width: 100%;
+            font-size: var(--font-size-base) !important;
+            color: var(--black) !important;
+            font-family: var(--font-poppins) !important;
+            margin-bottom: 0.5rem;
         }
     }
 }
 
-.ant-collapse{
-    width:100%;
+.ant-collapse {
+    width: 100%;
 }
+
 .collapseByAction {
     display: flex;
     flex-direction: column;
@@ -120,11 +141,13 @@
     }
 
     &__children {
-        padding-top:2rem;
-        padding-bottom:2rem;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+
         &__item {
             margin: 1rem 0;
         }
+
         hr {
             border: none;
             height: 1px;
@@ -134,33 +157,34 @@
 }
 
 /* TRIP SELECTION TYPE*/
-.active {
-    background-color: var(--green) !important;
-  }
 
 .icon {
     width: 27px;
     height: 27px;
     position: relative;
-  }
-  .text {
+}
+
+.text {
     text-decoration: none;
     position: relative;
     color: inherit;
     display: inline-block;
     min-width: 51px;
-  }
-  .tripTypeIcons,
-  .tripTypes {
+}
+
+.tripTypeIcons,
+.tripTypes {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-  }
-  .tripTypeIcons {
+}
+
+.tripTypeIcons {
     gap: var(--gap-9xs);
-  }
-  .tripTypes {
+}
+
+.tripTypes {
     flex: 1;
     border-radius: var(--br-5xs);
     background-color: var(--white);
@@ -168,19 +192,21 @@
     box-sizing: border-box;
     overflow-y: auto;
     padding: var(--padding-5xs) var(--padding-xl);
-    //min-width: 262px;
+    min-width: 262px;
     max-width: 100%;
     text-align: left;
     font-size: var(--font-size-base);
     color: var(--black);
     font-family: var(--font-poppins);
     cursor: pointer;
-  }
+}
 
+.active {
+    background-color: var(--green);
+}
 
-  
- /*Agendamiento*/
- .locationLabels {
+/*Agendamiento*/
+.locationLabels {
     align-self: stretch;
     flex-direction: column;
     max-width: 100%;
@@ -189,8 +215,9 @@
     color: var(--black) !important;
     font-family: var(--font-poppins) !important;
     margin-bottom: 0.5rem;
- }
- .puntoOrigen{
+}
+
+.puntoOrigen {
     align-self: stretch;
     position: relative;
     letter-spacing: -1px;
@@ -200,59 +227,4 @@
 
 .ant-picker-dropdown .ant-picker-panel-container {
     background: #f7f7f7 !important;
-}
-
-.divdistance{
-    margin-top: 10px;
-    background: #f7f7f7 !important;
-    padding: 15px;
-}
-
-.divdistance p{
-    padding: 5px;
-}
-
-.text-right{
-    text-align: right;
-}
-
-.ant-drawer .ant-drawer-content{
-    background-color: #f7f7f7 !important;
-}
-
-.ant-card-body{
-    padding: 15px !important;
-}
-
-.carddivider{
-    margin-left: 2rem;
-    border-left: 2px #DDDDDD solid;
-    height: 40px;
-}
-
-.form-wizard-steps{
-    display: none !important;
-}
-
-.wizard-footer-right{
-    background-color: var(--green) !important;
-}
-
-.wizard-footer-left{
-    background-color: var(--black) !important;
-}
-
-.wizard-progress-bar{
-    background-color: var(--green) !important;
-}
-.react-form-wizard .wizard-tab-content{
-    text-align: left !important;
-    padding-bottom: 25px !important;
-    min-height: 250px !important;
-}
-.collapseByAction__label__text{
-    margin-top: 10px !important;
-    margin-bottom: 10px !important;
-    font-weight: bold !important;
-    line-height: 2rem !important;
 }

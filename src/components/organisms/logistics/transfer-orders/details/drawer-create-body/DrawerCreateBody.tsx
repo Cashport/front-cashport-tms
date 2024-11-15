@@ -215,7 +215,7 @@ export const DrawerCreateBody: FC<IDrawerBodyProps> = ({
               customInput={Input}
               thousandSeparator={"."}
               decimalSeparator=","
-              decimalScale={0}
+              decimalScale={1}
               onValueChange={(values) => setForm({ ...form, quantity: values.floatValue || 0 })}
               placeholder="Escribe la cantidad"
             />

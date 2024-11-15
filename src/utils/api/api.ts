@@ -71,7 +71,7 @@ export const setProjectInApi = (projectId: number) => {
   });
 };
 
-const getProjectId = async () => {
+export const getProjectId = async () => {
   await new Promise((resolve) => setTimeout(resolve, 50));
   const project = JSON.parse(sessionStorage.getItem("project") || "{}");
   const projectId = (project?.state?.projectsBasicInfo?.find(() => true)?.ID as number) || 0;

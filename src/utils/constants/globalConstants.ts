@@ -9,6 +9,8 @@ export const STORAGE_TOKEN = "token";
 
 export const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME;
 
+export const SOCKET_URI = process.env.NEXT_PUBLIC_SOCKET_URI;
+
 // ---
 export const CREATED = 201;
 export const SUCCESS = 200;
@@ -48,7 +50,15 @@ export const STATUS = {
     DETENIDO: "9f37afd7-1852-457d-964b-378fa6150471",
     STAND_BY: "73ad61e3-395f-4ae4-8aef-9d24f3f917a9",
     POR_LEGALIZAR: "ce946d35-381e-4bf3-a54a-4d38fb1b5e92",
-    LEGALIZADO: "49e6c46e-5a57-4a38-8b13-955bbffb7279"
+    POR_ACEPTAR: "49e6c46e-5a57-4a38-8b13-955bbffb7279" // Ex legalizado
+  },
+  TRIP: {
+    SIN_INICIAR: "5d6508db-a151-4b13-b0a7-61459fa953b4",
+    CARGANDO: "af18a220-6647-4068-ad0f-2ddeb3ecb31e",
+    EN_CURSO: "20ccbed7-449e-441c-8635-c37a09120115",
+    DESCARGANDO: "8260cd86-df0e-4d52-b5f1-9e18fa4cfd16",
+    DETENIDO: "423c2398-9b84-45e2-8534-20f0e6adddca",
+    STAND_BY: "a849c73d-dfd1-4c8d-a803-68100c59034e",
   },
   NOVELTY: {
     PENDIENTE: "5bffe76c-2707-4088-bdff-1ae66701874b",

@@ -1,15 +1,14 @@
-import axios, { AxiosResponse } from "axios";
-import { API, getIdToken } from "@/utils/api/api";
+import axios from "axios";
+import { getIdToken } from "@/utils/api/api";
 import config from "@/config";
 import { IDocumentCompleted, IListData, ITransferOrder } from "@/types/logistics/schema";
-import { GenericResponse } from "@/types/global/IGlobal";
 
 export const addTransferOrder = async (
   data: ITransferOrder,
   files: IDocumentCompleted[]
 ): Promise<any> => {
   try {
-    //const token = await getIdToken();
+    const token = await getIdToken();
     const form = new FormData();
     const body: any = data;
     body.files = files;
@@ -17,14 +16,22 @@ export const addTransferOrder = async (
       if (file.file) form.append(`file-for-${file.id_document_type}`, file.file);
     });
     form.append("body", JSON.stringify({ ...body }));
-    const response: GenericResponse = await API.sendFormData(`/transfer-order/create`, form);
-    console.log("RESPONSE addTransferOrder", response);
-    if (response.success) return response.data;
-    throw new Error(response?.message || "Error /transfer-order/create`");
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error?.message || "Error /transfer-order/create");
-    }
+    const response = await axios.post(`${config.API_HOST}/transfer-order/create`, form, {
+      headers: {
+        "content-type": "multipart/form-data",
+        Accept: "application/json, text/plain, */*",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response;
+  } catch (error: any) {
+    console.log("Error post transfer-order/: ", error);
+    let msg = "";
+    if (Array.isArray(error?.response?.data?.data))
+      msg = error?.response?.data?.data.map((item: any) => item?.msg || "").join(" - ");
+    throw new Error(
+      msg || error?.response?.data?.message || "Ocurrio un error al crear la operacion"
+    ) as any;
   }
 };
 

@@ -34,17 +34,17 @@ export const DriverTable = ({ params: { id } }: Props) => {
   };
 
   useEffect(() => {
-    const data = drivers
-      ?.filter((element: any) => {
-        if (!search) return true;
-        return (
-          element.name.toLowerCase().includes(search.toLowerCase()) ||
-          element.last_name.toLowerCase().includes(search.toLowerCase()) ||
-          element.document.toLowerCase().includes(search.toLowerCase()) 
-        );
-      })
-      .map((element: any) => ({...element
-      })) || [];
+    const data =
+      drivers
+        ?.filter((element: any) => {
+          if (!search) return true;
+          return (
+            element.name.toLowerCase().includes(search.toLowerCase()) ||
+            element.last_name.toLowerCase().includes(search.toLowerCase()) ||
+            element.document.toLowerCase().includes(search.toLowerCase())
+          );
+        })
+        .map((element: any) => ({ ...element })) || [];
     setDatasource(data);
   }, [drivers, search]);
 
@@ -58,7 +58,7 @@ export const DriverTable = ({ params: { id } }: Props) => {
       title: "Nombre",
       dataIndex: "name",
       key: "name",
-      render: (_, { name, last_name}) => (<Text>{name + " " + (last_name || "")}</Text>)
+      render: (_, { name, last_name }) => <Text>{name + " " + (last_name || "")}</Text>
     },
     {
       title: "Documento",
@@ -66,7 +66,7 @@ export const DriverTable = ({ params: { id } }: Props) => {
       key: "document"
     },
     {
-      title: "Telefono",
+      title: "Teléfono",
       dataIndex: "phone",
       key: "phone"
     },
