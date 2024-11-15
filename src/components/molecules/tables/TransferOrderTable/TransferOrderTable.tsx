@@ -80,7 +80,7 @@ const columns = (
               {trShouldRedirect ? (
                 <Link
                   className="row-text subId"
-                  href={`${"/logistics/transfer-request/"}${record.id_transfer_request}`}
+                  href={`${"/logistics/transfer-orders/details/"}${record.id_transfer_request}`}
                 >
                   TR {record.id_transfer_request}
                 </Link>
