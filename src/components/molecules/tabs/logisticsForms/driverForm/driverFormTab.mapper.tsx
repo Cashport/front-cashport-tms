@@ -28,7 +28,6 @@ export interface DriverFormTabProps {
   documentsTypesList: CertificateType[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
-  messageApi: MessageInstance;
 }
 
 export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICertificates[] };

@@ -106,6 +106,8 @@ export const Request: FC<IRequestProps> = ({
   const renderItems: CollapseProps["items"] = sortedFilteredData.map((item, index) => {
     let aditionalRow = undefined;
     let redirect = undefined;
+    let showBothIds = false;
+    let trShouldRedirect = false;
     if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
       aditionalRow = {
         title: "",
@@ -137,11 +139,24 @@ export const Request: FC<IRequestProps> = ({
     if (statusToDetailsTO.includes(item.statusId)) {
       redirect = "/logistics/orders/details";
     }
+    const tosToTR = [STATUS.TO.PROCESADO, STATUS.TO.PROCESANDO];
+    if (tosToTR.includes(item.statusId)) {
+      showBothIds = true;
+    }
+    if (item.statusId === STATUS.TO.PROCESADO) {
+      trShouldRedirect = true;
+    }
     return {
       key: index,
       label: getTitile(item.statusId, item.transferType, item.items.length),
       children: (
-        <TransferOrdersTable items={item.items} aditionalRow={aditionalRow} redirect={redirect} />
+        <TransferOrdersTable
+          items={item.items}
+          aditionalRow={aditionalRow}
+          redirect={redirect}
+          showBothIds={showBothIds}
+          trShouldRedirect={trShouldRedirect}
+        />
       )
     };
   });

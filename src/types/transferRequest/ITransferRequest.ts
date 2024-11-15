@@ -11,6 +11,7 @@ export interface ITransferRequest {
   total_value: number;
   description: string;
   created_at: Date;
+  id_transfer_request?: number;
 }
 
 export interface ITimeLine {
