@@ -34,11 +34,13 @@ export const CreateDriverView = ({ params }: Props) => {
         data.logo as any,
         data?.files as DocumentCompleteType[]
       );
-      message.success("El conductor fue creado exitosamente.", 2).then(() => {
-        push(`/logistics/providers/${params.id}/driver/${response.id}`);
-      });
+      if (response) {
+        message.success("Conductor creado", 2).then(() => {
+          push(`/logistics/providers/${params.id}/driver`);
+        });
+      }
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al crear driver", 4);
+      message.error(error instanceof Error ? error.message : "Error al crear conductor", 3);
     } finally {
       setIsLoadingSubmit(false);
     }
@@ -61,7 +63,7 @@ export const CreateDriverView = ({ params }: Props) => {
         statusForm={"create"}
         params={params}
         documentsTypesList={documentsType ?? []}
-        vehiclesTypesList={vehiclesTypesData?.data ?? []}
+        vehiclesTypesList={vehiclesTypesData ?? []}
       />
     </Skeleton>
   );

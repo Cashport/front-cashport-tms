@@ -112,7 +112,6 @@ export const CreateOrderView = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
 
   /* Tipo de viaje */
   const [typeactive, setTypeactive] = useState("1");
@@ -145,6 +144,10 @@ export const CreateOrderView = () => {
 
   const [clientValid, setClientValid] = useState(true);
   const [companyValid, setCompanyValid] = useState(true);
+  const [materialesValid, setMaterialesValid] = useState(true);
+  const [personasValid, setPersonasValid] = useState(true);
+  const [vehiculosValid, setVehiculosValid] = useState(true);
+
   const isButtonSubmitEnabled = !isLoading;
 
   const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
@@ -416,9 +419,9 @@ export const CreateOrderView = () => {
       // Handle error
       console.error("Error calculating directions:", error as any);
       if (error instanceof Error) {
-        messageApi.error("Error calculando direcciones: " + error.message);
+        message.error("Error calculando direcciones: " + error.message);
       } else {
-        messageApi.error("Error calculando direcciones: " + error);
+        message.error("Error calculando direcciones: " + error);
       }
     }
   };
@@ -557,7 +560,13 @@ export const CreateOrderView = () => {
               </Text>
             </Col>
             <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btnagregar active" onClick={() => addMaterial(item)}>
+              <button
+                className="btnagregar active"
+                onClick={() => {
+                  addMaterial(item);
+                  setMaterialesValid(true);
+                }}
+              >
                 Agregar
               </button>
             </Col>
@@ -611,7 +620,13 @@ export const CreateOrderView = () => {
               </Text>
             </Col>
             <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btnagregar active" onClick={() => addVehicle(item)}>
+              <button
+                className="btnagregar active"
+                onClick={() => {
+                  addVehicle(item);
+                  setVehiculosValid(true);
+                }}
+              >
                 Agregar
               </button>
             </Col>
@@ -1033,7 +1048,13 @@ export const CreateOrderView = () => {
               </Text>
             </Col>
             <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btnagregar active" onClick={() => addPerson(item)}>
+              <button
+                className="btnagregar active"
+                onClick={() => {
+                  addPerson(item);
+                  setPersonasValid(true);
+                }}
+              >
                 Agregar
               </button>
             </Col>
@@ -1066,46 +1087,46 @@ export const CreateOrderView = () => {
       if (origin.current.length == 0) {
         setOriginValid(false);
         isformvalid = false;
-        messageApi.error("Punto Origen es obligatorio");
+        message.error("Punto Origen es obligatorio");
       }
       if (typeactive == "1") {
         if (destination.current.length == 0) {
           setdestinationValid(false);
           isformvalid = false;
-          messageApi.error("Punto Destino es obligatorio");
+          message.error("Punto Destino es obligatorio");
         }
       }
       if (fechaInicial == undefined || fechaInicial == null) {
         setFechaInicialValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Inicial es obligatorio");
+        message.error("Fecha Inicial es obligatorio");
       }
       if (horaInicial == undefined || horaInicial == null) {
         setHoraInicialValid(false);
         isformvalid = false;
-        messageApi.error("Hora Inicial es obligatorio");
+        message.error("Hora Inicial es obligatorio");
       }
       if (fechaFinal == undefined || fechaFinal == null) {
         setFechaFinalValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Final es obligatorio");
+        message.error("Fecha Final es obligatorio");
       }
       if (horaFinal == undefined || horaFinal == null) {
         setHoraFinalValid(false);
         isformvalid = false;
-        messageApi.error("Hora Final es obligatorio");
+        message.error("Hora Final es obligatorio");
       }
       if (!fechaInicialFlexible) {
         setFechaInicialFlexibleValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Inicial Flexible es obligatorio");
+        message.error("Fecha Inicial Flexible es obligatorio");
       } else {
         setFechaInicialFlexibleValid(true);
       }
       if (!fechaFinalFlexible) {
         setFechaFinalFlexibleValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Final Flexible es obligatorio");
+        message.error("Fecha Final Flexible es obligatorio");
       } else {
         setFechaFinalFlexibleValid(true);
       }
@@ -1113,7 +1134,7 @@ export const CreateOrderView = () => {
       if (company == -1) {
         setCompanyValid(false);
         isformvalid = false;
-        messageApi.error("Company code es obligatorio");
+        message.error("Company code es obligatorio");
       } else {
         setCompanyValid(true);
       }
@@ -1121,7 +1142,7 @@ export const CreateOrderView = () => {
       if (client == -1) {
         setClientValid(false);
         isformvalid = false;
-        messageApi.error("Cliente final es obligatorio");
+        message.error("Cliente final es obligatorio");
       } else {
         setClientValid(true);
       }
@@ -1131,17 +1152,20 @@ export const CreateOrderView = () => {
       if (typeactive == "3") {
         if (dataPersons.length == 0) {
           isformvalid = false;
-          messageApi.error("Debe agregar por lo menos una persona");
+          setPersonasValid(false);
+          message.error("Debe agregar por lo menos una persona");
         }
       } else {
         if (dataCarga.length == 0) {
           isformvalid = false;
-          messageApi.error("Debe agregar por lo menos un material");
+          setMaterialesValid(false);
+          message.error("Debe agregar por lo menos un material");
         }
       }
       if (dataVehicles.length == 0) {
         isformvalid = false;
-        messageApi.error("Debe agregar por lo menos un vehículo sugerido");
+        setVehiculosValid(false);
+        message.error("Debe agregar por lo menos un vehículo sugerido");
       }
 
       const checkPSLs = (psls: IOrderPsl[]) => {
@@ -1151,21 +1175,21 @@ export const CreateOrderView = () => {
 
         if (!hasValidPsl) {
           isformvalid = false;
-          messageApi.error("Debe haber al menos un PSL válido con un centro de costo válido");
+          message.error("Debe haber al menos un PSL válido con un centro de costo válido");
           return;
         }
 
         const totalPslPercent = psls.reduce((total, psl) => total + psl.percent, 0);
         if (totalPslPercent !== 100) {
           isformvalid = false;
-          messageApi.error("La totalidad de los PSLs debe ser 100%");
+          message.error("La totalidad de los PSLs debe ser 100%");
         }
 
         for (const psl of psls) {
           const totalCcPercent = psl.costcenters.reduce((total, cc) => total + cc.percent, 0);
           if (totalCcPercent !== psl.percent) {
             isformvalid = false;
-            messageApi.error("La suma de los centros de costos debe ser igual al del PSL asociado");
+            message.error("La suma de los centros de costos debe ser igual al del PSL asociado");
           }
         }
       };
@@ -1177,10 +1201,10 @@ export const CreateOrderView = () => {
         if (contact.contact_number.length === 0 || contact.name.length === 0) {
           const type = contact.contact_type == 1 ? "origen" : "destino";
           isformvalid = false;
-          messageApi.error(`Debe registrar información del contacto de ${type}`);
+          message.error(`Debe registrar información del contacto de ${type}`);
         } else if (contact.contact_number.length < 10) {
           isformvalid = false;
-          messageApi.error(`Los números de teléfono deben contener 10 dígitos`);
+          message.error(`Los números de teléfono deben contener 10 dígitos`);
         }
       });
     }
@@ -1311,23 +1335,16 @@ export const CreateOrderView = () => {
 
     console.log("DATA PARA POST: ", data);
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
-      if (response.status === SUCCESS) {
-        messageApi.open({
-          type: "success",
-          content: "El viaje fue creado exitosamente.",
-          duration: 2
-        });
-        push("/logistics/orders/details/" + response.data.data.id);
+      const newTO = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
+      if (newTO) {
+        message.success(`TO No. ${newTO.id} ha sido creada`, 2, () =>
+          push("/logistics/orders/details/" + newTO.id)
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.error(error.message);
-      } else {
-        messageApi.error("Oops, hubo un error por favor intenta mas tarde.");
-      }
+      message.error(error instanceof Error ? error.message : "La solicitud no ha sido creada", 3);
     } finally {
       setIsLoading(false);
     }
@@ -1696,6 +1713,11 @@ export const CreateOrderView = () => {
                         }
                         return false;
                       }}
+                      className={
+                        materialesValid
+                          ? "puntoOrigen dateInputForm"
+                          : "puntoOrigen dateInputFormError"
+                      }
                     />
                   </Col>
                   <Col span={12} />
@@ -1781,6 +1803,11 @@ export const CreateOrderView = () => {
                       }
                       return false;
                     }}
+                    className={
+                      vehiculosValid
+                        ? "puntoOrigen dateInputForm"
+                        : "puntoOrigen dateInputFormError"
+                    }
                   />
                 </Col>
                 <Col span={12} />
@@ -2269,7 +2296,6 @@ export const CreateOrderView = () => {
 
   return (
     <Container>
-      {contextHolder}
       {/* ------------Main Info Order-------------- */}
       <Flex className="orderContainer">
         <Row style={{ width: "100%" }}>
@@ -2331,6 +2357,7 @@ export const CreateOrderView = () => {
             <Flex gap="middle" align="flex-end">
               <Button
                 disabled={!isButtonSubmitEnabled}
+                loading={isLoading}
                 className="active"
                 style={{ fontWeight: "bold" }}
                 onClick={() => {

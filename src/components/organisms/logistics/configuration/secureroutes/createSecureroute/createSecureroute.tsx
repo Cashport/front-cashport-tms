@@ -19,16 +19,13 @@ export const CreateGroupLocationView = ({ params }: Props) => {
 
   const handleSubmit = async (data: any) => {
     try {
-        const response = await addMaterial(
-          {...data}, 
-          data.images
-        );  
+      const response = await addMaterial({ ...data }, data.images);
       if (response && response.status === 200) {
         messageApi.open({
           type: "success",
           content: `El material fue creada exitosamente.`
         });
-        push(`/logistics/configuration/materials/all`);//${response.data.data.id}
+        push(`/logistics/configuration/materials/all`); //${response.data.data.id}
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -42,7 +39,7 @@ export const CreateGroupLocationView = ({ params }: Props) => {
           content: "Oops, hubo un error por favor intenta más tarde."
         });
       }
-    } 
+    }
   };
   return (
     <>
@@ -51,8 +48,13 @@ export const CreateGroupLocationView = ({ params }: Props) => {
         onSubmitForm={handleSubmit}
         statusForm={"create"}
         params={params}
+        isLoadingSubmit={false}
+        materialsTypesData={[]}
+        onActiveMaterial={() => {}}
+        onDesactivateMaterial={() => {}}
+        onEditProject={() => {}}
+        materialsTransportTypesData={[]}
       />
     </>
   );
 };
-

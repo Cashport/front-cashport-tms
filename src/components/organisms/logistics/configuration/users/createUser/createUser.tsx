@@ -5,6 +5,7 @@ import "../../../../../../styles/_variables_logistics.css";
 import "./createUser.scss";
 import { UserFormTab } from "@/components/molecules/tabs/logisticsForms/userForm/userFormTab";
 import { addUser } from "@/services/logistics/users";
+import { useState } from "react";
 
 type Props = {
   params: {
@@ -15,51 +16,26 @@ type Props = {
 
 export const CreateUserView = ({ params }: Props) => {
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const handleSubmit = async (data: any) => {
     try {
-        const response = await addUser(
-          {...data}, 
-          data.logo
-        );  
-      if (response && response.status === 200) {        
-        messageApi.open({
-          type: "success",
-          content: `El usuario fue creado exitosamente.`
-        });
-        push(`/logistics/configuration/users/all`); //${response.data.data.id}
+      const response = await addUser({ ...data }, data.logo);
+      if (response && response.status === 200) {
+        setIsLoadingSubmit(false);
+        message.success("Usuario creado", 2, () => push(`/logistics/configuration/users/all`));
       }
-    } catch (error:any) {
-     
-      if(error?.response?.data?.message){
-        console.log(error?.response?.data)
-        messageApi.open({
-          type: "error",
-          content: error?.response?.data?.message
-        });
-      }else if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message
-        });
-      } else {
-        message.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta más tarde."
-        });
-      }
-    } 
+    } catch (error: any) {
+      setIsLoadingSubmit(false);
+      message.error("Error al crear usuario", 3);
+    }
   };
   return (
-    <>
-      {contextHolder}
-      <UserFormTab
-        onSubmitForm={handleSubmit}
-        statusForm={"create"}
-        params={params}
-      />
-    </>
+    <UserFormTab
+      onSubmitForm={handleSubmit}
+      statusForm={"create"}
+      params={params}
+      isLoadingSubmit={isLoadingSubmit}
+    />
   );
 };
-
