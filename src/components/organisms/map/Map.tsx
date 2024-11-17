@@ -289,6 +289,7 @@ const MapComponent = () => {
     }
   }
 
+  console.log('Test deploy 1');
   return (
     <div className={styles.mainMap}>
       <SideBar />
