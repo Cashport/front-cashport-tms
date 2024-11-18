@@ -64,7 +64,9 @@ const DetailTripMap: FC<IDetailTripMapProps> = ({ trip, lat, long, driver, onClo
           <Text className={styles.btnText}>Regresar</Text>
         </Button>
         <div className={styles.stateContainer}>
-          <div onClick={() => router.push(`/logistics/transfer-orders/details/${trip.transferRequestId}`)} className={styles.tr}>TR-{trip.transferRequestId}</div>
+          <a href={`/logistics/transfer-orders/details/${trip.transferRequestId}`}>
+            <div onClick={() => {}} className={styles.tr}>TR-{trip.transferRequestId}</div>
+          </a>
           <div className={styles.stateTag} style={{ backgroundColor: getStateColor(trip.stateId) }}>
             <CheckCircle size={16} color={getStateTextColor(trip.stateId)} />
             <div className={styles.state} style={{ color: getStateTextColor(trip.stateId) }}>{trip.state.name}</div>
