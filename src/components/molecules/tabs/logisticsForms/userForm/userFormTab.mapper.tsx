@@ -21,16 +21,14 @@ export interface UserFormTabProps {
     userId: string;
   };
   handleFormState?: (newFormState: StatusForm) => void;
+  isLoadingSubmit: boolean;
 }
 
 export type UserData = IUser;
 
 export type ApiVehicleType = { id_vehicle_type: number };
 
-export const dataToProjectFormData = (
-  data: any
-): IFormUser => {
-
+export const dataToProjectFormData = (data: any): IFormUser => {
   //console.log(data)
   return {
     logo: [],
@@ -49,7 +47,7 @@ export const dataToProjectFormData = (
       carrier: data.carrier,
       position: data.POSITION,
       psl: data.psl,
-      ACTIVE: data.ACTIVE,
+      ACTIVE: data.ACTIVE
     }
   };
 };
@@ -72,7 +70,6 @@ export const _onSubmit = (
     setloading(false);
   }
 };
-
 
 export const validationButtonText = (statusForm: "create" | "edit" | "review") => {
   switch (statusForm) {

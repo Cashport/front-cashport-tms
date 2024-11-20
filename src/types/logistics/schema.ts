@@ -3513,3 +3513,73 @@ export interface IDocumentCompleted extends IDocumentsAPI {
   file?: File;
   expirationDate: any;
 }
+interface IFile {
+  id: number;
+  entity_type: number;
+  description: string;
+  optional: boolean;
+  id_location: number | null;
+  id_material_type: number | null;
+  expiry: boolean;
+  template: string;
+  active: boolean;
+  created_at: string; // ISO date string
+  created_by: string;
+  modified_at: string | null; // ISO date string or null
+  modified_by: string;
+  file: {
+    uid: string;
+  };
+  expirationDate: string; // ISO date string
+}
+export interface CreateDriver {
+  id: number;
+  phone: string;
+  email: string;
+  document_type: number;
+  document: string;
+  license: string;
+  license_categorie: string;
+  license_expiration: string; // ISO date string
+  name: string;
+  last_name: string;
+  emergency_number: string;
+  emergency_contact: string;
+  rh: string;
+  glasses: 1 | 0;
+  birth_date: string; // ISO date string
+  vehicle_type: number[];
+  company_id: string;
+  files: IFile[];
+}
+
+export interface CreateOrderResponse {
+  id_user: number;
+  id_service_type: string;
+  id_start_location: number;
+  id_end_location: number;
+  start_date: string; // ISO string format
+  end_date: string; // ISO string format
+  start_freight_equipment: string;
+  end_freight_equipment: string;
+  rotation: string;
+  start_date_flexible: string;
+  end_date_flexible: string;
+  freight_destination_time: number;
+  freight_origin_time: number;
+  id_route: string;
+  id_company: string;
+  id_client: number;
+  status: string; // UUID format
+  id: number;
+  active: string; // "true" or "false"
+  created_at: string; // ISO string format
+  created_by: string;
+  modified_at: string; // ISO string format
+  modified_by: string;
+  observation: string | null;
+  user: string;
+  geometry: string;
+  service_type_desc: string;
+  client_desc: string;
+}

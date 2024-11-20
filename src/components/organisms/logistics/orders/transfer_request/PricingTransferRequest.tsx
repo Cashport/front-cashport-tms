@@ -415,10 +415,11 @@ export default function PricingTransferRequest({
     const tracking = orders ? orders?.tracking : [];
     try {
       const res = await createTransferRequest(ordersId, tracking);
-      message.success("Solicitud de transferencia creada");
-      res?.stepOne?.transferRequest?.length
-        ? router.replace("/logistics/transfer-request/" + res.stepOne.transferRequest[0].id)
-        : undefined;
+      if (res?.stepOne?.transferRequest?.length) {
+        const newTRid = res.stepOne.transferRequest[0].id;
+        message.success(`TR No. ${newTRid} creada`);
+        router.replace("/logistics/transfer-request/" + newTRid);
+      }
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
       else message.error("Error al crear la solicitud de transferencia");
@@ -455,7 +456,7 @@ export default function PricingTransferRequest({
   const handleFinish = async (data: TransferRequestFinish) => {
     try {
       await finishTransferRequest(data);
-      message.success("Solicitud de transferencia finalizada");
+      message.success(`TR No. ${id} asignada`);
       router.push("/logistics/transfer-orders");
     } catch (error) {
       if (error instanceof Error) message.error(error.message);

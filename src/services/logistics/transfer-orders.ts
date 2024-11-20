@@ -6,7 +6,7 @@ import { IDocumentCompleted, IListData, ITransferOrder } from "@/types/logistics
 export const addTransferOrder = async (
   data: ITransferOrder,
   files: IDocumentCompleted[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<any> => {
   try {
     const token = await getIdToken();
     const form = new FormData();
@@ -23,7 +23,8 @@ export const addTransferOrder = async (
         Authorization: `Bearer ${token}`
       }
     });
-    return response;
+    console.log("RESOIBS", response);
+    if (response?.data?.data) return response.data.data;
   } catch (error: any) {
     console.log("Error post transfer-order/: ", error);
     let msg = "";

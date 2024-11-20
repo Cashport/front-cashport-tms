@@ -1,4 +1,4 @@
-import { Button, Table, Tooltip, Typography } from "antd";
+import { Button, Flex, Table, Tooltip, Typography } from "antd";
 import type { TableColumnsType } from "antd";
 
 import "./transferOrderTable.scss";
@@ -18,6 +18,7 @@ const { Text } = Typography;
 interface DataType {
   key: number;
   tr: string;
+  id_transfer_request?: number;
   validator: {
     ismaterialsproblem: boolean;
     ispeopleproblem: boolean;
@@ -44,7 +45,12 @@ interface DataType {
   valor: number;
 }
 
-const columns = (showColumn: boolean, redirect?: string): TableColumnsType<DataType> => {
+const columns = (
+  showColumn: boolean,
+  redirect?: string,
+  showBothIds?: boolean,
+  trShouldRedirect?: boolean
+): TableColumnsType<DataType> => {
   const timeToTrip = showColumn
     ? {
         title: "Tiempo transcurrido",
@@ -61,14 +67,38 @@ const columns = (showColumn: boolean, redirect?: string): TableColumnsType<DataT
     {
       title: "TR",
       dataIndex: "tr",
-      render: (text: string) => (
-        <Link
-          className="row-text id"
-          href={`${redirect ?? "/logistics/transfer-orders/details"}/${text}`}
-        >
-          {text}
-        </Link>
-      ),
+      render: (id, record) => {
+        if (showBothIds && record.id_transfer_request) {
+          return (
+            <Flex vertical gap={4}>
+              <Link
+                className="row-text id"
+                href={`${redirect ?? "/logistics/transfer-orders/details"}/${id}`}
+              >
+                {id}
+              </Link>
+              {trShouldRedirect ? (
+                <Link
+                  className="row-text subId"
+                  href={`${"/logistics/transfer-orders/details/"}${record.id_transfer_request}`}
+                >
+                  TR {record.id_transfer_request}
+                </Link>
+              ) : (
+                <span className="row-text subId">TR {record.id_transfer_request}</span>
+              )}
+            </Flex>
+          );
+        }
+        return (
+          <Link
+            className="row-text id"
+            href={`${redirect ?? "/logistics/transfer-orders/details"}/${id}`}
+          >
+            {id}
+          </Link>
+        );
+      },
       sorter: (a, b) => Number(a.tr) - Number(b.tr),
       showSorterTooltip: false,
       sortDirections: ["descend", "ascend"]
@@ -189,13 +219,17 @@ interface ITransferOrdersTable {
   showColumn?: boolean;
   aditionalRow?: any;
   redirect?: string;
+  showBothIds?: boolean;
+  trShouldRedirect?: boolean;
 }
 
 export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
   items,
   showColumn = true,
   aditionalRow,
-  redirect
+  redirect,
+  showBothIds = false,
+  trShouldRedirect = false
 }) => {
   let data: DataType[] = [];
   if (items) {
@@ -212,6 +246,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
           destination: item.end_date
         },
         tipodeviaje: item.type,
+        id_transfer_request: item.id_transfer_request ?? undefined,
         // vehiculos: {
         //   origin: 'Cama baja',
         //   destination: 'HDG-465',
@@ -231,7 +266,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
       };
     });
   }
-  const columnsShow = columns(showColumn, redirect);
+  const columnsShow = columns(showColumn, redirect, showBothIds, trShouldRedirect);
   if (aditionalRow) {
     columnsShow.unshift(aditionalRow);
   }

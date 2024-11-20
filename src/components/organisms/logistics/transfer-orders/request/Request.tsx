@@ -106,6 +106,8 @@ export const Request: FC<IRequestProps> = ({
   const renderItems: CollapseProps["items"] = sortedFilteredData.map((item, index) => {
     let aditionalRow = undefined;
     let redirect = undefined;
+    let showBothIds = false;
+    let trShouldRedirect = false;
     if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
       aditionalRow = {
         title: "",
@@ -119,7 +121,7 @@ export const Request: FC<IRequestProps> = ({
       };
       redirect = "/logistics/orders/details";
     }
-    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO];
+    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
     if (trDeleteable.includes(item.statusId)) {
       aditionalRow = {
         title: "",
@@ -133,18 +135,28 @@ export const Request: FC<IRequestProps> = ({
       };
       redirect = "/logistics/transfer-request/";
     }
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Esperando proveedor")?.id) {
-      redirect = "/logistics/transfer-request/";
-    }
     const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
     if (statusToDetailsTO.includes(item.statusId)) {
       redirect = "/logistics/orders/details";
+    }
+    const tosToTR = [STATUS.TO.PROCESADO, STATUS.TO.PROCESANDO];
+    if (tosToTR.includes(item.statusId)) {
+      showBothIds = true;
+    }
+    if (item.statusId === STATUS.TO.PROCESADO) {
+      trShouldRedirect = true;
     }
     return {
       key: index,
       label: getTitile(item.statusId, item.transferType, item.items.length),
       children: (
-        <TransferOrdersTable items={item.items} aditionalRow={aditionalRow} redirect={redirect} />
+        <TransferOrdersTable
+          items={item.items}
+          aditionalRow={aditionalRow}
+          redirect={redirect}
+          showBothIds={showBothIds}
+          trShouldRedirect={trShouldRedirect}
+        />
       )
     };
   });

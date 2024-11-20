@@ -29,7 +29,7 @@ export const GroupLocationsTable = () => {
 
   useEffect(() => {
     const data =
-      grouplocations?.data?.data
+      grouplocations
         ?.filter((element: any) => {
           if (!search) return true;
           return element.description.toLowerCase().includes(search.toLowerCase());

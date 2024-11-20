@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Col,
-  Flex,
-  Form,
-  Row,
-  Typography
-} from "antd";
+import { Button, Col, Flex, Form, Row, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
 
@@ -17,21 +10,11 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 
 import "./materialformtab.scss";
 import {
-  _onSubmit,
   dataToProjectFormData,
   validationButtonText,
   MaterialFormTabProps
 } from "./materialFormTab.mapper";
-import {  IFormMaterial, IMaterialType, IMaterialTransportType, IMaterialTransportByMaterial, IMaterialTypeByMaterial } from "@/types/logistics/schema";
-
-import {
-  FileObject
-} from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-
-import useSWR from "swr";
-import { getDocumentsByEntityType } from "@/services/logistics/certificates";
-import { getAllMaterialType, getAllMaterialTransportType } from "@/services/logistics/materials";
-
+import { IFormMaterial, IMaterialType, IMaterialTransportType } from "@/types/logistics/schema";
 import Link from "next/link";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
@@ -52,29 +35,11 @@ export const MaterialFormTab = ({
   handleFormState = () => {},
   onActiveMaterial = () => {},
   onDesactivateMaterial = () => {},
+  isLoadingSubmit,
+  materialsTransportTypesData: transportFeaturesOptions,
+  materialsTypesData: securityFeaturesOptions
 }: MaterialFormTabProps) => {
-
   const [isOpenModal, setIsOpenModal] = useState(false);
-
-  const { data: materialsTypesData, isLoading: loadingMaterialsTypes } = useSWR(
-    "materialtypes",
-    getAllMaterialType,
-    { revalidateIfStale:false,
-      revalidateOnFocus:false,
-      revalidateOnReconnect:false
-    }
-  );
-
-  const { data: materialsTransportTypesData, isLoading: loadingMaterialsTransportTypes } = useSWR(
-    "materialtransporttypes",
-    getAllMaterialTransportType,
-    { revalidateIfStale:false,
-      revalidateOnFocus:false,
-      revalidateOnReconnect:false
-    }
-  );
-
-  const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   //const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
@@ -100,7 +65,6 @@ export const MaterialFormTab = ({
     defaultValues,
     disabled: statusForm === "review"
   });
-
   const formImages = watch("images");
 
   const hasImages = () => {
@@ -110,70 +74,59 @@ export const MaterialFormTab = ({
     return isValid; //&& hasImages();
   };
 
-  const isSubmitButtonEnabled = isFormCompleted() && !loading;
+  const isSubmitButtonEnabled = isFormCompleted() && !isLoadingSubmit;
 
-  const convertToSelectOptions = (materialTypes: IMaterialType[]) => {
-    if (!Array.isArray(materialTypes)) return [];
-    return materialTypes?.map((materialType) => ({
-      label: materialType.description,
-      value: materialType.id
+  const convertToSelectOptions = (options: IMaterialTransportType[] | IMaterialType[]) => {
+    if (!Array.isArray(options)) return [];
+    return options?.map((option) => ({
+      label: option.description,
+      value: option.id
     }));
   };
 
-  const convertToSelectOptionsData = (materialTypes: IMaterialType[]) => {
-    if (materialTypes.length == 0) return [];
-    const results:OptionType[] = []
-    data?.material_type.forEach(matty => {
-      const matfilter = materialTypes?.filter(f => f.id == matty.id_material_type);
-      const option: OptionType={
+  const convertToSelectDefaults = (
+    options: IMaterialTransportType[] | IMaterialType[],
+    type: "transport" | "security"
+  ): any => {
+    if (options.length == 0) return [];
+    const results: OptionType[] = [];
+    const dataFromAPI: any = type === "transport" ? data?.material_transport : data?.material_type;
+    const propToFilterName =
+      type === "transport" ? "id_material_transport_type" : "id_material_type";
+    dataFromAPI?.forEach((d: any) => {
+      const matfilter = options?.filter((option) => option.id == d[propToFilterName]);
+      const option: OptionType = {
         value: matfilter[0].id,
         label: matfilter[0].description
-      }
-      results.push(option);
-    });
-    return results;
-  };
-
-  const convertToSelectOptionsTransport = (materialTransportTypes: IMaterialTransportType[]) => {
-    if (!Array.isArray(materialTransportTypes)) return [];
-    return materialTransportTypes?.map((materialTransportType) => ({
-      label: materialTransportType.description,
-      value: materialTransportType.id
-    }));
-  };
-
-  const convertToSelectOptionsTransportData = (materialTransportTypes: IMaterialTransportType[]) => {
-    if (materialTransportTypes.length == 0) return [];
-    const results:OptionType[] = []
-    data?.material_transport.forEach(mattr => {
-      const matfilter = materialTransportTypes?.filter(f => f.id == mattr.id_material_transport_type);
-      const option: OptionType={
-        value: matfilter[0].id,
-        label: matfilter[0].description
-      }
+      };
       results.push(option);
     });
     return results;
   };
 
   const onSubmit = async (data: any) => {
-
-    // const hasImage = data.images.length > 0;
-    // if (!hasImage){
-    //   setImageError(true);
-    //   return;
-    // } 
-
-    const  formImages:any[] = (data.images ? [...data.images] : [])
+    const formImages: any[] = data.images ? [...data.images] : [];
     setImages(Array(5).fill({ file: undefined }));
-    _onSubmit(
-      data,
-      formImages,
-      setImageError,
-      setLoading,
-      onSubmitForm
-    );
+    setImageError(false);
+    onSubmitForm({ ...data, images: formImages });
   };
+  useEffect(() => {
+    if (data?.material_transport) {
+      setValue(
+        "general.material_transport",
+        convertToSelectDefaults(transportFeaturesOptions, "transport")
+      );
+    }
+  }, [data, transportFeaturesOptions, setValue]);
+
+  useEffect(() => {
+    if (data?.material_type) {
+      setValue(
+        "general.material_type",
+        convertToSelectDefaults(securityFeaturesOptions, "security")
+      );
+    }
+  }, [data, securityFeaturesOptions, setValue]);
 
   return (
     <>
@@ -248,28 +201,28 @@ export const MaterialFormTab = ({
               <Row>
                 <Col span={24} className="colfoto">
                   <UploadImg
-                      disabled={statusForm === "review"}
-                      imgDefault={formImages ? formImages[0]?.url_archive : undefined}
-                      setImgFile={(file) => {
-                        const currentUrlArchive = formImages ? formImages[0]?.url_archive : undefined; // obtener el valor actual de url_archive
-                        if (currentUrlArchive) {
-                          (file as any).url_archive = currentUrlArchive;
-                          setValue(`images.${0}`, file);
-                        } else {
-                          setValue(`images.${0}`, file);
-                        }
-                        setImages((prev) =>
-                          prev.map((img, index) => (index === 0 ? { ...img, file } : img))
-                        );
-                        if (file) {
-                          //console.log(file)
-                          setImageError(false);
-                        }
-                      }}
-                    />
-                    {imageError && (                    
-                      <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>
-                    )}
+                    disabled={statusForm === "review"}
+                    imgDefault={formImages ? formImages[0]?.url_archive : undefined}
+                    setImgFile={(file) => {
+                      const currentUrlArchive = formImages ? formImages[0]?.url_archive : undefined; // obtener el valor actual de url_archive
+                      if (currentUrlArchive) {
+                        (file as any).url_archive = currentUrlArchive;
+                        setValue(`images.${0}`, file);
+                      } else {
+                        setValue(`images.${0}`, file);
+                      }
+                      setImages((prev) =>
+                        prev.map((img, index) => (index === 0 ? { ...img, file } : img))
+                      );
+                      if (file) {
+                        //console.log(file)
+                        setImageError(false);
+                      }
+                    }}
+                  />
+                  {imageError && (
+                    <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>
+                  )}
                 </Col>
               </Row>
               <Row gutter={16}>
@@ -332,7 +285,7 @@ export const MaterialFormTab = ({
                   />
                 </Col>
                 <Col span={6}>
-                  <InputForm                  
+                  <InputForm
                     typeInput="number"
                     titleInput="Alto (m)"
                     nameInput="general.mt_height"
@@ -373,59 +326,59 @@ export const MaterialFormTab = ({
           {/* ----------------------------------Vehiculos--------------------------------- */}
 
           <Row style={{ width: "100%", marginTop: "2rem" }}>
-              <Col span={24}>
-                <Title className="title" level={4}>
-                  Características
-                </Title>
-                <Row style={{ width: "100%", marginTop: "2rem" }}>
-                  <Col span={12}>
-                    <Controller
-                      name="general.material_transport"
-                      control={control}
-                      rules={{ required: false }}
-                      render={({ field }) => 
-                        <MultiSelectTags
-                          field={field}
-                          placeholder="Seleccionar"
-                          title="Características de transporte"
-                          errors={errors?.general?.material_transport}
-                          defaultValue={convertToSelectOptionsTransportData((materialsTransportTypesData?.data.data as any) || [])}
-                          options={convertToSelectOptionsTransport((materialsTransportTypesData?.data.data as any) || [])}
-                          disabled={statusForm === "review"} 
-                          layout="vertical"
-                        />
-                      }
-                    />
-                  </Col>
-                  <Col span={12}>
-                    <Controller
-                      name="general.material_type"
-                      control={control}
-                      rules={{ required: false }}
-                      render={({ field }) => 
-                        <MultiSelectTags
-                          field={field}
-                          placeholder="Seleccionar"
-                          title="Características de seguridad"
-                          errors={errors?.general?.material_type}
-                          defaultValue={convertToSelectOptionsData((materialsTypesData?.data.data as any) || [])}
-                          options={convertToSelectOptions((materialsTypesData?.data.data as any) || [])}
-                          disabled={statusForm === "review"} 
-                          layout="vertical"
-                        />
-                      }
-                    />
-                  </Col>                  
-                </Row>
-              </Col>              
+            <Col span={24}>
+              <Title className="title" level={4}>
+                Características
+              </Title>
+              <Row style={{ width: "100%", marginTop: "2rem" }}>
+                <Col span={12}>
+                  <Controller
+                    name="general.material_transport"
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field }) => (
+                      <MultiSelectTags
+                        field={field}
+                        placeholder="Seleccionar"
+                        title="Características de transporte"
+                        errors={errors?.general?.material_transport}
+                        defaultValue={null}
+                        options={convertToSelectOptions(transportFeaturesOptions)}
+                        disabled={statusForm === "review"}
+                        layout="vertical"
+                      />
+                    )}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Controller
+                    name="general.material_type"
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field }) => (
+                      <MultiSelectTags
+                        field={field}
+                        placeholder="Seleccionar"
+                        title="Características de seguridad"
+                        errors={errors?.general?.material_type}
+                        defaultValue={null}
+                        options={convertToSelectOptions(securityFeaturesOptions)}
+                        disabled={statusForm === "review"}
+                        layout="vertical"
+                      />
+                    )}
+                  />
+                </Col>
+              </Row>
+            </Col>
           </Row>
-
           {["edit", "create"].includes(statusForm) && (
-            <Row justify={"end"} style={{marginTop:'2rem'}}>
+            <Row justify={"end"} style={{ marginTop: "2rem" }}>
               <SubmitFormButton
                 text={validationButtonText(statusForm)}
                 disabled={!isSubmitButtonEnabled}
                 onClick={handleSubmit(onSubmit)}
+                loading={isLoadingSubmit}
               />
             </Row>
           )}
@@ -438,17 +391,6 @@ export const MaterialFormTab = ({
         onActive={onActiveMaterial}
         onDesactivate={onDesactivateMaterial}
       />
-      {/* <ModalDocuments
-        isOpen={isOpenModalDocuments}
-        mockFiles={selectedFiles}
-        setFiles={setFiles}
-        documentsType={documentsType}
-        isLoadingDocuments={isLoadingDocuments}
-        onClose={() => setIsOpenModalDocuments(false)}
-        handleChange={handleChange}
-        handleChangeExpirationDate={handleChangeExpirationDate}
-        setSelectedFiles={setSelectedFiles}
-      /> */}
     </>
   );
 };

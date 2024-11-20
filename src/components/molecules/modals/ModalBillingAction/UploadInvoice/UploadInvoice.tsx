@@ -1,5 +1,5 @@
 import UiTabs from "@/components/ui/ui-tabs";
-import { Flex, Skeleton } from "antd";
+import { Flex, message, Skeleton } from "antd";
 import { useEffect, useState } from "react";
 import styles from "./UploadInvoice.module.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -19,6 +19,7 @@ import { uploadInvoiceFormSchema } from "./controllers/formSchema";
 import { PreAuthorizationRequestData } from "@/types/logistics/billing/billing";
 import { STATUS } from "@/utils/constants/globalConstants";
 import { formatNumber } from "@/utils/utils";
+import { useRouter } from "next/navigation";
 
 interface UploadInvoice {
   idBilling: number;
@@ -41,6 +42,7 @@ const UploadInvoice = ({
   const [defaultValues, setDefaultValues] = useState<UploadInvoiceForm>(defaultUploadInvoiceForm);
   const [isEditable, setIsEditable] = useState(canEditForm);
   const [billingInfo, setBillingInfo] = useState<IBillingInfoAPI | null>(null);
+  const { push } = useRouter();
 
   const {
     control,
@@ -113,31 +115,18 @@ const UploadInvoice = ({
   }
   // Handle form submission
   async function sendForm(form: UploadInvoiceForm) {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await sendInvoices(form, idBilling);
       if (response) {
-        messageApi?.open({
-          type: "success",
-          content: "Creado correctamente",
-          duration: 3
-        });
-      } else {
-        messageApi?.open({
-          type: "error",
-          content: "Hubo un error",
-          duration: 3
-        });
+        setIsLoading(false);
+        onClose();
+        message.success(`TR No. ${idTR} facturada`, 2, () => push(`/facturacion`));
       }
     } catch (error: any) {
-      messageApi?.open({
-        type: "error",
-        content: error?.message ?? "Hubo un error",
-        duration: 3
-      });
-    } finally {
       setIsLoading(false);
       onClose();
+      message.error("Hubo un error al facturar la orden", 2);
     }
   }
 
@@ -170,7 +159,7 @@ const UploadInvoice = ({
   const getPendingInvoiceValue = (): number => {
     const currentInvoiceTotal =
       formValues?.pas?.reduce((total: number, pa: any) => {
-        if (pa.invoice.pdfFile?.file) {
+        if (pa.invoice.pdfFile?.file && pa.invoice.xmlFile?.file) {
           return total + Number(pa.invoice.value);
         }
         return total;
@@ -363,7 +352,7 @@ const UploadInvoice = ({
             </UploadDocumentButton>
           ) : (
             <UploadFileButton
-              isMandatory={false}
+              isMandatory={true}
               key={`${selectedTab}.${currentInvoice.id}.xml`}
               title={"XML Factura"}
               handleOnDelete={() => handleOnDeleteDocument("xmlFile")}
