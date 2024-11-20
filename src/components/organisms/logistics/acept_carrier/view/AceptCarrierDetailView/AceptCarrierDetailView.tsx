@@ -188,15 +188,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       setIsLoading(true);
       const res = await postCarrierReject(String(carrier?.id_carrier), String(carrier?.id));
       if (res) {
-        messageApi.open({
-          content: "Rechazado"
-        });
-      }
-      router.push("/logistics/acept_carrier");
+        message.success("Rechazado", 2, () => router.push("/logistics/acept_carrier"));
+      } else message.error("Hubo un error", 3, () => router.push("/logistics/acept_carrier"));
     } catch (error) {
-      messageApi.open({
-        content: "Hubo un problema rechazando la orden"
-      });
+      message.error("Hubo un problema rechazando la orden");
     } finally {
       setIsLoading(false);
     }
@@ -243,6 +238,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             mapContainerRef={mapContainerRef}
             setView={setView}
             showRejectButton={canBeRejected}
+            handleReject={handleReject}
           />
         );
       case "asignation":
