@@ -254,6 +254,9 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
         <div className={styles.trackComponent}>
           <div className={styles.trackTitleContainer}>
             <Text className={styles.trackTitle}>ID - {transferRequest?.id}</Text>
+            <Text className={styles.trackTO}>
+             TO - {transferRequest?.transfer_orders?.join(", ")}
+            </Text>
             <ConfigProvider
               theme={{
                 components: {

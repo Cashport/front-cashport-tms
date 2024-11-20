@@ -57,6 +57,7 @@ export interface ITransferRequestDetail {
   timeLine: ITimeLine[];
   steps: IStep[];
   geometry: IGeometryResponse;
+  transfer_orders: number[];
 }
 
 export interface ITransferRequestResponse {
