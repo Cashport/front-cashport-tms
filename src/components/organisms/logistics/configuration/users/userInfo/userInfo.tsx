@@ -8,7 +8,7 @@ import { StatusForm } from "@/components/molecules/tabs/logisticsForms/locationF
 import useSWR from "swr";
 import { UserFormTab } from "@/components/molecules/tabs/logisticsForms/userForm/userFormTab";
 import { getUserById, updateUser, updateUserStatus } from "@/services/logistics/users";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 interface Props {
   params: {
     id: string;
