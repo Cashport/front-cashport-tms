@@ -257,7 +257,7 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
               TR - {transferRequest?.id}
               {transferRequest?.transfer_orders && transferRequest.transfer_orders.length > 0 && (
                 <span className={styles.trackTO}>
-                  TO-{transferRequest.transfer_orders.join(", TO - ")}
+                  TO-{transferRequest.transfer_orders.join(", TO-")}
                 </span>
               )}
             </Text>
