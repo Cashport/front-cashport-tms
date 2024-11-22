@@ -214,13 +214,15 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
               <text>Vehículo Sugerido</text>
             </label>
             {orderRequest?.transfer_order_vehicles ? (
-              orderRequest?.transfer_order_vehicles.map((a) => (
-                <VehicleSuggestedTag
-                  units={a.quantity}
-                  vehicle_type_desc={a.vehicle_type_desc}
-                  key={a.id}
-                />
-              ))
+              <Flex gap={10}>
+                {orderRequest?.transfer_order_vehicles.map((a) => (
+                  <VehicleSuggestedTag
+                    units={a.quantity}
+                    vehicle_type_desc={a.vehicle_type_desc}
+                    key={a.id}
+                  />
+                ))}
+              </Flex>
             ) : (
               <p></p>
             )}
