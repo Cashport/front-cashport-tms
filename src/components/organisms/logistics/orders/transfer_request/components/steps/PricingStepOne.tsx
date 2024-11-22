@@ -13,6 +13,7 @@ import { Responsibles } from "../../../DetailsOrderView/components/Responsibles/
 import AditionalInfo from "@/components/organisms/logistics/acept_carrier/detail/components/AditionalInfo/AditionalInfo";
 import { formatNumber } from "@/utils/utils";
 import MaterialTableFooter from "../../../CreateOrderView/components/MaterialTableFooter/MaterialTableFooter";
+import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
 
 const { Title, Text } = Typography;
 
@@ -214,9 +215,11 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
             </label>
             {orderRequest?.transfer_order_vehicles ? (
               orderRequest?.transfer_order_vehicles.map((a) => (
-                <div className="vehicles_sugested" key={a.id}>
-                  {a.vehicle_type_desc}
-                </div>
+                <VehicleSuggestedTag
+                  units={a.quantity}
+                  vehicle_type_desc={a.vehicle_type_desc}
+                  key={a.id}
+                />
               ))
             ) : (
               <p></p>
