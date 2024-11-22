@@ -188,6 +188,8 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
                 otherRequirements={orderRequest?.transfer_order_other_requeriments ?? []}
                 specialInstructions={orderRequest?.observation ?? ""}
                 finalClient={orderRequest?.client_desc ?? ""}
+                declaredCargoValue={orderRequest?.declared_cargo_value}
+                contractNumber={orderRequest?.contract_number}
               />
             </Col>
           </Row>

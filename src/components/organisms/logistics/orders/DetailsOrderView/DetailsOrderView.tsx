@@ -12,7 +12,7 @@ dayjs.extend(utc);
 import "mapbox-gl/dist/mapbox-gl.css";
 
 //schemas
-import { IMaterial, ITransferOrder, TripType } from "@/types/logistics/schema";
+import { IMaterial, ITransferOrder, ITripSummaryAPI, TripType } from "@/types/logistics/schema";
 
 //navigation
 import { useRouter } from "next/navigation";
@@ -42,7 +42,7 @@ interface Props {
 export const DetailsOrderView = ({ idOrder = "" }: Props) => {
   const { push } = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
-  const [transferOrder, setTransferOrder] = useState<ITransferOrder>();
+  const [transferOrder, setTransferOrder] = useState<ITripSummaryAPI>();
   const [tripType, setTripType] = useState<TripType>(TripType.Carga);
   const [materialsTotalWeight, setMaterialsTotalWeight] = useState<number>(0);
   const [materialsTotalVolume, setMaterialsTotalVolume] = useState<number>(0);
@@ -194,6 +194,8 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
               otherRequirements={transferOrder?.transfer_order_other_requeriments ?? []}
               specialInstructions={transferOrder?.observation ?? ""}
               finalClient={transferOrder?.client_desc ?? ""}
+              contractNumber={transferOrder?.contract_number}
+              declaredCargoValue={transferOrder?.declared_cargo_value}
             />
           </Flex>
           <Flex className={styles.container} vertical>
