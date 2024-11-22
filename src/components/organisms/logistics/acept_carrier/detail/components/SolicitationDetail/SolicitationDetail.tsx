@@ -96,6 +96,7 @@ export default function SolicitationDetail({
         documents={providerDetail?.carrier_request_documents ?? []}
         contacts={providerDetail?.carrier_request_contacts ?? []}
         specialInstructions={providerDetail?.special_instructions}
+        declaredCargoValue={providerDetail?.declared_cargo_value}
       />
       {service_type !== "Personas" && (
         <Flex vertical className={styles.materialsWrapper} style={{ width: "100%" }}>
