@@ -15,6 +15,8 @@ import { getTravelDuration } from "@/utils/logistics/maps";
 import { SOCKET_URI, STATUS } from "@/utils/constants/globalConstants";
 import Image from "next/image";
 import "dayjs/locale/es-us";
+import Link from "next/link";
+import React from "react";
 dayjs.extend(utc).locale("es-us");
 
 const Text = Typography;
@@ -130,7 +132,7 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   };
 
   useEffect(() => {
-    const socket = io(SOCKET_URI || '');
+    const socket = io(SOCKET_URI || "");
     socket.on("changeLocation", (data) => {
       console.log("Ubicación recibida:", data);
       updateUserLocation(data);
@@ -248,19 +250,32 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
     new Date(transferRequest?.end_date || "").getTime() -
     new Date(transferRequest?.start_date || "").getTime();
 
+  const OrderList = ({ orders }: { orders: number[] }) => {
+    return (
+      <div style={{ color: "gray" }}>
+        {orders.map((order, index) => (
+          <React.Fragment key={order}>
+            <Link href={`/logistics/orders/details/${order}`} passHref target="_blank">
+              <span className={styles.trackSubtitle}>TO-{order}</span>
+            </Link>
+            {index < orders.length - 1 && <span>, </span>}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.mainDescription}>
       <div className={styles.trackContainer}>
         <div className={styles.trackComponent}>
           <div className={styles.trackTitleContainer}>
-            <Text className={styles.trackTitle}>
-              TR - {transferRequest?.id}
-              {transferRequest?.transfer_orders && transferRequest.transfer_orders.length > 0 && (
-                <span className={styles.trackTO}>
-                  TO-{transferRequest.transfer_orders.join(", TO-")}
-                </span>
+            <Flex gap={8}>
+              <Text className={styles.trackTitle}>TR-{transferRequest?.id}</Text>
+              {!!transferRequest?.transfer_orders?.length && (
+                <OrderList orders={transferRequest?.transfer_orders ?? []} />
               )}
-            </Text>
+            </Flex>
             <ConfigProvider
               theme={{
                 components: {
@@ -304,14 +319,22 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
         <div className={styles.cardsContainer}>
           <div className={styles.card}>
             <div className={styles.titleCardContainer}>
+              <Text className={styles.titleCard}>Costo total</Text>
+            </div>
+            <div className={styles.titleCardContainer}>
+              <Text className={styles.subtitleCard}>
+                {formatMoney(transferRequest?.total_price) || "-"}
+              </Text>
+            </div>
+          </div>
+          <div className={styles.card}>
+            <div className={styles.titleCardContainer}>
               <Text className={styles.titleCard}>Tarifa base</Text>
-              <Shuffle size={16} />
             </div>
             <div className={styles.titleCardContainer}>
               <Text className={styles.subtitleCard}>
                 {formatMoney(transferRequest?.total_fare) || "-"}
               </Text>
-              <WarningCircle size={13} />
             </div>
           </div>
           <div className={styles.card}>

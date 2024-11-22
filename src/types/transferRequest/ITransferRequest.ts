@@ -50,6 +50,7 @@ export interface ITransferRequestDetail {
   start_location: string;
   end_location: string;
   total_fare: number;
+  total_price: number;
   surcharge: number;
   distance: number;
   time_total: number;
