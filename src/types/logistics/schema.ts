@@ -1635,6 +1635,8 @@ export interface ITransferOrderRequest {
   client_desc: string;
   start_location?: ILocation | null | undefined;
   end_location?: ILocation | null | undefined;
+  contract_number?: string;
+  declared_cargo_value?: number;
   //geometry
   geometry: any;
   //datos de contacto
@@ -2050,6 +2052,8 @@ export interface ITransferOrder {
   observation: string | null | undefined;
   start_location?: ILocation | null | undefined;
   end_location?: ILocation | null | undefined;
+  contractNumber?: string;
+  declaredCargoValue?: number;
   //geometry
   geometry: any;
   //datos de contacto
@@ -3582,4 +3586,58 @@ export interface CreateOrderResponse {
   geometry: string;
   service_type_desc: string;
   client_desc: string;
+}
+export interface ITripSummaryAPI {
+  id: number;
+  id_service_type: string;
+  service_type_desc: TripType;
+  id_user: number;
+  user: string | null | undefined;
+  id_start_location: number;
+  id_end_location: number;
+  start_date?: string;
+  end_date?: string;
+  start_freight_equipment: boolean | string;
+  end_freight_equipment: boolean | string;
+  freight_origin_time?: number;
+  freight_destination_time?: number;
+  rotation: string;
+  start_date_flexible: number;
+  end_date_flexible: number;
+  id_route: string;
+  id_company: number;
+  id_client: number;
+  client_desc: string;
+  status: string;
+  active: string;
+  created_at?: string | null | undefined;
+  created_by?: string | null | undefined;
+  created_by_user?: string;
+  modified_at?: string | null | undefined;
+  modified_by?: string | null | undefined;
+  observation: string | null | undefined;
+  start_location?: ILocation | null | undefined;
+  end_location?: ILocation | null | undefined;
+  contract_number?: string;
+  declared_cargo_value?: number;
+  //geometry
+  geometry: any;
+  //datos de contacto
+  transfer_order_contacts?: ITransferOrderContacts[] | null;
+  //centros de costo
+  transfer_order_cost_center?: ITransferOrderCostCenter[] | null;
+  //documentos
+  transfer_order_documents?: ITransferOrderDocuments[] | null;
+  //material
+  transfer_order_material?: ITransferOrderMaterial[] | null;
+  //requerimientos adicionales
+  transfer_order_other_requeriments?: ITransferOrderOtherRequirements[] | null;
+  //personas -- aplica para viaje tipo persona
+  transfer_order_persons?: ITransferOrderPersons[] | null;
+  //productos
+  transfer_order_products?: ITransferOrderProducts[] | null;
+  //vehiculo sugerido
+  transfer_order_vehicles?: ITransferOrderVehicle[] | null;
+  //psls y ccs asociados
+  transfer_order_psl?: ITransferOrderPsls[] | null;
 }

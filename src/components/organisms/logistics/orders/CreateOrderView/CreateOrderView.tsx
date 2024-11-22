@@ -32,10 +32,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import axios from "axios";
 import MapboxGeocoding from "@mapbox/mapbox-sdk/services/geocoding";
 
-// components
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
-import { NavRightSection } from "@/components/atoms/NavRightSection/NavRightSection";
-
 //schemas
 import {
   CustomOptionType,
@@ -62,7 +58,6 @@ import { getAllMaterials } from "@/services/logistics/materials";
 import { getSuggestedVehicles } from "@/services/logistics/vehicles";
 
 //vars
-import { SUCCESS } from "@/utils/constants/globalConstants";
 import { useRouter } from "next/navigation";
 import {
   PlusCircle,
@@ -105,6 +100,7 @@ import createColumnsPersons from "./controllers/persons/columns";
 import { useRequirementManagement } from "./controllers/hooks/useRequirementManagment";
 import createOtherRequirementsColumns from "./controllers/otherRequirements/columns";
 import Container from "@/components/atoms/Container/Container";
+import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
 
 const { Title, Text } = Typography;
 
@@ -147,6 +143,9 @@ export const CreateOrderView = () => {
   const [materialesValid, setMaterialesValid] = useState(true);
   const [personasValid, setPersonasValid] = useState(true);
   const [vehiculosValid, setVehiculosValid] = useState(true);
+
+  const [declaredCargoValue, setDeclaredCargoValue] = useState<number>(0);
+  const [contractNumber, setContractNumber] = useState<string>("");
 
   const isButtonSubmitEnabled = !isLoading;
 
@@ -1248,7 +1247,9 @@ export const CreateOrderView = () => {
       status: "",
       observation: observation,
       service_type_desc: TripType.Carga,
-      client_desc: ""
+      client_desc: "",
+      contractNumber: contractNumber !== "" ? contractNumber : undefined,
+      declaredCargoValue: typeactive !== "3" ? declaredCargoValue : undefined
     };
 
     //contactos
@@ -2075,7 +2076,7 @@ export const CreateOrderView = () => {
                 </Button>
               </Col>
             </Row> */}
-            <Row style={{ marginBottom: "1rem" }}>
+            <Row style={{ marginBottom: "1rem" }} gutter={32}>
               <Col span={12}>
                 <Text className="locationLabels" style={{ display: "flex" }}>
                   Cliente final
@@ -2100,8 +2101,47 @@ export const CreateOrderView = () => {
                   </>
                 )}
               </Col>
-              <Col span={12} />
+              <Col span={12}>
+                <Text className="locationLabels" style={{ display: "flex" }}>
+                  N° de contrato
+                </Text>
+                <Input
+                  placeholder="Ingresar número de contrato"
+                  className="puntoOrigen dateInputForm"
+                  key={"contractNumber"}
+                  value={contractNumber}
+                  onChange={(e) => {
+                    setContractNumber(e.target.value);
+                  }}
+                  maxLength={100}
+                />
+              </Col>
             </Row>
+            {typeactive !== "3" && (
+              <Row style={{ marginBottom: "1rem" }}>
+                <Col span={12}>
+                  <Text className="locationLabels" style={{ display: "flex" }}>
+                    Valor declarado de la carga
+                  </Text>
+                  <InputNumber<number>
+                    className="puntoOrigen dateInputForm"
+                    min={0}
+                    key={"declaredCargoValue"}
+                    value={declaredCargoValue}
+                    formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value?.replace(/\$\s?|(,*)/g, "") as unknown as number}
+                    onChange={(value) => setDeclaredCargoValue(value || 0)}
+                    onKeyDown={(event) => {
+                      if (!/^[0-9]$/.test(event.key) && event.key !== "Backspace") {
+                        event.preventDefault();
+                      }
+                    }}
+                    step={1}
+                  />
+                </Col>
+              </Row>
+            )}
+
             <Row style={{ marginBottom: "1rem" }}>
               <Col span={12}>
                 <Text className="locationLabels" style={{ display: "flex" }}>

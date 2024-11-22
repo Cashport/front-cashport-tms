@@ -132,6 +132,7 @@ export interface IAceptCarrierAPI {
   special_instructions?: string;
   id_service_type: number;
   fee_description?: string;
+  declared_cargo_value?: number;
 }
 
 export interface Data {
