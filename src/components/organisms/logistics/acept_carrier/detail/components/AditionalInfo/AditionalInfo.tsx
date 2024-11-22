@@ -4,6 +4,7 @@ import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/Up
 import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
 import styles from "./aditionalInfo.module.scss";
 import { Dispatch, SetStateAction, useEffect } from "react";
+import { formatNumber } from "@/utils/utils";
 
 interface Documents {
   id: number;
@@ -32,6 +33,8 @@ interface AditionalInfoProps {
   specialInstructions?: string;
   setIsNextStepActive?: Dispatch<SetStateAction<boolean>>;
   insideCollapse?: boolean;
+  contractNumber?: string;
+  declaredCargoValue?: number;
 }
 
 const CONTACT_TYPES = {
@@ -47,7 +50,9 @@ export default function AditionalInfo({
   finalClient,
   otherRequirements,
   setIsNextStepActive,
-  insideCollapse = false
+  insideCollapse = false,
+  contractNumber,
+  declaredCargoValue
 }: Readonly<AditionalInfoProps>) {
   useEffect(() => {
     if (setIsNextStepActive) {
@@ -132,12 +137,31 @@ export default function AditionalInfo({
                       </Col>
                     </Row>
                   ))}
-                <Row style={{ paddingTop: "1rem" }}>
+                <p className={styles.subtitle}>Detalle de la carga</p>
+                <Row>
                   <Col span={12}>
-                    <p className={styles.subtitle}>Cliente final</p>
+                    <p className={styles.bodyReg}>Cliente final</p>
                   </Col>
                   <Col span={8} style={{ textAlign: "right" }}>
                     {finalClient && <p className={styles.bodyReg}>{finalClient}</p>}
+                  </Col>
+                  {!!contractNumber && (
+                    <Col span={12}>
+                      <p className={styles.bodyReg}>Número de contrato</p>
+                    </Col>
+                  )}
+                  {!!contractNumber && (
+                    <Col span={8} style={{ textAlign: "right" }}>
+                      <p className={styles.bodyReg}>{contractNumber}</p>
+                    </Col>
+                  )}
+                  <Col span={12}>
+                    <p className={styles.bodyReg}>Valor declarado de la carga</p>
+                  </Col>
+                  <Col span={8} style={{ textAlign: "right" }}>
+                    {declaredCargoValue && (
+                      <p className={styles.bodyReg}>${formatNumber(declaredCargoValue, 2)}</p>
+                    )}
                   </Col>
                 </Row>
                 <p className={styles.subtitle} style={{ paddingTop: "0.5rem" }}>
