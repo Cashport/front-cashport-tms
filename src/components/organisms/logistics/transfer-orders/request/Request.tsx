@@ -1,4 +1,4 @@
-import { Checkbox, CollapseProps, Spin, Typography } from "antd";
+import { Checkbox, CollapseProps, Spin } from "antd";
 import styles from "./Request.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -7,12 +7,9 @@ import { getAcceptedTransferRequest } from "@/services/logistics/transfer-reques
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
-import Loader from "@/components/atoms/loaders/loader";
-
-const Text = Typography;
+import { useSearch } from "@/context/SearchContext";
 
 interface IRequestProps {
-  search: string;
   handleCheckboxChange: (id: number, checked: boolean) => void;
   ordersId: number[];
   trsIds: number[];
@@ -21,7 +18,6 @@ interface IRequestProps {
 }
 
 export const Request: FC<IRequestProps> = ({
-  search,
   handleCheckboxChange,
   ordersId,
   trsIds,
@@ -30,6 +26,7 @@ export const Request: FC<IRequestProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
+  const { searchQuery: search } = useSearch();
 
   const getTitile = (stateId: string, transferType: string, number: number) => {
     const getState = TransferOrdersState.find((f) => f.id === stateId);
@@ -50,7 +47,7 @@ export const Request: FC<IRequestProps> = ({
 
   const getTransferRequestAccepted = async () => {
     try {
-      const getRequest = await getAcceptedTransferRequest();
+      const getRequest = await getAcceptedTransferRequest(search);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
         setIsLoading(false);
@@ -68,7 +65,7 @@ export const Request: FC<IRequestProps> = ({
 
   useEffect(() => {
     getTransferRequestAccepted();
-  }, []);
+  }, [search]);
 
   if (isLoading)
     return (
@@ -77,33 +74,7 @@ export const Request: FC<IRequestProps> = ({
       </div>
     );
 
-  const filteredData = transferRequest
-    .map((status) => {
-      const filteredItems = status.items.filter(
-        (item) =>
-          item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-          item.end_location.toLowerCase().includes(search.toLowerCase()) ||
-          item.id.toString().includes(search.toLowerCase())
-      );
-
-      return { ...status, items: filteredItems };
-    })
-    .filter((status) => status.items.length > 0);
-
-  // Array con los IDs de estado en el orden deseado
-  const ORDERED_STATE_IDS = [
-    STATUS.TO.SIN_PROCESAR, // Sin procesar
-    STATUS.TO.PROCESANDO, // Procesando
-    STATUS.TO.PROCESADO, // Procesando
-    STATUS.TR.ASIGNANDO_VEHICULO, // Procesado
-    STATUS.TR.ESPERANDO_PROVEEDOR // Esperando proveedor
-  ];
-
-  const sortedFilteredData = filteredData.toSorted((a, b) => {
-    return ORDERED_STATE_IDS.indexOf(a.statusId) - ORDERED_STATE_IDS.indexOf(b.statusId);
-  });
-
-  const renderItems: CollapseProps["items"] = sortedFilteredData.map((item, index) => {
+  const renderItems: CollapseProps["items"] = transferRequest.map((item, index) => {
     let aditionalRow = undefined;
     let redirect = undefined;
     let showBothIds = false;
@@ -148,14 +119,18 @@ export const Request: FC<IRequestProps> = ({
     }
     return {
       key: index,
-      label: getTitile(item.statusId, item.transferType, item.items.length),
+      label: getTitile(item.statusId, item.transferType, item.page.totalRows),
       children: (
         <TransferOrdersTable
           items={item.items}
+          pagination={item.page}
           aditionalRow={aditionalRow}
           redirect={redirect}
           showBothIds={showBothIds}
           trShouldRedirect={trShouldRedirect}
+          fetchData={(newPage, rowsPerPage) =>
+            getAcceptedTransferRequest(search, item.statusId, newPage, rowsPerPage)
+          }
         />
       )
     };
