@@ -1,19 +1,18 @@
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import styles from "./completed.module.scss";
-import { CollapseProps, Spin, Typography } from "antd";
+import { CollapseProps, Spin } from "antd";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 import { FC, useEffect, useState } from "react";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import { getFinishedTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
+import { useSearch } from "@/context/SearchContext";
 
-const Text = Typography;
+interface ICompletedProps {}
 
-interface ICompletedProps {
-  search: string;
-}
+export const Completed: FC<ICompletedProps> = () => {
+  const { searchQuery: search } = useSearch();
 
-export const Completed: FC<ICompletedProps> = ({ search }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
@@ -36,7 +35,7 @@ export const Completed: FC<ICompletedProps> = ({ search }) => {
 
   const getTransferRequestAccepted = async () => {
     try {
-      const getRequest = await getFinishedTransferRequest();
+      const getRequest = await getFinishedTransferRequest(search);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
         setIsLoading(false);
@@ -48,24 +47,22 @@ export const Completed: FC<ICompletedProps> = ({ search }) => {
 
   useEffect(() => {
     getTransferRequestAccepted();
-  }, []);
+  }, [search]);
 
-  const filteredData = transferRequest.map((status) => {
-    const filteredItems = status.items.filter(
-      (item) =>
-        item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.end_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.id.toString().includes(search.toLowerCase())
-    );
-
-    return { ...status, items: filteredItems };
-  });
-
-  const renderItems: CollapseProps["items"] = filteredData.map((item, index) => {
+  const renderItems: CollapseProps["items"] = transferRequest.map((item, index) => {
     return {
       key: index,
       label: getTitile(item.statusId, item.items.length),
-      children: <TransferOrdersTable showColumn={false} items={item.items} />
+      children: (
+        <TransferOrdersTable
+          showColumn={false}
+          items={item.items}
+          pagination={item.page}
+          fetchData={(newPage, rowsPerPage) =>
+            getFinishedTransferRequest(search, item.statusId, newPage, rowsPerPage)
+          }
+        />
+      )
     };
   });
 
