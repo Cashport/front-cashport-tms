@@ -1,4 +1,4 @@
-import { Checkbox, CollapseProps, Spin, Typography } from "antd";
+import { Checkbox, CollapseProps, Spin } from "antd";
 import styles from "./InProcess.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -7,17 +7,16 @@ import { ITransferRequestResponse } from "@/types/transferRequest/ITransferReque
 import { getOnRouteTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
-
-const Text = Typography;
+import { useSearch } from "@/context/SearchContext";
 
 interface IInProcessProps {
-  search: string;
   trsIds: number[];
   handleCheckboxChangeTR: (id: number, checked: boolean) => void;
   modalState: boolean;
 }
 
-export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxChangeTR, modalState }) => {
+export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
+  const { searchQuery: search } = useSearch();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
@@ -40,7 +39,7 @@ export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxC
 
   const getTransferRequestAccepted = async () => {
     try {
-      const getRequest = await getOnRouteTransferRequest();
+      const getRequest = await getOnRouteTransferRequest(search);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
         setIsLoading(false);
@@ -52,7 +51,7 @@ export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxC
 
   useEffect(() => {
     getTransferRequestAccepted();
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     if (!modalState) {
@@ -60,18 +59,7 @@ export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxC
     }
   }, [modalState]);
 
-  const filteredData = transferRequest.map((status) => {
-    const filteredItems = status.items.filter(
-      (item) =>
-        item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.end_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.id.toString().includes(search.toLowerCase())
-    );
-
-    return { ...status, items: filteredItems };
-  });
-
-  const renderItems: CollapseProps["items"] = filteredData.map((item, index) => {
+  const renderItems: CollapseProps["items"] = transferRequest.map((item, index) => {
     let aditionalRow = undefined;
     const trDeleteable = [STATUS.TR.SIN_INICIAR];
     if (trDeleteable.includes(item.statusId)) {
@@ -89,7 +77,17 @@ export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxC
     return {
       key: index,
       label: getTitile(item.statusId, item.items.length),
-      children: <TransferOrdersTable showColumn={false} aditionalRow={aditionalRow} items={item.items} />
+      children: (
+        <TransferOrdersTable
+          showColumn={false}
+          aditionalRow={aditionalRow}
+          items={item.items}
+          pagination={item.page}
+          fetchData={(newPage, rowsPerPage) =>
+            getOnRouteTransferRequest(search, item.statusId, newPage, rowsPerPage)
+          }
+        />
+      )
     };
   });
 

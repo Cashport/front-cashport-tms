@@ -123,10 +123,27 @@ export const finishTransferRequest = async (data: TransferRequestFinish) => {
   );
 };
 
-export const getAcceptedTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
+export const getAcceptedTransferRequest = async (
+  search: string,
+  statusId?: string,
+  page?: number,
+  rowsPerPage?: number
+): Promise<ITransferRequestResponse[]> => {
   try {
+    let queryParams = `?searchParam=${search ?? ""}`;
+
+    if (statusId !== undefined) {
+      queryParams += `&statusId=${statusId}`;
+    }
+    if (page !== undefined) {
+      queryParams += `&page=${page}`;
+    }
+    if (rowsPerPage !== undefined) {
+      queryParams += `&rowsPerPage=${rowsPerPage}`;
+    }
+
     const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-order`
+      `/transfer-request/transfer-request-order${queryParams}`
     );
     if (response.success) return response.data;
     return [];
@@ -136,10 +153,26 @@ export const getAcceptedTransferRequest = async (): Promise<ITransferRequestResp
   }
 };
 
-export const getOnRouteTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
+export const getOnRouteTransferRequest = async (
+  search: string,
+  statusId?: string,
+  page?: number,
+  rowsPerPage?: number
+): Promise<ITransferRequestResponse[]> => {
   try {
+    let queryParams = `?searchParam=${search ?? ""}`;
+
+    if (statusId !== undefined) {
+      queryParams += `&statusId=${statusId}`;
+    }
+    if (page !== undefined) {
+      queryParams += `&page=${page}`;
+    }
+    if (rowsPerPage !== undefined) {
+      queryParams += `&rowsPerPage=${rowsPerPage}`;
+    }
     const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-on-route`
+      `/transfer-request/transfer-request-on-route${queryParams}`
     );
     if (response.success) return response.data;
     return [];
@@ -149,10 +182,26 @@ export const getOnRouteTransferRequest = async (): Promise<ITransferRequestRespo
   }
 };
 
-export const getFinishedTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
+export const getFinishedTransferRequest = async (
+  search: string,
+  statusId?: string,
+  page?: number,
+  rowsPerPage?: number
+): Promise<ITransferRequestResponse[]> => {
   try {
+    let queryParams = `?searchParam=${search ?? ""}`;
+
+    if (statusId !== undefined) {
+      queryParams += `&statusId=${statusId}`;
+    }
+    if (page !== undefined) {
+      queryParams += `&page=${page}`;
+    }
+    if (rowsPerPage !== undefined) {
+      queryParams += `&rowsPerPage=${rowsPerPage}`;
+    }
     const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-finished`
+      `/transfer-request/transfer-request-finished${queryParams}`
     );
     if (response.success) return response.data;
     return [];
