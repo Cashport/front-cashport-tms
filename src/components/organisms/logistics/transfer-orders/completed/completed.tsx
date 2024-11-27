@@ -13,7 +13,7 @@ interface ICompletedProps {}
 export const Completed: FC<ICompletedProps> = () => {
   const { searchQuery: search } = useSearch();
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
   const getTitile = (stateId: string, number: number) => {
@@ -34,6 +34,8 @@ export const Completed: FC<ICompletedProps> = () => {
   };
 
   const getTransferRequestAccepted = async () => {
+    setIsLoading(true);
+
     try {
       const getRequest = await getFinishedTransferRequest(search);
       if (Array.isArray(getRequest)) {
@@ -42,36 +44,56 @@ export const Completed: FC<ICompletedProps> = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
+  const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
+    setIsLoading(true);
+    try {
+      const getRequest = await getFinishedTransferRequest(search, statusId, newPage);
+      if (Array.isArray(getRequest) && getRequest.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = getRequest[0];
 
+        setTransferRequest((prevState) =>
+          prevState.map((item) => (item.statusId === updatedItem.statusId ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     getTransferRequestAccepted();
   }, [search]);
 
-  const renderItems: CollapseProps["items"] = transferRequest.map((item, index) => {
-    return {
-      key: index,
-      label: getTitile(item.statusId, item.items.length),
+  const renderItems: CollapseProps["items"] = transferRequest
+    .filter((item) => item?.items?.length > 0) // Filtrar los que tengan al menos un elemento
+    .map((item, index) => ({
+      key: item.statusId,
+      label: getTitile(item.statusId, item.page.totalRows),
       children: (
         <TransferOrdersTable
           showColumn={false}
           items={item.items}
           pagination={item.page}
-          fetchData={(newPage, rowsPerPage) =>
-            getFinishedTransferRequest(search, item.statusId, newPage, rowsPerPage)
+          loading={isLoading}
+          fetchData={(newPage: number) =>
+            getTransferRequestAcceptedByStatusId(item.statusId, newPage)
           }
         />
       )
-    };
-  });
+    }));
 
-  if (isLoading)
-    return (
-      <div className={styles.emptyContainer}>
-        <Spin size="large" />
-      </div>
-    );
+  // if (isLoading)
+  //   return (
+  //     <div className={styles.emptyContainer}>
+  //       <Spin size="large" />
+  //     </div>
+  //   );
 
   return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
 };

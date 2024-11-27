@@ -17,7 +17,7 @@ interface IInProcessProps {
 
 export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
   const { searchQuery: search } = useSearch();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
   const getTitile = (stateId: string, number: number) => {
@@ -38,6 +38,8 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
   };
 
   const getTransferRequestAccepted = async () => {
+    setIsLoading(true);
+
     try {
       const getRequest = await getOnRouteTransferRequest(search);
       if (Array.isArray(getRequest)) {
@@ -46,6 +48,26 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
+    setIsLoading(true);
+    try {
+      const getRequest = await getOnRouteTransferRequest(search, statusId, newPage);
+      if (Array.isArray(getRequest) && getRequest.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = getRequest[0];
+
+        setTransferRequest((prevState) =>
+          prevState.map((item) => (item.statusId === updatedItem.statusId ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,44 +81,47 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
     }
   }, [modalState]);
 
-  const renderItems: CollapseProps["items"] = transferRequest.map((item, index) => {
-    let aditionalRow = undefined;
-    const trDeleteable = [STATUS.TR.SIN_INICIAR];
-    if (trDeleteable.includes(item.statusId)) {
-      aditionalRow = {
-        title: "",
-        dataIndex: "checkbox",
-        render: (_: any, { tr }: any) => (
-          <Checkbox
-            checked={trsIds.includes(tr)}
-            onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+  const renderItems: CollapseProps["items"] = transferRequest
+    .filter((item) => item?.items?.length > 0)
+    .map((item, index) => {
+      let aditionalRow = undefined;
+      const trDeleteable = [STATUS.TR.SIN_INICIAR];
+      if (trDeleteable.includes(item.statusId)) {
+        aditionalRow = {
+          title: "",
+          dataIndex: "checkbox",
+          render: (_: any, { tr }: any) => (
+            <Checkbox
+              checked={trsIds.includes(tr)}
+              onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+            />
+          )
+        };
+      }
+      return {
+        key: index,
+        label: getTitile(item.statusId, item.page.totalRows),
+        children: (
+          <TransferOrdersTable
+            showColumn={false}
+            aditionalRow={aditionalRow}
+            items={item.items}
+            pagination={item.page}
+            loading={isLoading}
+            fetchData={(newPage: number) =>
+              getTransferRequestAcceptedByStatusId(item.statusId, newPage)
+            }
           />
         )
       };
-    }
-    return {
-      key: index,
-      label: getTitile(item.statusId, item.items.length),
-      children: (
-        <TransferOrdersTable
-          showColumn={false}
-          aditionalRow={aditionalRow}
-          items={item.items}
-          pagination={item.page}
-          fetchData={(newPage, rowsPerPage) =>
-            getOnRouteTransferRequest(search, item.statusId, newPage, rowsPerPage)
-          }
-        />
-      )
-    };
-  });
+    });
 
-  if (isLoading)
-    return (
-      <div className={styles.emptyContainer}>
-        <Spin size="large" />
-      </div>
-    );
+  // if (isLoading)
+  //   return (
+  //     <div className={styles.emptyContainer}>
+  //       <Spin size="large" />
+  //     </div>
+  //   );
 
   return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
 };
