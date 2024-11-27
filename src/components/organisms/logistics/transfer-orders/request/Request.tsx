@@ -24,7 +24,9 @@ export const Request: FC<IRequestProps> = ({
   handleCheckboxChangeTR,
   modalState
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
+  const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
+
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
   const { searchQuery: search } = useSearch();
 
@@ -46,7 +48,7 @@ export const Request: FC<IRequestProps> = ({
   };
 
   const getTransferRequestAccepted = async () => {
-    setIsLoading(true);
+    setIsLoadingMain(true);
     try {
       const getRequest = await getAcceptedTransferRequest(search);
       if (Array.isArray(getRequest)) {
@@ -55,12 +57,12 @@ export const Request: FC<IRequestProps> = ({
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingMain(false);
     }
   };
 
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
-    setIsLoading(true);
+    setIsLoadingPagination(true);
     try {
       const getRequest = await getAcceptedTransferRequest(search, statusId, newPage);
       if (Array.isArray(getRequest) && getRequest.length > 0) {
@@ -74,7 +76,7 @@ export const Request: FC<IRequestProps> = ({
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingPagination(false);
     }
   };
 
@@ -87,13 +89,6 @@ export const Request: FC<IRequestProps> = ({
   useEffect(() => {
     getTransferRequestAccepted();
   }, [search]);
-
-  // if (isLoading)
-  //   return (
-  //     <div className={styles.emptyContainer}>
-  //       <Spin size="large" />
-  //     </div>
-  //   );
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
@@ -151,7 +146,7 @@ export const Request: FC<IRequestProps> = ({
             redirect={redirect}
             showBothIds={showBothIds}
             trShouldRedirect={trShouldRedirect}
-            loading={isLoading}
+            loading={isLoadingPagination}
             fetchData={(newPage: number) =>
               getTransferRequestAcceptedByStatusId(item.statusId, newPage)
             }
@@ -159,6 +154,13 @@ export const Request: FC<IRequestProps> = ({
         )
       };
     });
+
+  if (isLoadingMain)
+    return (
+      <div className={styles.emptyContainer}>
+        <Spin size="large" />
+      </div>
+    );
 
   return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
 };
