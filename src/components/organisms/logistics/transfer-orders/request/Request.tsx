@@ -24,7 +24,7 @@ export const Request: FC<IRequestProps> = ({
   handleCheckboxChangeTR,
   modalState
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
   const { searchQuery: search } = useSearch();
 
@@ -46,14 +46,35 @@ export const Request: FC<IRequestProps> = ({
   };
 
   const getTransferRequestAccepted = async () => {
+    setIsLoading(true);
     try {
       const getRequest = await getAcceptedTransferRequest(search);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
-        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
+    setIsLoading(true);
+    try {
+      const getRequest = await getAcceptedTransferRequest(search, statusId, newPage);
+      if (Array.isArray(getRequest) && getRequest.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = getRequest[0];
+
+        setTransferRequest((prevState) =>
+          prevState.map((item) => (item.statusId === updatedItem.statusId ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,74 +88,77 @@ export const Request: FC<IRequestProps> = ({
     getTransferRequestAccepted();
   }, [search]);
 
-  if (isLoading)
-    return (
-      <div className={styles.emptyContainer}>
-        <Spin size="large" />
-      </div>
-    );
+  // if (isLoading)
+  //   return (
+  //     <div className={styles.emptyContainer}>
+  //       <Spin size="large" />
+  //     </div>
+  //   );
 
-  const renderItems: CollapseProps["items"] = transferRequest.map((item, index) => {
-    let aditionalRow = undefined;
-    let redirect = undefined;
-    let showBothIds = false;
-    let trShouldRedirect = false;
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
-      aditionalRow = {
-        title: "",
-        dataIndex: "checkbox",
-        render: (_: any, { tr }: any) => (
-          <Checkbox
-            checked={ordersId.includes(tr)}
-            onChange={(e) => handleCheckboxChange(tr, e.target.checked)}
+  const renderItems: CollapseProps["items"] = transferRequest
+    .filter((item) => item?.items?.length > 0)
+    .map((item, index) => {
+      let aditionalRow = undefined;
+      let redirect = undefined;
+      let showBothIds = false;
+      let trShouldRedirect = false;
+      if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
+        aditionalRow = {
+          title: "",
+          dataIndex: "checkbox",
+          render: (_: any, { tr }: any) => (
+            <Checkbox
+              checked={ordersId.includes(tr)}
+              onChange={(e) => handleCheckboxChange(tr, e.target.checked)}
+            />
+          )
+        };
+        redirect = "/logistics/orders/details";
+      }
+      const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
+      if (trDeleteable.includes(item.statusId)) {
+        aditionalRow = {
+          title: "",
+          dataIndex: "checkbox",
+          render: (_: any, { tr }: any) => (
+            <Checkbox
+              checked={trsIds.includes(tr)}
+              onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+            />
+          )
+        };
+        redirect = "/logistics/transfer-request/";
+      }
+      const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
+      if (statusToDetailsTO.includes(item.statusId)) {
+        redirect = "/logistics/orders/details";
+      }
+      const tosToTR = [STATUS.TO.PROCESADO, STATUS.TO.PROCESANDO];
+      if (tosToTR.includes(item.statusId)) {
+        showBothIds = true;
+      }
+      if (item.statusId === STATUS.TO.PROCESADO) {
+        trShouldRedirect = true;
+      }
+      return {
+        key: index,
+        label: getTitile(item.statusId, item.transferType, item.page.totalRows),
+        children: (
+          <TransferOrdersTable
+            items={item.items}
+            pagination={item.page}
+            aditionalRow={aditionalRow}
+            redirect={redirect}
+            showBothIds={showBothIds}
+            trShouldRedirect={trShouldRedirect}
+            loading={isLoading}
+            fetchData={(newPage: number) =>
+              getTransferRequestAcceptedByStatusId(item.statusId, newPage)
+            }
           />
         )
       };
-      redirect = "/logistics/orders/details";
-    }
-    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
-    if (trDeleteable.includes(item.statusId)) {
-      aditionalRow = {
-        title: "",
-        dataIndex: "checkbox",
-        render: (_: any, { tr }: any) => (
-          <Checkbox
-            checked={trsIds.includes(tr)}
-            onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
-          />
-        )
-      };
-      redirect = "/logistics/transfer-request/";
-    }
-    const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
-    if (statusToDetailsTO.includes(item.statusId)) {
-      redirect = "/logistics/orders/details";
-    }
-    const tosToTR = [STATUS.TO.PROCESADO, STATUS.TO.PROCESANDO];
-    if (tosToTR.includes(item.statusId)) {
-      showBothIds = true;
-    }
-    if (item.statusId === STATUS.TO.PROCESADO) {
-      trShouldRedirect = true;
-    }
-    return {
-      key: index,
-      label: getTitile(item.statusId, item.transferType, item.page.totalRows),
-      children: (
-        <TransferOrdersTable
-          items={item.items}
-          pagination={item.page}
-          aditionalRow={aditionalRow}
-          redirect={redirect}
-          showBothIds={showBothIds}
-          trShouldRedirect={trShouldRedirect}
-          fetchData={(newPage, rowsPerPage) =>
-            getAcceptedTransferRequest(search, item.statusId, newPage, rowsPerPage)
-          }
-        />
-      )
-    };
-  });
+    });
 
   return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
 };
