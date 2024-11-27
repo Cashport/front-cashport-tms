@@ -1,25 +1,43 @@
-import React, { createContext, useState, useContext, ReactNode, FC } from "react";
+import useSearch from "@/hooks/useSearch";
+import React, { createContext, ReactNode, useContext, useMemo } from "react";
 
-interface SearchContextType {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+// Crear el contexto para el proveedor de búsqueda
+interface SearchContextProps {
+  searchTerm: string | undefined;
+  searchQuery: string | undefined;
+  handleChangeSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
+// Definir el tipo de las props del proveedor
+interface SearchProviderProps {
+  debounceDelay?: number; // Tiempo de debounce opcional
+  children: ReactNode; // ReactNode para los elementos hijos
+}
+const SearchContext = createContext<SearchContextProps | undefined>(undefined);
 
-const SearchContext = createContext<SearchContextType | undefined>(undefined);
+// Provider que utiliza `useSearch`
+export const SearchProvider: React.FC<SearchProviderProps> = ({
+  children,
+  debounceDelay = 1000 // Valor predeterminado para el debounce
+}) => {
+  const { searchTerm, searchQuery, handleChangeSearch } = useSearch(debounceDelay);
 
-export const SearchProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  return (
-    <SearchContext.Provider value={{ searchQuery, setSearchQuery }}>
-      {children}
-    </SearchContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      searchTerm,
+      searchQuery,
+      handleChangeSearch
+    }),
+    [searchTerm, searchQuery, handleChangeSearch]
   );
+
+  return <SearchContext.Provider value={contextValue}>{children}</SearchContext.Provider>;
 };
 
-export const useSearch = (): SearchContextType => {
+// Hook para usar el contexto en cualquier componente
+export const useSearchContext = (): SearchContextProps => {
   const context = useContext(SearchContext);
   if (!context) {
-    throw new Error("useSearch must be used within a SearchProvider");
+    throw new Error("useSearchContext debe usarse dentro de un SearchProvider");
   }
   return context;
 };

@@ -7,7 +7,7 @@ import { getAcceptedTransferRequest } from "@/services/logistics/transfer-reques
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
-import { useSearch } from "@/context/SearchContext";
+import { useSearchContext } from "@/context/SearchContext";
 
 interface IRequestProps {
   handleCheckboxChange: (id: number, checked: boolean) => void;
@@ -28,7 +28,7 @@ export const Request: FC<IRequestProps> = ({
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
 
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
-  const { searchQuery: search } = useSearch();
+  const { searchQuery: search } = useSearchContext();
 
   const getTitile = (stateId: string, transferType: string, number: number) => {
     const getState = TransferOrdersState.find((f) => f.id === stateId);
@@ -84,11 +84,7 @@ export const Request: FC<IRequestProps> = ({
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState]);
-
-  useEffect(() => {
-    getTransferRequestAccepted();
-  }, [search]);
+  }, [modalState, search]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)

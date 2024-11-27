@@ -7,7 +7,7 @@ import { ITransferRequestResponse } from "@/types/transferRequest/ITransferReque
 import { getOnRouteTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
-import { useSearch } from "@/context/SearchContext";
+import { useSearchContext } from "@/context/SearchContext";
 
 interface IInProcessProps {
   trsIds: number[];
@@ -16,7 +16,8 @@ interface IInProcessProps {
 }
 
 export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
-  const { searchQuery: search } = useSearch();
+  const { searchQuery: search } = useSearchContext();
+
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
@@ -72,14 +73,10 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
   };
 
   useEffect(() => {
-    getTransferRequestAccepted();
-  }, [search]);
-
-  useEffect(() => {
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState]);
+  }, [modalState, search]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
