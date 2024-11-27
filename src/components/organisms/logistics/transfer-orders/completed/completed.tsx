@@ -13,7 +13,8 @@ interface ICompletedProps {}
 export const Completed: FC<ICompletedProps> = () => {
   const { searchQuery: search } = useSearch();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
+  const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
   const getTitile = (stateId: string, number: number) => {
@@ -34,22 +35,21 @@ export const Completed: FC<ICompletedProps> = () => {
   };
 
   const getTransferRequestAccepted = async () => {
-    setIsLoading(true);
+    setIsLoadingMain(true);
 
     try {
       const getRequest = await getFinishedTransferRequest(search);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
-        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingMain(false);
     }
   };
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
-    setIsLoading(true);
+    setIsLoadingPagination(true);
     try {
       const getRequest = await getFinishedTransferRequest(search, statusId, newPage);
       if (Array.isArray(getRequest) && getRequest.length > 0) {
@@ -63,7 +63,7 @@ export const Completed: FC<ICompletedProps> = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingPagination(false);
     }
   };
   useEffect(() => {
@@ -80,7 +80,7 @@ export const Completed: FC<ICompletedProps> = () => {
           showColumn={false}
           items={item.items}
           pagination={item.page}
-          loading={isLoading}
+          loading={isLoadingPagination}
           fetchData={(newPage: number) =>
             getTransferRequestAcceptedByStatusId(item.statusId, newPage)
           }
@@ -88,12 +88,12 @@ export const Completed: FC<ICompletedProps> = () => {
       )
     }));
 
-  // if (isLoading)
-  //   return (
-  //     <div className={styles.emptyContainer}>
-  //       <Spin size="large" />
-  //     </div>
-  //   );
+  if (isLoadingMain)
+    return (
+      <div className={styles.emptyContainer}>
+        <Spin size="large" />
+      </div>
+    );
 
   return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
 };
