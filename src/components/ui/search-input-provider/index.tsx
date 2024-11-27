@@ -1,7 +1,7 @@
 import { FC } from "react";
 import styles from "./search-input.module.scss";
-import { MagnifyingGlass } from "phosphor-react";
-import { useSearch } from "@/context/SearchContext";
+import { MagnifyingGlass, XCircle } from "phosphor-react";
+import { useSearchContext } from "@/context/SearchContext";
 
 interface UiSearchInputProps {
   id?: string;
@@ -16,10 +16,15 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
   placeholder,
   className
 }) => {
-  const { searchQuery, setSearchQuery } = useSearch();
+  const { searchTerm, handleChangeSearch } = useSearchContext();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+    handleChangeSearch(event);
+  };
+  const handleClear = () => {
+    // Crear un evento falso para resetear el searchTerm
+    const fakeEvent = { target: { value: "" } } as React.ChangeEvent<HTMLInputElement>;
+    handleChangeSearch(fakeEvent);
   };
 
   return (
@@ -30,9 +35,19 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
         id={id}
         name={name}
         placeholder={placeholder}
-        value={searchQuery}
+        value={searchTerm}
         onChange={handleChange}
       />
+      {searchTerm && (
+        <button
+          type="button"
+          className={styles.clearButton}
+          onClick={handleClear}
+          aria-label="Clear search"
+        >
+          <XCircle className={styles.clearIcon} />
+        </button>
+      )}
     </label>
   );
 };
