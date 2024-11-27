@@ -95,7 +95,6 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
     columnsShow.unshift(aditionalRow);
   }
 
-  console.log("datasource", dataSource.length, pagination.totalRows);
   return (
     <Table
       rowSelection={

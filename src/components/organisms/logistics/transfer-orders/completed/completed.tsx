@@ -6,12 +6,12 @@ import { FC, useEffect, useState } from "react";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import { getFinishedTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
-import { useSearch } from "@/context/SearchContext";
+import { useSearchContext } from "@/context/SearchContext";
 
 interface ICompletedProps {}
 
 export const Completed: FC<ICompletedProps> = () => {
-  const { searchQuery: search } = useSearch();
+  const { searchQuery: search } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);

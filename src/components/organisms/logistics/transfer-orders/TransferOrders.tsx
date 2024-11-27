@@ -126,7 +126,7 @@ export const TransferOrders = () => {
   };
 
   return (
-    <SearchProvider>
+    <SearchProvider debounceDelay={500}>
       <Container>
         <Flex justify="space-between" style={{ marginBottom: "1rem" }}>
           <div className={styles.filterContainer}>
