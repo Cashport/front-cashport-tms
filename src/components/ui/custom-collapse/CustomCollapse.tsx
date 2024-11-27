@@ -1,4 +1,4 @@
-import { Collapse, CollapseProps, ConfigProvider } from "antd";
+import { Collapse, CollapseProps, ConfigProvider, Empty } from "antd";
 
 export default function CustomCollapse({
   items,
@@ -6,6 +6,7 @@ export default function CustomCollapse({
   defaultActiveKey,
   ...rest
 }: Readonly<CollapseProps>) {
+  const hasValidItems = items && items.length > 0;
   return (
     <ConfigProvider
       theme={{
@@ -16,7 +17,11 @@ export default function CustomCollapse({
         }
       }}
     >
-      <Collapse ghost items={items} defaultActiveKey={defaultActiveKey ?? ["0"]} {...rest} />
+      {hasValidItems ? (
+        <Collapse ghost items={items} defaultActiveKey={defaultActiveKey ?? ["0"]} {...rest} />
+      ) : (
+        <Empty description="No hay información disponible" />
+      )}
     </ConfigProvider>
   );
 }
