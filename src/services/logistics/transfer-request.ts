@@ -126,8 +126,7 @@ export const finishTransferRequest = async (data: TransferRequestFinish) => {
 export const getAcceptedTransferRequest = async (
   search: string,
   statusId?: string,
-  page?: number,
-  rowsPerPage?: number
+  page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
     let queryParams = `?searchParam=${search ?? ""}`;
@@ -137,9 +136,6 @@ export const getAcceptedTransferRequest = async (
     }
     if (page !== undefined) {
       queryParams += `&page=${page}`;
-    }
-    if (rowsPerPage !== undefined) {
-      queryParams += `&rowsPerPage=${rowsPerPage}`;
     }
 
     const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
@@ -156,8 +152,7 @@ export const getAcceptedTransferRequest = async (
 export const getOnRouteTransferRequest = async (
   search: string,
   statusId?: string,
-  page?: number,
-  rowsPerPage?: number
+  page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
     let queryParams = `?searchParam=${search ?? ""}`;
@@ -167,9 +162,6 @@ export const getOnRouteTransferRequest = async (
     }
     if (page !== undefined) {
       queryParams += `&page=${page}`;
-    }
-    if (rowsPerPage !== undefined) {
-      queryParams += `&rowsPerPage=${rowsPerPage}`;
     }
     const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
       `/transfer-request/transfer-request-on-route${queryParams}`
@@ -185,8 +177,7 @@ export const getOnRouteTransferRequest = async (
 export const getFinishedTransferRequest = async (
   search: string,
   statusId?: string,
-  page?: number,
-  rowsPerPage?: number
+  page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
     let queryParams = `?searchParam=${search ?? ""}`;
@@ -196,9 +187,6 @@ export const getFinishedTransferRequest = async (
     }
     if (page !== undefined) {
       queryParams += `&page=${page}`;
-    }
-    if (rowsPerPage !== undefined) {
-      queryParams += `&rowsPerPage=${rowsPerPage}`;
     }
     const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
       `/transfer-request/transfer-request-finished${queryParams}`

@@ -3,7 +3,7 @@ import {
   ITransferRequest,
   ITransferRequestResponse
 } from "@/types/transferRequest/ITransferRequest";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { columns } from "./columns/TOColumns";
@@ -40,7 +40,8 @@ interface ITransferOrdersTable {
   redirect?: string;
   showBothIds?: boolean;
   trShouldRedirect?: boolean;
-  fetchData: (newPage: any, rowsPerPage: any) => Promise<ITransferRequestResponse[]>;
+  fetchData: (newPage: number) => Promise<void>;
+  loading: boolean;
 }
 
 export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
@@ -51,49 +52,50 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
   redirect,
   showBothIds = false,
   trShouldRedirect = false,
-  fetchData
+  fetchData,
+  loading
 }) => {
   const [currentPage, setCurrentPage] = useState<number>(pagination?.actualPage || 1);
-  const [pageSize, setPageSize] = useState<number>(pagination?.rowsperpage || 10);
 
-  const handleTableChange = (page: number, pageSize: number) => {
+  const handleTableChange = (page: number) => {
     setCurrentPage(page);
-    setPageSize(pageSize);
-    fetchData(page, pageSize);
+    fetchData(page);
   };
 
-  let data: DataType[] = [];
-  if (items) {
-    data = items.map((item, index) => {
-      return {
-        key: index,
-        tr: String(item.id),
-        origendestino: {
-          origin: item.start_location,
-          destination: item.end_location
-        },
-        fechas: {
-          origin: item.start_date,
-          destination: item.end_date
-        },
-        tipodeviaje: item.type,
-        id_transfer_request: item.id_transfer_request ?? undefined,
-        tiempodeviaje: String(item.created_at),
-        valor: item?.total_value ?? 0,
-        validator: {
-          ismaterialsproblem: item.is_materials_problem,
-          ispeopleproblem: item.is_people_problem,
-          isRejected: !!item.is_rejected,
-          tr: String(item.id)
-        }
-      };
-    });
-  }
+  const [dataSource, setDataSource] = useState<DataType[]>([]);
+  console.log("items", items);
+  useEffect(() => {
+    const mappedData = items.map((item) => ({
+      key: item.id,
+      tr: String(item.id),
+      origendestino: {
+        origin: item.start_location,
+        destination: item.end_location
+      },
+      fechas: {
+        origin: item.start_date,
+        destination: item.end_date
+      },
+      tipodeviaje: item.type,
+      id_transfer_request: item.id_transfer_request ?? undefined,
+      tiempodeviaje: String(item.created_at),
+      valor: item?.total_value ?? 0,
+      validator: {
+        ismaterialsproblem: item.is_materials_problem,
+        ispeopleproblem: item.is_people_problem,
+        isRejected: !!item.is_rejected,
+        tr: String(item.id)
+      }
+    }));
+    setDataSource(mappedData);
+  }, [items]);
+
   const columnsShow = columns(showColumn, redirect, showBothIds, trShouldRedirect);
   if (aditionalRow) {
     columnsShow.unshift(aditionalRow);
   }
 
+  console.log("datasource", dataSource.length, pagination.totalRows);
   return (
     <Table
       rowSelection={
@@ -104,14 +106,15 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
           : undefined
       }
       columns={columnsShow}
-      dataSource={data}
+      dataSource={dataSource}
       pagination={{
         current: currentPage,
-        pageSize: pageSize,
+        pageSize: 10,
         total: pagination?.totalRows,
         onChange: handleTableChange,
-        showSizeChanger: true
+        showSizeChanger: false
       }}
+      loading={loading}
     />
   );
 };
