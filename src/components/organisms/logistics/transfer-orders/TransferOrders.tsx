@@ -17,6 +17,7 @@ import { checkUserComponentPermissions } from "@/utils/utils";
 import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenerateActionOrders/ModalGenerateActionOrders";
 import { SearchProvider } from "@/context/SearchContext";
 import UiSearchInput from "@/components/ui/search-input-provider";
+import FilterWithCascader from "@/components/atoms/Filters/FilterOrders/FilterOrders";
 
 const { Text } = Typography;
 
@@ -131,7 +132,7 @@ export const TransferOrders = () => {
         <Flex justify="space-between" style={{ marginBottom: "1rem" }}>
           <div className={styles.filterContainer}>
             <UiSearchInput className="search" placeholder="Buscar" />
-            <FilterProjects setSelecetedProjects={setSelectFilters} />
+            <FilterWithCascader />
             <PrincipalButton
               type="default"
               icon={<DotsThree size={"1.5rem"} />}
