@@ -61,8 +61,15 @@ export interface ITransferRequestDetail {
   transfer_orders: number[];
 }
 
+export interface IPagination {
+  actualPage: number;
+  totalPages: number;
+  rowsperpage: number;
+  totalRows: number;
+}
 export interface ITransferRequestResponse {
   statusId: string; // uuid
   transferType: string;
   items: ITransferRequest[];
+  page: IPagination;
 }

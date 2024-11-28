@@ -1,4 +1,4 @@
-import { Checkbox, CollapseProps, Spin, Typography } from "antd";
+import { Checkbox, CollapseProps, Spin } from "antd";
 import styles from "./InProcess.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -7,18 +7,19 @@ import { ITransferRequestResponse } from "@/types/transferRequest/ITransferReque
 import { getOnRouteTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
-
-const Text = Typography;
+import { useSearchContext } from "@/context/SearchContext";
 
 interface IInProcessProps {
-  search: string;
   trsIds: number[];
   handleCheckboxChangeTR: (id: number, checked: boolean) => void;
   modalState: boolean;
 }
 
-export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxChangeTR, modalState }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
+  const { searchQuery: search } = useSearchContext();
+
+  const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
+  const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
   const getTitile = (stateId: string, number: number) => {
@@ -39,61 +40,80 @@ export const InProcess: FC<IInProcessProps> = ({ search, trsIds, handleCheckboxC
   };
 
   const getTransferRequestAccepted = async () => {
+    setIsLoadingMain(true);
+
     try {
-      const getRequest = await getOnRouteTransferRequest();
+      const getRequest = await getOnRouteTransferRequest(search);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
-        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoadingMain(false);
     }
   };
+  const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
+    setIsLoadingPagination(true);
+    try {
+      const getRequest = await getOnRouteTransferRequest(search, statusId, newPage);
+      if (Array.isArray(getRequest) && getRequest.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = getRequest[0];
 
-  useEffect(() => {
-    getTransferRequestAccepted();
-  }, []);
+        setTransferRequest((prevState) =>
+          prevState.map((item) => (item.statusId === updatedItem.statusId ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoadingPagination(false);
+    }
+  };
 
   useEffect(() => {
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState]);
+  }, [modalState, search]);
 
-  const filteredData = transferRequest.map((status) => {
-    const filteredItems = status.items.filter(
-      (item) =>
-        item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.end_location.toLowerCase().includes(search.toLowerCase()) ||
-        item.id.toString().includes(search.toLowerCase())
-    );
-
-    return { ...status, items: filteredItems };
-  });
-
-  const renderItems: CollapseProps["items"] = filteredData.map((item, index) => {
-    let aditionalRow = undefined;
-    const trDeleteable = [STATUS.TR.SIN_INICIAR];
-    if (trDeleteable.includes(item.statusId)) {
-      aditionalRow = {
-        title: "",
-        dataIndex: "checkbox",
-        render: (_: any, { tr }: any) => (
-          <Checkbox
-            checked={trsIds.includes(tr)}
-            onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+  const renderItems: CollapseProps["items"] = transferRequest
+    .filter((item) => item?.items?.length > 0)
+    .map((item, index) => {
+      let aditionalRow = undefined;
+      const trDeleteable = [STATUS.TR.SIN_INICIAR];
+      if (trDeleteable.includes(item.statusId)) {
+        aditionalRow = {
+          title: "",
+          dataIndex: "checkbox",
+          render: (_: any, { tr }: any) => (
+            <Checkbox
+              checked={trsIds.includes(tr)}
+              onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+            />
+          )
+        };
+      }
+      return {
+        key: index,
+        label: getTitile(item.statusId, item.page.totalRows),
+        children: (
+          <TransferOrdersTable
+            showColumn={false}
+            aditionalRow={aditionalRow}
+            items={item.items}
+            pagination={item.page}
+            loading={isLoadingPagination}
+            fetchData={(newPage: number) =>
+              getTransferRequestAcceptedByStatusId(item.statusId, newPage)
+            }
           />
         )
       };
-    }
-    return {
-      key: index,
-      label: getTitile(item.statusId, item.items.length),
-      children: <TransferOrdersTable showColumn={false} aditionalRow={aditionalRow} items={item.items} />
-    };
-  });
+    });
 
-  if (isLoading)
+  if (isLoadingMain)
     return (
       <div className={styles.emptyContainer}>
         <Spin size="large" />
