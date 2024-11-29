@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button, Flex, message, Spin, Table, Typography } from "antd";
 import type { TableProps } from "antd";
-import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
+import { Eye, Plus, Triangle } from "phosphor-react";
 import "./materialsTable.scss";
 import UiSearchInput from "@/components/ui/search-input";
 import { IMaterial } from "@/types/logistics/schema";
 import { getAllMaterials } from "@/services/logistics/materials";
 import useSWR from "swr";
+import Link from "next/link";
 
 const { Text } = Typography;
 
@@ -134,11 +135,9 @@ export const MaterialsTable = () => {
       width: "54px",
       dataIndex: "",
       render: (_, { id }) => (
-        <Button
-          href={`/logistics/configuration/materials/${id}`}
-          className="icon-detail"
-          icon={<Eye size={20} />}
-        />
+        <Link href={`/logistics/configuration/materials/${id}`} type="text">
+          <Button className="icon-detail" icon={<Eye size={20} />} />
+        </Link>
       )
     }
   ];
@@ -154,22 +153,18 @@ export const MaterialsTable = () => {
               setSearch(event.target.value);
             }}
           />
-          {/* <Button
-            className="options"
-            href="/logistics/configutarion/material"
-            icon={<DotsThree size={"1.5rem"} />}
-          /> */}
         </Flex>
         <Flex justify="flex-end">
-          <Button
-            type="primary"
-            className="buttonNewProject"
-            size="large"
-            href="/logistics/configuration/materials/new"
-          >
-            Nuevo material
-            {<Plus weight="bold" size={14} />}
-          </Button>
+          <Link href="/logistics/configuration/materials/new">
+            <Button
+              type="primary"
+              className="buttonNewProject"
+              size="large"
+            >
+              Nuevo material
+              {<Plus weight="bold" size={14} />}
+            </Button>
+          </Link>
         </Flex>
       </Flex>
       {!isLoading ? (

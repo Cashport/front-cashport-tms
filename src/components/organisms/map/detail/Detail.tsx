@@ -12,7 +12,6 @@ import Document from "./Document/Document";
 import { calculateDistanceFromCurrentLocation } from "@/utils/logistics/calculateDistanceMap";
 import { IDriverMap } from "@/types/logistics/driver/driver";
 import { Empty } from "@phosphor-icons/react";
-// import { useRouter } from "next/router";
 
 const Text = Typography;
 
@@ -32,7 +31,6 @@ enum Tab {
 
 const DetailTripMap: FC<IDetailTripMapProps> = ({ trip, lat, long, driver, onClose }) => {
   const [tab, setTab] = useState<Tab>(Tab.TRACKING);
-  // const router = useRouter();
 
   const getStateColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);

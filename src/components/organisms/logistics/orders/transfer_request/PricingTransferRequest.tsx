@@ -78,6 +78,7 @@ import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
 import { CalendarX } from "phosphor-react";
+import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
 
 const { Title, Text } = Typography;
 
@@ -846,16 +847,11 @@ export default function PricingTransferRequest({
                         <p>Vehículos sugeridos</p>
                       </label>
                       {transferRequest.general?.transferRequestVehiclesSugest?.map((veh) => (
-                        <div className="vehiclesSubtitleInformation" key={veh.id}>
-                          <p className="vehiclesSubtitleInformationVehicle">
-                            {veh.vehicle_type_desc}
-                          </p>
-                          <label className="vehiclesSubtitleInformationQuantity">
-                            <p className="vehiclesSubtitleInformationQuantityNumber">
-                              {veh.units.toString().padStart(2, "0")}
-                            </p>
-                          </label>
-                        </div>
+                        <VehicleSuggestedTag
+                          units={veh.units}
+                          vehicle_type_desc={veh.vehicle_type_desc}
+                          key={veh.id}
+                        />
                       ))}
                     </Flex>
                   )}
