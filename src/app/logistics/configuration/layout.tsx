@@ -6,7 +6,6 @@ import Container from "@/components/atoms/Container/Container";
 import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
 import { checkUserComponentPermissions } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
-import { useEffect } from "react";
 
 interface Props {
   children?: React.ReactNode;
@@ -25,7 +24,7 @@ const ConfigurationLayout = ({ children, params }: Props) => {
 
   const getDefaultValue = () => {
     if (path.includes("materials")) {
-      return "materiasl";
+      return "materials";
     }
     if (path.includes("users")) {
       return "users";
@@ -42,7 +41,7 @@ const ConfigurationLayout = ({ children, params }: Props) => {
     if (path.includes("secureroutes")) {
       return "secureroutes";
     }
-    return "";
+    return "materials";
   };
 
   const onChange = (key: string) => {
@@ -99,6 +98,7 @@ const ConfigurationLayout = ({ children, params }: Props) => {
       <Container>
         <Tabs
           defaultActiveKey={getDefaultValue()}
+          activeKey={getDefaultValue()}
           items={items.filter((x: any) => !x.hidden)}
           onChange={onChange}
         />
