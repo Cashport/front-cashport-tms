@@ -26,9 +26,8 @@ export const Request: FC<IRequestProps> = ({
 }) => {
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
-
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
-  const { searchQuery: search } = useSearchContext();
+  const { searchQuery: search, filterQuery } = useSearchContext();
 
   const getTitile = (stateId: string, transferType: string, number: number) => {
     const getState = TransferOrdersState.find((f) => f.id === stateId);
@@ -50,7 +49,7 @@ export const Request: FC<IRequestProps> = ({
   const getTransferRequestAccepted = async () => {
     setIsLoadingMain(true);
     try {
-      const getRequest = await getAcceptedTransferRequest(search);
+      const getRequest = await getAcceptedTransferRequest(search, filterQuery);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
       }
@@ -64,7 +63,7 @@ export const Request: FC<IRequestProps> = ({
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
     setIsLoadingPagination(true);
     try {
-      const getRequest = await getAcceptedTransferRequest(search, statusId, newPage);
+      const getRequest = await getAcceptedTransferRequest(search, filterQuery, statusId, newPage);
       if (Array.isArray(getRequest) && getRequest.length > 0) {
         // Nuevo elemento a actualizar
         const updatedItem = getRequest[0];
@@ -84,7 +83,7 @@ export const Request: FC<IRequestProps> = ({
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search]);
+  }, [modalState, search, filterQuery]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)

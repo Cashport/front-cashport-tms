@@ -16,7 +16,7 @@ interface IInProcessProps {
 }
 
 export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
-  const { searchQuery: search } = useSearchContext();
+  const { searchQuery: search, filterQuery } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
@@ -43,7 +43,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
     setIsLoadingMain(true);
 
     try {
-      const getRequest = await getOnRouteTransferRequest(search);
+      const getRequest = await getOnRouteTransferRequest(search, filterQuery);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
       }
@@ -56,7 +56,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
     setIsLoadingPagination(true);
     try {
-      const getRequest = await getOnRouteTransferRequest(search, statusId, newPage);
+      const getRequest = await getOnRouteTransferRequest(search, filterQuery, statusId, newPage);
       if (Array.isArray(getRequest) && getRequest.length > 0) {
         // Nuevo elemento a actualizar
         const updatedItem = getRequest[0];
@@ -76,7 +76,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search]);
+  }, [modalState, search, filterQuery]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
