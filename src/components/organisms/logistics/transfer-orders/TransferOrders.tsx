@@ -1,6 +1,5 @@
 "use client";
 import styles from "./transferOrders.module.scss";
-import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
 import { useEffect, useState } from "react";
 import { Request } from "./request/Request";
 import { InProcess } from "./in-process/InProcess";
@@ -17,7 +16,7 @@ import { checkUserComponentPermissions } from "@/utils/utils";
 import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenerateActionOrders/ModalGenerateActionOrders";
 import { SearchProvider } from "@/context/SearchContext";
 import UiSearchInput from "@/components/ui/search-input-provider";
-import FilterWithCascader from "@/components/atoms/Filters/FilterOrders/FilterOrders";
+import Filter from "@/components/atoms/Filters/FilterOrders";
 
 const { Text } = Typography;
 
@@ -132,7 +131,7 @@ export const TransferOrders = () => {
         <Flex justify="space-between" style={{ marginBottom: "1rem" }}>
           <div className={styles.filterContainer}>
             <UiSearchInput className="search" placeholder="Buscar" />
-            <FilterWithCascader />
+            <Filter />
             <PrincipalButton
               type="default"
               icon={<DotsThree size={"1.5rem"} />}

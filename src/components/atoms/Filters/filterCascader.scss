@@ -26,7 +26,7 @@
     align-items: center;
     background-color: $white;
     padding: 8px;
-    width: 100%;
+  
     border: none;
     box-shadow: none;
     cursor: pointer;
@@ -38,3 +38,22 @@
         text-decoration: underline;
     }
 }
+
+.cascader-menu-container {
+    max-height: 200px; /* Ajusta según tus necesidades */
+    overflow-y: auto;
+  }
+  
+  .cascader-buttons {
+    display: flex;
+    justify-content: flex-start; /* Centra los botones */
+    gap: 2.5rem; /* Espaciado fijo entre los botones */
+    padding: 8px;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    width: 100%; /* Asegura que ocupe todo el ancho del Cascader */
+    box-sizing: border-box; /* Incluye el padding en el tamaño total */
+  }

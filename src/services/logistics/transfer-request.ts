@@ -122,33 +122,23 @@ export const finishTransferRequest = async (data: TransferRequestFinish) => {
     response?.message || "Error obteniendo los pasos de la solicitud de transferencia"
   );
 };
-const getQueryString = (search?: string, statusId?: string, page?: number) => {
-  const queryParams = new URLSearchParams();
 
-  if (search !== undefined && search.trim() !== "") {
-    queryParams.append("searchParam", search);
-  }
-
-  if (statusId !== undefined) {
-    queryParams.append("statusId", String(statusId));
-  }
-
-  if (page !== undefined) {
-    queryParams.append("page", String(page));
-  }
-
-  return `?${queryParams.toString()}`;
-};
 export const getAcceptedTransferRequest = async (
   search?: string,
+  filterQuery?: [string, string][],
   statusId?: string,
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
-    const queryString = getQueryString(search, statusId, page);
-
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-order${queryString}`
+    const body = {
+      searchParam: search,
+      psl: filterQuery,
+      statusId,
+      page
+    };
+    const response: GenericResponse<ITransferRequestResponse[]> = await API.post(
+      `/transfer-request/transfer-request-order`,
+      body
     );
     if (response.success) return response.data;
     return [];
@@ -160,14 +150,20 @@ export const getAcceptedTransferRequest = async (
 
 export const getOnRouteTransferRequest = async (
   search?: string,
+  filterQuery?: [string, string][],
   statusId?: string,
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
-    const queryString = getQueryString(search, statusId, page);
-
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-on-route${queryString}`
+    const body = {
+      searchParam: search,
+      psl: filterQuery,
+      statusId,
+      page
+    };
+    const response: GenericResponse<ITransferRequestResponse[]> = await API.post(
+      `/transfer-request/transfer-request-on-route`,
+      body
     );
     if (response.success) return response.data;
     return [];
@@ -179,14 +175,20 @@ export const getOnRouteTransferRequest = async (
 
 export const getFinishedTransferRequest = async (
   search?: string,
+  filterQuery?: [string, string][],
   statusId?: string,
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
-    const queryString = getQueryString(search, statusId, page);
-
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-finished${queryString}`
+    const body = {
+      searchParam: search,
+      psl: filterQuery,
+      statusId,
+      page
+    };
+    const response: GenericResponse<ITransferRequestResponse[]> = await API.post(
+      `/transfer-request/transfer-request-finished`,
+      body
     );
     if (response.success) return response.data;
     return [];
