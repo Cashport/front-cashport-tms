@@ -1,5 +1,8 @@
 import { Table } from "antd";
-import { ITransferRequest } from "@/types/transferRequest/ITransferRequest";
+import {
+  ITransferRequest,
+  ITransferRequestResponse
+} from "@/types/transferRequest/ITransferRequest";
 import { FC, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -60,7 +63,6 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
   };
 
   const [dataSource, setDataSource] = useState<DataType[]>([]);
-
   useEffect(() => {
     const mappedData = items.map((item) => ({
       key: item.id,

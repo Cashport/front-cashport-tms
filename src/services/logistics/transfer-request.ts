@@ -234,7 +234,7 @@ export const updateTransferRequestStatus = async (
 };
 
 export const downloadCsvTransferOrders = async () => {
-  await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.csv");
+  await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.xlsx");
 };
 
 export const deleteOrders = async (trIds: number[], toIds: number[]): Promise<any> => {
