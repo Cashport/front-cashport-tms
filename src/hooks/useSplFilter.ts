@@ -46,7 +46,6 @@ interface UsePslFilter {
 export const usePslFilter = (): UsePslFilter => {
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [searchInput, setSearchInput] = useState("");
-
   const [filterQuery, setFilterQuery] = useState<[string, string][]>([]);
 
   const { data, isLoading } = useSWR<IPslUsers>(
@@ -55,19 +54,41 @@ export const usePslFilter = (): UsePslFilter => {
     {}
   );
 
-  function transformData(apiData: PslAPI[]): Option[] {
-    return apiData.map(({ id, description, checked, users }) => ({
-      value: id.toString(),
-      label: description,
-      key: id.toString(),
-      children: users.map((user) => ({
-        value: user.id.toString(),
-        label: user.name,
-        key: `user-${user.id}`
-      }))
-    }));
+  function transformData(apiData: PslAPI[]): { options: Option[]; preSelectedValues: string[][] } {
+    const preSelectedValues: string[][] = [];
+
+    const options = apiData.map(({ id, description, users }) => {
+      const children = users.map((user) => {
+        if (user.checked) {
+          preSelectedValues.push([id.toString(), user.id.toString()]);
+        }
+        return {
+          value: user.id.toString(),
+          label: user.name,
+          key: `${id}-user-${user.id}`
+        };
+      });
+
+      return {
+        value: id.toString(),
+        label: description,
+        key: id.toString(),
+        children
+      };
+    });
+
+    return { options, preSelectedValues };
   }
-  const transformedData = useMemo(() => transformData(data?.data ?? []), [data]);
+
+  const { options, preSelectedValues } = useMemo(() => transformData(data?.data ?? []), [data]);
+
+  // Actualiza los valores seleccionados cuando se carga la data de la API:
+  useEffect(() => {
+    if (JSON.stringify(selectedValues) !== JSON.stringify(preSelectedValues)) {
+      setSelectedValues(preSelectedValues);
+    }
+  }, [preSelectedValues]);
+
   const clearFilters = () => {
     setFilterQuery([]);
   };
@@ -78,10 +99,6 @@ export const usePslFilter = (): UsePslFilter => {
     setFilterQuery([]);
   };
 
-  // const filter = (inputValue: string, path: DefaultOptionType[]) =>
-  //   path.some(
-  //     (option) => (option.label as string).toLowerCase().indexOf(inputValue.toLowerCase()) > -1
-  //   );
   const filter = (inputValue: string, path: DefaultOptionType[]) =>
     path.some((option) =>
       (option.label as string).toLowerCase().includes(inputValue.toLowerCase())
@@ -118,9 +135,7 @@ export const usePslFilter = (): UsePslFilter => {
   };
   const handleSelectAll = () => {
     const filteredValues =
-      searchInput.trim() !== ""
-        ? getFilteredValues(transformedData, searchInput)
-        : getAllValues(transformedData);
+      searchInput.trim() !== "" ? getFilteredValues(options, searchInput) : getAllValues(options);
     setSelectedValues(filteredValues);
   };
 
@@ -132,7 +147,7 @@ export const usePslFilter = (): UsePslFilter => {
   useEffect(() => {
     const updatedFilterQuery: [string, string][] = selectedValues.reduce(
       (acc, [parentValue, childValue]) => {
-        const parent = transformedData.find((option) => option.value === parentValue);
+        const parent = options.find((option) => option.value === parentValue);
         if (!parent) return acc;
 
         const existingParent = acc.find(([pValue]) => pValue === parentValue);
@@ -152,12 +167,11 @@ export const usePslFilter = (): UsePslFilter => {
       },
       [] as [string, string][]
     );
-
     handleUpdateFilterQuery(updatedFilterQuery);
-  }, [selectedValues, transformedData]);
+  }, [selectedValues]);
 
   return {
-    options: transformedData,
+    options,
     isLoading,
     handleSelectAll,
     handleClearFilters,
