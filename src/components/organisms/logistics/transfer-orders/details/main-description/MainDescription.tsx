@@ -322,7 +322,7 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
               <Text className={styles.titleCard}>Costo total</Text>
             </div>
             <div className={styles.titleCardContainer}>
-              <Text className={styles.subtitleCard}>
+              <Text className={styles.subtitleCardBold}>
                 {formatMoney(transferRequest?.total_price) || "-"}
               </Text>
             </div>
