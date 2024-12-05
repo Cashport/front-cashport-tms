@@ -280,10 +280,10 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
                 </Col>
               </Row>
             </Flex>
-            <Flex vertical gap={32}>
+            {/* <Flex vertical gap={32}>
               <div className={styles.headingText}>Centros de costos</div>
               <Responsibles psls={mockedPSL} insideCollapse={false} />
-            </Flex>
+            </Flex> */}
             <Flex vertical gap={32}>
               <div className={styles.headingText}>Detalle del servicio</div>
               <div className={styles.container}>{tripDetailsWithNovelties}</div>
