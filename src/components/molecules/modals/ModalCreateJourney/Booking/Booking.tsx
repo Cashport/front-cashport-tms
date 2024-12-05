@@ -21,6 +21,7 @@ import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import tz from "dayjs/plugin/timezone";
 import { useLocations } from "../utils/useLocations";
+import { RangePickerProps } from "antd/es/date-picker";
 dayjs.locale("es");
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -134,6 +135,11 @@ const Booking = ({
     setValue("route", route);
   }, [route]);
 
+  const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
+    // Can not select days before today
+    return current && current < dayjs().startOf("day");
+  };
+
   return (
     <Flex vertical gap={24}>
       <FormWizard.TabContent title="Agendamiento" icon="ti-settings">
@@ -215,6 +221,7 @@ const Booking = ({
                       onChange={(value) => {
                         field.onChange(value);
                       }}
+                      disabledDate={disabledDate}
                       value={field.value}
                       className={styles.select}
                     />
@@ -237,6 +244,7 @@ const Booking = ({
                       value={field.value}
                       className={styles.select}
                       showNow={false}
+                      disabledDate={disabledDate}
                     />
                   )}
                 />
