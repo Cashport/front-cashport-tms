@@ -135,9 +135,32 @@ const Booking = ({
     setValue("route", route);
   }, [route]);
 
+  const now = dayjs();
   const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
     // Can not select days before today
-    return current && current < dayjs().startOf("day");
+    return current?.isBefore(now, "day");
+  };
+
+  const getDisabledTime = (selectedDate: any) => {
+    const isToday = dayjs(selectedDate).isSame(now, "day");
+
+    if (!isToday) {
+      return {
+        disabledHours: () => [],
+        disabledMinutes: () => []
+      };
+    }
+
+    return {
+      // Deshabilitar horas menores a la hora actual
+      disabledHours: () =>
+        Array.from({ length: 24 }, (_, i) => i).filter((hour) => hour < now.hour()),
+      // Deshabilitar minutos menores a los minutos actuales si la hora es la actual
+      disabledMinutes: (selectedHour: number) =>
+        selectedHour === now.hour()
+          ? Array.from({ length: 60 }, (_, i) => i).filter((minute) => minute < now.minute())
+          : []
+    };
   };
 
   return (
@@ -244,7 +267,8 @@ const Booking = ({
                       value={field.value}
                       className={styles.select}
                       showNow={false}
-                      disabledDate={disabledDate}
+                      disabledDate={() => false} // No deshabilitamos fechas completas
+                      disabledTime={() => getDisabledTime(watch("startDate"))}
                     />
                   )}
                 />
