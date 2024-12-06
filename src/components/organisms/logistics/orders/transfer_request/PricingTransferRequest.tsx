@@ -470,7 +470,7 @@ export default function PricingTransferRequest({
       setView("vehicles");
     } else if (view === "vehicles") {
       setView("solicitation");
-    } else router.push("/logistics/transfer-orders");
+    } else router.push(`/logistics/transfer-orders?tab=${TabEnum.REQUESTS}`);
   };
 
   /* Carga */

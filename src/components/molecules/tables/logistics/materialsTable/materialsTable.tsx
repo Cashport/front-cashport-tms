@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { Button, Flex, message, Spin, Table, Typography } from "antd";
 import type { TableProps } from "antd";
@@ -156,11 +157,7 @@ export const MaterialsTable = () => {
         </Flex>
         <Flex justify="flex-end">
           <Link href="/logistics/configuration/materials/new">
-            <Button
-              type="primary"
-              className="buttonNewProject"
-              size="large"
-            >
+            <Button type="primary" className="buttonNewProject" size="large">
               Nuevo material
               {<Plus weight="bold" size={14} />}
             </Button>

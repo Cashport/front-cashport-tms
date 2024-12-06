@@ -153,3 +153,25 @@ export interface IAPIResponse {
 export interface DataCarga extends Material {
   quantity: number;
 }
+
+export interface CarrierRequestAPI {
+  status: string; // ID único para el estado del servicio
+  id: number; // ID del servicio
+  service_type: string; // Tipo de servicio (ej. "Carga")
+  start_date: string; // Fecha y hora de inicio (formato: DD/MM/YYYY HH:mm)
+  end_date: string; // Fecha y hora de fin (formato: DD/MM/YYYY HH:mm)
+  start_location: string; // Ubicación inicial
+  end_location: string; // Ubicación final
+  vehicles: string; // Identificación de los vehículos utilizados
+  elapsedtime: string; // Fecha y hora en formato ISO 8601
+  amount: number; // Monto asociado al servicio
+  order_nro: number; // Número de orden
+  id_transfer_request: number; // ID de la solicitud de transferencia
+}
+
+export interface CarrierCollapseAPI {
+  color: string;
+  description: string;
+  statusid: string;
+  carrierrequests: CarrierRequestAPI[];
+}
