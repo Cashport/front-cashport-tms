@@ -60,7 +60,7 @@ const Resum: FC<IResumProps> = ({ trip, driver }) => {
         </div>
         <div className={styles.contactContainer}>
           <Text className={styles.resumText}>Fecha de creación</Text>
-          <Text className={`${styles.resumText} ${styles.bold}`}>{dayjs.utc(trip.createdAt).format('DD [de] MMMM [de] YYYY')}</Text>
+          <Text className={`${styles.resumText} ${styles.bold}`}>{dayjs.utc(trip.createdAt).format('DD MMMM YYYY')}</Text>
         </div>
       </div>
       <Text className={`${styles.title} ${styles.margin}`}>Instrucciones especiales</Text>
