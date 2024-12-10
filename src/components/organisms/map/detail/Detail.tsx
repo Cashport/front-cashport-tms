@@ -104,11 +104,11 @@ const DetailTripMap: FC<IDetailTripMapProps> = ({ trip, lat, long, driver, onClo
           <Text className={styles.sqSubtitle}>{trip.vehicle.behicleType}</Text>
         </div>
         <div className={styles.square}>
-          <Text className={styles.sqTitle}>{lat && long ? calculateDistanceFromCurrentLocation(lat, long, trip.geometry.geometry[0].geometry.coordinates) : 0} Kms</Text>
+          <Text className={styles.sqTitle}>{lat && long ? parseFloat((calculateDistanceFromCurrentLocation(lat, long, trip.geometry.geometry[0].geometry.coordinates) / 1000).toFixed(0)) : 0} Kms</Text>
           <Text className={styles.sqSubtitle}>Kms recorridos</Text>
         </div>
         <div className={styles.square}>
-          <Text className={styles.sqTitle}>{driver?.hoursTraveled} Horas</Text>
+          <Text className={styles.sqTitle}>{driver?.hoursTraveled || 0} Horas</Text>
           <Text className={styles.sqSubtitle}>Hrs de viaje</Text>
         </div>
       </div>

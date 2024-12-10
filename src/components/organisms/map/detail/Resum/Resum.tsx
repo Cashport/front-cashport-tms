@@ -5,6 +5,7 @@ import { FC } from "react";
 import dayjs from "dayjs";
 import { getTravelDuration } from "@/utils/logistics/maps";
 import { IDriverMap } from "@/types/logistics/driver/driver";
+import "dayjs/locale/es-us";
 
 const Text = Typography;
 
@@ -43,7 +44,7 @@ const Resum: FC<IResumProps> = ({ trip, driver }) => {
       <div className={styles.resumContainer}>
         <div className={styles.contactContainer}>
           <Text className={styles.resumText}>Distancia total</Text>
-          <Text className={`${styles.resumText} ${styles.bold}`}>{trip.geometry.geometry[0].distance} Km</Text>
+          <Text className={`${styles.resumText} ${styles.bold}`}>{parseFloat((trip.geometry.geometry[0].distance / 1000).toFixed(0))} Km</Text>
         </div>
         <div className={styles.contactContainer}>
           <Text className={styles.resumText}>Tiempo estimado</Text>
@@ -59,7 +60,7 @@ const Resum: FC<IResumProps> = ({ trip, driver }) => {
         </div>
         <div className={styles.contactContainer}>
           <Text className={styles.resumText}>Fecha de creación</Text>
-          <Text className={`${styles.resumText} ${styles.bold}`}>{dayjs(trip.createdAt).format('DD [de] MMMM [de] YYYY')}</Text>
+          <Text className={`${styles.resumText} ${styles.bold}`}>{dayjs.utc(trip.createdAt).format('DD MMMM YYYY')}</Text>
         </div>
       </div>
       <Text className={`${styles.title} ${styles.margin}`}>Instrucciones especiales</Text>

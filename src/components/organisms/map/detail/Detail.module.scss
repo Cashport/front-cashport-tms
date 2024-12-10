@@ -1,5 +1,12 @@
 .mainDetail {
   overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 
   .backContainer {
     display: flex;
@@ -130,17 +137,17 @@
     justify-content: space-between;
     gap: 16px;
     margin-top: 32px;
-
+  
     .square {
-      width: 115px;
+      width: calc((100% - 48px) / 4);
       height: 68px;
       display: flex;
       flex-direction: column;
       border-radius: 8px;
       background-color: #303A50;
-      padding: 8px 10px;
+      padding: 8px 0px;
       row-gap: 4px;
-
+  
       .sqTitle {
         color: #FFF;
         font-size: 16px;
@@ -150,8 +157,10 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        margin-left: 10px;
+        margin-right: 10px;
       }
-
+  
       .sqSubtitle {
         color: #FFF;
         font-size: 12px;
@@ -160,6 +169,8 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        margin-left: 10px;
+        margin-right: 10px;
       }
     }
   }
