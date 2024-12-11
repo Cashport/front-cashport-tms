@@ -78,7 +78,6 @@ import TrackingDrawer from "./components/tracking/TrackingDrawer";
 import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
-import { CalendarX, X } from "phosphor-react";
 import { CalendarX } from "phosphor-react";
 import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
 
