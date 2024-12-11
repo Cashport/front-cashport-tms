@@ -12,8 +12,6 @@ import Document from "./Document/Document";
 import { calculateDistanceFromCurrentLocation } from "@/utils/logistics/calculateDistanceMap";
 import { IDriverMap } from "@/types/logistics/driver/driver";
 import { Empty } from "@phosphor-icons/react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 
 const Text = Typography;
 
@@ -33,7 +31,6 @@ enum Tab {
 
 const DetailTripMap: FC<IDetailTripMapProps> = ({ trip, lat, long, driver, onClose }) => {
   const [tab, setTab] = useState<Tab>(Tab.TRACKING);
-  const router = useRouter();
 
   const getStateColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);
@@ -64,7 +61,9 @@ const DetailTripMap: FC<IDetailTripMapProps> = ({ trip, lat, long, driver, onClo
           <Text className={styles.btnText}>Regresar</Text>
         </Button>
         <div className={styles.stateContainer}>
-          <div onClick={() => router.push(`/logistics/transfer-orders/details/${trip.transferRequestId}`)} className={styles.tr}>TR-{trip.transferRequestId}</div>
+          <a href={`/logistics/transfer-orders/details/${trip.transferRequestId}`}>
+            <div onClick={() => {}} className={styles.tr}>TR-{trip.transferRequestId}</div>
+          </a>
           <div className={styles.stateTag} style={{ backgroundColor: getStateColor(trip.stateId) }}>
             <CheckCircle size={16} color={getStateTextColor(trip.stateId)} />
             <div className={styles.state} style={{ color: getStateTextColor(trip.stateId) }}>{trip.state.name}</div>
@@ -105,11 +104,11 @@ const DetailTripMap: FC<IDetailTripMapProps> = ({ trip, lat, long, driver, onClo
           <Text className={styles.sqSubtitle}>{trip.vehicle.behicleType}</Text>
         </div>
         <div className={styles.square}>
-          <Text className={styles.sqTitle}>{lat && long ? calculateDistanceFromCurrentLocation(lat, long, trip.geometry.geometry[0].geometry.coordinates) : 0} Kms</Text>
+          <Text className={styles.sqTitle}>{lat && long ? parseFloat((calculateDistanceFromCurrentLocation(lat, long, trip.geometry.geometry[0].geometry.coordinates) / 1000).toFixed(0)) : 0} Kms</Text>
           <Text className={styles.sqSubtitle}>Kms recorridos</Text>
         </div>
         <div className={styles.square}>
-          <Text className={styles.sqTitle}>{driver?.hoursTraveled} Horas</Text>
+          <Text className={styles.sqTitle}>{driver?.hoursTraveled || 0} Horas</Text>
           <Text className={styles.sqSubtitle}>Hrs de viaje</Text>
         </div>
       </div>

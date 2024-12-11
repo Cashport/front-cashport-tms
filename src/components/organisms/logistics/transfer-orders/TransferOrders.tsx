@@ -1,7 +1,5 @@
 "use client";
 import styles from "./transferOrders.module.scss";
-import UiSearchInput from "@/components/ui/search-input/search-input";
-import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
 import { useEffect, useState } from "react";
 import { Request } from "./request/Request";
 import { InProcess } from "./in-process/InProcess";
@@ -16,6 +14,9 @@ import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
 import { checkUserComponentPermissions } from "@/utils/utils";
 import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenerateActionOrders/ModalGenerateActionOrders";
+import { SearchProvider } from "@/context/SearchContext";
+import UiSearchInput from "@/components/ui/search-input-provider";
+import Filter from "@/components/atoms/Filters/FilterOrders";
 
 const { Text } = Typography;
 
@@ -28,7 +29,6 @@ export enum TabEnum {
 const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
 export const TransferOrders = () => {
-  const [search, setSearch] = useState<string>("");
   const { selectedProject: project, isHy } = useAppStore((state) => state);
   const [ordersId, setOrdersId] = useState<number[]>([]);
   const [trsIds, setTrsIds] = useState<number[]>([]);
@@ -103,7 +103,6 @@ export const TransferOrders = () => {
       case TabEnum.REQUESTS:
         return (
           <Request
-            search={search}
             handleCheckboxChange={handleCheckboxChange}
             ordersId={ordersId}
             trsIds={trsIds}
@@ -112,85 +111,93 @@ export const TransferOrders = () => {
           />
         );
       case TabEnum.IN_PROCESS:
-        return <InProcess search={search} />;
+        return (
+          <InProcess
+            trsIds={trsIds}
+            modalState={isModalOpen}
+            handleCheckboxChangeTR={handleCheckboxChangeTR}
+          />
+        );
       case TabEnum.COMPLETED:
-        return <Completed search={search} />;
+        return <Completed />;
       default:
         return <Empty />;
     }
   };
 
   return (
-    <Container>
-      <Flex justify="space-between" style={{ marginBottom: "1rem" }}>
-        <div className={styles.filterContainer}>
-          <UiSearchInput
-            className="search"
-            placeholder="Buscar"
-            onChange={(event) => {
-              setSearch(event.target.value);
-            }}
-          />
-          <FilterProjects setSelecetedProjects={setSelectFilters} />
-          <PrincipalButton
-            type="default"
-            icon={<DotsThree size={"1.5rem"} />}
-            disabled={false}
-            loading={false}
-            onClick={() => setIsModalOpen(true)}
+    <SearchProvider debounceDelay={500}>
+      <Container>
+        <Flex justify="space-between" style={{ marginBottom: "1rem" }}>
+          <div className={styles.filterContainer}>
+            <UiSearchInput className="search" placeholder="Buscar" />
+            <Filter />
+            <PrincipalButton
+              type="default"
+              icon={<DotsThree size={"1.5rem"} />}
+              disabled={false}
+              loading={false}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Generar acción
+            </PrincipalButton>
+          </div>
+          <ProtectedComponent
+            componentName={TMS_COMPONENTS[viewName].REQUESTS}
+            viewName={viewName}
+            checkFunction={({ create_permission }) => create_permission}
           >
-            Generar acción
-          </PrincipalButton>
+            <PrincipalButton
+              type="primary"
+              className="buttonNewProject"
+              size="large"
+              href="/logistics/orders/new"
+            >
+              Crear Nuevo Viaje
+              {<Plus weight="bold" size={14} />}
+            </PrincipalButton>
+          </ProtectedComponent>
+        </Flex>
+        <div className={styles.tabContainer} style={{ marginBottom: "0.5rem" }}>
+          <ProtectedComponent componentName={TMS_COMPONENTS[viewName].REQUESTS} viewName={viewName}>
+            <Text
+              onClick={() => setTab(TabEnum.REQUESTS)}
+              className={`${styles.tab} ${tab === TabEnum.REQUESTS && styles.active}`}
+            >
+              Solicitudes
+            </Text>
+          </ProtectedComponent>
+          <ProtectedComponent
+            componentName={TMS_COMPONENTS[viewName].IN_PROCESS}
+            viewName={viewName}
+          >
+            <Text
+              onClick={() => setTab(TabEnum.IN_PROCESS)}
+              className={`${styles.tab} ${tab === TabEnum.IN_PROCESS && styles.active}`}
+            >
+              En curso
+            </Text>
+          </ProtectedComponent>
+          <ProtectedComponent
+            componentName={TMS_COMPONENTS[viewName].COMPLETED}
+            viewName={viewName}
+          >
+            <Text
+              onClick={() => setTab(TabEnum.COMPLETED)}
+              className={`${styles.tab} ${tab === TabEnum.COMPLETED && styles.active}`}
+            >
+              Finalizados
+            </Text>
+          </ProtectedComponent>
         </div>
-        <ProtectedComponent
-          componentName={TMS_COMPONENTS[viewName].REQUESTS}
-          viewName={viewName}
-          checkFunction={({ create_permission }) => create_permission}
-        >
-          <PrincipalButton
-            type="primary"
-            className="buttonNewProject"
-            size="large"
-            href="/logistics/orders/new"
-          >
-            Crear Nuevo Viaje
-            {<Plus weight="bold" size={14} />}
-          </PrincipalButton>
-        </ProtectedComponent>
-      </Flex>
-      <div className={styles.tabContainer} style={{ marginBottom: "0.5rem" }}>
-        <ProtectedComponent componentName={TMS_COMPONENTS[viewName].REQUESTS} viewName={viewName}>
-          <Text
-            onClick={() => setTab(TabEnum.REQUESTS)}
-            className={`${styles.tab} ${tab === TabEnum.REQUESTS && styles.active}`}
-          >
-            Solicitudes
-          </Text>
-        </ProtectedComponent>
-        <ProtectedComponent componentName={TMS_COMPONENTS[viewName].IN_PROCESS} viewName={viewName}>
-          <Text
-            onClick={() => setTab(TabEnum.IN_PROCESS)}
-            className={`${styles.tab} ${tab === TabEnum.IN_PROCESS && styles.active}`}
-          >
-            En curso
-          </Text>
-        </ProtectedComponent>
-        <ProtectedComponent componentName={TMS_COMPONENTS[viewName].COMPLETED} viewName={viewName}>
-          <Text
-            onClick={() => setTab(TabEnum.COMPLETED)}
-            className={`${styles.tab} ${tab === TabEnum.COMPLETED && styles.active}`}
-          >
-            Finalizados
-          </Text>
-        </ProtectedComponent>
-      </div>
-      <div>{isHy && renderView()}</div>
-      <ModalGenerateActionOrders
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        ordersId={ordersId}
-        trsIds={trsIds}
-      />
-    </Container>
+        <div>{isHy && renderView()}</div>
+        <ModalGenerateActionOrders
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          ordersId={ordersId}
+          trsIds={trsIds}
+        />
+      </Container>
+    </SearchProvider>
   );
 };

@@ -9,7 +9,7 @@ type CustomTimeSelectorProps = {
 };
 
 const CustomTimeSelector: React.FC<CustomTimeSelectorProps> = ({
-  initialValue = 0,
+  initialValue = 1,
   maxValue = 50,
   onTimeChange
 }) => {

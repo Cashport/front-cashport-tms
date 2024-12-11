@@ -21,7 +21,6 @@ interface Props {
 }
 
 export const DriverInfoView = ({ params }: Props) => {
-  const [messageApi, contextHolder] = message.useMessage();
   const [statusForm, setStatusForm] = useState<StatusForm>("review");
   const { push } = useRouter();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
@@ -30,7 +29,7 @@ export const DriverInfoView = ({ params }: Props) => {
     setStatusForm(newFormState);
   }, []);
 
-  const fetcher = async ({ id, key }: { id: string; key: string }) => {
+  const fetcher = async () => {
     return getDriverById(params.driverId);
   };
 
@@ -50,30 +49,12 @@ export const DriverInfoView = ({ params }: Props) => {
         data.logo as any,
         data?.files as DocumentCompleteType[]
       );
-      if (response.status === 200) {
-        messageApi
-          .open({
-            type: "success",
-            content: "El conductor fue editado exitosamente."
-          })
-          .then(() => {
-            push(`/logistics/providers/${params.id}/driver`);
-          });
-      }
+      message.success("Conductor editado", 2).then(() => {
+        push(`/logistics/providers/${params.id}/driver/${response.id}`);
+        setStatusForm("review");
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message,
-          duration: 3
-        });
-      } else {
-        messageApi.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta mas tarde.",
-          duration: 3
-        });
-      }
+      message.error(error instanceof Error ? error.message : "Error al editar conductor", 3);
     } finally {
       setIsLoadingSubmit(false);
     }
@@ -81,18 +62,15 @@ export const DriverInfoView = ({ params }: Props) => {
   const handlechangeStatus = async (status: boolean) => {
     try {
       await updateDriverStatus(params.driverId, status);
-      messageApi.open({
-        type: "success",
-        content: "El conductor fue editado exitosamente.",
-        duration: 2
+      message.success(`Conductor ${status ? "activado" : "desactivado"}`, 2).then(() => {
+        push(`/logistics/providers/${params.id}/driver`);
+        setStatusForm("review");
       });
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message
-        });
-      }
+      message.error(
+        error instanceof Error ? error.message : "Error al editar estado del conductor",
+        3
+      );
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
@@ -106,26 +84,19 @@ export const DriverInfoView = ({ params }: Props) => {
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   return (
-    <>
-      {contextHolder}
-      <Skeleton
-        active
-        loading={isLoadingDocuments || isLoadingVehicles || isLoading || isValidating}
-      >
-        <DriverFormTab
-          onSubmitForm={handleSubmitForm}
-          data={data?.data?.data[0]}
-          params={params}
-          statusForm={statusForm}
-          handleFormState={handleFormState}
-          onActiveProject={() => handlechangeStatus(true)}
-          onDesactivateProject={() => handlechangeStatus(false)}
-          documentsTypesList={documentsType ?? []}
-          vehiclesTypesList={vehiclesTypesData?.data ?? []}
-          isLoadingSubmit={isLoadingSubmit}
-          messageApi={messageApi}
-        />
-      </Skeleton>
-    </>
+    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isLoading || isValidating}>
+      <DriverFormTab
+        onSubmitForm={handleSubmitForm}
+        data={data?.data?.data[0]}
+        params={params}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        onActiveProject={() => handlechangeStatus(true)}
+        onDesactivateProject={() => handlechangeStatus(false)}
+        documentsTypesList={documentsType ?? []}
+        vehiclesTypesList={vehiclesTypesData ?? []}
+        isLoadingSubmit={isLoadingSubmit}
+      />
+    </Skeleton>
   );
 };

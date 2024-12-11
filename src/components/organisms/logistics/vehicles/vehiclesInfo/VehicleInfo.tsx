@@ -1,17 +1,15 @@
 "use client";
-import { Flex, message, Row, Skeleton } from "antd";
+import { message, Skeleton } from "antd";
 import "../../../../../styles/_variables_logistics.css";
 import "./vehicleInfo.scss";
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
 import { getVehicleById, getVehicleType, updateVehicle } from "@/services/logistics/vehicle";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { useCallback, useState } from "react";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
-import { useRouter } from "next/navigation";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
 
 interface Props {
-  isEdit?: boolean;
   idParam: string;
   params: {
     id: string;
@@ -19,13 +17,11 @@ interface Props {
   };
 }
 
-export const VehicleInfoView = ({ isEdit = false, idParam = "", params }: Props) => {
-  const [messageApi, contextHolder] = message.useMessage();
+export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const [statusForm, setStatusForm] = useState<StatusForm>("review");
-  const { push } = useRouter();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  const fetcher = async ({ id, key }: { id: string; key: string }) => {
+  const fetcher = async ({ id }: { id: string }) => {
     return getVehicleById(id);
   };
 
@@ -41,38 +37,20 @@ export const VehicleInfoView = ({ isEdit = false, idParam = "", params }: Props)
   });
 
   const handleSubmit = async (data: any) => {
+    setIsLoadingSubmit(true);
     try {
-      setIsLoadingSubmit(true);
       const response = await updateVehicle({ ...data }, data.files, data.images);
       if (response && response.status === 200) {
-        messageApi
-          .open({
-            type: "success",
-            content: `El vehículo fue editado exitosamente.`,
-            duration: 2
-          })
-          .then(() => {
-            push(`/logistics/providers/${params.id}/vehicle`);
-          });
+        setIsLoadingSubmit(false);
+        message.success("Vehículo editado", 2, () => setStatusForm("review"));
+        mutate({ id: params, key: "1" });
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message,
-          duration: 3
-        });
-      } else {
-        message.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta más tarde.",
-          duration: 3
-        });
-      }
-    } finally {
       setIsLoadingSubmit(false);
+      message.error(error instanceof Error ? error.message : "Error al editar vehículo", 2);
     }
   };
+
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
     "1",
     getDocumentsByEntityType,
@@ -85,27 +63,17 @@ export const VehicleInfoView = ({ isEdit = false, idParam = "", params }: Props)
   );
 
   return (
-    <>
-      {contextHolder}
-      <Flex className="vehicleFormContainer">
-        <Row style={{ width: "100%" }}>
-          <Skeleton
-            active
-            loading={isLoading || isValidating || isLoadingDocuments || isLoadingVehicles}
-          >
-            <VehicleFormTab
-              statusForm={statusForm}
-              handleFormState={handleFormState}
-              data={data?.data as any}
-              params={params}
-              onSubmitForm={handleSubmit}
-              documentsTypesList={documentsType ?? []}
-              vehiclesTypesList={vehiclesTypesData?.data ?? []}
-              isLoading={isLoadingSubmit}
-            />
-          </Skeleton>
-        </Row>
-      </Flex>
-    </>
+    <Skeleton active loading={isLoading || isValidating || isLoadingDocuments || isLoadingVehicles}>
+      <VehicleFormTab
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        data={data}
+        params={params}
+        onSubmitForm={handleSubmit}
+        documentsTypesList={documentsType ?? []}
+        vehiclesTypesList={vehiclesTypesData ?? []}
+        isLoading={isLoadingSubmit}
+      />
+    </Skeleton>
   );
 };

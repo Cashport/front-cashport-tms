@@ -161,10 +161,22 @@ export const finishTransferRequest = async (data: TransferRequestFinish) => {
   );
 };
 
-export const getAcceptedTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
+export const getAcceptedTransferRequest = async (
+  search?: string,
+  filterQuery?: [string, string][],
+  statusId?: string,
+  page?: number
+): Promise<ITransferRequestResponse[]> => {
   try {
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-order`
+    const body = {
+      searchParam: search,
+      psl: filterQuery,
+      statusId,
+      page
+    };
+    const response: GenericResponse<ITransferRequestResponse[]> = await API.post(
+      `/transfer-request/transfer-request-order`,
+      body
     );
     if (response.success) return response.data;
     return [];
@@ -174,10 +186,22 @@ export const getAcceptedTransferRequest = async (): Promise<ITransferRequestResp
   }
 };
 
-export const getOnRouteTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
+export const getOnRouteTransferRequest = async (
+  search?: string,
+  filterQuery?: [string, string][],
+  statusId?: string,
+  page?: number
+): Promise<ITransferRequestResponse[]> => {
   try {
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-on-route`
+    const body = {
+      searchParam: search,
+      psl: filterQuery,
+      statusId,
+      page
+    };
+    const response: GenericResponse<ITransferRequestResponse[]> = await API.post(
+      `/transfer-request/transfer-request-on-route`,
+      body
     );
     if (response.success) return response.data;
     return [];
@@ -187,10 +211,22 @@ export const getOnRouteTransferRequest = async (): Promise<ITransferRequestRespo
   }
 };
 
-export const getFinishedTransferRequest = async (): Promise<ITransferRequestResponse[]> => {
+export const getFinishedTransferRequest = async (
+  search?: string,
+  filterQuery?: [string, string][],
+  statusId?: string,
+  page?: number
+): Promise<ITransferRequestResponse[]> => {
   try {
-    const response: GenericResponse<ITransferRequestResponse[]> = await API.get(
-      `/transfer-request/transfer-request-finished`
+    const body = {
+      searchParam: search,
+      psl: filterQuery,
+      statusId,
+      page
+    };
+    const response: GenericResponse<ITransferRequestResponse[]> = await API.post(
+      `/transfer-request/transfer-request-finished`,
+      body
     );
     if (response.success) return response.data;
     return [];
@@ -236,7 +272,7 @@ export const updateTransferRequestStatus = async (
 };
 
 export const downloadCsvTransferOrders = async () => {
-  await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.csv");
+  await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.xlsx");
 };
 
 export const deleteOrders = async (trIds: number[], toIds: number[]): Promise<any> => {

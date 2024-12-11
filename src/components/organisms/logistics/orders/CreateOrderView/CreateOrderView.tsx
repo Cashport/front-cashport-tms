@@ -32,10 +32,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import axios from "axios";
 import MapboxGeocoding from "@mapbox/mapbox-sdk/services/geocoding";
 
-// components
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
-import { NavRightSection } from "@/components/atoms/NavRightSection/NavRightSection";
-
 //schemas
 import {
   CustomOptionType,
@@ -62,7 +58,6 @@ import { getAllMaterials } from "@/services/logistics/materials";
 import { getSuggestedVehicles } from "@/services/logistics/vehicles";
 
 //vars
-import { SUCCESS } from "@/utils/constants/globalConstants";
 import { useRouter } from "next/navigation";
 import {
   PlusCircle,
@@ -105,6 +100,7 @@ import createColumnsPersons from "./controllers/persons/columns";
 import { useRequirementManagement } from "./controllers/hooks/useRequirementManagment";
 import createOtherRequirementsColumns from "./controllers/otherRequirements/columns";
 import Container from "@/components/atoms/Container/Container";
+import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
 
 const { Title, Text } = Typography;
 
@@ -112,7 +108,6 @@ export const CreateOrderView = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
 
   /* Tipo de viaje */
   const [typeactive, setTypeactive] = useState("1");
@@ -121,8 +116,8 @@ export const CreateOrderView = () => {
   const origin = useRef<any>([]);
   const destination = useRef<any>([]);
   const [origenIzaje, setOrigenIzaje] = useState(false);
-  const [horasOrigenIzaje, setHorasOrigenIzaje] = useState<number>(0);
-  const [horasDestinoIzaje, setHorasDestinoIzaje] = useState<number>(0);
+  const [horasOrigenIzaje, setHorasOrigenIzaje] = useState<number | null>(null);
+  const [horasDestinoIzaje, setHorasDestinoIzaje] = useState<number | null>(null);
   const [destinoIzaje, setDestinoIzaje] = useState(false);
   const [fechaInicial, setFechaInicial] = useState<Dayjs | undefined>(undefined);
   const [horaInicial, setHoraInicial] = useState<Dayjs>();
@@ -145,6 +140,13 @@ export const CreateOrderView = () => {
 
   const [clientValid, setClientValid] = useState(true);
   const [companyValid, setCompanyValid] = useState(true);
+  const [materialesValid, setMaterialesValid] = useState(true);
+  const [personasValid, setPersonasValid] = useState(true);
+  const [vehiculosValid, setVehiculosValid] = useState(true);
+
+  const [declaredCargoValue, setDeclaredCargoValue] = useState<number>(0);
+  const [contractNumber, setContractNumber] = useState<string>("");
+
   const isButtonSubmitEnabled = !isLoading;
 
   const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
@@ -416,9 +418,9 @@ export const CreateOrderView = () => {
       // Handle error
       console.error("Error calculating directions:", error as any);
       if (error instanceof Error) {
-        messageApi.error("Error calculando direcciones: " + error.message);
+        message.error("Error calculando direcciones: " + error.message);
       } else {
-        messageApi.error("Error calculando direcciones: " + error);
+        message.error("Error calculando direcciones: " + error);
       }
     }
   };
@@ -446,10 +448,17 @@ export const CreateOrderView = () => {
     }
     const initialHour = horaInicial.get("h");
     const initialMinute = horaInicial.get("m");
-    let fechaFin = fechaInicial.hour(initialHour).minute(initialMinute).add(horasOrigenIzaje, "h");
+    let fechaFin = fechaInicial.hour(initialHour).minute(initialMinute);
+
+    if (horasOrigenIzaje) {
+      fechaFin = fechaFin.add(horasOrigenIzaje, "h");
+    }
 
     if (typeactive !== "2" && timetravelInSecs !== null) {
-      fechaFin = fechaFin.add(horasDestinoIzaje, "h").add(timetravelInSecs, "s");
+      if (horasDestinoIzaje) {
+        fechaFin = fechaFin.add(horasDestinoIzaje, "h");
+      }
+      fechaFin = fechaFin.add(timetravelInSecs, "s");
     }
 
     setHoraFinal(fechaFin);
@@ -469,6 +478,22 @@ export const CreateOrderView = () => {
     setTimetravelInSecs(duration);
   };
 
+  useEffect(() => {
+    if (origenIzaje) {
+      setHorasOrigenIzaje(1);
+    } else if (!origenIzaje) {
+      setHorasOrigenIzaje(null);
+    }
+  }, [origenIzaje]);
+
+  useEffect(() => {
+    if (destinoIzaje) {
+      setHorasDestinoIzaje(1);
+    } else if (!destinoIzaje) {
+      setHorasDestinoIzaje(null);
+    }
+  }, [destinoIzaje]);
+
   const resetFormValues = () => {
     origin.current = [];
     destination.current = [];
@@ -479,10 +504,10 @@ export const CreateOrderView = () => {
     setTimetravelInSecs(null);
     setLocationOrigin(null);
     setLocationDestination(null);
-    setHorasOrigenIzaje(0);
-    setHorasDestinoIzaje(0);
     setFechaInicial(undefined);
     setHoraInicial(undefined);
+    setHorasOrigenIzaje(null);
+    setHorasDestinoIzaje(null);
     setHoraFinal(undefined);
     setFechaFinal(undefined);
     setOrigenIzaje(false);
@@ -497,7 +522,10 @@ export const CreateOrderView = () => {
 
   useEffect(() => {
     resetFormValues();
-    if (typeactive == "2") setOrigenIzaje(true);
+    if (typeactive == "2") {
+      setOrigenIzaje(true);
+      setHorasOrigenIzaje(1);
+    }
   }, [typeactive]);
 
   /* Tipo de viaje  */
@@ -531,7 +559,13 @@ export const CreateOrderView = () => {
               </Text>
             </Col>
             <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btnagregar active" onClick={() => addMaterial(item)}>
+              <button
+                className="btnagregar active"
+                onClick={() => {
+                  addMaterial(item);
+                  setMaterialesValid(true);
+                }}
+              >
                 Agregar
               </button>
             </Col>
@@ -585,7 +619,13 @@ export const CreateOrderView = () => {
               </Text>
             </Col>
             <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btnagregar active" onClick={() => addVehicle(item)}>
+              <button
+                className="btnagregar active"
+                onClick={() => {
+                  addVehicle(item);
+                  setVehiculosValid(true);
+                }}
+              >
                 Agregar
               </button>
             </Col>
@@ -619,13 +659,13 @@ export const CreateOrderView = () => {
   const dataPslDefault = [
     {
       key: 1,
-      idpsl: 1,
+      idpsl: 0,
       descpsl: "",
       percent: 100,
       costcenters: [
         {
           key: 1,
-          idpslcostcenter: 1,
+          idpslcostcenter: 0,
           descpslcostcenter: "",
           percent: 100
         }
@@ -677,13 +717,13 @@ export const CreateOrderView = () => {
     const createNewPsl = (key: number) => {
       return {
         key,
-        idpsl: 1,
+        idpsl: 0,
         descpsl: "",
         percent: 0,
         costcenters: [
           {
             key: 1,
-            idpslcostcenter: 1,
+            idpslcostcenter: 0,
             descpslcostcenter: "",
             percent: 0
           }
@@ -697,7 +737,7 @@ export const CreateOrderView = () => {
     const createNewCC = (key: number) => {
       return {
         key,
-        idpslcostcenter: 1,
+        idpslcostcenter: 0,
         descpslcostcenter: "",
         percent: 0
       };
@@ -1007,7 +1047,13 @@ export const CreateOrderView = () => {
               </Text>
             </Col>
             <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btnagregar active" onClick={() => addPerson(item)}>
+              <button
+                className="btnagregar active"
+                onClick={() => {
+                  addPerson(item);
+                  setPersonasValid(true);
+                }}
+              >
                 Agregar
               </button>
             </Col>
@@ -1040,46 +1086,46 @@ export const CreateOrderView = () => {
       if (origin.current.length == 0) {
         setOriginValid(false);
         isformvalid = false;
-        messageApi.error("Punto Origen es obligatorio");
+        message.error("Punto Origen es obligatorio");
       }
       if (typeactive == "1") {
         if (destination.current.length == 0) {
           setdestinationValid(false);
           isformvalid = false;
-          messageApi.error("Punto Destino es obligatorio");
+          message.error("Punto Destino es obligatorio");
         }
       }
       if (fechaInicial == undefined || fechaInicial == null) {
         setFechaInicialValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Inicial es obligatorio");
+        message.error("Fecha Inicial es obligatorio");
       }
       if (horaInicial == undefined || horaInicial == null) {
         setHoraInicialValid(false);
         isformvalid = false;
-        messageApi.error("Hora Inicial es obligatorio");
+        message.error("Hora Inicial es obligatorio");
       }
       if (fechaFinal == undefined || fechaFinal == null) {
         setFechaFinalValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Final es obligatorio");
+        message.error("Fecha Final es obligatorio");
       }
       if (horaFinal == undefined || horaFinal == null) {
         setHoraFinalValid(false);
         isformvalid = false;
-        messageApi.error("Hora Final es obligatorio");
+        message.error("Hora Final es obligatorio");
       }
       if (!fechaInicialFlexible) {
         setFechaInicialFlexibleValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Inicial Flexible es obligatorio");
+        message.error("Fecha Inicial Flexible es obligatorio");
       } else {
         setFechaInicialFlexibleValid(true);
       }
       if (!fechaFinalFlexible) {
         setFechaFinalFlexibleValid(false);
         isformvalid = false;
-        messageApi.error("Fecha Final Flexible es obligatorio");
+        message.error("Fecha Final Flexible es obligatorio");
       } else {
         setFechaFinalFlexibleValid(true);
       }
@@ -1087,7 +1133,7 @@ export const CreateOrderView = () => {
       if (company == -1) {
         setCompanyValid(false);
         isformvalid = false;
-        messageApi.error("Company code es obligatorio");
+        message.error("Company code es obligatorio");
       } else {
         setCompanyValid(true);
       }
@@ -1095,7 +1141,7 @@ export const CreateOrderView = () => {
       if (client == -1) {
         setClientValid(false);
         isformvalid = false;
-        messageApi.error("Cliente final es obligatorio");
+        message.error("Cliente final es obligatorio");
       } else {
         setClientValid(true);
       }
@@ -1105,46 +1151,59 @@ export const CreateOrderView = () => {
       if (typeactive == "3") {
         if (dataPersons.length == 0) {
           isformvalid = false;
-          messageApi.error("Debe agregar por lo menos una persona");
+          setPersonasValid(false);
+          message.error("Debe agregar por lo menos una persona");
         }
       } else {
         if (dataCarga.length == 0) {
           isformvalid = false;
-          messageApi.error("Debe agregar por lo menos un material");
+          setMaterialesValid(false);
+          message.error("Debe agregar por lo menos un material");
         }
       }
       if (dataVehicles.length == 0) {
         isformvalid = false;
-        messageApi.error("Debe agregar por lo menos un vehículo sugerido");
+        setVehiculosValid(false);
+        message.error("Debe agregar por lo menos un vehículo sugerido");
       }
-      if (dataPsl.length == 0) {
-        isformvalid = false;
-        messageApi.error("Debe agregar por lo menos un PSL");
-      }
-      const checkPercentages = (psls: IOrderPsl[]) => {
+
+      const checkPSLs = (psls: IOrderPsl[]) => {
+        const hasValidPsl = psls.some(
+          (psl) => psl.idpsl !== 0 && psl.costcenters.some((cc) => cc.idpslcostcenter !== 0)
+        );
+
+        if (!hasValidPsl) {
+          isformvalid = false;
+          message.error("Debe haber al menos un PSL válido con un centro de costo válido");
+          return;
+        }
+
         const totalPslPercent = psls.reduce((total, psl) => total + psl.percent, 0);
         if (totalPslPercent !== 100) {
           isformvalid = false;
-          messageApi.error("La totalidad de los PSLs debe ser 100%");
+          message.error("La totalidad de los PSLs debe ser 100%");
         }
+
         for (const psl of psls) {
           const totalCcPercent = psl.costcenters.reduce((total, cc) => total + cc.percent, 0);
           if (totalCcPercent !== psl.percent) {
             isformvalid = false;
-            messageApi.error("La suma de los centros de costos debe ser igual al del PSL asociado");
+            message.error("La suma de los centros de costos debe ser igual al del PSL asociado");
           }
         }
       };
-      checkPercentages(dataPsl);
+
+      checkPSLs(dataPsl);
+
       //datos de contacto
       dataContacts.forEach((contact) => {
         if (contact.contact_number.length === 0 || contact.name.length === 0) {
           const type = contact.contact_type == 1 ? "origen" : "destino";
           isformvalid = false;
-          messageApi.error(`Debe registrar información del contacto de ${type}`);
+          message.error(`Debe registrar información del contacto de ${type}`);
         } else if (contact.contact_number.length < 10) {
           isformvalid = false;
-          messageApi.error(`Los números de teléfono deben contener 10 dígitos`);
+          message.error(`Los números de teléfono deben contener 10 dígitos`);
         }
       });
     }
@@ -1172,8 +1231,8 @@ export const CreateOrderView = () => {
       end_date: fechaFinalToBody?.tz("GMT", true).toISOString(),
       start_freight_equipment: String(origenIzaje ? 1 : 0),
       end_freight_equipment: String(destinoIzaje ? 1 : 0),
-      freight_origin_time: origenIzaje ? horasOrigenIzaje : undefined,
-      freight_destination_time: destinoIzaje ? horasDestinoIzaje : undefined,
+      freight_origin_time: origenIzaje && !!horasOrigenIzaje ? horasOrigenIzaje : undefined,
+      freight_destination_time: destinoIzaje && !!horasDestinoIzaje ? horasDestinoIzaje : undefined,
       rotation: "0",
       start_date_flexible: fechaInicialFlexible ?? 0,
       end_date_flexible: fechaFinalFlexible ?? 0,
@@ -1188,7 +1247,9 @@ export const CreateOrderView = () => {
       status: "",
       observation: observation,
       service_type_desc: TripType.Carga,
-      client_desc: ""
+      client_desc: "",
+      contractNumber: contractNumber !== "" ? contractNumber : undefined,
+      declaredCargoValue: typeactive !== "3" ? declaredCargoValue : undefined
     };
 
     //contactos
@@ -1275,23 +1336,16 @@ export const CreateOrderView = () => {
 
     console.log("DATA PARA POST: ", data);
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
-      if (response.status === SUCCESS) {
-        messageApi.open({
-          type: "success",
-          content: "El viaje fue creado exitosamente.",
-          duration: 2
-        });
-        push("/logistics/orders/details/" + response.data.data.id);
+      const newTO = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
+      if (newTO) {
+        message.success(`TO No. ${newTO.id} ha sido creada`, 2, () =>
+          push("/logistics/orders/details/" + newTO.id)
+        );
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.error(error.message);
-      } else {
-        messageApi.error("Oops, hubo un error por favor intenta mas tarde.");
-      }
+      message.error(error instanceof Error ? error.message : "La solicitud no ha sido creada", 3);
     } finally {
       setIsLoading(false);
     }
@@ -1364,7 +1418,7 @@ export const CreateOrderView = () => {
                       <Flex gap={"0.5rem"} align="center" justify="end">
                         <Text>Cuantas horas de izaje</Text>
                         <CustomTimeSelector
-                          initialValue={horasOrigenIzaje}
+                          initialValue={horasOrigenIzaje ?? 1}
                           onTimeChange={(value) => setHorasOrigenIzaje(value)}
                         />
                       </Flex>
@@ -1428,7 +1482,7 @@ export const CreateOrderView = () => {
                         <Flex gap={"0.5rem"} align="center" justify="end">
                           <Text>Cuantas horas de izaje</Text>
                           <CustomTimeSelector
-                            initialValue={horasDestinoIzaje}
+                            initialValue={horasDestinoIzaje ?? 1}
                             onTimeChange={(value) => setHorasDestinoIzaje(value)}
                           />
                         </Flex>
@@ -1660,6 +1714,11 @@ export const CreateOrderView = () => {
                         }
                         return false;
                       }}
+                      className={
+                        materialesValid
+                          ? "puntoOrigen dateInputForm"
+                          : "puntoOrigen dateInputFormError"
+                      }
                     />
                   </Col>
                   <Col span={12} />
@@ -1745,6 +1804,11 @@ export const CreateOrderView = () => {
                       }
                       return false;
                     }}
+                    className={
+                      vehiculosValid
+                        ? "puntoOrigen dateInputForm"
+                        : "puntoOrigen dateInputFormError"
+                    }
                   />
                 </Col>
                 <Col span={12} />
@@ -2012,7 +2076,7 @@ export const CreateOrderView = () => {
                 </Button>
               </Col>
             </Row> */}
-            <Row style={{ marginBottom: "1rem" }}>
+            <Row style={{ marginBottom: "1rem" }} gutter={32}>
               <Col span={12}>
                 <Text className="locationLabels" style={{ display: "flex" }}>
                   Cliente final
@@ -2037,8 +2101,47 @@ export const CreateOrderView = () => {
                   </>
                 )}
               </Col>
-              <Col span={12} />
+              <Col span={12}>
+                <Text className="locationLabels" style={{ display: "flex" }}>
+                  N° de contrato
+                </Text>
+                <Input
+                  placeholder="Ingresar número de contrato"
+                  className="puntoOrigen dateInputForm"
+                  key={"contractNumber"}
+                  value={contractNumber}
+                  onChange={(e) => {
+                    setContractNumber(e.target.value);
+                  }}
+                  maxLength={100}
+                />
+              </Col>
             </Row>
+            {typeactive !== "3" && (
+              <Row style={{ marginBottom: "1rem" }}>
+                <Col span={12}>
+                  <Text className="locationLabels" style={{ display: "flex" }}>
+                    Valor declarado de la carga
+                  </Text>
+                  <InputNumber<number>
+                    className="puntoOrigen dateInputForm"
+                    min={0}
+                    key={"declaredCargoValue"}
+                    value={declaredCargoValue}
+                    formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value?.replace(/\$\s?|(,*)/g, "") as unknown as number}
+                    onChange={(value) => setDeclaredCargoValue(value || 0)}
+                    onKeyDown={(event) => {
+                      if (!/^[0-9]$/.test(event.key) && event.key !== "Backspace") {
+                        event.preventDefault();
+                      }
+                    }}
+                    step={1}
+                  />
+                </Col>
+              </Row>
+            )}
+
             <Row style={{ marginBottom: "1rem" }}>
               <Col span={12}>
                 <Text className="locationLabels" style={{ display: "flex" }}>
@@ -2233,7 +2336,6 @@ export const CreateOrderView = () => {
 
   return (
     <Container>
-      {contextHolder}
       {/* ------------Main Info Order-------------- */}
       <Flex className="orderContainer">
         <Row style={{ width: "100%" }}>
@@ -2295,6 +2397,7 @@ export const CreateOrderView = () => {
             <Flex gap="middle" align="flex-end">
               <Button
                 disabled={!isButtonSubmitEnabled}
+                loading={isLoading}
                 className="active"
                 style={{ fontWeight: "bold" }}
                 onClick={() => {

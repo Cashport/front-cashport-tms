@@ -79,6 +79,8 @@ import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
 import { CalendarX, X } from "phosphor-react";
+import { CalendarX } from "phosphor-react";
+import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
 
 const { Title, Text } = Typography;
 
@@ -421,10 +423,11 @@ export default function PricingTransferRequest({
     const tracking = orders ? orders?.tracking : [];
     try {
       const res = await createTransferRequest(ordersId, tracking);
-      message.success("Solicitud de transferencia creada");
-      res?.stepOne?.transferRequest?.length
-        ? router.replace("/logistics/transfer-request/" + res.stepOne.transferRequest[0].id)
-        : undefined;
+      if (res?.stepOne?.transferRequest?.length) {
+        const newTRid = res.stepOne.transferRequest[0].id;
+        message.success(`TR No. ${newTRid} creada`);
+        router.replace("/logistics/transfer-request/" + newTRid);
+      }
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
       else message.error("Error al crear la solicitud de transferencia");
@@ -461,7 +464,7 @@ export default function PricingTransferRequest({
   const handleFinish = async (data: TransferRequestFinish) => {
     try {
       await finishTransferRequest(data);
-      message.success("Solicitud de transferencia finalizada");
+      message.success(`TR No. ${id} asignada`);
       router.push("/logistics/transfer-orders");
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
@@ -474,7 +477,7 @@ export default function PricingTransferRequest({
       setView("vehicles");
     } else if (view === "vehicles") {
       setView("solicitation");
-    } else router.push("/logistics/transfer-orders");
+    } else router.push(`/logistics/transfer-orders?tab=${TabEnum.REQUESTS}`);
   };
 
   /* Carga */
@@ -892,16 +895,11 @@ export default function PricingTransferRequest({
                           <p>Vehículos sugeridos</p>
                         </label>
                         {transferRequest.general?.transferRequestVehiclesSugest?.map((veh) => (
-                          <div className="vehiclesSubtitleInformation" key={veh.id}>
-                            <p className="vehiclesSubtitleInformationVehicle">
-                              {veh.vehicle_type_desc}
-                            </p>
-                            <label className="vehiclesSubtitleInformationQuantity">
-                              <p className="vehiclesSubtitleInformationQuantityNumber">
-                                {veh.units.toString().padStart(2, "0")}
-                              </p>
-                            </label>
-                          </div>
+                          <VehicleSuggestedTag
+                            units={veh.units}
+                            vehicle_type_desc={veh.vehicle_type_desc}
+                            key={veh.id}
+                          />
                         ))}
                       </Flex>
                       <Flex className="vehiclesSubtitle" gap={10}>

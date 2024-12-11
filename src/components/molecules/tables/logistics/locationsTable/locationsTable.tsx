@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button, Flex, message, Table, Typography } from "antd";
 import type { TableProps } from "antd";
-import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
+import { Eye, Plus, Triangle } from "phosphor-react";
 import "./locationsTable.scss";
 import UiSearchInput from "@/components/ui/search-input";
 import { ILocation } from "@/types/logistics/schema";
 import { getAllLocations } from "@/services/logistics/locations";
 import useSWR from "swr";
+import Link from "next/link";
 
 const { Text } = Typography;
 
@@ -15,34 +16,39 @@ export const LocationsTable = () => {
   const [search, setSearch] = useState("");
   const [datasource, setDatasource] = useState<any[]>([]);
 
-  const { data: locations, isLoading } = useSWR({}, getAllLocations, {
-    onError: (error: any) => {
-      console.error(error);
-      message.error(error.message);
+  const { data: locations, isLoading } = useSWR(
+    {
+      key: "GetAllLocations"
     },
-    refreshInterval: 30000,
-  });
+    getAllLocations,
+    {
+      onError: (error: any) => {
+        console.error(error);
+        message.error(error.message);
+      },
+      refreshInterval: 30000
+    }
+  );
 
   const onChangePage = (pagePagination: number) => {
     setPage(pagePagination);
   };
 
   useEffect(() => {
-    const data = locations
-      ?.data?.data?.filter((element: any) => {
-        if (!search) return true;
-        return (
-          element.description.toLowerCase().includes(search.toLowerCase())
-        );
-      })
-      .map((element: any) => ({
-        id: element.id,
-        description: element.description,
-        citydesc: element.citydesc,
-        statedesc: element.statedesc,
-        location_type: element.location_type,
-        active: element.active,
-      })) || [];
+    const data =
+      locations?.data?.data
+        ?.filter((element: any) => {
+          if (!search) return true;
+          return element.description.toLowerCase().includes(search.toLowerCase());
+        })
+        .map((element: any) => ({
+          id: element.id,
+          description: element.description,
+          citydesc: element.citydesc,
+          statedesc: element.statedesc,
+          location_type: element.location_type,
+          active: element.active
+        })) || [];
     setDatasource(data);
   }, [locations, search]);
 
@@ -50,22 +56,22 @@ export const LocationsTable = () => {
     {
       title: "Nombre",
       dataIndex: "description",
-      key: "description",
+      key: "description"
     },
     {
       title: "Departamento",
       dataIndex: "statedesc",
-      key: "statedesc",
+      key: "statedesc"
     },
     {
       title: "Municipio",
       dataIndex: "citydesc",
-      key: "citydesc",
+      key: "citydesc"
     },
     {
       title: "Tipo de ubicación",
       dataIndex: "location_type",
-      key: "location_type",
+      key: "location_type"
     },
     {
       title: "Estado",
@@ -83,7 +89,7 @@ export const LocationsTable = () => {
             <Text>{active ? "Activo" : "Inactivo"}</Text>
           </Flex>
         </Flex>
-      ),
+      )
     },
     {
       title: "",
@@ -91,13 +97,15 @@ export const LocationsTable = () => {
       width: "54px",
       dataIndex: "",
       render: (_, { id }) => (
-        <Button
-          href={`/logistics/configuration/locations/${id}`}
-          className="icon-detail"
-          icon={<Eye size={20} />}
-        />
-      ),
-    },
+        <Link href={`/logistics/configuration/locations/${id}`} type="text">
+          <Button
+            href={`/logistics/configuration/locations/${id}`}
+            className="icon-detail"
+            icon={<Eye size={20} />}
+          />
+        </Link>
+      )
+    }
   ];
 
   return (
@@ -111,22 +119,14 @@ export const LocationsTable = () => {
               setSearch(event.target.value);
             }}
           />
-          {/* <Button
-            className="options"
-            href="/logistics/providers/provider"
-            icon={<DotsThree size={"1.5rem"} />}
-          /> */}
         </Flex>
         <Flex justify="flex-end">
-          <Button
-            type="primary"
-            className="buttonNewProject"
-            size="large"
-            href="/logistics/configuration/locations/new"
-          >
-            Nueva ubicación
-            {<Plus weight="bold" size={14} />}
-          </Button>
+          <Link href="/logistics/configuration/locations/new">
+            <Button type="primary" className="buttonNewProject" size="large">
+              Nueva ubicación
+              {<Plus weight="bold" size={14} />}
+            </Button>
+          </Link>
         </Flex>
       </Flex>
       <Table
@@ -146,7 +146,7 @@ export const LocationsTable = () => {
               return <Flex className="pagination">{page}</Flex>;
             }
             return originalElement;
-          },
+          }
         }}
         dataSource={datasource}
       />

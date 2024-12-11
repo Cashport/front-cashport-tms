@@ -22,7 +22,7 @@ type Props = {
 
 export const CreateDriverView = ({ params }: Props) => {
   const { push } = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
+
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const onCreateDriver = async (data: IFormDriver) => {
@@ -34,31 +34,13 @@ export const CreateDriverView = ({ params }: Props) => {
         data.logo as any,
         data?.files as DocumentCompleteType[]
       );
-      if (response.status === 200) {
-        messageApi
-          .open({
-            type: "success",
-            content: "El conductor fue creado exitosamente.",
-            duration: 2
-          })
-          .then(() => {
-            push(`/logistics/providers/${params.id}/driver`);
-          });
+      if (response) {
+        message.success("Conductor creado", 2).then(() => {
+          push(`/logistics/providers/${params.id}/driver`);
+        });
       }
     } catch (error) {
-      if (error instanceof Error) {
-        messageApi.open({
-          type: "error",
-          content: error.message,
-          duration: 3
-        });
-      } else {
-        messageApi.open({
-          type: "error",
-          content: "Oops, hubo un error por favor intenta mas tarde.",
-          duration: 3
-        });
-      }
+      message.error(error instanceof Error ? error.message : "Error al crear conductor", 3);
     } finally {
       setIsLoadingSubmit(false);
     }
@@ -74,19 +56,15 @@ export const CreateDriverView = ({ params }: Props) => {
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   return (
-    <>
-      {contextHolder}
-      <Skeleton active loading={isLoadingDocuments || isLoadingVehicles}>
-        <DriverFormTab
-          isLoadingSubmit={isLoadingSubmit}
-          onSubmitForm={onCreateDriver}
-          statusForm={"create"}
-          params={params}
-          documentsTypesList={documentsType ?? []}
-          vehiclesTypesList={vehiclesTypesData?.data ?? []}
-          messageApi={messageApi}
-        />
-      </Skeleton>
-    </>
+    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles}>
+      <DriverFormTab
+        isLoadingSubmit={isLoadingSubmit}
+        onSubmitForm={onCreateDriver}
+        statusForm={"create"}
+        params={params}
+        documentsTypesList={documentsType ?? []}
+        vehiclesTypesList={vehiclesTypesData ?? []}
+      />
+    </Skeleton>
   );
 };

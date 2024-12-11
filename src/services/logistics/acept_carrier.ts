@@ -1,10 +1,9 @@
 import axios from "axios";
-
 import { API, getIdToken } from "@/utils/api/api";
 import config from "@/config";
 import { IListData } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IAPIResponse } from "@/types/logistics/carrier/carrier";
+import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
 
 export const getAllTransferRequestList = async (): Promise<IListData> => {
   const token = await getIdToken();
@@ -23,8 +22,9 @@ export const getAllTransferRequestList = async (): Promise<IListData> => {
   }
 };
 
-export const getAceptCarrierRequestList = async (): Promise<any> => {
-  const response: GenericResponse = await API.post(`/carrier/all/request/list`);
+export const getAceptCarrierRequestList = async (): Promise<CarrierCollapseAPI[]> => {
+  const response: GenericResponse<CarrierCollapseAPI[]> =
+    await API.post(`/carrier/all/request/list`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };

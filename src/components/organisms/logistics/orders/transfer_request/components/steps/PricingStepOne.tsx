@@ -13,6 +13,7 @@ import { Responsibles } from "../../../DetailsOrderView/components/Responsibles/
 import AditionalInfo from "@/components/organisms/logistics/acept_carrier/detail/components/AditionalInfo/AditionalInfo";
 import { formatNumber } from "@/utils/utils";
 import MaterialTableFooter from "../../../CreateOrderView/components/MaterialTableFooter/MaterialTableFooter";
+import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
 
 const { Title, Text } = Typography;
 
@@ -188,6 +189,8 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
                 otherRequirements={orderRequest?.transfer_order_other_requeriments ?? []}
                 specialInstructions={orderRequest?.observation ?? ""}
                 finalClient={orderRequest?.client_desc ?? ""}
+                declaredCargoValue={orderRequest?.declared_cargo_value}
+                contractNumber={orderRequest?.contract_number}
               />
             </Col>
           </Row>
@@ -213,11 +216,15 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
               <text>Vehículo Sugerido</text>
             </label>
             {orderRequest?.transfer_order_vehicles ? (
-              orderRequest?.transfer_order_vehicles.map((a) => (
-                <div className="vehicles_sugested" key={a.id}>
-                  {a.vehicle_type_desc}
-                </div>
-              ))
+              <Flex gap={10}>
+                {orderRequest?.transfer_order_vehicles.map((a) => (
+                  <VehicleSuggestedTag
+                    units={a.quantity}
+                    vehicle_type_desc={a.vehicle_type_desc}
+                    key={a.id}
+                  />
+                ))}
+              </Flex>
             ) : (
               <p></p>
             )}

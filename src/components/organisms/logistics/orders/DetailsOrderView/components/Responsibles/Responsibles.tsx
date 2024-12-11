@@ -5,7 +5,7 @@ interface CostCenter {
   percentage: number;
   cost_center_desc: string;
 }
-interface PSL {
+export interface PSL {
   id: number;
   description: string;
   transfer_order_cost_center: CostCenter[];

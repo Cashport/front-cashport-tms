@@ -28,6 +28,7 @@ interface SolicitationDetailProps {
   mapContainerRef: any;
   setView: Dispatch<SetStateAction<"detail" | "asignation" | "confirmation">>;
   showRejectButton: boolean;
+  handleReject: () => Promise<void>;
 }
 
 export default function SolicitationDetail({
@@ -40,7 +41,8 @@ export default function SolicitationDetail({
   timetravel,
   mapContainerRef,
   setView,
-  showRejectButton
+  showRejectButton,
+  handleReject
 }: Readonly<SolicitationDetailProps>) {
   const router = useRouter();
 
@@ -94,6 +96,7 @@ export default function SolicitationDetail({
         documents={providerDetail?.carrier_request_documents ?? []}
         contacts={providerDetail?.carrier_request_contacts ?? []}
         specialInstructions={providerDetail?.special_instructions}
+        declaredCargoValue={providerDetail?.declared_cargo_value}
       />
       {service_type !== "Personas" && (
         <Flex vertical className={styles.materialsWrapper} style={{ width: "100%" }}>
@@ -108,7 +111,7 @@ export default function SolicitationDetail({
         isLeftButtonActive={true}
         handleNext={() => setView("asignation")}
         handleBack={() => router.push("/logistics/acept_carrier")}
-        handleReject={() => {}}
+        handleReject={handleReject}
         isLastStep={false}
         showRejectButton={showRejectButton}
       />

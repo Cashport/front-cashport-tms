@@ -1,4 +1,4 @@
-import { Checkbox, CollapseProps, Spin, Typography } from "antd";
+import { Checkbox, CollapseProps, Spin } from "antd";
 import styles from "./Request.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
@@ -7,12 +7,9 @@ import { getAcceptedTransferRequest } from "@/services/logistics/transfer-reques
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { STATUS } from "@/utils/constants/globalConstants";
-import Loader from "@/components/atoms/loaders/loader";
-
-const Text = Typography;
+import { useSearchContext } from "@/context/SearchContext";
 
 interface IRequestProps {
-  search: string;
   handleCheckboxChange: (id: number, checked: boolean) => void;
   ordersId: number[];
   trsIds: number[];
@@ -21,15 +18,16 @@ interface IRequestProps {
 }
 
 export const Request: FC<IRequestProps> = ({
-  search,
   handleCheckboxChange,
   ordersId,
   trsIds,
   handleCheckboxChangeTR,
   modalState
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
+  const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
+  const { searchQuery: search, filterQuery } = useSearchContext();
 
   const getTitile = (stateId: string, transferType: string, number: number) => {
     const getState = TransferOrdersState.find((f) => f.id === stateId);
@@ -49,14 +47,35 @@ export const Request: FC<IRequestProps> = ({
   };
 
   const getTransferRequestAccepted = async () => {
+    setIsLoadingMain(true);
     try {
-      const getRequest = await getAcceptedTransferRequest();
+      const getRequest = await getAcceptedTransferRequest(search, filterQuery);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
-        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoadingMain(false);
+    }
+  };
+
+  const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
+    setIsLoadingPagination(true);
+    try {
+      const getRequest = await getAcceptedTransferRequest(search, filterQuery, statusId, newPage);
+      if (Array.isArray(getRequest) && getRequest.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = getRequest[0];
+
+        setTransferRequest((prevState) =>
+          prevState.map((item) => (item.statusId === updatedItem.statusId ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoadingPagination(false);
     }
   };
 
@@ -64,90 +83,79 @@ export const Request: FC<IRequestProps> = ({
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState]);
+  }, [modalState, search, filterQuery]);
 
-  useEffect(() => {
-    getTransferRequestAccepted();
-  }, []);
+  const renderItems: CollapseProps["items"] = transferRequest
+    .filter((item) => item?.items?.length > 0)
+    .map((item, index) => {
+      let aditionalRow = undefined;
+      let redirect = undefined;
+      let showBothIds = false;
+      let trShouldRedirect = false;
+      if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
+        aditionalRow = {
+          title: "",
+          dataIndex: "checkbox",
+          render: (_: any, { tr }: any) => (
+            <Checkbox
+              checked={ordersId.includes(tr)}
+              onChange={(e) => handleCheckboxChange(tr, e.target.checked)}
+            />
+          )
+        };
+        redirect = "/logistics/orders/details";
+      }
+      const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
+      if (trDeleteable.includes(item.statusId)) {
+        aditionalRow = {
+          title: "",
+          dataIndex: "checkbox",
+          render: (_: any, { tr }: any) => (
+            <Checkbox
+              checked={trsIds.includes(tr)}
+              onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+            />
+          )
+        };
+        redirect = "/logistics/transfer-request/";
+      }
+      const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
+      if (statusToDetailsTO.includes(item.statusId)) {
+        redirect = "/logistics/orders/details";
+      }
+      const tosToTR = [STATUS.TO.PROCESADO, STATUS.TO.PROCESANDO];
+      if (tosToTR.includes(item.statusId)) {
+        showBothIds = true;
+      }
+      if (item.statusId === STATUS.TO.PROCESADO) {
+        trShouldRedirect = true;
+      }
+      return {
+        key: index,
+        label: getTitile(item.statusId, item.transferType, item.page.totalRows),
+        children: (
+          <TransferOrdersTable
+            items={item.items}
+            pagination={item.page}
+            aditionalRow={aditionalRow}
+            redirect={redirect}
+            showBothIds={showBothIds}
+            trShouldRedirect={trShouldRedirect}
+            loading={isLoadingPagination}
+            fetchData={(newPage: number) =>
+              getTransferRequestAcceptedByStatusId(item.statusId, newPage)
+            }
+          />
+        )
+      };
+    });
 
-  if (isLoading)
+  if (isLoadingMain)
     return (
       <div className={styles.emptyContainer}>
         <Spin size="large" />
       </div>
     );
-
-  const filteredData = transferRequest
-    .map((status) => {
-      const filteredItems = status.items.filter(
-        (item) =>
-          item.start_location.toLowerCase().includes(search.toLowerCase()) ||
-          item.end_location.toLowerCase().includes(search.toLowerCase()) ||
-          item.id.toString().includes(search.toLowerCase())
-      );
-
-      return { ...status, items: filteredItems };
-    })
-    .filter((status) => status.items.length > 0);
-
-  // Array con los IDs de estado en el orden deseado
-  const ORDERED_STATE_IDS = [
-    STATUS.TO.SIN_PROCESAR, // Sin procesar
-    STATUS.TO.PROCESANDO, // Procesando
-    STATUS.TO.PROCESADO, // Procesando
-    STATUS.TR.ASIGNANDO_VEHICULO, // Procesado
-    STATUS.TR.ESPERANDO_PROVEEDOR // Esperando proveedor
-  ];
-
-  const sortedFilteredData = filteredData.toSorted((a, b) => {
-    return ORDERED_STATE_IDS.indexOf(a.statusId) - ORDERED_STATE_IDS.indexOf(b.statusId);
-  });
-
-  const renderItems: CollapseProps["items"] = sortedFilteredData.map((item, index) => {
-    let aditionalRow = undefined;
-    let redirect = undefined;
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
-      aditionalRow = {
-        title: "",
-        dataIndex: "checkbox",
-        render: (_: any, { tr }: any) => (
-          <Checkbox
-            checked={ordersId.includes(tr)}
-            onChange={(e) => handleCheckboxChange(tr, e.target.checked)}
-          />
-        )
-      };
-      redirect = "/logistics/orders/details";
-    }
-    const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO];
-    if (trDeleteable.includes(item.statusId)) {
-      aditionalRow = {
-        title: "",
-        dataIndex: "checkbox",
-        render: (_: any, { tr }: any) => (
-          <Checkbox
-            checked={trsIds.includes(tr)}
-            onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
-          />
-        )
-      };
-      redirect = "/logistics/transfer-request/";
-    }
-    if (item.statusId === TransferOrdersState.find((f) => f.name === "Esperando proveedor")?.id) {
-      redirect = "/logistics/transfer-request/";
-    }
-    const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
-    if (statusToDetailsTO.includes(item.statusId)) {
-      redirect = "/logistics/orders/details";
-    }
-    return {
-      key: index,
-      label: getTitile(item.statusId, item.transferType, item.items.length),
-      children: (
-        <TransferOrdersTable items={item.items} aditionalRow={aditionalRow} redirect={redirect} />
-      )
-    };
-  });
 
   return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
 };

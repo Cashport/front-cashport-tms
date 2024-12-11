@@ -11,6 +11,7 @@ export interface ITransferRequest {
   total_value: number;
   description: string;
   created_at: Date;
+  id_transfer_request?: number;
 }
 
 export interface ITimeLine {
@@ -49,6 +50,7 @@ export interface ITransferRequestDetail {
   start_location: string;
   end_location: string;
   total_fare: number;
+  total_price: number;
   surcharge: number;
   distance: number;
   time_total: number;
@@ -56,10 +58,18 @@ export interface ITransferRequestDetail {
   timeLine: ITimeLine[];
   steps: IStep[];
   geometry: IGeometryResponse;
+  transfer_orders: number[];
 }
 
+export interface IPagination {
+  actualPage: number;
+  totalPages: number;
+  rowsperpage: number;
+  totalRows: number;
+}
 export interface ITransferRequestResponse {
   statusId: string; // uuid
   transferType: string;
   items: ITransferRequest[];
+  page: IPagination;
 }
