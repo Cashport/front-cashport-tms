@@ -1,0 +1,24 @@
+.actionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.actionName {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -1px;
+}
+.select{
+  align-self: stretch;
+  position: relative;
+  letter-spacing: -1px;
+  line-height: 32px !important;
+  margin-bottom: 0.5rem !important;
+  height: 40px !important;
+}
+.divider {
+  border: 0.0625rem solid #DDDDDD;
+  margin:  0 !important;
+  height: 100% !important;
+}

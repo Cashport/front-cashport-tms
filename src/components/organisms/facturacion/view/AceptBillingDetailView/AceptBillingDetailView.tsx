@@ -1,22 +1,10 @@
 "use client";
-import {
-  Button,
-  Col,
-  ConfigProvider,
-  Drawer,
-  Flex,
-  message,
-  Modal,
-  Row,
-  Spin,
-  Typography
-} from "antd";
-import { CaretLeft, DotsThree, Truck, CraneTower, User } from "@phosphor-icons/react";
+import { Button, Col, Drawer, Flex, message, Row, Spin, Typography } from "antd";
+import { DotsThree, Truck, CraneTower, User } from "@phosphor-icons/react";
 import { getBillingDetailsById } from "@/services/billings/billings";
 import styles from "./AceptBillingDetailView.module.scss";
 import { useState, useEffect } from "react";
 import { NoveltyTable } from "@/components/molecules/tables/NoveltyTable/Novelty";
-import Link from "next/link";
 import ModalBillingAction from "@/components/molecules/modals/ModalBillingAction/ModalBillingAction";
 import { IJourney, IIncident } from "@/types/logistics/schema";
 import { INovelty, IEvidence } from "@/types/novelty/INovelty";
@@ -27,6 +15,8 @@ import { getNoveltyDetail } from "@/services/logistics/novelty";
 import { DrawerBody } from "@/components/organisms/logistics/transfer-orders/details/drawer-body/DrawerBody";
 import ModalBillingMT from "@/components/molecules/modals/ModalBillingMT/ModalBillingMT";
 import { Receipt } from "phosphor-react";
+import { Responsibles } from "@/components/organisms/logistics/orders/DetailsOrderView/components/Responsibles/Responsibles";
+import { mockedPSL } from "./mockedpds";
 
 const { Text } = Typography;
 
@@ -54,7 +44,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     try {
       setLoading(true);
       const response = await getBillingDetailsById(params.id);
-      if (response && response.journeys) {
+      if (response?.journeys) {
         setBillingData(response);
         console.log(response);
         setBillingStatus(response.billing.statusDesc);
@@ -290,8 +280,14 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
                 </Col>
               </Row>
             </Flex>
-
-            <div className={styles.container}>{tripDetailsWithNovelties}</div>
+            {/* <Flex vertical gap={32}>
+              <div className={styles.headingText}>Centros de costos</div>
+              <Responsibles psls={mockedPSL} insideCollapse={false} />
+            </Flex> */}
+            <Flex vertical gap={32}>
+              <div className={styles.headingText}>Detalle del servicio</div>
+              <div className={styles.container}>{tripDetailsWithNovelties}</div>
+            </Flex>
           </>
         )}
       </div>

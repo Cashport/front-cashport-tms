@@ -1,5 +1,8 @@
 "use client";
-import { Tabs, TabsProps } from "antd";
+
+import { Flex, Typography, Row, Col, Tabs, TabsProps } from "antd";
+import { SideBar } from "@/components/molecules/SideBar/SideBar";
+import { NavRightSection } from "@/components/atoms/NavRightSection/NavRightSection";
 import { usePathname, useRouter } from "next/navigation";
 import "./provider.scss";
 import "@/styles/_variables_logistics.css";
@@ -13,22 +16,18 @@ interface Props {
   };
 }
 
-const ProviderInfoView = ({ children, params }: Props) => {
+const { Title } = Typography;
+
+const ContractInfoView = ({ children, params }: Props) => {
   const router = useRouter();
   const path = usePathname();
 
   const getDefaultValue = () => {
-    if (path.includes("driver")) {
-      return "driver";
-    }
-    if (path.includes("vehicle")) {
-      return "vehicle";
-    }
     return "";
   };
 
   const onChange = (key: string) => {
-    router.push(`/logistics/providers/${params.id}/${key}`);
+    router.push(`/logistics/contracts/${params.id}/${key}`);
   };
   const items: TabsProps["items"] = [
     {
@@ -37,19 +36,29 @@ const ProviderInfoView = ({ children, params }: Props) => {
       children: <></>
     },
     {
-      key: "vehicle",
-      label: "Vehículos",
+      key: "",
+      label: "Tarifas por Horas",
       children: <></>
     },
     {
-      key: "driver",
-      label: "Conductores",
+      key: "",
+      label: "Tarifas por KM",
+      children: <></>
+    },
+    {
+      key: "",
+      label: "Tarifas por Trayectos",
+      children: <></>
+    },
+    {
+      key: "",
+      label: "Otros Servicios",
       children: <></>
     }
   ];
 
   return (
-    <ViewWrapper headerTitle="Proveedores">
+    <ViewWrapper headerTitle="Contratos">
       <Container>
         <Tabs defaultActiveKey={getDefaultValue()} items={items} onChange={onChange} />
         {children}
@@ -58,4 +67,4 @@ const ProviderInfoView = ({ children, params }: Props) => {
   );
 };
 
-export default ProviderInfoView;
+export default ContractInfoView;

@@ -60,7 +60,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
   };
 
   const [dataSource, setDataSource] = useState<DataType[]>([]);
-
+  
   useEffect(() => {
     const mappedData = items.map((item) => ({
       key: item.id,
