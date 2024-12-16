@@ -32,6 +32,7 @@ interface ISocketData {
   longitude: number;
   timestamp: Date;
   trip: ISocketTrip;
+  distance: number;
 }
 
 interface IMark {
@@ -43,6 +44,7 @@ const MapComponent = () => {
   const [isActive, setIsActive] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const [socketInfo, setSocketInfo] = useState<IMark[]>([]);
+  const [distancePercent, setDistancePercent] = useState<number>(0);
   const [trip, setTrip] = useState<ISocketTrip | null>(null);
   const [tripLat, setTripLat] = useState<number | null>(null);
   const [tripLong, setTripLong] = useState<number | null>(null);
@@ -187,6 +189,7 @@ const MapComponent = () => {
                 latitude: data.latitude,
                 longitude: data.longitude,
                 timestamp: data.timestamp,
+                distance: data.distance,
                 trip: data.trip,
               },
             };
@@ -300,10 +303,22 @@ const MapComponent = () => {
     }
   }, [trip, mapLoaded]);
 
+  useEffect(() => {
+    if (trip !== null) {
+      const getInfo = socketInfo.find((f) => f.socketInfo.trip.id === trip.id);
+      if (getInfo) {
+        setTrip(getInfo.socketInfo.trip);
+        setTripLat(getInfo.socketInfo.latitude);
+        setTripLong(getInfo.socketInfo.longitude);
+        getDriverFromTrip(getInfo.socketInfo.trip.id, getInfo.socketInfo.userId);
+        setDistancePercent(getInfo.socketInfo.distance)
+      }
+    }
+  }, [socketInfo])
+
   const getDriverFromTrip = async (tripId: string, userId: string) => {
     try {
       const findDriver: AxiosResponse<IDriverMap, any> = await API.get(`/cashport/map-detail/${tripId}/${userId}`);
-      console.log(findDriver.data);
       setDriver(findDriver.data);
     } catch (error) {
       console.error(error);
@@ -340,6 +355,7 @@ const MapComponent = () => {
                     lat={tripLat}
                     long={tripLong}
                     driver={driver}
+                    distancePercent={distancePercent}
                   />
                 </div>
               </div>
@@ -399,6 +415,7 @@ const MapComponent = () => {
                               setTripLat(item.socketInfo.latitude);
                               setTripLong(item.socketInfo.longitude);
                               getDriverFromTrip(item.socketInfo.trip.id, item.socketInfo.userId);
+                              setDistancePercent(item.socketInfo.distance)
                             }} className={styles.showBtn}>
                               <Eye size={20} color='#CBE71E' />
                             </div>

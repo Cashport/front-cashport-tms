@@ -5,7 +5,9 @@ import { FC } from "react";
 import dayjs from "dayjs";
 import { getTravelDuration } from "@/utils/logistics/maps";
 import { IDriverMap } from "@/types/logistics/driver/driver";
-import "dayjs/locale/es-us";
+import "dayjs/locale/es";
+
+dayjs.locale("es");
 
 const Text = Typography;
 
