@@ -1,8 +1,5 @@
 "use client";
-
-import { Flex, Typography, Row, Col, Tabs, TabsProps } from "antd";
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
-import { NavRightSection } from "@/components/atoms/NavRightSection/NavRightSection";
+import { Tabs, TabsProps } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import "./provider.scss";
 import "@/styles/_variables_logistics.css";
@@ -15,8 +12,6 @@ interface Props {
     id: string;
   };
 }
-
-const { Title } = Typography;
 
 const ProviderInfoView = ({ children, params }: Props) => {
   const router = useRouter();

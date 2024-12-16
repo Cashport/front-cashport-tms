@@ -11,6 +11,7 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import { openNotification } from "@/components/atoms/Notification/Notification";
 
 import "./loginform.scss";
+import Link from "next/link";
 
 interface IAuthLogin {
   email: string;
@@ -104,8 +105,27 @@ export const LoginForm = ({ setResetPassword }: LoginFormProps) => {
         <p onClick={handleForgotPassword} className="forgotPassword">
           Olvidé mi contraseña
         </p>
+        <p className="loginForm__inputTitleReg">
+          Al continuar aceptas nuestros 
+          <Link
+            className="loginForm__link"
+            href={
+              "https://cashport-tms.s3.us-east-2.amazonaws.com/T%26C+Profitline+-+Cashport+Logistics.htm"
+            }
+            target="_blank"
+          >
+            Términos y condiciones
+          </Link>
+           y {" "}
+          <Link
+            className="loginForm__link"
+            href={"https://profitline.com.co/politicas-proteccion-datos-personales-habeas-data"}
+            target="_blank"
+          >
+            Política de tratamiento de datos
+          </Link>
+        </p>
       </Flex>
-
       <PrincipalButton disabled={!isValid} loading={isLoading} htmlType="submit">
         {isLoading ? "Cargando..." : "Iniciar sesión"}
       </PrincipalButton>

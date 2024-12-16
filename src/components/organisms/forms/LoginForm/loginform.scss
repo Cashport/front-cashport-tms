@@ -18,7 +18,17 @@
         font-weight: 600;
         color: $black;
     }
-
+    &__inputTitleReg {
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: $black;
+    }
+    &__link {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $black;
+        text-decoration: underline;
+    }
     &__content {
         margin: 2.75rem 0;
     }

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Flex } from "antd";
+import { Flex, Popconfirm } from "antd";
 import styles from "./buttons.module.scss";
 
 interface ButtonsProps {
@@ -38,9 +38,9 @@ export default function Buttons({
       </div>
       <Flex className={styles.right}>
         {showRejectButton && (
-          <button className={styles.deleteButton} onClick={() => handleReject()}>
-            Rechazar
-          </button>
+          <Popconfirm title="Esta seguro de rechazar?" onConfirm={handleReject}>
+            <button className={styles.deleteButton}>Rechazar</button>
+          </Popconfirm>
         )}
         {canContinue && (
           <button

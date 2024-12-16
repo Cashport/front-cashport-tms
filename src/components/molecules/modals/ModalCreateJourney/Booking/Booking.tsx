@@ -21,6 +21,7 @@ import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import tz from "dayjs/plugin/timezone";
 import { useLocations } from "../utils/useLocations";
+import { RangePickerProps } from "antd/es/date-picker";
 dayjs.locale("es");
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -134,6 +135,34 @@ const Booking = ({
     setValue("route", route);
   }, [route]);
 
+  const now = dayjs();
+  const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
+    // Can not select days before today
+    return current?.isBefore(now, "day");
+  };
+
+  const getDisabledTime = (selectedDate: any) => {
+    const isToday = dayjs(selectedDate).isSame(now, "day");
+
+    if (!isToday) {
+      return {
+        disabledHours: () => [],
+        disabledMinutes: () => []
+      };
+    }
+
+    return {
+      // Deshabilitar horas menores a la hora actual
+      disabledHours: () =>
+        Array.from({ length: 24 }, (_, i) => i).filter((hour) => hour < now.hour()),
+      // Deshabilitar minutos menores a los minutos actuales si la hora es la actual
+      disabledMinutes: (selectedHour: number) =>
+        selectedHour === now.hour()
+          ? Array.from({ length: 60 }, (_, i) => i).filter((minute) => minute < now.minute())
+          : []
+    };
+  };
+
   return (
     <Flex vertical gap={24}>
       <FormWizard.TabContent title="Agendamiento" icon="ti-settings">
@@ -215,6 +244,7 @@ const Booking = ({
                       onChange={(value) => {
                         field.onChange(value);
                       }}
+                      disabledDate={disabledDate}
                       value={field.value}
                       className={styles.select}
                     />
@@ -237,6 +267,8 @@ const Booking = ({
                       value={field.value}
                       className={styles.select}
                       showNow={false}
+                      disabledDate={() => false} // No deshabilitamos fechas completas
+                      disabledTime={() => getDisabledTime(watch("startDate"))}
                     />
                   )}
                 />

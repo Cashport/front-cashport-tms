@@ -17,6 +17,9 @@ import { API } from '@/utils/api/api';
 import { AxiosResponse } from 'axios';
 import { SOCKET_URI } from '@/utils/constants/globalConstants';
 
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+
 const mapStyles = {
   width: '100%',
   height: '100%',
@@ -29,6 +32,7 @@ interface ISocketData {
   longitude: number;
   timestamp: Date;
   trip: ISocketTrip;
+  distance: number;
 }
 
 interface IMark {
@@ -40,6 +44,7 @@ const MapComponent = () => {
   const [isActive, setIsActive] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const [socketInfo, setSocketInfo] = useState<IMark[]>([]);
+  const [distancePercent, setDistancePercent] = useState<number>(0);
   const [trip, setTrip] = useState<ISocketTrip | null>(null);
   const [tripLat, setTripLat] = useState<number | null>(null);
   const [tripLong, setTripLong] = useState<number | null>(null);
@@ -104,7 +109,7 @@ const MapComponent = () => {
                   </div>
                   <div>
                   <div style="color:#fff;font-size:14px;font-weight:600;line-height:20px">${data.trip.startAddress}</div>
-                  <div style="color:#fff;font-size:14px;font-weight:400;line-height:20px">${dayjs(data.trip.initRoute).format('DD MMM. YYYY')} - ${dayjs(data.trip.initRoute).format('HH:mm')}</div>
+                  <div style="color:#fff;font-size:14px;font-weight:400;line-height:20px">${dayjs.utc(data.trip.initRoute).format('DD MMM. YYYY')} - ${dayjs.utc(data.trip.initRoute).format('HH:mm')}</div>
                   </div>
                 </div>
                 <div style="display:flex;column-gap:17px;">
@@ -113,7 +118,7 @@ const MapComponent = () => {
                   </div>
                   <div>
                   <div style="color:#6f7a90;font-size:14px;font-weight:600;line-height:20px">${data.trip.endAddress}</div>
-                  <div style="color:#6f7a90;font-size:14px;font-weight:400;line-height:20px">${dayjs(data.trip.endRoute).format('DD MMM. YYYY')} - ${dayjs(data.trip.endRoute).format('HH:mm')}</div>
+                  <div style="color:#6f7a90;font-size:14px;font-weight:400;line-height:20px">${dayjs.utc(data.trip.endRoute).format('DD MMM. YYYY')} - ${dayjs.utc(data.trip.endRoute).format('HH:mm')}</div>
                   </div>
                 </div>
                 </div>
@@ -184,6 +189,7 @@ const MapComponent = () => {
                 latitude: data.latitude,
                 longitude: data.longitude,
                 timestamp: data.timestamp,
+                distance: data.distance,
                 trip: data.trip,
               },
             };
@@ -297,10 +303,22 @@ const MapComponent = () => {
     }
   }, [trip, mapLoaded]);
 
+  useEffect(() => {
+    if (trip !== null) {
+      const getInfo = socketInfo.find((f) => f.socketInfo.trip.id === trip.id);
+      if (getInfo) {
+        setTrip(getInfo.socketInfo.trip);
+        setTripLat(getInfo.socketInfo.latitude);
+        setTripLong(getInfo.socketInfo.longitude);
+        getDriverFromTrip(getInfo.socketInfo.trip.id, getInfo.socketInfo.userId);
+        setDistancePercent(getInfo.socketInfo.distance)
+      }
+    }
+  }, [socketInfo])
+
   const getDriverFromTrip = async (tripId: string, userId: string) => {
     try {
       const findDriver: AxiosResponse<IDriverMap, any> = await API.get(`/cashport/map-detail/${tripId}/${userId}`);
-      console.log(findDriver.data);
       setDriver(findDriver.data);
     } catch (error) {
       console.error(error);
@@ -337,6 +355,7 @@ const MapComponent = () => {
                     lat={tripLat}
                     long={tripLong}
                     driver={driver}
+                    distancePercent={distancePercent}
                   />
                 </div>
               </div>
@@ -370,14 +389,14 @@ const MapComponent = () => {
                                   <div className={styles.line}></div>
                                   <div>
                                     <div className={styles.cardDescription}>{item.socketInfo.trip.startAddress}</div>
-                                    <div className={styles.cardDate}>{dayjs(item.socketInfo.trip.initRoute).format('DD MMM. YYYY')} - {dayjs(item.socketInfo.trip.initRoute).format('HH:mm')}</div>
+                                    <div className={styles.cardDate}>{dayjs.utc(item.socketInfo.trip.initRoute).format('DD MMM. YYYY')} - {dayjs.utc(item.socketInfo.trip.initRoute).format('HH:mm')}</div>
                                   </div>
                                 </div>
                                 <div className={styles.cardMarkContainer}>
                                   <div className={styles.cardMark} />
                                   <div>
                                     <div className={styles.cardDescriptionStep}>{item.socketInfo.trip.endAddress}</div>
-                                    <div className={styles.cardDateStep}>{dayjs(item.socketInfo.trip.endRoute).format('DD MMM. YYYY')} - {dayjs(item.socketInfo.trip.endRoute).format('HH:mm')}</div>
+                                    <div className={styles.cardDateStep}>{dayjs.utc(item.socketInfo.trip.endRoute).format('DD MMM. YYYY')} - {dayjs.utc(item.socketInfo.trip.endRoute).format('HH:mm')}</div>
                                   </div>
                                 </div>
                               </div>
@@ -396,6 +415,7 @@ const MapComponent = () => {
                               setTripLat(item.socketInfo.latitude);
                               setTripLong(item.socketInfo.longitude);
                               getDriverFromTrip(item.socketInfo.trip.id, item.socketInfo.userId);
+                              setDistancePercent(item.socketInfo.distance)
                             }} className={styles.showBtn}>
                               <Eye size={20} color='#CBE71E' />
                             </div>
