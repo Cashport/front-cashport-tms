@@ -1,4 +1,4 @@
-import { fetcher } from "@/utils/api/api";
+import { API, fetcher } from "@/utils/api/api";
 import { DefaultOptionType } from "antd/es/select";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -50,7 +50,7 @@ export const usePslFilter = (): UsePslFilter => {
 
   const { data, isLoading } = useSWR<IPslUsers>(
     `transfer-request/home-screen-filters`,
-    fetcher,
+    async (url) => API.get(url),
     {}
   );
 
@@ -80,7 +80,7 @@ export const usePslFilter = (): UsePslFilter => {
     return { options, preSelectedValues };
   }
 
-  const { options, preSelectedValues } = useMemo(() => transformData(data?.data ?? []), [data]);
+  const { options, preSelectedValues } = useMemo(() => transformData(data?.data || []), [data]);
 
   // Actualiza los valores seleccionados cuando se carga la data de la API:
   useEffect(() => {
