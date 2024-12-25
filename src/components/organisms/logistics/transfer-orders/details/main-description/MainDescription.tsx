@@ -77,7 +77,7 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const mapsAccessToken =
-    "pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA";
+    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA";
 
   const getState = (stateId: string) => {
     let getState = TransferOrdersState.find((f) => f.id === stateId);
