@@ -1,7 +1,7 @@
 import directions, { DirectionsResponse } from "@mapbox/mapbox-sdk/services/directions";
 
 const MAPBOX_TOKEN =
-  "pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA"; // Replace with your Mapbox token
+  "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; // Replace with your Mapbox token
 const directionsService = directions({ accessToken: MAPBOX_TOKEN });
 
 export interface Coordinates {

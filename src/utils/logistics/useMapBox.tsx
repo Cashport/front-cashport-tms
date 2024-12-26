@@ -18,7 +18,7 @@ export const useMapbox = ({
   start_latitude,
   end_longitude,
   end_latitude,
-  mapsAccessToken = "pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA",
+  mapsAccessToken = "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA",
   centerMap
 }: UseMapboxHookProps) => {
   const origin = useRef<[number, number] | null>(null);

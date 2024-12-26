@@ -36,8 +36,8 @@ export const LogoCashport = ({ width = 1340, height = 343 }: LogoCashportProps) 
           y2="314.13"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#CBE71E" />
-          <stop offset="1" stop-color="#718111" />
+          <stop stopColor="#CBE71E" />
+          <stop offset="1" stopColor="#718111" />
         </linearGradient>
         <linearGradient
           id="paint1_linear_10785_9901"
@@ -47,8 +47,8 @@ export const LogoCashport = ({ width = 1340, height = 343 }: LogoCashportProps) 
           y2="467"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#CBE71E" />
-          <stop offset="1" stop-color="#718111" />
+          <stop stopColor="#CBE71E" />
+          <stop offset="1" stopColor="#718111" />
         </linearGradient>
       </defs>
     </svg>

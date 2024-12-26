@@ -36,10 +36,9 @@ export const SideBar = () => {
   const [isComponentLoading, setIsComponentLoading] = useState(true);
   const router = useRouter();
   const path = usePathname();
-  const project = useStore(useAppStore, (state) => state.selectedProject);
   const setProjectsBasicInfo = useAppStore((state) => state.setProjectsBasicInfo);
   const setSelectedProject = useAppStore((state) => state.setSelectedProject);
-  const { projectsBasicInfo: projects, isHy } = useAppStore((state) => state);
+  const { projectsBasicInfo: projects, isHy, selectedProject: project } = useAppStore((state) => state);
 
   const LOGO = project?.LOGO;
 
@@ -50,7 +49,7 @@ export const SideBar = () => {
   useEffect(() => {
     //to check if there is a project selected
     //if not it should open the modal to select one
-    if (!isComponentLoading && !project?.ID) {
+    if (isHy && !isComponentLoading && !project?.ID) {
       setModalProjectSelectorOpen(true);
     }
   }, [isComponentLoading, project]);
@@ -97,7 +96,7 @@ export const SideBar = () => {
       }
     };
 
-    if (projects?.length === 0 && isHy) {
+    if (!projects?.length && isHy) {
       fetchProjects();
     }
   }, [isHy]);

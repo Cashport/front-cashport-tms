@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { IOpenNotificationProps } from "@/components/atoms/Notification/Notification";
 import { auth } from "./firebase";
-import { STORAGE_TOKEN } from "@/utils/constants/globalConstants";
+import { COOKIE_NAME, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppStore } from "@/lib/store/store";
 import { NotificationInstance } from "antd/es/notification/interface";
@@ -50,9 +50,10 @@ const getAuth = async (
             Authorization: `Bearer ${token}`,
             tokenExm: `${JSON.stringify(userCred)}`
           }
-        }).then((response) => {
-          if (response.status === 200) {
-            localStorage.setItem(STORAGE_TOKEN, token);
+        }).then(async (response) => {
+          const data = await response.json();
+          if (data.data.token) {
+            localStorage.setItem(STORAGE_TOKEN, data.data.token);
             router.push("/landing");
           }
         });
@@ -68,11 +69,12 @@ const getAuth = async (
       });
   }
 };
-const logOut = (router: AppRouterInstance) => {
+const logOut = () => {
   window.location.href = "/auth/login";
   signOut(auth);
   localStorage.removeItem(STORAGE_TOKEN);
   const { resetStore } = useAppStore.getState();
+  window.Cookies.remove(COOKIE_NAME || "");
   resetStore();
 };
 
