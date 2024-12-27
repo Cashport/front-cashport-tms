@@ -21,12 +21,14 @@ export interface DocumentButtonProps {
   handleOnDelete?: (_: React.MouseEvent<HTMLElement>) => void;
   disabled?: boolean;
   children?: React.ReactNode;
+  accept?: string;
 }
 
 export const DocumentButton = ({
   title = "file",
   fileName = "Seleccionar archivo",
   fileSize = "PDF, Word, PNG (Tamaño max 30mb)",
+  accept = ".pdf, .png, .doc, .docx",
   handleOnChange,
   handleOnDrop,
   handleOnDelete,
@@ -38,7 +40,7 @@ export const DocumentButton = ({
     name: title,
     onChange: handleOnChange,
     onDrop: handleOnDrop,
-    accept: ".pdf, .png, .doc, .docx",
+    accept,
     showUploadList: false,
     customRequest: () => {
       return;

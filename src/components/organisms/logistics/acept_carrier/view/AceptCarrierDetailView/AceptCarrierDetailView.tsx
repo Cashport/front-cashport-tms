@@ -49,7 +49,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [messageApi, contextHolder] = message.useMessage();
 
   const mapsAccessToken =
-    "pk.eyJ1IjoiamNib2JhZGkiLCJhIjoiY2x4aWgxejVsMW1ibjJtcHRha2xsNjcxbCJ9.CU7FHmPR635zv6_tl6kafA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
+    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
 
   const { routeGeometry, distance, timetravel, mapContainerRef } = useMapbox({
     start_longitude: carrier?.start_longitude ?? 0,

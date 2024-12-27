@@ -328,6 +328,7 @@ const UploadInvoice = ({
               isMandatory={true}
               key={`${selectedTab}.${currentInvoice.id}.pdf`}
               title={"PDF Factura"}
+              accept=".pdf"
               handleOnDelete={() => handleOnDeleteDocument("pdfFile")}
               handleOnChange={(file) => handleOnChangeDocument("pdfFile", file)}
               fileName={currentInvoice?.pdfFile?.file?.name ?? undefined}
@@ -353,6 +354,7 @@ const UploadInvoice = ({
           ) : (
             <UploadFileButton
               isMandatory={true}
+              accept=".xml"
               key={`${selectedTab}.${currentInvoice.id}.xml`}
               title={"XML Factura"}
               handleOnDelete={() => handleOnDeleteDocument("xmlFile")}
