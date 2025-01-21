@@ -72,6 +72,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
   );
   const sugestedVehicles = data?.vehiclesPricing;
   const trips = data?.trips;
+  const otherRequirements = data?.otherRequirements || [];
 
   useEffect(() => {
     reset({
@@ -87,7 +88,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
           s.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
           []
       })),
-      otherRequirements: []
+      otherRequirements
     });
   }, [sugestedVehicles]);
 
@@ -105,7 +106,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
           t?.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
           []
       })),
-      otherRequirements: []
+      otherRequirements: journey.otherRequirements
     }
   });
 

@@ -64,6 +64,7 @@ export const getTransferRequestVehicles = async (id_journey: number) => {
   const response: GenericResponse<{
     vehiclesPricing: IVehiclesPricing[];
     trips: IVehiclesPricingTrips[];
+    otherRequirements: IRequirement[];
   }> = await API.get(`/transfer-request/vehicles/${id_journey}`);
   if (response.success) return response.data;
   throw new Error(

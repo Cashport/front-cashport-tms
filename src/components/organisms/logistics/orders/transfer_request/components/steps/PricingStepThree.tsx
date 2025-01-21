@@ -33,7 +33,7 @@ export default function PricingStepThree({ data, control }: Props) {
       )
     )
       return;
-    const index = fields.findIndex((a) => a.id_trip === cp.id_trip);
+    const index = fields.findIndex((a) => a.idEntity === cp.idEntity);
     if (index === -1) {
       append(cp);
     } else {
@@ -41,14 +41,30 @@ export default function PricingStepThree({ data, control }: Props) {
     }
   };
   const [openTabs, setOpenTabs] = useState<number[]>(data.journey?.map((_, i) => i) || []);
-  const tag = ({ trips }: { trips: TripCarriersPricing[] }) => (
+  const tag = ({
+    trips,
+    otherRequirements
+  }: {
+    trips: TripCarriersPricing[];
+    otherRequirements?: TripCarriersPricing[];
+  }) => (
     <Flex gap={24} vertical className={style.tripCarrierPricing}>
       {trips.map((trip, index) => (
         <TripCarrierPricing
           key={`trip-${index}-${trip.id_trip}`}
-          trip={trip}
+          trip={{ ...trip, id: trip.id_trip }}
           handleSelectCarrier={handleSelectCarrier}
           fields={fields}
+          entity="trip"
+        />
+      ))}
+      {otherRequirements?.map((ot, index) => (
+        <TripCarrierPricing
+          key={`otherRequirement-${index}-${ot.id_tr_other_requirement}`}
+          trip={{ ...ot, id: ot.id_tr_other_requirement }}
+          handleSelectCarrier={handleSelectCarrier}
+          fields={fields}
+          entity="otherRequirement"
         />
       ))}
     </Flex>
@@ -65,7 +81,7 @@ export default function PricingStepThree({ data, control }: Props) {
             end_location_desc={journey.end_location_desc}
             openTabs={openTabs}
             setOpenTabs={setOpenTabs}
-            tag={tag({ trips: journey.trips })}
+            tag={tag({ trips: journey.trips, otherRequirements: journey.otherRequirements })}
           />
         );
       })}

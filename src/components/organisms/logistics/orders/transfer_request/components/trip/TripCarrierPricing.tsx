@@ -9,13 +9,19 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 const { Text, Title } = Typography;
+
+interface intrinsicEntry extends Omit<TripCarriersPricing, "id_trip" | "id_tr_other_requirement"> {
+  id: number;
+}
+
 type Props = {
-  trip: TripCarriersPricing;
+  trip: intrinsicEntry;
   // eslint-disable-next-line no-unused-vars
   handleSelectCarrier: (data: CarrierPricingFinish) => void;
   fields: any[];
+  entity: "trip" | "otherRequirement";
 };
-export default function TripCarrierPricing({ trip, handleSelectCarrier, fields }: Props) {
+export default function TripCarrierPricing({ trip, handleSelectCarrier, fields, entity }: Props) {
   return (
     <>
       <Flex className={style.dataContainer} justify="space-between">
@@ -72,18 +78,22 @@ export default function TripCarrierPricing({ trip, handleSelectCarrier, fields }
         </Flex>
       </Flex>
       <Radio.Group
-        value={fields.find((a) => a.id_trip === trip.id_trip)?.id_carrier_request}
+        value={fields.find((a) => a.id_trip === trip.id)?.id_carrier_request}
         onChange={({ target: { value } }) =>
           handleSelectCarrier({
             id_carrier_request: value,
-            id_trip: trip.id_trip,
-            provider: trip.carriers_pricing.find((a) => a.id === value)?.id_carrier || 0
+            idEntity: trip.id,
+            provider: trip.carriers_pricing.find((a) => a.id === value)?.id_carrier || 0,
+            entity
           })
         }
       >
         <Flex vertical gap={24}>
           {trip.carriers_pricing.map((carrier, index) => (
-            <CarrierRequestProposal key={`proposal-${index}-${trip.id_trip}`} carrier={carrier} />
+            <CarrierRequestProposal
+              key={`proposal-${index}-${trip.id}-${entity}`}
+              carrier={carrier}
+            />
           ))}
         </Flex>
       </Radio.Group>

@@ -385,7 +385,13 @@ export default function PricingTransferRequest({
     if (view === "solicitation") setIsNextStepActive(true);
     if (view === "carrier") {
       const isValid = transferRequest?.stepThree?.journey?.every((j) =>
-        j.trips.every((t) => getValues("providers").some((p) => p.id_trip === t.id_trip))
+        j.trips.every((t) =>
+          getValues("providers").some(
+            (p) =>
+              (p.idEntity === t.id_trip && p.entity === "trip") ||
+              (p.idEntity === t.id_tr_other_requirement && p.entity === "otherRequirement")
+          )
+        )
       );
       setIsNextStepActive(!!isValid);
     }
@@ -453,7 +459,13 @@ export default function PricingTransferRequest({
     } else if (view === "carrier") {
       if (
         transferRequest?.stepThree?.journey?.every((j) =>
-          j.trips.every((t) => getValues("providers").some((p) => p.id_trip === t.id_trip))
+          j.trips.every((t) =>
+            getValues("providers").some(
+              (p) =>
+                (p.idEntity === t.id_trip && p.entity === "trip") ||
+                (p.idEntity === t.id_tr_other_requirement && p.entity === "otherRequirement")
+            )
+          )
         )
       )
         handleSubmit(handleFinish)();
