@@ -78,7 +78,7 @@ export default function TripCarrierPricing({ trip, handleSelectCarrier, fields, 
         </Flex>
       </Flex>
       <Radio.Group
-        value={fields.find((a) => a.id_trip === trip.id)?.id_carrier_request}
+        value={fields.find((a) => a.idEntity === trip.id)?.id_carrier_request}
         onChange={({ target: { value } }) =>
           handleSelectCarrier({
             id_carrier_request: value,

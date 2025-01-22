@@ -384,14 +384,16 @@ export default function PricingTransferRequest({
   useEffect(() => {
     if (view === "solicitation") setIsNextStepActive(true);
     if (view === "carrier") {
-      const isValid = transferRequest?.stepThree?.journey?.every((j) =>
-        j.trips.every((t) =>
-          getValues("providers").some(
-            (p) =>
-              (p.idEntity === t.id_trip && p.entity === "trip") ||
-              (p.idEntity === t.id_tr_other_requirement && p.entity === "otherRequirement")
+      const isValid = transferRequest?.stepThree?.journey?.every(
+        (j) =>
+          j.trips.every((t) =>
+            getValues("providers").some((p) => p.idEntity === t.id_trip && p.entity === "trip")
+          ) &&
+          j.otherRequirements.every((ot) =>
+            getValues("providers").some(
+              (p) => p.idEntity === ot.id_tr_other_requirement && p.entity === "otherRequirement"
+            )
           )
-        )
       );
       setIsNextStepActive(!!isValid);
     }
