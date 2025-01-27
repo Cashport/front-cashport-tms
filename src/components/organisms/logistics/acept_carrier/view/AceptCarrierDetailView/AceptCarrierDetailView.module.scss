@@ -1,57 +1,56 @@
 @import "@styles/variables.scss";
 
 .wrapper {
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  margin: 0 0 auto 0;
-  background-color: $white;
-  padding: 1.5rem;  
-  overflow-y: auto;
-  border: 1px solid #DDDDDD;
-  border-radius: 4px;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    margin: 0 0 auto 0;
+    background-color: $white;
+    padding: 1.5rem;
+    overflow-y: auto;
+    border-radius: 4px;
 }
 .link {
-  display: flex;
-  align-items: center;
-  margin-bottom: 18px;
-  color: black;
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+    color: black;
 }
 .divider {
-  border: 0.0625rem solid #DDDDDD;
-  margin:  0 !important;
-  height: 100% !important;
+    border: 0.0625rem solid #dddddd;
+    margin: 0 !important;
+    height: 100% !important;
 }
 .sectionWraper {
-  width: 100%;
-  background-color: #F7F7F7;
-  padding: 1rem;
-  border-radius: 4px;
+    width: 100%;
+    background-color: #f7f7f7;
+    padding: 1rem;
+    border-radius: 4px;
 }
 .subtitle {
-  font-family: var(--font-poppins) !important;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 36px;
-  letter-spacing: -1px;
-  white-space: nowrap;
+    font-family: var(--font-poppins) !important;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 36px;
+    letter-spacing: -1px;
+    white-space: nowrap;
 }
 .heading {
-  font-family: var(--font-poppins) !important;
-  font-weight: 600;
-  font-size: 32px;
-  line-height: 32px;
-  letter-spacing: -1px;
+    font-family: var(--font-poppins) !important;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 32px;
+    letter-spacing: -1px;
 }
 .text {
-  font-family: var(--font-poppins) !important;
-  font-weight: 300;
-  font-size: 16px;
-  line-height: 24px;
-  b {
-    font-weight: 500;
-  }
+    font-family: var(--font-poppins) !important;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 24px;
+    b {
+        font-weight: 500;
+    }
 }
 .strongText {
-  font-weight: 600;
+    font-weight: 600;
 }
