@@ -30,7 +30,6 @@ dayjs.extend(tz);
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import axios from "axios";
-import MapboxGeocoding from "@mapbox/mapbox-sdk/services/geocoding";
 
 //schemas
 import {
@@ -100,7 +99,6 @@ import createColumnsPersons from "./controllers/persons/columns";
 import { useRequirementManagement } from "./controllers/hooks/useRequirementManagment";
 import createOtherRequirementsColumns from "./controllers/otherRequirements/columns";
 import Container from "@/components/atoms/Container/Container";
-import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
 
 const { Title, Text } = Typography;
 
@@ -168,19 +166,11 @@ export const CreateOrderView = () => {
   const [selectedFiles, setSelectedFiles] = useState<IDocumentCompleted[]>([]);
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
 
-  /* MAPBOX */
-  const mapsAccessToken =
-    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
-
-  const mapContainerRef = useRef(null);
-  const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/streets-v12");
   const [routeGeometry, setRouteGeometry] = useState<any>(null);
   const [routeInfo, setRouteInfo] = useState([]);
   const [distance, setDistance] = useState<any>(null);
   const [timetravel, setTimetravel] = useState<any>(null);
   const [timetravelInSecs, setTimetravelInSecs] = useState<number | null>(null);
-
-  const [expand, setExpand] = useState(false);
 
   const [locations, setLocations] = useState<ILocation[]>([]);
   const [locationOptions, setLocationOptions] = useState<any>([]);
@@ -209,14 +199,6 @@ export const CreateOrderView = () => {
     shouldFetch ? ["carrierDocuments", locationOrigin, locationDestination, dataCarga] : null,
     () => getCarrierDocumentsByMaterialsAndLocations(locationOrigin, locationDestination, dataCarga)
   );
-
-  const handleToggleExpand = () => {
-    setExpand(!expand);
-  };
-
-  const geocodingClient = MapboxGeocoding({
-    accessToken: mapsAccessToken
-  });
 
   useEffect(() => {
     loadLocations();
@@ -275,112 +257,133 @@ export const CreateOrderView = () => {
 
   // Cambia origen
   const onChangeOrigin = (value: any) => {
-    locations.forEach(async (item) => {
-      if (item.id == value) {
-        setLocationOrigin(item);
-        origin.current = [item.longitude, item.latitude];
-        setOriginValid(true);
-        if (typeactive == "2") {
-          setLocationDestination(item);
-          destination.current = [item.longitude, item.latitude];
-          setdestinationValid(true);
-        }
-        calcRouteDirection();
+    const selectedOrigin = locations.find((item) => item.id === value);
+    if (selectedOrigin) {
+      setLocationOrigin(selectedOrigin);
+      origin.current = [selectedOrigin.longitude, selectedOrigin.latitude];
+      setOriginValid(true);
+
+      if (typeactive === "2") {
+        setLocationDestination(selectedOrigin);
+        destination.current = [selectedOrigin.longitude, selectedOrigin.latitude];
+        setdestinationValid(true);
       }
-    });
+    }
   };
 
   // Cambia destino
-  const onChangeDestino = async (value: any) => {
-    locations.forEach(async (item) => {
-      if (item.id == value) {
-        setLocationDestination(item);
-        destination.current = [item.longitude, item.latitude];
-        setdestinationValid(true);
-        calcRouteDirection();
-      }
-    });
+  const onChangeDestino = (value: any) => {
+    const selectedDestination = locations.find((item) => item.id === value);
+    if (selectedDestination) {
+      setLocationDestination(selectedDestination);
+      destination.current = [selectedDestination.longitude, selectedDestination.latitude];
+      setdestinationValid(true);
+    }
   };
 
-  /* MAPBOX */
+  // Ejecutar `calcRouteDirection` solo cuando `origin` o `destination` cambien
+  useEffect(() => {
+    if (origin.current.length > 0 && destination.current.length > 0) {
+      calcRouteDirection();
+    }
+  }, [origin.current, destination.current]);
+
+  // /* MAPBOX */
+  const mapsAccessToken =
+    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const fixedMapStyle = "mapbox://styles/mapbox/streets-v12";
+  const originMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const destinationMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    if (!mapContainerRef.current || mapRef.current) return; // Evita re-inicializar el mapa
 
     mapboxgl.accessToken = mapsAccessToken;
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: mapStyle,
-      center: { lon: -74.07231699675322, lat: 4.66336863727521 }, // longitude and latitude
+      style: fixedMapStyle,
+      center: { lon: -74.07231699675322, lat: 4.66336863727521 },
       zoom: 12,
-      attributionControl: false
+      attributionControl: false,
+      localIdeographFontFamily: "sans-serif" // Evita llamadas innecesarias a fuentes
     });
+
+    mapRef.current = map; // Guarda la instancia del mapa para evitar re-inicializarlo
 
     map.on("style.load", () => {
-      // Add the compass control
-      const compassControl = new mapboxgl.NavigationControl({
-        showCompass: true
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), "top-right");
+
+      // Modificar todas las capas de texto para evitar la carga de fuentes remotas
+      map.getStyle().layers.forEach((layer) => {
+        if (layer.type === "symbol" && layer.layout?.["text-field"]) {
+          map.setLayoutProperty(layer.id, "text-font", ["Arial Unicode MS Regular"]);
+        }
       });
-      map.addControl(compassControl, "top-right");
-
-      // Create a marker at the starting position
-      if (origin) {
-        const startMarker = new mapboxgl.Marker().setLngLat(origin.current).addTo(map);
-      }
-
-      // Create a marker at the finish position
-      if (destination) {
-        const finalMarker = new mapboxgl.Marker().setLngLat(destination.current).addTo(map);
-      }
-
-      if (routeGeometry) {
-        const datajson: GeoJSON.Feature = {
-          type: "Feature",
-          geometry: routeGeometry,
-          properties: {}
-        };
-
-        map.addSource("route", {
-          type: "geojson",
-          data: datajson
-        });
-
-        map.addLayer({
-          id: "route",
-          type: "line",
-          source: "route",
-          layout: {
-            "line-join": "round",
-            "line-cap": "round"
-          },
-          paint: {
-            "line-color": "#3FB1CE",
-            "line-width": 6
-          }
-        });
-      }
-
-      if (locationOrigin?.id == locationDestination?.id) {
-        map.setCenter(origin.current);
-        map.setZoom(14);
-      } else {
-        // Get the route bounds
-        const bounds = routeGeometry.coordinates.reduce(
-          (bounds: any, coord: any) => bounds.extend(coord),
-          new mapboxgl.LngLatBounds()
-        );
-
-        // Zoom out to fit the route within the map view
-        map.fitBounds(bounds, {
-          padding: 50
-        });
-      }
     });
 
-    // return () => {
-    //   map.remove();
-    // };
-  }, [mapStyle, routeGeometry, origin, destination]);
+    return () => map.remove(); // Limpieza cuando el componente se desmonta
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !routeGeometry) return;
+
+    const map = mapRef.current;
+
+    // Elimina la fuente y capa existentes para evitar superposiciones
+    if (map.getSource("route")) {
+      map.removeLayer("route");
+      map.removeSource("route");
+    }
+
+    const datajson: GeoJSON.Feature = {
+      type: "Feature",
+      geometry: routeGeometry,
+      properties: {}
+    };
+
+    map.addSource("route", { type: "geojson", data: datajson });
+
+    map.addLayer({
+      id: "route",
+      type: "line",
+      source: "route",
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: { "line-color": "#3FB1CE", "line-width": 6 }
+    });
+
+    if (originMarkerRef.current) {
+      originMarkerRef.current.remove();
+    }
+    if (destinationMarkerRef.current) {
+      destinationMarkerRef.current.remove();
+    }
+
+    // Agregar nuevo marcador de origen
+    if (origin.current) {
+      originMarkerRef.current = new mapboxgl.Marker().setLngLat(origin.current).addTo(map);
+    }
+
+    // Agregar nuevo marcador de destino
+    if (destination.current) {
+      destinationMarkerRef.current = new mapboxgl.Marker()
+        .setLngLat(destination.current)
+        .addTo(map);
+    }
+
+    if (locationOrigin?.id === locationDestination?.id) {
+      map.setCenter(origin.current);
+      map.setZoom(14);
+    } else {
+      const bounds = routeGeometry.coordinates.reduce(
+        (bounds: any, coord: any) => bounds.extend(coord),
+        new mapboxgl.LngLatBounds()
+      );
+      map.fitBounds(bounds, { padding: 50 });
+    }
+  }, [JSON.stringify(routeGeometry), origin, destination]);
 
   // calculate direction
   const calcRouteDirection = async () => {
