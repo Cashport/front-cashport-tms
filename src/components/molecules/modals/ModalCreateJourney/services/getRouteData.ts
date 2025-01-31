@@ -1,7 +1,7 @@
+import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 import directions, { DirectionsResponse } from "@mapbox/mapbox-sdk/services/directions";
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; // Replace with your Mapbox token
+const MAPBOX_TOKEN = MAPS_ACCESS_TOKEN; // Replace with your Mapbox token
 const directionsService = directions({ accessToken: MAPBOX_TOKEN });
 
 export interface Coordinates {

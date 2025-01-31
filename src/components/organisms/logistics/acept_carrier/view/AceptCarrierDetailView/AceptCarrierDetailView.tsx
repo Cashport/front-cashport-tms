@@ -21,6 +21,7 @@ import { CustomStepper } from "../../detail/components/Stepper/Stepper";
 import { getTravelFreightDuration } from "@/utils/logistics/maps";
 import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier/carrier";
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
+import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 
 interface AceptCarrierDetailProps {
   params: { id: string };
@@ -48,8 +49,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const mapsAccessToken =
-    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
+  const mapsAccessToken = MAPS_ACCESS_TOKEN; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
 
   const { routeGeometry, distance, timetravel, mapContainerRef } = useMapbox({
     start_longitude: carrier?.start_longitude ?? 0,

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { getTravelDuration } from "./maps";
+import { MAPS_ACCESS_TOKEN } from "../constants/globalConstants";
 
 interface UseMapboxHookProps {
   mapsAccessToken?: string;
@@ -18,7 +19,7 @@ export const useMapbox = ({
   start_latitude,
   end_longitude,
   end_latitude,
-  mapsAccessToken = "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA",
+  mapsAccessToken = MAPS_ACCESS_TOKEN,
   centerMap
 }: UseMapboxHookProps) => {
   const origin = useRef<[number, number] | null>(null);
