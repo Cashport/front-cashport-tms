@@ -92,6 +92,15 @@ interface Geometry {
     type: string;
   };
 }
+export interface OtherReq {
+  id_requirement: number;
+  description: string;
+  units: number;
+  fare: number;
+  totalServiceValue: number;
+  fee_description: string;
+  serviceTime: string;
+}
 
 export interface IAceptCarrierAPI {
   id: number;
@@ -133,6 +142,8 @@ export interface IAceptCarrierAPI {
   id_service_type: number;
   fee_description?: string;
   declared_cargo_value?: number;
+  entity: "otherRequirement" | "trip";
+  other_requirement?: OtherReq;
 }
 
 export interface Data {
