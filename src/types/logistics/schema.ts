@@ -1,6 +1,7 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { DocumentCompleteType } from "./certificate/certificate";
 import { ApiVehicleType } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
+import { IRequirement } from "../transferJourney/ITransferJourney";
 
 export interface IListData {
   id: any;
@@ -3435,6 +3436,7 @@ export interface IJourney {
   start_location_desc: string;
   end_location_desc: string;
   trips: ITripBilling[];
+  requirements: IRequirement[];
 }
 
 export interface ICarrierRequestDetailAPI extends ICarrierRequestDetail {
