@@ -119,7 +119,7 @@ const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
   const handleDownloadCsv = () => {
     const endpoint = `logistic-billing/export-csv/${billingId}`;
     downloadCSVFromEndpoint(endpoint, `TR-${idTR}_Billing.csv`);
-  };  
+  };
 
   if (isLoading) {
     return <Skeleton active loading={isLoading} />;

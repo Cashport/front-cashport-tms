@@ -4,7 +4,8 @@ export interface TransferRequestFinish {
 }
 
 export interface CarrierPricingFinish {
-  id_trip: number;
+  idEntity: number;
   provider: number;
   id_carrier_request: number;
+  entity: 'trip' | 'otherRequirement';
 }

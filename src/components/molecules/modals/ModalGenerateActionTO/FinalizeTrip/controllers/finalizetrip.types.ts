@@ -8,10 +8,16 @@ export interface IVehicle {
   documents: FileWithLink[];
   tripId: number;
 }
+export interface IRequirement {
+  requirementId: number;
+  description: string;
+  documents: FileWithLink[];
+}
 export interface ICarrier {
   carrier: string;
   idCarrier: number;
   vehicles: IVehicle[];
+  requirements: IRequirement[];
   adittionalComment: string;
 }
 export interface FinalizeTripForm {
@@ -28,6 +34,19 @@ export const emptyForm: FinalizeTripForm = {
         {
           tripId: 0,
           plate: "",
+          documents: [
+            {
+              docReference: "",
+              file: undefined, // No file uploaded yet
+              aditionalData: undefined // Empty object for additional data
+            }
+          ]
+        }
+      ],
+      requirements: [
+        {
+          requirementId: 0,
+          description: "",
           documents: [
             {
               docReference: "",
