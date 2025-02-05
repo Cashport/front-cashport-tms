@@ -37,6 +37,7 @@ import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocu
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import ModalDocumentsType from "@/components/molecules/modals/ModalDocumentsType/ModalDocumentsType";
 import useSWR from "swr";
+import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 
 const { Title } = Typography;
 
@@ -135,8 +136,7 @@ export const LocationFormTab = ({
   }, [errors]);
 
   /* MAPBOX */
-  const mapsAccessToken =
-    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
+  const mapsAccessToken = MAPS_ACCESS_TOKEN; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
 
   const mapContainerRef = useRef(null);
   const mapRef: any = useRef(null);

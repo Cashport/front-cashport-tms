@@ -99,6 +99,7 @@ import createColumnsPersons from "./controllers/persons/columns";
 import { useRequirementManagement } from "./controllers/hooks/useRequirementManagment";
 import createOtherRequirementsColumns from "./controllers/otherRequirements/columns";
 import Container from "@/components/atoms/Container/Container";
+import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 
 const { Title, Text } = Typography;
 
@@ -289,8 +290,7 @@ export const CreateOrderView = () => {
   }, [origin.current, destination.current]);
 
   // /* MAPBOX */
-  const mapsAccessToken =
-    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
+  const mapsAccessToken = MAPS_ACCESS_TOKEN; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
   const mapContainerRef = useRef(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const fixedMapStyle = "mapbox://styles/mapbox/streets-v12";

@@ -11,6 +11,8 @@ export const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME;
 
 export const SOCKET_URI = process.env.NEXT_PUBLIC_SOCKET_URI;
 
+export const MAPS_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPS_ACCESS_TOKEN || "";
+
 // ---
 export const CREATED = 201;
 export const SUCCESS = 200;

@@ -34,6 +34,7 @@ import Link from "next/link";
 import { CaretLeft } from "phosphor-react";
 import { BackButton } from "./components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
+import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 
 interface Props {
   idOrder: string;
@@ -59,8 +60,7 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
   const [dataCarga, setDataCarga] = useState<DataCarga[]>([]);
 
   /* MAPBOX */
-  const mapsAccessToken =
-    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA"; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
+  const mapsAccessToken = MAPS_ACCESS_TOKEN; //import.meta.env.VITE_MAP_BOX_ACCESS_TOKEN,
 
   const { routeGeometry, distance, timetravel, mapContainerRef } = useMapbox({
     start_longitude: transferOrder?.start_location?.longitude ?? 0,

@@ -15,7 +15,7 @@ import DetailTripMap from './detail/Detail';
 import { IDriverMap } from '@/types/logistics/driver/driver';
 import { API } from '@/utils/api/api';
 import { AxiosResponse } from 'axios';
-import { SOCKET_URI } from '@/utils/constants/globalConstants';
+import { MAPS_ACCESS_TOKEN, SOCKET_URI } from '@/utils/constants/globalConstants';
 
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
@@ -54,7 +54,7 @@ const MapComponent = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const mapsAccessToken = 'pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA';
+  const mapsAccessToken = MAPS_ACCESS_TOKEN;
   const socket = io(SOCKET_URI || '');
 
   const getStateColor = (stateId: string) => {
