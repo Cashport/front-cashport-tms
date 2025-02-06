@@ -85,7 +85,7 @@ export const createMaterialForm = (data: IMaterial, formImages: CustomFile[]) =>
     url_archive: file?.url_archive
   }));
 
-  form.append("body", JSON.stringify(body));
+  form.append("general", JSON.stringify(body));
 
   formImages.forEach((file: CustomFile, index: number) => {
     if (file?.uid) {
