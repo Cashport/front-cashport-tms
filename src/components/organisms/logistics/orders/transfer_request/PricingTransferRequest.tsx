@@ -370,8 +370,10 @@ export default function PricingTransferRequest({
   useEffect(() => {
     if (!!transferRequest?.stepTwo) {
       if (
-        transferRequest?.stepThree?.journey?.some((j) =>
-          j.trips.some((t) => t.carriers_pricing.some(() => true))
+        transferRequest?.stepThree?.journey?.some(
+          (j) =>
+            j.trips.some((t) => t.carriers_pricing.some(() => true)) ||
+            j.otherRequirements.some((o) => o.carriers_pricing.some(() => true))
         )
       ) {
         setView("carrier");
