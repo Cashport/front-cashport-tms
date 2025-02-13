@@ -74,7 +74,6 @@ const logOut = () => {
   signOut(auth);
   localStorage.removeItem(STORAGE_TOKEN);
   const { resetStore } = useAppStore.getState();
-  window.Cookies.remove(COOKIE_NAME || "");
   resetStore();
 };
 
