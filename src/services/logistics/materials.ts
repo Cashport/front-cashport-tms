@@ -48,7 +48,12 @@ export const getAllMaterials = async (): Promise<IListData> => {
 };
 
 export const getAllMaterialType = async (): Promise<IMaterialType[]> => {
-  const response: GenericResponse<IMaterialType[]> = await API.get(`/material/all/type`);
+  const token = await getIdToken();
+  const response: GenericResponse<IMaterialType[]> = await API.get(`/material/all/type`,{
+    headers: {
+        Authorization: `Bearer ${token}`
+    }
+    });
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener listado de materiales");
 };
@@ -80,7 +85,7 @@ export const createMaterialForm = (data: IMaterial, formImages: CustomFile[]) =>
     url_archive: file?.url_archive
   }));
 
-  form.append("body", JSON.stringify(body));
+  form.append("general", JSON.stringify(body));
 
   formImages.forEach((file: CustomFile, index: number) => {
     if (file?.uid) {
@@ -98,11 +103,13 @@ export const addMaterial = async (
   formImages: CustomFile[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
+    const token = await getIdToken();
     const form = createMaterialForm(data, formImages);
     const response = await axios.post(`${config.API_HOST}/material/create`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
+        Accept: "application/json, text/plain, */*",
+        Authorization: `Bearer ${token}`
       }
     });
     return response;
@@ -117,10 +124,12 @@ export const updateMaterial = async (
 ): Promise<AxiosResponse<any, any>> => {
   try {
     const form = createMaterialForm(data, formImages);
+    const token = await getIdToken();
     const response = await axios.put(`${config.API_HOST}/material/update`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
+        Accept: "application/json, text/plain, */*",
+        Authorization: `Bearer ${token}`
       }
     });
     return response;
@@ -136,12 +145,14 @@ export const updateMaterialStatus = async (
 ): Promise<AxiosResponse<any, any>> => {
   try {
     const form = new FormData();
+    const token = await getIdToken();
     const body: any = { material_id: location_id, active: active };
     form.append("body", JSON.stringify(body));
     const response = await axios.put(`${config.API_HOST}/material/updatestatus`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
+        Accept: "application/json, text/plain, */*",
+        Authorization: `Bearer ${token}`
       }
     });
     return response;
