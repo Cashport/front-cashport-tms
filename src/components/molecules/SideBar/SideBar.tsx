@@ -293,7 +293,7 @@ export const SideBar = () => {
         <Button
           type="text"
           size="large"
-          onClick={() => logOut(router)}
+          onClick={() => logOut()}
           icon={<ArrowLineRight size={26} />}
           className="buttonExit"
         >
