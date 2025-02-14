@@ -23,7 +23,7 @@ export const useProjects = ({ page, countryId, currencyId, searchQuery }: Props)
   });
   if (error?.message  && error.message === "Request failed with status code 401") {
    alert('Usuario no autorizado.')
-    logOut(router);
+    logOut();
   }
   return {
     data: (data as IProjects) || ({ pagination: { totalRows: 1 } } as IProjects),
