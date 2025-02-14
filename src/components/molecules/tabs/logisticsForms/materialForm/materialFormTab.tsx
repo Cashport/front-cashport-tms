@@ -335,7 +335,7 @@ export const MaterialFormTab = ({
                   <Controller
                     name="general.material_transport"
                     control={control}
-                    rules={{ required: false }}
+                    rules={{ required: true }}
                     render={({ field }) => (
                       <MultiSelectTags
                         field={field}
@@ -354,7 +354,7 @@ export const MaterialFormTab = ({
                   <Controller
                     name="general.material_type"
                     control={control}
-                    rules={{ required: false }}
+                    rules={{ required: true }}
                     render={({ field }) => (
                       <MultiSelectTags
                         field={field}
