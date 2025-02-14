@@ -2156,7 +2156,7 @@ export const CreateOrderView = () => {
               </Col>
               <Col span={12}>
                 <Text className="locationLabels" style={{ display: "flex" }}>
-                  N° de contrato
+                  N° de contrato / Sales order
                 </Text>
                 <Input
                   placeholder="Ingresar número de contrato"
