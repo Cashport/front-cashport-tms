@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { formatMoney } from "@/utils/utils";
 import utc from "dayjs/plugin/utc";
 import { getTravelDuration } from "@/utils/logistics/maps";
-import { MAPS_ACCESS_TOKEN, SOCKET_URI, STATUS } from "@/utils/constants/globalConstants";
+import { SOCKET_URI, STATUS } from "@/utils/constants/globalConstants";
 import Image from "next/image";
 import "dayjs/locale/es-us";
 import Link from "next/link";
@@ -76,7 +76,8 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const mapsAccessToken = MAPS_ACCESS_TOKEN;
+  const mapsAccessToken =
+    "pk.eyJ1IjoibWFyY29zcm9kcmlndWV6IiwiYSI6ImNtNTQwc3J4ajIyaTYyanEzenBocmozd3kifQ.McenmWcjdP9vdwvdZQJRuA";
 
   const getState = (stateId: string) => {
     let getState = TransferOrdersState.find((f) => f.id === stateId);

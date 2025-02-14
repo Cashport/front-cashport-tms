@@ -16,14 +16,18 @@ export function VehicleFields({
   control: any;
   register: any;
   selectedTab: number;
-  handleOnDeleteDocument: (vehicleIndex: number, documentIndex: number) => void;
-  handleOnChangeDocument: (fileToSave: any, vehicleIndex: number, documentIndex: number) => void;
+  handleOnDeleteDocument: (vehicleIndex: number, documentIndex: number, entityType: "trip" | "requirement") => void;
+  handleOnChangeDocument: (fileToSave: any, vehicleIndex: number, documentIndex: number, entityType: "trip" | "requirement") => void;
   currentCarrier: ICarrier;
   disabled?: boolean;
 }>) {
   const { fields: vehicleFields } = useFieldArray<FinalizeTripForm>({
     control,
     name: `carriers.${selectedTab}.vehicles`
+  });
+  const { fields: requirementsFields } = useFieldArray<FinalizeTripForm>({
+    control,
+    name: `carriers.${selectedTab}.requirements`
   });
 
   return (
@@ -35,7 +39,24 @@ export function VehicleFields({
             control={control}
             register={register}
             carrierIndex={selectedTab}
-            vehicleIndex={vehicleIndex}
+            entityIndex={vehicleIndex}
+            entityType="trip"
+            handleOnChangeDocument={handleOnChangeDocument}
+            handleOnDeleteDocument={handleOnDeleteDocument}
+            currentCarrier={currentCarrier}
+            disabled={disabled}
+          />
+        </Flex>
+      ))}
+      {requirementsFields.map((requirement: any, requirementIndex) => (
+        <Flex vertical key={`carrier-${selectedTab}-requerimento-${requirementIndex}`}>
+          <p className={styles.vehicleName}>Requerimiento adicional: {requirement.description}</p>
+          <DocumentFields
+            control={control}
+            register={register}
+            carrierIndex={selectedTab}
+            entityIndex={requirementIndex}
+            entityType="requirement"
             handleOnChangeDocument={handleOnChangeDocument}
             handleOnDeleteDocument={handleOnDeleteDocument}
             currentCarrier={currentCarrier}

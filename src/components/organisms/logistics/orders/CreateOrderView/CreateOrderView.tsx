@@ -763,7 +763,7 @@ export const CreateOrderView = () => {
     newPslPercent: number
   ) => {
     const newCCs = costcenters.map((cc) => {
-      const oldCCPercent = cc.percent / oldPsdPercent;
+      const oldCCPercent = Math.floor(cc.percent / oldPsdPercent);
       const newCCValue = newPslPercent * oldCCPercent;
       return { ...cc, percent: newCCValue };
     });
@@ -771,6 +771,7 @@ export const CreateOrderView = () => {
   };
 
   const handlePslPercentChange = (value: number, pslIndex: number) => {
+    value = Math.floor(value);
     setDataPsl((prevDataPsl) => {
       // Calcula el total actual de los porcentajes de los PSLs excluyendo el seleccionado
       const totalPercentExcludingCurrent = prevDataPsl.reduce((total, psl, index) => {
@@ -788,7 +789,9 @@ export const CreateOrderView = () => {
         if (i === pslIndex) {
           return { ...psl, percent: value };
         } else {
-          const adjustedPercent = isOverTotal ? remainingPercent / otherPslCount : psl.percent;
+          const adjustedPercent = isOverTotal
+            ? Math.floor(remainingPercent / otherPslCount)
+            : psl.percent;
           return {
             ...psl,
             percent: adjustedPercent,
@@ -804,6 +807,7 @@ export const CreateOrderView = () => {
   };
 
   const handleCcPercentChange = (value: number, pslIndex: number, ccIndex: number) => {
+    value = Math.floor(value);
     setDataPsl((prevDataPsl) =>
       prevDataPsl.map((psl, i) => {
         if (i !== pslIndex) return psl;
@@ -826,14 +830,14 @@ export const CreateOrderView = () => {
           updatedCostCenters = psl.costcenters.map((cc, j) =>
             j === ccIndex
               ? { ...cc, percent: value }
-              : { ...cc, percent: currentPslPercent / otherCcCount }
+              : { ...cc, percent: Math.floor(currentPslPercent / otherCcCount) }
           );
         } else if (totalCCPercent + value > currentPslPercent) {
           const remainingPercent = currentPslPercent - value;
           updatedCostCenters = psl.costcenters.map((cc, j) =>
             j === ccIndex
               ? { ...cc, percent: value }
-              : { ...cc, percent: remainingPercent / otherCcCount }
+              : { ...cc, percent: Math.floor(remainingPercent / otherCcCount) }
           );
         } else {
           updatedCostCenters = psl.costcenters.map((cc, j) =>
@@ -1181,14 +1185,17 @@ export const CreateOrderView = () => {
           return;
         }
 
-        const totalPslPercent = psls.reduce((total, psl) => total + psl.percent, 0);
+        const totalPslPercent = psls.reduce((total, psl) => total + Math.trunc(psl.percent), 0);
         if (totalPslPercent !== 100) {
           isformvalid = false;
           message.error("La totalidad de los PSLs debe ser 100%");
         }
 
         for (const psl of psls) {
-          const totalCcPercent = psl.costcenters.reduce((total, cc) => total + cc.percent, 0);
+          const totalCcPercent = psl.costcenters.reduce(
+            (total, cc) => total + Math.trunc(cc.percent),
+            0
+          );
           if (totalCcPercent !== psl.percent) {
             isformvalid = false;
             message.error("La suma de los centros de costos debe ser igual al del PSL asociado");
@@ -1286,7 +1293,7 @@ export const CreateOrderView = () => {
         id: 0,
         id_transfer_order: 0,
         id_product: psl.idpsl,
-        units: psl.percent,
+        units: Math.trunc(psl.percent),
         created_at: new Date(),
         created_by: cuser?.email,
         modified_at: new Date(),
@@ -1301,7 +1308,7 @@ export const CreateOrderView = () => {
           id_transfer_order: 0,
           id_psl: psl.idpsl,
           id_costcenter: cost.idpslcostcenter,
-          percentage: cost.percent,
+          percentage: Math.trunc(cost.percent),
           active: "",
           created_at: new Date(),
           created_by: cuser?.email,
@@ -2379,7 +2386,7 @@ export const CreateOrderView = () => {
             </Flex>
           </Col>
           <Col span={24}>
-            <Collapse
+            <Collapse 
               className="collapseByAction"
               expandIconPosition="end"
               accordion={false}

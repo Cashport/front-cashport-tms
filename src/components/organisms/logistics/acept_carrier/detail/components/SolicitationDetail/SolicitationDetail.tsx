@@ -13,6 +13,7 @@ import utc from "dayjs/plugin/utc";
 import { DataCarga, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 import Buttons from "../Buttons/Buttons";
 import { useRouter } from "next/navigation";
+import { RequirementSummaryData } from "@/components/organisms/logistics/orders/DetailsOrderView/components/RequirementSummaryData.tsx/RequirementSummaryData";
 
 dayjs.locale("es");
 dayjs.extend(utc);
@@ -29,6 +30,7 @@ interface SolicitationDetailProps {
   setView: Dispatch<SetStateAction<"detail" | "asignation" | "confirmation">>;
   showRejectButton: boolean;
   handleReject: () => Promise<void>;
+  entityType?: "otherRequirement" | "trip";
 }
 
 export default function SolicitationDetail({
@@ -42,7 +44,8 @@ export default function SolicitationDetail({
   mapContainerRef,
   setView,
   showRejectButton,
-  handleReject
+  handleReject,
+  entityType = "trip"
 }: Readonly<SolicitationDetailProps>) {
   const router = useRouter();
 
@@ -56,35 +59,55 @@ export default function SolicitationDetail({
         </Flex>
         <Flex>
           <Col span={12} style={{ paddingRight: "0.625rem" }}>
-            <SummaryData
-              routeGeometry={geometry}
-              distance={distance}
-              timetravel={timetravel}
-              weight={providerDetail?.carrier_request_material_by_trip?.reduce(
-                (acc, curr) => acc + curr.material[0].kg_weight,
-                0
-              )}
-              volume={providerDetail?.carrier_request_material_by_trip?.reduce(
-                (acc, curr) => acc + curr.material[0].m3_volume,
-                0
-              )}
-              needLiftingOrigin={false}
-              needLiftingDestination={false}
-              travelTypeDesc={providerDetail?.service_type ?? ""}
-              user_creator={{
-                user_email: providerDetail?.created_by || "",
-                user_name: "",
-                show: false
-              }}
-              start_location={providerDetail?.start_location ?? ""}
-              end_location={providerDetail?.end_location ?? ""}
-              start_date_flexible={"Exacto"}
-              end_date_flexible={"Exacto"}
-              start_date={dayjs.utc(providerDetail?.start_date).format("YYYY-MM-DD")}
-              start_date_hour={dayjs.utc(providerDetail?.start_date).format("HH:mm") ?? ""}
-              end_date={dayjs.utc(providerDetail?.end_date).format("YYYY-MM-DD")}
-              end_date_hour={dayjs.utc(providerDetail?.end_date).format("HH:mm") ?? ""}
-            />
+            {entityType === "otherRequirement" && providerDetail?.other_requirement ? (
+              <RequirementSummaryData
+                routeGeometry={geometry}
+                other_requirement={providerDetail?.other_requirement}
+                user_creator={{
+                  user_email: providerDetail?.created_by || "",
+                  user_name: "",
+                  show: false
+                }}
+                start_location={providerDetail?.start_location ?? ""}
+                end_location={providerDetail?.end_location ?? ""}
+                start_date_flexible={"Exacto"}
+                end_date_flexible={"Exacto"}
+                start_date={dayjs.utc(providerDetail?.start_date).format("YYYY-MM-DD")}
+                start_date_hour={dayjs.utc(providerDetail?.start_date).format("HH:mm") ?? ""}
+                end_date={dayjs.utc(providerDetail?.end_date).format("YYYY-MM-DD")}
+                end_date_hour={dayjs.utc(providerDetail?.end_date).format("HH:mm") ?? ""}
+              />
+            ) : (
+              <SummaryData
+                routeGeometry={geometry}
+                distance={distance}
+                timetravel={timetravel}
+                weight={providerDetail?.carrier_request_material_by_trip?.reduce(
+                  (acc, curr) => acc + curr.material[0].kg_weight,
+                  0
+                )}
+                volume={providerDetail?.carrier_request_material_by_trip?.reduce(
+                  (acc, curr) => acc + curr.material[0].m3_volume,
+                  0
+                )}
+                needLiftingOrigin={false}
+                needLiftingDestination={false}
+                travelTypeDesc={providerDetail?.service_type ?? ""}
+                user_creator={{
+                  user_email: providerDetail?.created_by || "",
+                  user_name: "",
+                  show: false
+                }}
+                start_location={providerDetail?.start_location ?? ""}
+                end_location={providerDetail?.end_location ?? ""}
+                start_date_flexible={"Exacto"}
+                end_date_flexible={"Exacto"}
+                start_date={dayjs.utc(providerDetail?.start_date).format("YYYY-MM-DD")}
+                start_date_hour={dayjs.utc(providerDetail?.start_date).format("HH:mm") ?? ""}
+                end_date={dayjs.utc(providerDetail?.end_date).format("YYYY-MM-DD")}
+                end_date_hour={dayjs.utc(providerDetail?.end_date).format("HH:mm") ?? ""}
+              />
+            )}
           </Col>
           <Col span={12}>
             <RouteMap mapContainerRef={mapContainerRef} />
@@ -98,7 +121,7 @@ export default function SolicitationDetail({
         specialInstructions={providerDetail?.special_instructions}
         declaredCargoValue={providerDetail?.declared_cargo_value}
       />
-      {service_type !== "Personas" && (
+      {service_type !== "Personas" && entityType !== "otherRequirement" && (
         <Flex vertical className={styles.materialsWrapper} style={{ width: "100%" }}>
           <h3>Materiales</h3>
           <p>&nbsp;</p>
@@ -109,7 +132,11 @@ export default function SolicitationDetail({
         canContinue={true}
         isRightButtonActive={true}
         isLeftButtonActive={true}
-        handleNext={() => setView("asignation")}
+        handleNext={() => {
+          if (entityType === "otherRequirement") {
+            setView("confirmation");
+          } else setView("asignation");
+        }}
         handleBack={() => router.push("/logistics/acept_carrier")}
         handleReject={handleReject}
         isLastStep={false}

@@ -17,6 +17,7 @@ import ModalBillingMT from "@/components/molecules/modals/ModalBillingMT/ModalBi
 import { Receipt } from "phosphor-react";
 import { Responsibles } from "@/components/organisms/logistics/orders/DetailsOrderView/components/Responsibles/Responsibles";
 import { mockedPSL } from "./mockedpds";
+import { RequirementHeader } from "@/components/molecules/collapse/Requirementheader/RequirementHeader";
 
 const { Text } = Typography;
 
@@ -62,7 +63,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
   }, [params.id, isModalVisible]);
 
   const TripHeader = ({ trip }: { trip: any }) => (
-    <div className={styles.resumContainer}>
+    <div className={styles.resumContainer} style={{ marginBottom: "1rem" }}>
       <div className={styles.resum}>
         <div className={styles.resumItem}>
           <Text className={styles.text}>Vehículo</Text>
@@ -197,12 +198,15 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     billingData?.journeys.flatMap((journey: IJourney) => {
       return [
         <TitleComponent key={`title-${journey.id}`} id={journey.id} journey={journey} />,
+        ...journey.requirements.flatMap((req, index) => {
+          return <RequirementHeader key={`req-${req.id}`} requirement={req} />;
+        }),
         ...journey.trips.flatMap((trip, index) => {
           const allIncidents =
             trip.incidents.length > 0 ? trip.incidents.map(convertIncidentToNovelty) : [];
 
           return (
-            <div key={`trip-novelty-container-${trip.id}`} style={{ marginBottom: "56px" }}>
+            <div key={`trip-novelty-container-${trip.id}`} style={{ rowGap: "1rem" }}>
               <TripHeader key={`trip-${trip.id}`} trip={trip} />
               <NoveltyTable
                 key={`novelty-table-${trip.id}`}

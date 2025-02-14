@@ -2,7 +2,7 @@ import { FinalizeTripForm } from "./finalizetrip.types";
 
 export function createFormData(form: FinalizeTripForm): FormData {
   const formData = new FormData();
-  const documentsMTs: { tripId: number; file: string }[] = [];
+  const documentsMTs: { entityId: number; file: string; entityType: "trip" | "requirement" }[] = [];
   const observations: { carrierId: number; Observation: string }[] = [];
 
   form.carriers.forEach((carrier) => {
@@ -16,10 +16,23 @@ export function createFormData(form: FinalizeTripForm): FormData {
       vehicle.documents.forEach((document, indexVehicle) => {
         if (document.file) {
           documentsMTs.push({
-            tripId: vehicle.tripId,
-            file: `INVOICE-${indexCarrier}-${indexVehicle}`
+            entityId: vehicle.tripId,
+            file: `INVOICE-${indexCarrier}-${indexVehicle}-trip`,
+            entityType: "trip"
           });
-          formData.append(`INVOICE-${indexCarrier}-${indexVehicle}`, document.file);
+          formData.append(`INVOICE-${indexCarrier}-${indexVehicle}-trip`, document.file);
+        }
+      });
+    });
+    carrier.requirements.forEach((requirement, indexCarrier) => {
+      requirement.documents.forEach((document, indexRequirement) => {
+        if (document.file) {
+          documentsMTs.push({
+            entityId: requirement.requirementId,
+            file: `INVOICE-${indexCarrier}-${indexRequirement}-requirement`,
+            entityType: "requirement"
+          });
+          formData.append(`INVOICE-${indexCarrier}-${indexRequirement}-requirement`, document.file);
         }
       });
     });

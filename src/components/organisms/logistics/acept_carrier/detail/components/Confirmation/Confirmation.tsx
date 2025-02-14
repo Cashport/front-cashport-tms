@@ -18,6 +18,7 @@ interface ConfirmationProps {
   handleSubmit: () => Promise<void>;
   hasFormValuesChanged: () => boolean;
   showRejectButton: boolean;
+  entityType: "otherRequirement" | "trip";
 }
 
 export function Confirmation({
@@ -30,7 +31,8 @@ export function Confirmation({
   handleReject,
   handleSubmit,
   hasFormValuesChanged,
-  showRejectButton
+  showRejectButton,
+  entityType
 }: Readonly<ConfirmationProps>) {
   const [aceptConditions, setAceptConditions] = useState<boolean>(false);
   const isFinishButtonShowed = formMode !== FormMode.VIEW;
@@ -44,26 +46,28 @@ export function Confirmation({
   return (
     <div>
       <Flex className={styles.wrapper}>
-        <Flex className={styles.sectionWraper} vertical>
-          {driverSelected?.map((driver, index) => (
-            <Flex key={`vehicle-driver-${index}`}>
-              <Col span={11} style={{ visibility: index !== 0 ? "hidden" : "initial" }}>
-                <p className={styles.subtitle}>
-                  {vehicleSelected?.brand} {vehicleSelected?.color}
-                </p>
-                <p className={styles.subtitle}>{vehicleSelected?.plate_number}</p>
-              </Col>
-              <Col span={2}>
-                <Divider type="vertical" className={styles.divider} />
-              </Col>
-              <Col span={11} style={{ display: "flex", justifyContent: "flex-end" }}>
-                <p className={styles.subtitle}>
-                  {driver?.name} {driver?.last_name} - {driver?.phone}
-                </p>
-              </Col>
-            </Flex>
-          ))}
-        </Flex>
+        {entityType !== "otherRequirement" && (
+          <Flex className={styles.sectionWraper} vertical>
+            {driverSelected?.map((driver, index) => (
+              <Flex key={`vehicle-driver-${index}`}>
+                <Col span={11} style={{ visibility: index !== 0 ? "hidden" : "initial" }}>
+                  <p className={styles.subtitle}>
+                    {vehicleSelected?.brand} {vehicleSelected?.color}
+                  </p>
+                  <p className={styles.subtitle}>{vehicleSelected?.plate_number}</p>
+                </Col>
+                <Col span={2}>
+                  <Divider type="vertical" className={styles.divider} />
+                </Col>
+                <Col span={11} style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <p className={styles.subtitle}>
+                    {driver?.name} {driver?.last_name} - {driver?.phone}
+                  </p>
+                </Col>
+              </Flex>
+            ))}
+          </Flex>
+        )}
         <Flex vertical className={styles.sectionWraper}>
           <p className={styles.subtitle}>Comentarios</p>
           <div className={styles.textArea}>
@@ -93,7 +97,10 @@ export function Confirmation({
         isRightButtonActive={isFinishButtonEnabled()}
         isLeftButtonActive={true}
         handleNext={handleSubmit}
-        handleBack={() => setView("asignation")}
+        handleBack={() => {
+          if (entityType === "otherRequirement") setView("detail");
+          else setView("asignation");
+        }}
         handleReject={handleReject}
         isLastStep={true}
         showRejectButton={showRejectButton}

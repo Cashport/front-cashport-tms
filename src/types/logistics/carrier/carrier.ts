@@ -7,10 +7,11 @@ export interface SendCarrierRequest {
 export interface CarrierRequest {
   id_transfer_request: number;
   id_carrier: number;
-  id_vehicle_type: number;
+  id_vehicle_type?: number;
   fare: number;
-  id_trip: number;
+  id_trip?: number;
   id_pricing: number;
+  id_requirement?: number;
 }
 
 export interface DriverDocument {
@@ -92,6 +93,15 @@ interface Geometry {
     type: string;
   };
 }
+export interface OtherReq {
+  id_requirement: number;
+  description: string;
+  units: number;
+  fare: number;
+  totalServiceValue: number;
+  fee_description: string;
+  serviceTime: string;
+}
 
 export interface IAceptCarrierAPI {
   id: number;
@@ -133,6 +143,8 @@ export interface IAceptCarrierAPI {
   id_service_type: number;
   fee_description?: string;
   declared_cargo_value?: number;
+  entity: "otherRequirement" | "trip";
+  other_requirement?: OtherReq;
 }
 
 export interface Data {

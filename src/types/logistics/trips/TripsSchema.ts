@@ -4,6 +4,7 @@ export interface TripsCreation {
   id_journey: number;
   id_transfer_request: number;
   trips: TripCreation[];
+  other_requirements: Omit<IRequirement, "description">[];
 }
 export interface TripCreation {
   id: number;
@@ -24,6 +25,7 @@ export interface JourneyTripPricing {
   end_location_desc: string;
   id_type_service: number;
   trips: TripCarriersPricing[];
+  other_requirements: RequirementCarriersPricing[];
   community_name?: string;
   is_community?: 0 | 1;
 }
@@ -32,6 +34,14 @@ export interface TripCarriersPricing {
   id_trip: number;
   vehicle_type: number;
   vehicle_type_desc: string;
+  carriers_pricing: CarriersPricing[];
+}
+
+export interface RequirementCarriersPricing {
+  id: number;
+  idRequirement: number;
+  descripcion: string;
+  units: number;
   carriers_pricing: CarriersPricing[];
 }
 
@@ -46,6 +56,7 @@ export interface CarriersPricing {
   id_carrier: number;
   nit: string;
   fee_description: string;
+  pricing_description?: string;
 }
 
 export interface CarriersPricingModal extends CarriersPricing {
@@ -57,6 +68,21 @@ export interface Trip {
   vehicle_type: number;
   vehicle_type_desc: string;
   carriers_pricing: CarriersPricingModal[];
+}
+export interface Requirement {
+  id: number;
+  idRequirement: number;
+  descripcion: string;
+  carriers_pricing: CarriersPricingModal[];
+}
+export type serviceType = "trip" | "other_requirement";
+export interface Service {
+  id: number;
+  service_id: number;
+  service_description: string;
+  carriers_pricing: CarriersPricingModal[];
+  units: number | null;
+  type: serviceType;
 }
 
 export interface Journey {
@@ -70,9 +96,20 @@ export interface Journey {
   is_community: 0 | 1;
 }
 
-export interface MockedTrip {
-  trip: Trip;
-  journey: Omit<JourneyTripPricing, "trips">;
+export interface ServiceTab {
+  service: Service;
+  journey: Omit<JourneyTripPricing, "trips" | "other_requirements">;
+}
+
+export interface RequirementsAPI {
+  id: number;
+  description: string;
+}
+
+export interface IRequirement {
+  idRequirement: number;
+  units: number;
+  description: string;
 }
 
 // Socket trips

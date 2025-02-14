@@ -1,6 +1,7 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { DocumentCompleteType } from "./certificate/certificate";
 import { ApiVehicleType } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
+import { IRequirement } from "../transferJourney/ITransferJourney";
 
 export interface IListData {
   id: any;
@@ -1947,6 +1948,7 @@ export interface ITransferRequestJourneyInfo {
   start_location_desc: string;
   end_location_desc: string;
   trips: IVehiclesPricingTrips[];
+  otherRequirements: IRequirement[];
   is_community?: 0 | 1;
   community_name?: string;
   end_date_flexible: number;
@@ -1965,9 +1967,11 @@ export interface ITransferRequestJourneyReview {
   end_location_desc: string;
   service_type: number;
   trips: TripCarriersPricing[];
+  otherRequirements: TripCarriersPricing[];
 }
 export interface TripCarriersPricing {
   id_trip: number;
+  id_tr_other_requirement: number;
   vehicle_type: number;
   vehicle_type_desc: string;
   start_date: string;
@@ -3435,6 +3439,7 @@ export interface IJourney {
   start_location_desc: string;
   end_location_desc: string;
   trips: ITripBilling[];
+  requirements: IRequirement[];
 }
 
 export interface ICarrierRequestDetailAPI extends ICarrierRequestDetail {
