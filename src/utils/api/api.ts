@@ -6,7 +6,10 @@ import { onAuthStateChanged } from "firebase/auth";
 export async function getIdToken(forceRefresh?: boolean) {
   const user = auth.currentUser;
   if (user) {
-    return await user.getIdToken(forceRefresh);
+    const responseAPI = await fetch(`/api/auth`);
+    const sessionCookie = await responseAPI.json();
+    console.log("sessionCookie", sessionCookie);
+    return sessionCookie?.token;
   } else {
     return new Promise((resolve, reject) => {
       onAuthStateChanged(auth, async (user) => {
