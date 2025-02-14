@@ -8,7 +8,7 @@ import {
   FIREBASE_STORAGE_BUCKET
 } from "@/utils/constants/globalConstants";
 import { initializeApp } from "firebase/app";
-import { getAuth, ParsedToken, signInWithCustomToken } from "firebase/auth";
+import { getAuth, ParsedToken, signInWithCustomToken} from "firebase/auth";
 import "firebase/auth";
 import "firebase/functions";
 import "firebase/firestore";
@@ -43,9 +43,17 @@ interface Claims extends ParsedToken {
 }
 
 export const decodedClaims = async (token: string) => {
-  const decoded = await signInWithCustomToken(auth, token);
-  const claims = await decoded.user.getIdTokenResult();
-  return claims.claims as Claims;
+  //const decoded = await signInWithCustomToken(auth, token);
+  const session = document.cookie.split(";").find((c) => c.startsWith(`${process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME}=`));
+  const responseAPI = await fetch(`/api/auth`, {
+    headers: {
+      Cookie: `${process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME}=${session?.value}`
+    }
+  });
+  const claims = await responseAPI.json();
+  console.log("responseAPI", claims);
+
+  return claims.data as Claims;
 };
 
 export default app;

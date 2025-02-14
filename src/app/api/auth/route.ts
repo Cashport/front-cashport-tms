@@ -15,11 +15,14 @@ export async function POST() {
   if (authorization?.startsWith("Bearer ")) {
     const idToken = authorization.split("Bearer ")[1];
     const decodedToken = await auth().verifyIdToken(idToken);
-    const permissions = await getPermissions(idToken);
+    const sessionCookie = await auth().createSessionCookie(idToken, {
+      expiresIn: 60 * 60 * 24 * 14 * 1000
+    });
+    const permissions = await getPermissions(sessionCookie);
+    console.log(permissions);
     const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
       permissions
     });
-    token = idCustomToken;
     const customToken = await customGetAuth(idCustomToken);
     if (decodedToken) {
       //Generar cookie
@@ -30,7 +33,9 @@ export async function POST() {
           expiresIn
         }
       );
+      token = sessionCookie;
       console.log(COOKIE_NAME);
+      console.log("sessionCookie", sessionCookie);
       const options = {
         name: COOKIE_NAME,
         value: sessionCookie,
@@ -59,5 +64,5 @@ export async function GET() {
     return NextResponse.json({ isLogged: false }, { status: 401 });
   }
 
-  return NextResponse.json({ isLogged: true }, { status: 200 });
+  return NextResponse.json({ isLogged: true, data: decodedClaims, token: session }, { status: 200 });
 }
