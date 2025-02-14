@@ -146,11 +146,37 @@ export const CreateOrderView = () => {
   const [declaredCargoValue, setDeclaredCargoValue] = useState<number>(0);
   const [contractNumber, setContractNumber] = useState<string>("");
 
+  const [isFixedRate, setIsFixedRate] = useState(false);
+
   const isButtonSubmitEnabled = !isLoading;
 
-  const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
+  const disabledStartDate: RangePickerProps["disabledDate"] = (current: any) => {
     // Can not select days before today
     return current && current < dayjs().startOf("day");
+  };
+
+  const disabledEndDate: RangePickerProps["disabledDate"] = (current: Dayjs) => {
+    if (!fechaInicial) return false;
+    return current && current.isBefore(fechaInicial.startOf("day"));
+  };
+
+  const disabledEndTime = (selectedDate: Dayjs) => {
+    if (!selectedDate || !fechaInicial || !horaInicial) return {};
+
+    const isSameDay = selectedDate.isSame(fechaInicial, "day");
+
+    if (isSameDay) {
+      return {
+        disabledHours: () => Array.from({ length: horaInicial.hour() }, (_, i) => i), // Deshabilita horas previas
+        disabledMinutes: (hour: number) =>
+          hour === horaInicial.hour()
+            ? Array.from({ length: horaInicial.minute() }, (_, i) => i)
+            : [],
+        disabledSeconds: () => []
+      };
+    }
+
+    return {};
   };
 
   useEffect(() => {
@@ -452,27 +478,29 @@ export const CreateOrderView = () => {
     const initialHour = horaInicial.get("h");
     const initialMinute = horaInicial.get("m");
     let fechaFin = fechaInicial.hour(initialHour).minute(initialMinute);
-
-    if (horasOrigenIzaje) {
-      fechaFin = fechaFin.add(horasOrigenIzaje, "h");
-    }
-
-    if (typeactive !== "2" && timetravelInSecs !== null) {
-      if (horasDestinoIzaje) {
-        fechaFin = fechaFin.add(horasDestinoIzaje, "h");
+    if (!isFixedRate) {
+      if (horasOrigenIzaje) {
+        fechaFin = fechaFin.add(horasOrigenIzaje, "h");
       }
-      fechaFin = fechaFin.add(timetravelInSecs, "s");
-    }
 
-    setHoraFinal(fechaFin);
-    setFechaFinal(fechaFin);
+      if (typeactive !== "2" && timetravelInSecs !== null) {
+        if (horasDestinoIzaje) {
+          fechaFin = fechaFin.add(horasDestinoIzaje, "h");
+        }
+        fechaFin = fechaFin.add(timetravelInSecs, "s");
+      }
+
+      setHoraFinal(fechaFin);
+      setFechaFinal(fechaFin);
+    }
   }, [
     typeactive,
     fechaInicial,
     horaInicial,
     horasOrigenIzaje,
     horasDestinoIzaje,
-    timetravelInSecs
+    timetravelInSecs,
+    isFixedRate
   ]);
 
   const calculateDuration = (duration: number) => {
@@ -517,6 +545,7 @@ export const CreateOrderView = () => {
     setDestinoIzaje(false);
     setFechaInicialFlexible(null);
     setFechaFinalFlexible(null);
+    setIsFixedRate(false);
   };
 
   useEffect(() => {
@@ -1259,7 +1288,8 @@ export const CreateOrderView = () => {
       service_type_desc: TripType.Carga,
       client_desc: "",
       contractNumber: contractNumber !== "" ? contractNumber : undefined,
-      declaredCargoValue: typeactive !== "3" ? declaredCargoValue : undefined
+      declaredCargoValue: typeactive !== "3" ? declaredCargoValue : undefined,
+      isFixedRate: String(Number(isFixedRate))
     };
 
     //contactos
@@ -1509,7 +1539,7 @@ export const CreateOrderView = () => {
                   <Col span={8}>
                     <DatePicker
                       placeholder="Seleccione fecha"
-                      disabledDate={disabledDate}
+                      disabledDate={disabledStartDate}
                       onChange={(value) => {
                         setFechaInicial(value);
                         setFechaInicialValid(true);
@@ -1584,8 +1614,8 @@ export const CreateOrderView = () => {
                   <Col span={8}>
                     <DatePicker
                       placeholder="Seleccione fecha"
-                      disabledDate={disabledDate}
-                      disabled={true}
+                      disabledDate={disabledEndDate}
+                      disabled={!isFixedRate}
                       value={fechaFinal}
                       onChange={(value) => {
                         setFechaFinal(value);
@@ -1606,11 +1636,11 @@ export const CreateOrderView = () => {
                       format={"HH:mm"}
                       minuteStep={15}
                       needConfirm={false}
-                      disabled={true}
+                      disabled={!isFixedRate}
                       hourStep={1}
                       type={"time"}
-                      variant="filled"
                       value={horaFinal}
+                      disabledTime={isFixedRate ? disabledEndTime : undefined}
                       onChange={(value) => {
                         setHoraFinal(value);
                         setHoraFinalValid(true);
@@ -1628,7 +1658,7 @@ export const CreateOrderView = () => {
                     <Select
                       value={fechaFinalFlexible}
                       placeholder="Seleccione"
-                      disabled={true}
+                      disabled={!isFixedRate}
                       className={
                         fechaFinalFlexibleValid
                           ? "puntoOrigen dateInputForm"
@@ -1654,6 +1684,19 @@ export const CreateOrderView = () => {
                     )}
                   </Col>
                 </Row>
+              </Col>
+            </Row>
+            <Row style={{ marginTop: "1rem" }}>
+              <Col span={12}>
+                <Flex gap={"0.5rem"}>
+                  <Switch
+                    checked={isFixedRate}
+                    onChange={(event) => {
+                      setIsFixedRate(event);
+                    }}
+                  />
+                  <Text>Es renta fija</Text>
+                </Flex>
               </Col>
             </Row>
             {routeGeometry && (
@@ -2386,7 +2429,7 @@ export const CreateOrderView = () => {
             </Flex>
           </Col>
           <Col span={24}>
-            <Collapse 
+            <Collapse
               className="collapseByAction"
               expandIconPosition="end"
               accordion={false}

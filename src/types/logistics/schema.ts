@@ -2058,6 +2058,7 @@ export interface ITransferOrder {
   end_location?: ILocation | null | undefined;
   contractNumber?: string;
   declaredCargoValue?: number;
+  isFixedRate?: string; // "0" or "1"
   //geometry
   geometry: any;
   //datos de contacto
