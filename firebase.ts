@@ -8,10 +8,11 @@ import {
   FIREBASE_STORAGE_BUCKET
 } from "@/utils/constants/globalConstants";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, ParsedToken, signInWithCustomToken } from "firebase/auth";
 import "firebase/auth";
 import "firebase/functions";
 import "firebase/firestore";
+import { IUserPermissions } from "@/types/userPermissions/IUserPermissions";
 
 // https://firebase.google.com/docs/web/setup#available-libraries
 // Your web app's Firebase configuration
@@ -30,4 +31,21 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
+
+export async function customGetAuth(asd: string) {
+  const customToken = await signInWithCustomToken(auth, asd);
+  customToken.user.getIdTokenResult();
+  return customToken;
+}
+
+interface Claims extends ParsedToken {
+  permissions: IUserPermissions["data"];
+}
+
+export const decodedClaims = async (token: string) => {
+  const decoded = await signInWithCustomToken(auth, token);
+  const claims = await decoded.user.getIdTokenResult();
+  return claims.claims as Claims;
+};
+
 export default app;

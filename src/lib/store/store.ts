@@ -17,7 +17,7 @@ export const useAppStore = create<AppStore>()(
       ...createHidrationSlice(set),
       resetStore: () => {
         // Clear the session storage
-        sessionStorage.removeItem("project");
+        localStorage.removeItem("project");
         // Reset the Zustand store to initial state
         set({
           ...createUserSlice(set),
@@ -29,7 +29,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "project",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state, error) => {
         if (error) console.error(error);
         if (state) state.setHydrated();
