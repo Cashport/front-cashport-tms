@@ -44,7 +44,7 @@ interface Claims extends ParsedToken {
 
 export const decodedClaims = async (token: string) => {
   //const decoded = await signInWithCustomToken(auth, token);
-  const session = document.cookie.split(";").find((c) => c.startsWith(`${process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME}=`));
+  const session: any = document.cookie.split(";").find((c) => c.startsWith(`${process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME}=`));
   const responseAPI = await fetch(`/api/auth`, {
     headers: {
       Cookie: `${process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME}=${session?.value}`
