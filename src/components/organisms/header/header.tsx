@@ -31,7 +31,7 @@ const Header: FC<HeaderProps> = ({ title, showNotifications = false }) => {
           <Popover
             placement="bottomRight"
             trigger="click"
-            content={<Button onClick={() => logOut(router)}>Cerrar sesión</Button>}
+            content={<Button onClick={() => logOut()}>Cerrar sesión</Button>}
           >
             <CaretDown className={styles.arrow} />
           </Popover>
