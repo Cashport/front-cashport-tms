@@ -25,10 +25,16 @@ export interface IVehicleAPI {
   plate_number: string;
   MT: string[];
 }
+export interface IRequestAPI {
+  id: number;
+  description: string;
+  MT: string[];
+}
 export interface ICarrierAPI {
   carrier_id: number;
   provider: string;
   vehicles: IVehicleAPI[];
+  requirements: IRequestAPI[];
   Observation: string;
 }
 
@@ -77,6 +83,26 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
                 }
               ]
       })),
+      requirements: c.requirements.map((r) => ({
+        requirementId: r.id,
+        description: r.description,
+        documents:
+          r.MT?.length > 0
+            ? r.MT?.map((MTlink) => {
+              return {
+                link: MTlink ?? undefined,
+                file: undefined,
+                docReference: carrierIndex
+              };
+            })
+          : [
+              {
+                link: undefined,
+                file: undefined,
+                docReference: carrierIndex
+              }
+            ]
+    })),
       adittionalComment: c.Observation !== "" ? c.Observation : undefined
     }));
     return {
@@ -123,8 +149,14 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
   };
 
   //Handle document changes
-  const handleOnChangeDocument = (fileToSave: any, vehicleIndex: number, documentIndex: number) => {
+  const handleOnChangeDocument = (
+    fileToSave: any,
+    entityIndex: number,
+    documentIndex: number,
+    entityType: "trip" | "requirement"
+  ) => {
     const { file: rawFile } = fileToSave;
+    const entity = entityType === "trip" ? "vehicles" : "requirements";
     if (rawFile) {
       const fileSizeInMB = rawFile.size / (1024 * 1024);
       if (fileSizeInMB > 30) {
@@ -134,19 +166,24 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
         return;
       }
       setValue(
-        `carriers.${selectedTab}.vehicles.${vehicleIndex}.documents.${documentIndex}.file`,
+        `carriers.${selectedTab}.${entity}.${entityIndex}.documents.${documentIndex}.file`,
         rawFile
       );
-      trigger(`carriers.${selectedTab}.vehicles.${vehicleIndex}.documents.${documentIndex}`);
+      trigger(`carriers.${selectedTab}.${entity}.${entityIndex}.documents.${documentIndex}`);
     }
   };
 
-  const handleOnDeleteDocument = (vehicleIndex: number, documentIndex: number) => {
+  const handleOnDeleteDocument = (
+    entityIndex: number,
+    documentIndex: number,
+    entityType: "trip" | "requirement"
+  ) => {
+    const entity = entityType === "trip" ? "vehicles" : "requirements";
     setValue(
-      `carriers.${selectedTab}.vehicles.${vehicleIndex}.documents.${documentIndex}.file`,
+      `carriers.${selectedTab}.${entity}.${entityIndex}.documents.${documentIndex}.file`,
       undefined
     );
-    trigger(`carriers.${selectedTab}.vehicles.${vehicleIndex}.documents.${documentIndex}`);
+    trigger(`carriers.${selectedTab}.${entity}.${entityIndex}.documents.${documentIndex}`);
   };
 
   useEffect(() => {

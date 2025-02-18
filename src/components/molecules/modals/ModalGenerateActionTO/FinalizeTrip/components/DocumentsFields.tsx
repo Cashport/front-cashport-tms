@@ -10,24 +10,26 @@ export function DocumentFields({
   control,
   register,
   carrierIndex,
-  vehicleIndex,
+  entityIndex,
   handleOnDeleteDocument,
   handleOnChangeDocument,
   currentCarrier,
+  entityType,
   disabled = false
 }: Readonly<{
   control: any;
   register: any;
   carrierIndex: number;
-  vehicleIndex: number;
-  handleOnDeleteDocument: (vehicleIndex: number, documentIndex: number) => void;
-  handleOnChangeDocument: (fileToSave: any, vehicleIndex: number, documentIndex: number) => void;
+  entityIndex: number;
+  entityType: "trip" | "requirement";
+  handleOnDeleteDocument: (entityIndex: number, documentIndex: number, entityType: "trip" | "requirement") => void;
+  handleOnChangeDocument: (fileToSave: any, entityIndex: number, documentIndex: number, entityType: "trip" | "requirement") => void;
   currentCarrier: ICarrier;
   disabled?: boolean;
 }>) {
   const { fields: documentFields, append: appendDocument } = useFieldArray<FinalizeTripForm>({
     control,
-    name: `carriers.${carrierIndex}.vehicles.${vehicleIndex}.documents`
+    name: `carriers.${carrierIndex}.${entityType == "trip" ? "vehicles" : "requirements"}.${entityIndex}.documents`
   });
 
   return (
@@ -37,7 +39,7 @@ export function DocumentFields({
           if (document.link) {
             return (
               <UploadDocumentButton
-                key={`carrier-${carrierIndex}-vehicle-${vehicleIndex}-doc-${documentIndex}`}
+                key={`carrier-${carrierIndex}-${entityType === "trip" ? "vehicle" : "requirement"}-${entityIndex}-doc-${documentIndex}`}
                 title={"Documento MT"}
                 showTitleAndMandatory={documentIndex === 0}
                 isMandatory={true}
@@ -55,17 +57,17 @@ export function DocumentFields({
           }
           return (
             <UploadFileButton
-              key={`carrier-${carrierIndex}-vehicle-${vehicleIndex}-doc-${documentIndex}`}
+              key={`carrier-${carrierIndex}-${entityType === "trip" ? "vehicle" : "requirement"}-${entityIndex}-doc-${documentIndex}`}
               title={"Documento MT"}
               showTitleAndMandatory={documentIndex === 0}
-              handleOnDelete={() => handleOnDeleteDocument(vehicleIndex, documentIndex)}
-              handleOnChange={(file) => handleOnChangeDocument(file, vehicleIndex, documentIndex)}
+              handleOnDelete={() => handleOnDeleteDocument(entityIndex, documentIndex, entityType)}
+              handleOnChange={(file) => handleOnChangeDocument(file, entityIndex, documentIndex, entityType)}
               fileName={
-                currentCarrier.vehicles?.[vehicleIndex].documents?.[documentIndex].file?.name ??
+                currentCarrier[entityType === "trip" ? "vehicles" : "requirements"]?.[entityIndex].documents?.[documentIndex].file?.name ??
                 undefined
               }
               fileSize={
-                currentCarrier.vehicles?.[vehicleIndex].documents?.[documentIndex].file?.size ??
+                currentCarrier[entityType === "trip" ? "vehicles" : "requirements"]?.[entityIndex].documents?.[documentIndex].file?.size ??
                 undefined
               }
               isMandatory={true}

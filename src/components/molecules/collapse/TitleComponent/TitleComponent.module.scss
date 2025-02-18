@@ -1,0 +1,64 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
+
+    .stateContainer {
+        display: flex;
+        column-gap: 4px;
+        align-items: center;
+        background-color: #3d3d3d;
+        padding: 8px 16px;
+        border-radius: 8px;
+        align-self: flex-start;
+
+        .state {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+    }
+
+    .fromto {
+        display: flex;
+        justify-content: space-between;
+
+        .fromtoContainer {
+            display: flex;
+            flex-direction: column;
+            row-gap: 2px;
+            padding: 2px 16px;
+            width: 50%;
+
+            .title {
+                color: #969696;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 32px;
+                letter-spacing: -1px;
+            }
+
+            .subtitle {
+                color: #141414;
+                font-size: 20px;
+                font-weight: 600;
+                letter-spacing: -1px;
+            }
+
+            &.right {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                border-left: 1px solid #ddd;
+            }
+
+            .caret {
+                transition: transform 3s;
+
+                &.rotate {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+    }
+}

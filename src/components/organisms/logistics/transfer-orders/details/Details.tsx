@@ -297,18 +297,16 @@ export const TransferOrderDetails = () => {
   };
 
   useEffect(() => {
-    findDetails();
-  }, []);
-
-  useEffect(() => {
     if (!isModalVisible && !isModalBillingVisible) {
       findDetails();
     }
   }, [isModalVisible, isModalBillingVisible]);
 
   useEffect(() => {
-    findNovelties();
-    findBilling();
+    if(!!transferRequest){
+      findNovelties();
+      findBilling();
+    }
   }, [transferRequest]);
 
   return (

@@ -41,7 +41,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [canBeRejected, setCanBeRejected] = useState<boolean>(false);
-
+  const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
   const router = useRouter();
 
@@ -98,6 +98,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       if (result) {
         const to: IAceptCarrierAPI = result;
         setCurrentData(to);
+        setEntityType(to.entity);
         setFormMode(getFormMode(to?.statusdesc));
         setCanBeRejected(to?.statusdesc !== "Rechazado");
         const driversResult = await getDriverByCarrierId(to?.id_carrier);
@@ -206,7 +207,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
   const steps = [
     { title: "Detalle solicitud", disabled: false },
-    { title: "Asignación de vehículo y conductor", disabled: false },
+    { title: "Asignación de vehículo y conductor", disabled: entityType === "otherRequirement" },
     { title: "Confirmar servicio", disabled: false }
   ];
   const hasFormValuesChanged = () => {
@@ -239,6 +240,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             setView={setView}
             showRejectButton={canBeRejected}
             handleReject={handleReject}
+            entityType={entityType}
           />
         );
       case "asignation":
@@ -271,6 +273,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             handleSubmit={handleSubmit}
             handleReject={handleReject}
             showRejectButton={canBeRejected}
+            entityType={entityType}
           />
         );
     }
