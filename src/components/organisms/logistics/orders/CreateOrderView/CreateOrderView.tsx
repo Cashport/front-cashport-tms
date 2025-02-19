@@ -1695,7 +1695,7 @@ export const CreateOrderView = () => {
                       setIsFixedRate(event);
                     }}
                   />
-                  <Text>Es renta fija</Text>
+                  <Text>Es renta</Text>
                 </Flex>
               </Col>
             </Row>
