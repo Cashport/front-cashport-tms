@@ -11,9 +11,10 @@ interface ITab {
 interface UiTabProps {
   tabs: ITab[];
   sticky?: boolean;
+  onChange?: (key: string) => void;
 }
 
-const UiTab: FC<UiTabProps> = ({ tabs, sticky = false }: UiTabProps) => {
+const UiTab: FC<UiTabProps> = ({ tabs, sticky = false, onChange }: UiTabProps) => {
   return (
     <div className={`tabsContainer ${sticky && "-sticky"}`}>
       <Tabs
@@ -21,6 +22,7 @@ const UiTab: FC<UiTabProps> = ({ tabs, sticky = false }: UiTabProps) => {
         defaultActiveKey="1"
         items={tabs}
         size="small"
+        onChange={onChange}
       />
     </div>
   );
