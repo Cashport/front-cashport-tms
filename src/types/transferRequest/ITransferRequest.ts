@@ -1,3 +1,5 @@
+import { ILocation } from "../logistics/schema";
+
 export interface ITransferRequest {
   id: number;
   is_materials_problem: boolean;
@@ -47,8 +49,8 @@ export interface ITransferRequestDetail {
   status_id: string;
   start_date: Date;
   end_date: Date;
-  start_location: string;
-  end_location: string;
+  start_location: ILocation;
+  end_location: ILocation;
   total_fare: number;
   total_price: number;
   surcharge: number;
@@ -59,6 +61,8 @@ export interface ITransferRequestDetail {
   steps: IStep[];
   geometry: IGeometryResponse;
   transfer_orders: number[];
+  id_end_location: number;
+  id_start_location: number;
 }
 
 export interface IPagination {
