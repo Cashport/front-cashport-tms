@@ -21,7 +21,8 @@ export const STATUS = {
   TO: {
     SIN_PROCESAR: "9f5ba87c-8736-4367-8077-3b914d2ee711",
     PROCESANDO: "00ce0b06-71b8-4981-861f-b4fa100dbd25",
-    PROCESADO: "56859d8f-2345-4df2-b811-2371905d80a0"
+    PROCESADO: "56859d8f-2345-4df2-b811-2371905d80a0",
+    CANCELADO: '3f9d2e88-12b4-4d7c-9e8f-5c6a8b7d4f01'
   },
   CR: {
     POR_CONFIRMAR: "e2210921-8650-44a2-8c3a-b96d9cd492b4",
@@ -52,7 +53,8 @@ export const STATUS = {
     DETENIDO: "9f37afd7-1852-457d-964b-378fa6150471",
     STAND_BY: "73ad61e3-395f-4ae4-8aef-9d24f3f917a9",
     POR_LEGALIZAR: "ce946d35-381e-4bf3-a54a-4d38fb1b5e92",
-    POR_ACEPTAR: "49e6c46e-5a57-4a38-8b13-955bbffb7279" // Ex legalizado
+    POR_ACEPTAR: "49e6c46e-5a57-4a38-8b13-955bbffb7279", // Ex legalizado
+    CANCELADO: 'e2a1c7f4-5d6b-4c9e-8a32-7e4f1d9cbb12'
   },
   TRIP: {
     SIN_INICIAR: "5d6508db-a151-4b13-b0a7-61459fa953b4",
