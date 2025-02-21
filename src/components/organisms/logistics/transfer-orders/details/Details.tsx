@@ -440,7 +440,6 @@ export const TransferOrderDetails = () => {
 
       {showInvoiceDetailModal?.isOpen && (
         <ModalResumeTracking
-          hiddenActions
           isOpen={showInvoiceDetailModal?.isOpen || false}
           onClose={() => setShowInvoiceDetailModal({ isOpen: false, invoiceId: 0 })}
           invoiceId={showInvoiceDetailModal?.invoiceId || 0}
