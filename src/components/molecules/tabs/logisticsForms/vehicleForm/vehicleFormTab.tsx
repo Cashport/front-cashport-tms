@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Flex, Row, Switch, Typography, message } from "antd";
+import {
+  Button,
+  Col,
+  Dropdown,
+  Flex,
+  MenuProps,
+  Modal,
+  Row,
+  Switch,
+  Typography,
+  message
+} from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, DotsThree, Pencil } from "phosphor-react";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -28,6 +39,8 @@ import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
+import ConfirmModal from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 
 const { Title, Text } = Typography;
 
@@ -49,6 +62,7 @@ export const VehicleFormTab = ({
   isLoading
 }: VehicleFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
 
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -219,7 +233,19 @@ export const VehicleFormTab = ({
       setValue("general.id_vehicle_type", data?.id_vehicle_type);
     }
   }, [data, setValue]);
-
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <Button className="buttonOutlined" onClick={() => setIsModalConfirmAuditOpen(true)}>
+          Auditar vehículo
+        </Button>
+      ),
+      onClick: () => {
+        setIsModalConfirmAuditOpen(true);
+      }
+    }
+  ];
   return (
     <>
       <form className="vehiclesFormTab" onSubmit={handleSubmit(onSubmit)}>
@@ -235,20 +261,21 @@ export const VehicleFormTab = ({
             </Button>
           </Link>
           <Flex gap={"1rem"}>
-            {statusForm === "review" && (
-              <Button
-                className="buttons"
-                htmlType="button"
-                disabled={statusForm === "review"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsOpenModal(true);
-                }}
-              >
-                Cambiar Estado
-                <ArrowsClockwise size={"1.2rem"} />
-              </Button>
-            )}
+            <Dropdown menu={{ items }} placement="bottomLeft" trigger={["click"]}>
+              <Button icon={<DotsThree size={"1.5rem"} />} />
+            </Dropdown>
+            <Button
+              className="buttons"
+              htmlType="button"
+              disabled={statusForm === "review"}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsOpenModal(true);
+              }}
+            >
+              Cambiar Estado
+              <ArrowsClockwise size={"1.2rem"} />
+            </Button>
             {statusForm === "review" ? (
               <Button
                 className="buttons -edit"
@@ -575,6 +602,13 @@ export const VehicleFormTab = ({
         handleChange={handleChange}
         handleChangeExpirationDate={handleChangeExpirationDate}
         setSelectedFiles={setSelectedFiles}
+      />
+      <ConfirmModal
+        open={isModalConfirmAuditOpen}
+        title="Confirmar"
+        bodyText="Confirma que se han revisado todos los documentos del conductor y están completos y en regla según las políticas del cliente."
+        onConfirm={() => setIsModalConfirmAuditOpen(false)}
+        onCancel={() => setIsModalConfirmAuditOpen(false)}
       />
     </>
   );

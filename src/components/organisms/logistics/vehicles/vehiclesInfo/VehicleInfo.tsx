@@ -61,7 +61,9 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-
+  const onEditVehicle = () => {
+    console.log("onEditVehicle");
+  };
   return (
     <Skeleton active loading={isLoading || isValidating || isLoadingDocuments || isLoadingVehicles}>
       <VehicleFormTab
@@ -72,6 +74,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
         onSubmitForm={handleSubmit}
         documentsTypesList={documentsType ?? []}
         vehiclesTypesList={vehiclesTypesData ?? []}
+        onEditVehicle={onEditVehicle}
         isLoading={isLoadingSubmit}
       />
     </Skeleton>

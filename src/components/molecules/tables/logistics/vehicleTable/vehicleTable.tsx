@@ -73,6 +73,11 @@ export const VehicleTable = ({ params: { id } }: Props) => {
       key: "model"
     },
     {
+      title: "Auditado",
+      dataIndex: "audited",
+      key: "audited"
+    },
+    {
       title: "",
       key: "buttonSee",
       width: "54px",
