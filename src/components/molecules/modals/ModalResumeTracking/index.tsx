@@ -1,25 +1,29 @@
 import { FC, useState } from "react";
-import {
-  ArrowLineDown,
-  CaretDoubleRight,
-  DotsThree,
-  Envelope,
-  Minus,
-  Plus,
-  Receipt
-} from "phosphor-react";
+import { ArrowLineDown, CaretDoubleRight, DotsThree, Receipt } from "phosphor-react";
 import styles from "./ModalResumeTracking.module.scss";
-import { useInvoiceDetail } from "@/hooks/useInvoiceDetail";
-
-import { Button, Flex, Tabs, TabsProps, Typography } from "antd";
+import { Button, Flex, Typography } from "antd";
 import { IInvoice } from "@/types/invoices/IInvoices";
-import { formatDatePlane, formatMoney } from "@/utils/utils";
+import { formatMoney } from "@/utils/utils";
 import { useSWRConfig } from "swr";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal/invoice-download-modal";
 import { vehiclesData } from "./mocked-data";
 import UiTab from "@/components/ui/ui-tab";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { VehicleTracking } from "@/types/logistics/tracking/tracking";
+import { STATUS } from "@/utils/constants/globalConstants";
+
+export const TrackingStepState = [
+  {
+    name: "Abierta",
+    bgColor: "#CBE71E",
+    textColor: "#141414"
+  },
+  {
+    name: "Cerrada",
+    bgColor: "#495057",
+    textColor: "#FFFFFF"
+  }
+];
 
 const { Text, Link } = Typography;
 interface InvoiceDetailModalProps {
@@ -27,24 +31,10 @@ interface InvoiceDetailModalProps {
   onClose: () => void;
   invoiceId: number;
   clientId: number;
-  hiddenActions?: boolean;
   // eslint-disable-next-line no-unused-vars
   handleActionInDetail?: (invoice: IInvoice) => void;
   selectInvoice?: IInvoice;
   projectId?: number;
-}
-interface TimelineEvent {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  responsible?: string;
-  driver?: string;
-  estimatedValue?: number;
-  distanceKm?: number;
-  rate?: number;
-  hours?: number;
-  status?: "Abierta" | "Cerrada";
 }
 
 const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
@@ -52,49 +42,17 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
   onClose,
   invoiceId,
   clientId,
-  hiddenActions,
   projectId,
   selectInvoice,
   handleActionInDetail
 }) => {
   const { mutate } = useSWRConfig();
-  const { data: invoiceData } = useInvoiceDetail({ invoiceId, clientId, projectId });
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [quantity, setQuantity] = useState(0);
 
-  const statusClass = (status: string): string => {
-    switch (status) {
-      case "Identificado" || "coinciliada":
-        return styles.identifiedReconciled;
-      case "En auditoría":
-        return styles.inAudit;
-      case "No identificado":
-        return styles.unidentified;
-      case "aplicacion":
-        return styles.applied;
-      case "Ap. parcialmente":
-        return styles.partially;
-      case "sin conciliar":
-        return styles.noReconcile;
-      case "novedades":
-        return styles.novelty;
-      case "saldo":
-        return styles.balances;
-      case "glosado":
-        return styles.glossed;
-      case "devolucion":
-        return styles.return;
-      case "vencida":
-        return styles.annulment;
-      default:
-        return "";
-    }
-  };
   const getState = (stateId: string) => {
     let getState = TransferOrdersState.find((f) => f.id === stateId);
     if (!getState) {
-      getState = TransferOrdersState.find((f) => f.id === "d33e062f-51a5-457e-946e-a45cbbffbf95");
+      getState = TransferOrdersState.find((f) => f.id === STATUS.TR.SIN_INICIAR);
     }
 
     return (
@@ -105,28 +63,24 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
       </div>
     );
   };
-  // const items = [
-  //   {
-  //     key: "1",
-  //     label: "HGB 657",
-  //     children: <></>
-  //   },
-  //   {
-  //     key: "2",
-  //     label: "JKM 679",
-  //     children: <></>
-  //   },
-  //   {
-  //     key: "3",
-  //     label: "UJT 123",
-  //     children: <></>
-  //   }
-  // ];
+  const getStepState = (stateName: string) => {
+    const getState = TrackingStepState.find((f) => f.name === stateName);
+    return (
+      <div className={styles.trackStateContainer}>
+        <Text
+          className={styles.stepState}
+          style={{ backgroundColor: getState?.bgColor, color: getState?.textColor }}
+        >
+          {getState?.name}
+        </Text>
+      </div>
+    );
+  };
   const generateTabsFromVehicles = (vehicles: VehicleTracking[]) => {
     return vehicles.map((vehicle, index) => ({
       key: (index + 1).toString(),
       label: vehicle.plate,
-      children: <></> // Aquí puedes renderizar el contenido de cada tab
+      children: <></>
     }));
   };
 
@@ -136,7 +90,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
   const onChange = (key: string) => {
     setActiveKey(key);
   };
-  console.log(invoiceData, "invoiceData", selectInvoice);
+
   const currentVehicle = vehiclesData[Number(activeKey) - 1];
   const timeLineData = currentVehicle?.trackingEvents;
   return (
@@ -166,7 +120,10 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
           </Button>
         </div>
         <UiTab tabs={items} sticky onChange={onChange} />
-        <Flex justify="space-between" style={{ padding: "8px 16px 24px 8px" }}>
+        <Flex
+          justify="space-between"
+          style={{ padding: "8px 16px 24px 8px", alignItems: "flex-start" }}
+        >
           <div>
             <Text>Proveedor </Text>
             <Text strong style={{ fontWeight: "bold" }}>
@@ -174,16 +131,25 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
             </Text>
             <br />
             <Text>Vehículo </Text>
-            <Link strong href="#" target="_blank">
+            <Link
+              href="#"
+              target="_blank"
+              className={styles.link}
+              style={{ textDecoration: "underline" }}
+            >
               {currentVehicle?.vehicle}
             </Link>
             <br />
             <Text>Conductor </Text>
-            <Link strong href="tel:3144705302">
+            <Link
+              href="tel:3144705302"
+              className={styles.link}
+              style={{ textDecoration: "underline" }}
+            >
               {currentVehicle?.driver?.name} - {currentVehicle?.driver?.phone}
             </Link>
           </div>
-          {getState("b9e5ce08-16a7-4880-88a5-ebca7737c55d")}
+          {getState(currentVehicle?.status)}
         </Flex>
         <hr />
         <div className={styles.body}>
@@ -199,7 +165,10 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
                         <div className={`${styles.stepCircle} ${styles.active}`} />
                         <div className={styles.stepLabel}>
                           <div className={styles.cardInvoiceFiling}>
-                            <h5 className={styles.title}>{item.title}</h5>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <h5 className={styles.title}>{item.title}</h5>
+                              {item.status && getStepState(item.status)}
+                            </div>
                             <div className={styles.date}>
                               {item.date} - {item.time}
                             </div>

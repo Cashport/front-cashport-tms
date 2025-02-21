@@ -17,5 +17,6 @@ export interface VehicleTracking {
   vehicle: string;
   driver: { name: string; phone: string };
   plate: string;
+  status: string;
   trackingEvents: TimelineEvent[];
 }
