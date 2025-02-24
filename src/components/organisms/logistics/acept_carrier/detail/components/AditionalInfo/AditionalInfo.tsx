@@ -5,6 +5,7 @@ import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDo
 import styles from "./aditionalInfo.module.scss";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { formatNumber } from "@/utils/utils";
+import ChipsRow from "@/components/organisms/logistics/orders/DetailsOrderView/components/ChipsRow";
 
 interface Documents {
   id: number;
@@ -167,18 +168,17 @@ export default function AditionalInfo({
                 <p className={styles.subtitle} style={{ paddingTop: "0.5rem" }}>
                   Requerimientos adicionales
                 </p>
-                <Row style={{ paddingTop: "0.5rem" }}>
-                  <Col span={24}>
-                    {otherRequirements?.map((req: any, reqIndex: number) => (
-                      <div
-                        className={styles.selected}
-                        key={`other-req-${req.other_requirement_desc}-${reqIndex}`}
-                      >
-                        {req.other_requirement_desc} <small>{req.quantity}</small>
-                      </div>
-                    ))}
-                  </Col>
-                </Row>
+                {otherRequirements && otherRequirements?.length > 0 && (
+                  <ChipsRow
+                    chips={otherRequirements?.map(
+                      ((req) => ({
+                        name: req.other_requirement_desc,
+                        quantity: req.quantity,
+                        id: req.id
+                      })) || []
+                    )}
+                  />
+                )}
               </Col>
               <Col span={12}>
                 <p className={styles.subtitle} style={{ marginBottom: "0.25rem" }}>
