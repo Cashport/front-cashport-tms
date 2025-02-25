@@ -1,6 +1,5 @@
-import UiTabs from "@/components/ui/ui-tabs";
 import { Flex, message, Skeleton } from "antd";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./FinalizeTrip.module.scss";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { MessageInstance } from "antd/es/message/interface";
@@ -11,6 +10,7 @@ import { VehicleFields } from "./components/VehicleFields";
 import { getCarriersTripsDetails, sendFinalizeTripAllCarriers } from "@/services/trips/trips";
 import { STATUS } from "@/utils/constants/globalConstants";
 import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
+import UiTab from "@/components/ui/ui-tab";
 
 interface FinalizeTrip {
   idTR: string;
@@ -56,6 +56,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
     name: "carriers"
   });
   const tabsNames = carriersFields.map((c) => `${c.carrier}`);
+
   const formValues = useWatch({ control });
 
   // //Create default with api data
@@ -89,20 +90,20 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
         documents:
           r.MT?.length > 0
             ? r.MT?.map((MTlink) => {
-              return {
-                link: MTlink ?? undefined,
-                file: undefined,
-                docReference: carrierIndex
-              };
-            })
-          : [
-              {
-                link: undefined,
-                file: undefined,
-                docReference: carrierIndex
-              }
-            ]
-    })),
+                return {
+                  link: MTlink ?? undefined,
+                  file: undefined,
+                  docReference: carrierIndex
+                };
+              })
+            : [
+                {
+                  link: undefined,
+                  file: undefined,
+                  docReference: carrierIndex
+                }
+              ]
+      })),
       adittionalComment: c.Observation !== "" ? c.Observation : undefined
     }));
     return {
@@ -202,23 +203,32 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
 
   const currentCarrier = watch(`carriers.${selectedTab}`);
 
-  function validateVehiclesWithDocuments(form: any): boolean {
-    for (const carrier of form.carriers) {
-      for (const vehicle of carrier.vehicles) {
-        const hasValidDocument = vehicle.documents.some(
-          (document: any) => document.file || document.link
-        );
-        if (!hasValidDocument) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
+  const hasValidDocuments = (formValues: any): boolean => {
+    return (
+      formValues?.carriers?.every((carrier: any) => {
+        // Validar vehículos
+        const allVehiclesValid =
+          carrier?.vehicles?.every((vehicle: any) =>
+            vehicle?.documents?.some((document: any) => document.file || document.link)
+          ) ?? true;
 
-  const allVehiclesHaveDocs = validateVehiclesWithDocuments(formValues);
+        // Validar requerimientos
+        const allRequirementsValid =
+          carrier?.requirements?.every((requirement: any) =>
+            requirement?.documents?.some((document: any) => document.file || document.link)
+          ) ?? true;
 
-  const isConfirmDisabled = !allVehiclesHaveDocs || !isEditable;
+        return allVehiclesValid && allRequirementsValid;
+      }) ?? false
+    );
+  };
+
+  const allVehiclesAndRequirementsHaveDocs = useMemo(
+    () => hasValidDocuments(formValues),
+    [formValues]
+  );
+
+  const isConfirmDisabled = !allVehiclesAndRequirementsHaveDocs || !isEditable;
 
   if (isLoading) {
     return <Skeleton active loading={isLoading} />;
@@ -234,11 +244,14 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
             </p>
           </Flex>
         </Flex>
-        <UiTabs
-          tabs={tabsNames}
-          onTabClick={(index) => setSelectedTab(index)}
-          initialTabIndex={selectedTab}
-          className={styles.scrollableTabsUI}
+        <UiTab
+          tabs={tabsNames.map((tab, index) => ({
+            key: index.toString(),
+            label: tab
+          }))}
+          activeKey={selectedTab.toString()}
+          onChange={(key) => setSelectedTab(Number(key))}
+          defaultActiveKey="0"
         />
         <Flex vertical>
           <div key={currentCarrier?.idCarrier}>
