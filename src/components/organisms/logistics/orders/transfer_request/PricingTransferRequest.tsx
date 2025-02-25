@@ -1,18 +1,4 @@
-import {
-  Flex,
-  Typography,
-  message,
-  Row,
-  Col,
-  Select,
-  Table,
-  TableProps,
-  Button,
-  Drawer,
-  Card,
-  Spin,
-  Modal
-} from "antd";
+import { Flex, Typography, message, Select, Table, TableProps, Button, Drawer } from "antd";
 import React, { useRef, useEffect, useState } from "react";
 
 // dayjs locale
@@ -33,14 +19,12 @@ import {
   ITransferOrdersRequest,
   IVehicleType,
   ITransferRequestJourneyReview,
-  ITrackingPartial,
   ITrackingResponse
 } from "@/types/logistics/schema";
 
 import {
   Pencil,
   Trash,
-  DotsSixVertical,
   CaretDoubleRight,
   Warning,
   Truck,
@@ -79,7 +63,7 @@ import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
 import { CalendarX } from "phosphor-react";
-import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
+import ChipsRow from "../DetailsOrderView/components/ChipsRow";
 
 const { Title, Text } = Typography;
 
@@ -909,33 +893,33 @@ export default function PricingTransferRequest({
                         <label className="vehiclesSubtitleSugestion">
                           <p>Vehículos sugeridos</p>
                         </label>
-                        {transferRequest.general?.transferRequestVehiclesSugest?.map((veh) => (
-                          <VehicleSuggestedTag
-                            units={veh.units}
-                            vehicle_type_desc={veh.vehicle_type_desc}
-                            key={veh.id}
+                        {transferRequest.general?.transferRequestVehiclesSugest && (
+                          <ChipsRow
+                            chips={transferRequest.general?.transferRequestVehiclesSugest?.map(
+                              ((veh) => ({
+                                name: veh.vehicle_type_desc,
+                                quantity: veh.units,
+                                id: veh.id
+                              })) || []
+                            )}
                           />
-                        ))}
+                        )}
                       </Flex>
                       <Flex className="vehiclesSubtitle" gap={10}>
                         <label className="vehiclesSubtitleSugestion">
                           <p>Requerimientos adicionales</p>
                         </label>
-                        {otherRequirements?.map((req) => (
-                          <div
-                            className="vehiclesSubtitleInformation"
-                            key={req.id_other_requeriments}
-                          >
-                            <p className="vehiclesSubtitleInformationVehicle">
-                              {req.other_requirement_desc}
-                            </p>
-                            <label className="vehiclesSubtitleInformationQuantity">
-                              <p className="vehiclesSubtitleInformationQuantityNumber">
-                                {req.quantity.toString().padStart(2, "0")}
-                              </p>
-                            </label>
-                          </div>
-                        ))}
+                        {otherRequirements && (
+                          <ChipsRow
+                            chips={otherRequirements?.map(
+                              ((req) => ({
+                                name: req.other_requirement_desc,
+                                quantity: req.quantity,
+                                id: req.id_other_requeriments
+                              })) || []
+                            )}
+                          />
+                        )}
                       </Flex>
                     </Flex>
                   )}
