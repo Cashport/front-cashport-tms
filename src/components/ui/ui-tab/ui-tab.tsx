@@ -18,6 +18,7 @@ const UiTab: FC<UiTabProps> = ({
   defaultActiveKey,
   activeKey
 }: UiTabProps) => {
+
   return (
     <div className={`tabsContainer ${sticky && "-sticky"}`}>
       <Tabs

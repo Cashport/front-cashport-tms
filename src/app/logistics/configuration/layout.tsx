@@ -1,11 +1,11 @@
 "use client";
-import { Tabs } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import Container from "@/components/atoms/Container/Container";
 import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
 import { checkUserComponentPermissions } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
+import UiTab from "@/components/ui/ui-tab";
 
 interface Props {
   children?: React.ReactNode;
@@ -96,10 +96,10 @@ const ConfigurationLayout = ({ children, params }: Props) => {
   return (
     <ViewWrapper headerTitle="Configuración">
       <Container>
-        <Tabs
+        <UiTab
           defaultActiveKey={getDefaultValue()}
           activeKey={getDefaultValue()}
-          items={items.filter((x: any) => !x.hidden)}
+          tabs={items.filter((x: any) => !x.hidden)}
           onChange={onChange}
         />
         {children}

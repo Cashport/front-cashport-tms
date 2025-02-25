@@ -1,10 +1,11 @@
 "use client";
-import { Tabs, TabsProps } from "antd";
+import { TabsProps } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import "./provider.scss";
 import "@/styles/_variables_logistics.css";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import Container from "@/components/atoms/Container/Container";
+import UiTab from "@/components/ui/ui-tab";
 
 interface Props {
   children?: React.ReactNode;
@@ -51,7 +52,7 @@ const ProviderInfoView = ({ children, params }: Props) => {
   return (
     <ViewWrapper headerTitle="Proveedores">
       <Container>
-        <Tabs defaultActiveKey={getDefaultValue()} items={items} onChange={onChange} />
+        <UiTab defaultActiveKey={getDefaultValue()} tabs={items} onChange={onChange} />
         {children}
       </Container>
     </ViewWrapper>

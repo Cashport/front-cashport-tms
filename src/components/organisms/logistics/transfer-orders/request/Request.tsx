@@ -130,6 +130,9 @@ export const Request: FC<IRequestProps> = ({
       if (item.statusId === STATUS.TO.PROCESADO) {
         trShouldRedirect = true;
       }
+      if (item.statusId === STATUS.TR.CANCELADO) {
+        trShouldRedirect = false;
+      }
       return {
         key: index,
         label: getTitile(item.statusId, item.transferType, item.page.totalRows),
