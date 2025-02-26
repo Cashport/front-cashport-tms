@@ -85,10 +85,7 @@ export const TransferOrderDetails = () => {
     overcostId: undefined
   });
   const [formEvidences, setFormEvidences] = useState<File[]>([]);
-  const [showInvoiceDetailModal, setShowInvoiceDetailModal] = useState<{
-    isOpen: boolean;
-    invoiceId: number;
-  }>({ isOpen: false, invoiceId: 0 });
+  const [isModalTrackingVisible, setIsModalTrackingVisible] = useState(false);
   const { id } = useParams();
   const router = useRouter();
 
@@ -336,9 +333,7 @@ export const TransferOrderDetails = () => {
               className={styles.tranckingBtn}
               type="text"
               size="large"
-              onClick={() =>
-                setShowInvoiceDetailModal({ isOpen: true, invoiceId: transferRequest?.id || 0 })
-              }
+              onClick={() => setIsModalTrackingVisible(true)}
             >
               <Text className={styles.text}>Tracking</Text>
               <CaretDoubleRight size={24} />
@@ -372,7 +367,6 @@ export const TransferOrderDetails = () => {
         </div>
         <div>{renderView()}</div>
       </div>
-
       <Drawer
         placement="right"
         open={openDrawer}
@@ -437,15 +431,11 @@ export const TransferOrderDetails = () => {
         messageApi={messageApi}
         uploadInvoiceTitle={billingList?.find((b) => b.id == billingId)?.carrier}
       />
-
-      {showInvoiceDetailModal?.isOpen && (
-        <ModalResumeTracking
-          isOpen={showInvoiceDetailModal?.isOpen || false}
-          onClose={() => setShowInvoiceDetailModal({ isOpen: false, invoiceId: 0 })}
-          invoiceId={showInvoiceDetailModal?.invoiceId || 0}
-          clientId={1}
-        />
-      )}
+      <ModalResumeTracking
+        isOpen={isModalTrackingVisible}
+        onClose={() => setIsModalTrackingVisible(false)}
+        idTR={transferRequest?.id || 0}
+      />
     </Flex>
   );
 };
