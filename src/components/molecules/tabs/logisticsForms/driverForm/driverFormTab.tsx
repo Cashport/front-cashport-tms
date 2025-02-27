@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useForm } from "react-hook-form";
 // components
-import { Button, Col, Flex, Form, Row, Typography } from "antd";
+import {
+  Button,
+  Col,
+  Dropdown,
+  Flex,
+  Form,
+  MenuProps,
+  Modal,
+  Row,
+  Space,
+  Tag,
+  Typography
+} from "antd";
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -24,7 +36,7 @@ import { DocumentCompleteType } from "@/types/logistics/certificate/certificate"
 //styles
 import "./driverformtab.scss";
 //icons
-import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
+import { ArrowClockwise, ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
 //utils
 import {
   _onSubmit,
@@ -40,6 +52,13 @@ import {
   licencesOptions
 } from "../formSelectOptions";
 import runes from "runes2";
+import CustomTag from "@/components/atoms/CustomTag";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import React from "react";
+import ChipsRow from "@/components/organisms/logistics/orders/DetailsOrderView/components/ChipsRow";
+import FooterButtons from "@/components/molecules/modals/ModalBillingAction/FooterButtons/FooterButtons";
+import ModalConfirmAudit from "./components/ModalConfirmAudit";
 
 const { Title, Text } = Typography;
 
@@ -54,16 +73,23 @@ export const DriverFormTab = ({
   handleFormState = () => {},
   documentsTypesList,
   vehiclesTypesList,
-  isLoadingSubmit
+  isLoadingSubmit,
+  onAuditDriver = async () => {}
 }: DriverFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
+  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
+
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [resetTrigger, setResetTrigger] = useState<boolean>(false);
   const [imageError, setImageError] = useState(false);
 
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
-
+  const typeOfTrip = [
+    { label: "Personas", value: 1 },
+    { label: "Sustancias peligrosas", value: 2 },
+    { label: "Explosivos", value: 3 }
+  ];
   const defaultValues =
     statusForm === "create" ? {} : dataToProjectFormData(data, vehiclesTypesList || []);
   const {
@@ -84,6 +110,10 @@ export const DriverFormTab = ({
   };
   const isSubmitButtonEnabled = isFormCompleted();
   const phoneValue = watch("general.phone");
+  const driverStatus = watch("general.status");
+  const trip_type = watch("general.trip_type");
+
+  console.log("form general", getValues("general"));
   const emergencyContactNumberValue = watch("general.emergency_number");
 
   /*archivos*/
@@ -205,6 +235,55 @@ export const DriverFormTab = ({
       onSubmitForm
     );
   };
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <ButtonGenerateAction
+          icon={<Pencil size={"1.5rem"} />}
+          title={statusForm === "review" ? "Editar" : "Cancelar edición"}
+          hideArrow
+          onClick={() => {
+            if (statusForm === "review") {
+              handleFormState("edit");
+            } else {
+              handleFormState("review");
+              setResetTrigger(true);
+              setImageFile(undefined);
+              reset();
+            }
+          }}
+        />
+      )
+    },
+    {
+      key: "2",
+      label: (
+        <ButtonGenerateAction
+          icon={<ArrowsClockwise size={"1.5rem"} />}
+          title="Cambiar estado"
+          onClick={() => setIsOpenModal(true)}
+          hideArrow
+        />
+      )
+    },
+    {
+      key: "3",
+      label: (
+        <ButtonGenerateAction
+          icon={<CheckCircle size={"1.5rem"} />}
+          title="Auditar"
+          disabled={statusForm !== "review"}
+          hideArrow
+          onClick={() => setIsModalConfirmAuditOpen(true)}
+        />
+      )
+    }
+  ];
+  const menuStyle: React.CSSProperties = {
+    backgroundColor: "white",
+    boxShadow: "none"
+  };
 
   return (
     <>
@@ -220,54 +299,32 @@ export const DriverFormTab = ({
               Ver Conductores
             </Button>
           </Link>
-          <Flex gap={"1rem"}>
-            {(statusForm === "review" || statusForm === "edit") && (
-              <Button
-                className="buttons"
-                htmlType="button"
+
+          <Flex gap={"0.5rem"} align="center">
+            <Flex>
+              <CustomTag text={driverStatus.description} color={driverStatus.color} />
+            </Flex>
+            <Dropdown
+              menu={{ items }}
+              trigger={["click"]}
+              dropdownRender={(menu) => (
+                <div>
+                  {React.cloneElement(
+                    menu as React.ReactElement<{
+                      style: React.CSSProperties;
+                    }>,
+                    { style: menuStyle }
+                  )}
+                </div>
+              )}
+            >
+              <GenerateActionButton
+                onClick={() => {
+                  console.log("click");
+                }}
                 disabled={statusForm === "review"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsOpenModal(true);
-                }}
-              >
-                Cambiar Estado
-                <ArrowsClockwise size={"1.2rem"} />
-              </Button>
-            )}
-            {statusForm === "review" ? (
-              <Button
-                className="buttons -edit"
-                htmlType="button"
-                onClick={(e) => {
-                  handleFormState("edit");
-                  e.preventDefault();
-                  setResetTrigger(false);
-                }}
-              >
-                {validationButtonText(statusForm)}
-                <Pencil size={"1.2rem"} />
-              </Button>
-            ) : (
-              ""
-            )}
-            {statusForm === "edit" ? (
-              <Button
-                className="buttons -edit"
-                htmlType="button"
-                onClick={(e) => {
-                  handleFormState("review");
-                  e.preventDefault();
-                  setResetTrigger(true);
-                  setImageFile(undefined);
-                  reset();
-                }}
-              >
-                {"Cancelar edición"}
-              </Button>
-            ) : (
-              ""
-            )}
+              />
+            </Dropdown>
           </Flex>
         </Flex>
         <Flex component={"main"} flex="1" vertical style={{ paddingRight: "1rem" }}>
@@ -506,6 +563,27 @@ export const DriverFormTab = ({
               )}
             />
           </Row>
+          {/* ----------------------------------Tipos de viaje--------------------------------- */}
+          <Row style={{ width: "100%", marginTop: "2rem" }}>
+            <Title className="title" level={4}>
+              Tipos de viaje
+            </Title>
+            <Controller
+              name="general.trip_type"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <MultiSelectTags
+                  field={field}
+                  placeholder="Seleccione"
+                  title="Tipos de viaje que esta autorizado"
+                  errors={errors?.general?.trip_type}
+                  options={typeOfTrip}
+                  disabled={statusForm === "review"}
+                />
+              )}
+            />
+          </Row>
           {/* -----------------------------------Contact----------------------------------- */}
           <Row style={{ width: "100%", marginTop: "2rem" }}>
             <Col span={24}>
@@ -623,6 +701,62 @@ export const DriverFormTab = ({
           setIsOpenModal(false);
           handleFormState("review");
         }}
+      />
+      {/* <Modal
+        width={686}
+        open={isModalConfirmAuditOpen}
+        onClose={() => setIsModalConfirmAuditOpen(false)}
+        title={<Text style={{ fontWeight: 600, fontSize: 20 }}>Auditar conductor</Text>}
+        centered
+        footer={
+          <FooterButtons
+            titleConfirm="Confirmar auditoría"
+            onClose={() => setIsModalConfirmAuditOpen(false)}
+            handleOk={() => {
+              setIsModalConfirmAuditOpen(false);
+              onAuditDriver();
+            }}
+          />
+        }
+      >
+        <Flex vertical gap="1.5rem" align="center" style={{ marginBottom: "2rem" }}>
+          <Flex vertical gap={8} align="center">
+            <Text style={{ fontWeight: 300, fontSize: 16 }}>
+              ¿Confirma que el vehiculo cumple con los requerimientos legales y de HSEQ?
+            </Text>
+            <Text style={{ fontWeight: 300, fontSize: 16 }}>
+              Confirmo que está autorizado para manejar
+            </Text>
+          </Flex>
+          <Flex gap={4}>
+            {trip_type?.map((req, index) => (
+              <Tag
+                key={index}
+                color="#3D3D3D"
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  marginRight: 0,
+                  fontSize: "14px",
+                  fontWeight: "400"
+                }}
+              >
+                {req.label}
+              </Tag>
+            ))}
+          </Flex>
+        </Flex>
+      </Modal> */}
+      <ModalConfirmAudit
+        isOpen={isModalConfirmAuditOpen}
+        onClose={() => setIsModalConfirmAuditOpen(false)}
+        onConfirm={onAuditDriver}
+        title="Auditar conductor"
+        description={[
+          "¿Confirma que el vehículo cumple con los requerimientos legales y de HSEQ?",
+          "Confirmo que está autorizado para manejar"
+        ]}
+        tags={trip_type}
       />
       <ModalDocuments
         isOpen={isOpenModalDocuments}

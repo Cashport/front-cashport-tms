@@ -6,18 +6,20 @@ type ButtonGenerateActionProps = {
   title: string;
   onClick?: () => void;
   disabled?: boolean;
+  hideArrow?: boolean;
 };
 export const ButtonGenerateAction: React.FC<ButtonGenerateActionProps> = ({
   icon,
   title,
   onClick,
-  disabled = false
+  disabled = false,
+  hideArrow = false
 }) => {
   return (
     <button className={styles.actionButton} onClick={onClick} disabled={disabled}>
       {icon}
       <p className={styles.actionButton__text}>{title}</p>
-      <CaretRight className={styles.actionButton__caretRight} size={"1.1rem"} />
+      {!hideArrow && <CaretRight className={styles.actionButton__caretRight} size={"1.1rem"} />}
     </button>
   );
 };

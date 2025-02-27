@@ -9,6 +9,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { IVehicle } from "@/types/logistics/schema";
 import { getAllVehicles } from "@/services/logistics/vehicle";
 import useSWR from "swr";
+import CustomTag from "@/components/atoms/CustomTag";
 
 type Props = {
   params: {
@@ -71,6 +72,19 @@ export const VehicleTable = ({ params: { id } }: Props) => {
       title: "Modelo",
       dataIndex: "model",
       key: "model"
+    },
+    {
+      title: "Status",
+      key: "status",
+      dataIndex: "status",
+      width: "200px",
+      render: (_, { status }) => {
+        return (
+          <Flex>
+            <CustomTag text={status.description} color={status.color} />
+          </Flex>
+        );
+      }
     },
     {
       title: "",

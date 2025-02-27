@@ -108,3 +108,14 @@ export const updateVehicle = async (
     throw error as any;
   }
 };
+
+export const updateVehicleStatus = async (
+  id: string,
+  status: number
+): Promise<AxiosResponse<any, any>> => {
+  const response: GenericResponse = await API.put(`/vehicle/update-status/${id}`, {
+    status
+  });
+  if (response.success) return response.data;
+  throw new Error(response.message || "Error al actualizar el estado del vehiculo");
+};

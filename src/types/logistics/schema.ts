@@ -946,6 +946,10 @@ export interface IDriverByCarrierRequestWithDefaults {
  * Exposes all fields present in drivers as a typescript
  * interface.
  */
+export interface IStatus {
+  description: string;
+  color: string;
+}
 export interface IDrivers {
   id: number;
   name: string;
@@ -963,6 +967,7 @@ export interface IDrivers {
   licence_expiration: Date;
   emergency_number: number;
   emergency_contact: string;
+  status: IStatus;
 }
 
 /**
@@ -1219,7 +1224,6 @@ export interface IFormGeneralDriver {
   emergency_contact: string;
   firebaseguid?: string;
   active: any;
-  status?: any;
   created_at: Date;
   created_by: string;
   modified_at?: Date | null;
@@ -1230,6 +1234,8 @@ export interface IFormGeneralDriver {
   birth_date: Date;
   photo?: string;
   company_id?: string;
+  status: IStatus;
+  trip_type: { label: string; value: number }[];
 }
 /**
  * Exposes all fields present in vehicle as a typescript
@@ -1252,7 +1258,6 @@ export interface IVehicle {
   gps_user: string;
   gps_password: string;
   active: any;
-  status?: any;
   created_at: Date;
   created_by: string;
   modified_at: Date;
@@ -1261,6 +1266,8 @@ export interface IVehicle {
   images: CustomFile[];
   IS_ACTIVE: boolean;
   has_gps: boolean;
+  status: IStatus;
+  trip_type: { label: string; value: number }[];
 }
 /**
  * Exposes all fields present in carrier as a typescript
@@ -3255,6 +3262,7 @@ export interface VehicleType {
   image: string;
   available: number;
   price: number;
+  trip_type: number;
 }
 
 export interface ActiveVehicleType {

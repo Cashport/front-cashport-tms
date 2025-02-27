@@ -59,10 +59,15 @@ export const DriverInfoView = ({ params }: Props) => {
       setIsLoadingSubmit(false);
     }
   };
-  const handlechangeStatus = async (status: boolean) => {
+  const handlechangeStatus = async (status: 0 | 1 | 2) => {
+    const statusText = {
+      0: "Conductor desactivado",
+      1: "Conductor activado",
+      2: "Conductor auditado"
+    };
     try {
       await updateDriverStatus(params.driverId, status);
-      message.success(`Conductor ${status ? "activado" : "desactivado"}`, 2).then(() => {
+      message.success(`${statusText[status]} `, 2).then(() => {
         push(`/logistics/providers/${params.id}/driver`);
         setStatusForm("review");
       });
@@ -73,6 +78,7 @@ export const DriverInfoView = ({ params }: Props) => {
       );
     }
   };
+
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
     "2",
     getDocumentsByEntityType,
@@ -91,8 +97,9 @@ export const DriverInfoView = ({ params }: Props) => {
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}
-        onActiveProject={() => handlechangeStatus(true)}
-        onDesactivateProject={() => handlechangeStatus(false)}
+        onActiveProject={() => handlechangeStatus(1)}
+        onDesactivateProject={() => handlechangeStatus(0)}
+        onAuditDriver={() => handlechangeStatus(2)}
         documentsTypesList={documentsType ?? []}
         vehiclesTypesList={vehiclesTypesData ?? []}
         isLoadingSubmit={isLoadingSubmit}
