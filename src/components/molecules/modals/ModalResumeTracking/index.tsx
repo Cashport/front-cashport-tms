@@ -1,8 +1,14 @@
 import { FC, useMemo, useState } from "react";
 import useSWR from "swr";
-import { CaretDoubleRight, DotsThree, Receipt, ArrowLineDown } from "phosphor-react";
+import {
+  CaretDoubleRight,
+  Receipt,
+  ArrowLineDown,
+  ArrowsClockwise,
+  CaretDown
+} from "phosphor-react";
 import styles from "./ModalResumeTracking.module.scss";
-import { Button, Skeleton, Typography } from "antd";
+import { Dropdown, MenuProps, Skeleton, Typography } from "antd";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal/invoice-download-modal";
 import UiTab from "@/components/ui/ui-tab";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
@@ -12,7 +18,12 @@ import dayjs from "dayjs";
 import "dayjs/locale/es"; // Importar el idioma español
 import { formatMoney } from "@/utils/utils";
 import { ApiResponse, VehicleTracking } from "@/types/logistics/tracking/tracking";
-const { Text, Link } = Typography;
+import React from "react";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
+import ModalHeader from "./components/ModalHeader";
+const { Text } = Typography;
 interface InvoiceDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,7 +45,7 @@ export const TrackingStepState = [
 const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idTR }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeKey, setActiveKey] = useState<string>("1");
-
+  const [isModalChangeStatus, setisModalChangeStatus] = useState(false);
   const onChange = (key: string) => setActiveKey(key);
 
   const { data, error, isLoading } = useSWR<ApiResponse<VehicleTracking[]>>(
@@ -91,9 +102,52 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   //     </div>
   //   );
   // };
+  const [comments, setComments] = useState<string>("");
+  const getStateDropdown = (stateId: string) => {
+    let getState = TransferOrdersState.find((f) => f.id === stateId);
+    if (!getState) {
+      getState = TransferOrdersState.find((f) => f.id === "d33e062f-51a5-457e-946e-a45cbbffbf95");
+    }
+
+    return (
+      <div className={styles.trackStateContainer}>
+        <Text className={styles.trackState} style={{ backgroundColor: getState?.bgColor }}>
+          {getState?.name}
+        </Text>
+        <CaretDown size={16} />
+      </div>
+    );
+  };
+  const itemsGenerateAction: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <ButtonGenerateAction
+          icon={<ArrowsClockwise size={"1.5rem"} />}
+          title="Seguimiento"
+          onClick={() => setisModalChangeStatus(true)}
+          hideArrow
+        />
+      )
+    }
+  ];
+  const menuStyle: React.CSSProperties = {
+    backgroundColor: "white",
+    boxShadow: "none"
+  };
 
   return (
     <aside className={`${styles.wrapper} ${isOpen ? styles.show : styles.hide}`}>
+      <ModalVehicleFollowUp
+        isOpen={isModalChangeStatus}
+        onClose={() => setisModalChangeStatus(false)}
+        onChangeStatus={(newStatus) => console.log("Nuevo estado:", newStatus)}
+        currentVehicle={currentVehicle}
+        comments={comments}
+        setComments={setComments}
+        dropdownItems={items}
+        getStateDropdown={getStateDropdown}
+      />
       <InvoiceDownloadModal isModalOpen={isModalOpen} handleCloseModal={setIsModalOpen} />
       <div>
         <div className={styles.header}>
@@ -105,49 +159,37 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
             <Receipt size={20} />
             Ver MT
           </div>
-
-          <Button
-            className={styles.button__actions}
-            size="large"
-            icon={<DotsThree size={"1.5rem"} />}
-            onClick={() => {}}
+          <Dropdown
+            menu={{ items: itemsGenerateAction }}
+            trigger={["click"]}
+            dropdownRender={(menu) => (
+              <div>
+                {React.cloneElement(
+                  menu as React.ReactElement<{
+                    style: React.CSSProperties;
+                  }>,
+                  { style: menuStyle }
+                )}
+              </div>
+            )}
           >
-            Generar acción
-          </Button>
+            <GenerateActionButton
+              onClick={() => {
+                console.log("click");
+              }}
+            />
+          </Dropdown>
         </div>
         <Skeleton loading={isLoading} active>
           {currentVehicle && (
             <>
               <UiTab tabs={items} sticky onChange={onChange} />
-              <div className={styles.currentTrip}>
-                <div>
-                  <Text>Proveedor </Text>
-                  <Text strong style={{ fontWeight: "bold" }}>
-                    {currentVehicle?.provider ?? ""}
-                  </Text>
-                  <br />
-                  <Text>Vehículo </Text>
-                  <Link
-                    href={`/logistics/providers/${currentVehicle?.id_provider}/vehicle/${currentVehicle?.id_vehicle}`}
-                    target="_blank"
-                    className={styles.link}
-                    style={{ textDecoration: "underline" }}
-                  >
-                    {currentVehicle?.vehicle_type ?? ""}
-                  </Link>
-                  <br />
-                  <Text>Conductor </Text>
-                  <Link
-                    href={`/logistics/providers/${currentVehicle?.id_provider}/driver/${currentVehicle?.driver_id}`}
-                    target="_blank"
-                    className={styles.link}
-                    style={{ textDecoration: "underline" }}
-                  >
-                    {currentVehicle?.driver_name ?? ""} - {currentVehicle?.driver_phone ?? ""}
-                  </Link>
-                </div>
-                {getState(currentVehicle?.state_id ?? "")}
-              </div>
+              <ModalHeader
+                vehicle={currentVehicle}
+                transferOrderStates={TransferOrdersState}
+                defaultStateId={STATUS.TR.SIN_INICIAR}
+                showState={true}
+              />
               <hr />
               <div className={styles.body}>
                 <div className={styles.content}>
@@ -170,6 +212,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
                     {item.} */}
                                   </div>
                                   <div className={styles.date}>{formatDate(item.event_time)}</div>
+                                  {item.created_by && (
+                                    <div
+                                      className={styles.name}
+                                    >{`Usuario: ${item.created_by}`}</div>
+                                  )}
                                   {item.url_photo && (
                                     <div>
                                       <div className={styles.icons}>
