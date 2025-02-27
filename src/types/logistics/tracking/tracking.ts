@@ -36,3 +36,9 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
 }
+
+export interface IChangeStatusTrip {
+  tripStatus: string;
+  tripId: number;
+  comment: string;
+}
