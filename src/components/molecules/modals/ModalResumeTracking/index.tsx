@@ -8,7 +8,7 @@ import {
   CaretDown
 } from "phosphor-react";
 import styles from "./ModalResumeTracking.module.scss";
-import { Dropdown, MenuProps, Skeleton, Typography } from "antd";
+import { Dropdown, MenuProps, Skeleton, Typography, message } from "antd";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal/invoice-download-modal";
 import UiTab from "@/components/ui/ui-tab";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
@@ -23,6 +23,8 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 import ModalHeader from "./components/ModalHeader";
+import { updateTripTrackingStatus } from "@/services/logistics/tracking";
+import { set } from "react-hook-form";
 const { Text } = Typography;
 interface InvoiceDetailModalProps {
   isOpen: boolean;
@@ -46,6 +48,10 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeKey, setActiveKey] = useState<string>("1");
   const [isModalChangeStatus, setisModalChangeStatus] = useState(false);
+  const [newTripStatus, setNewTripStatus] = useState<string>(STATUS.TR.POR_ACEPTAR);
+
+  const [comment, setComment] = useState<string>("");
+  const [isLoadingChangeStatus, setIsLoadingChangeStatus] = useState<boolean>(false);
   const onChange = (key: string) => setActiveKey(key);
 
   const { data, error, isLoading } = useSWR<ApiResponse<VehicleTracking[]>>(
@@ -89,6 +95,26 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
       </div>
     );
   };
+  const onSubmitNewStatus = async () => {
+    const finalData = {
+      tripId: currentVehicle?.id ?? 0,
+      tripStatus: newTripStatus,
+      comment: comment
+    };
+    setIsLoadingChangeStatus(true);
+    try {
+      console.log("finalData", finalData);
+      const response = await updateTripTrackingStatus(finalData);
+      if (response.status === 200) {
+        message.success(`Cambio de estado realizado correctamente`, 3);
+      }
+    } catch (error) {
+      message.error(`Cambio de estado no realizado`, 3);
+    } finally {
+      setIsLoadingChangeStatus(false);
+      setisModalChangeStatus(false);
+    }
+  };
   // const getStepState = (stateName: string) => {
   //   const getState = TrackingStepState.find((f) => f.name === stateName);
   //   return (
@@ -102,7 +128,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   //     </div>
   //   );
   // };
-  const [comments, setComments] = useState<string>("");
+
   const getStateDropdown = (stateId: string) => {
     let getState = TransferOrdersState.find((f) => f.id === stateId);
     if (!getState) {
@@ -135,18 +161,21 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     backgroundColor: "white",
     boxShadow: "none"
   };
-
+  console.log("tripStatus", currentVehicle?.state_id, newTripStatus);
   return (
     <aside className={`${styles.wrapper} ${isOpen ? styles.show : styles.hide}`}>
       <ModalVehicleFollowUp
         isOpen={isModalChangeStatus}
         onClose={() => setisModalChangeStatus(false)}
-        onChangeStatus={(newStatus) => console.log("Nuevo estado:", newStatus)}
+        onChangeStatus={(newStatus) => setNewTripStatus(newStatus)}
+        tripStatus={newTripStatus}
         currentVehicle={currentVehicle}
-        comments={comments}
-        setComments={setComments}
+        comment={comment}
+        setComment={setComment}
         dropdownItems={items}
         getStateDropdown={getStateDropdown}
+        onConfirm={onSubmitNewStatus}
+        isLoading={isLoadingChangeStatus}
       />
       <InvoiceDownloadModal isModalOpen={isModalOpen} handleCloseModal={setIsModalOpen} />
       <div>

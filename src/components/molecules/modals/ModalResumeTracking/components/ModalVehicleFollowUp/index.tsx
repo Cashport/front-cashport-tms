@@ -15,10 +15,13 @@ interface ModalVehicleFollowUpProps {
   onClose: () => void;
   onChangeStatus: (status: string) => void;
   currentVehicle: VehicleTracking | null;
-  comments: string;
-  setComments: (value: string) => void;
+  comment: string;
+  setComment: (value: string) => void;
   dropdownItems: { key: string; label: string }[];
   getStateDropdown: (stateId: string) => React.ReactNode;
+  onConfirm: () => void;
+  isLoading: boolean;
+  tripStatus: string;
 }
 
 export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
@@ -26,10 +29,13 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
   onClose,
   onChangeStatus,
   currentVehicle,
-  comments,
-  setComments,
+  comment,
+  setComment,
   dropdownItems,
-  getStateDropdown
+  getStateDropdown,
+  onConfirm,
+  isLoading,
+  tripStatus
 }) => {
   const items: MenuProps["items"] = [
     {
@@ -53,6 +59,7 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
       label: "Stand by"
     }
   ];
+  console.log("comments", comment);
   return (
     <Modal
       open={isOpen}
@@ -63,7 +70,8 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
         <FooterButtons
           titleConfirm="Cambiar de estado"
           onClose={onClose}
-          handleOk={() => onChangeStatus(currentVehicle?.state_id || "")}
+          handleOk={onConfirm}
+          isConfirmLoading={isLoading}
         />
       }
     >
@@ -92,11 +100,11 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
               menu={{
                 items,
                 selectable: true,
-                defaultSelectedKeys: [currentVehicle?.state_id || ""],
+                defaultSelectedKeys: [tripStatus || ""],
                 onClick: (item) => onChangeStatus(item.key)
               }}
             >
-              {getStateDropdown(currentVehicle?.state_id || "")}
+              {getStateDropdown(tripStatus)}
             </Dropdown>
           </ConfigProvider>
         </Flex>
@@ -105,9 +113,9 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
           <p className={styles.comments}>Observación</p>
           <TextArea
             placeholder="Observación"
-            value={comments}
+            value={comment}
             autoSize={{ minRows: 2, maxRows: 4 }}
-            onChange={(event) => setComments(event.target.value)}
+            onChange={(event) => setComment(event.target.value)}
             style={{ backgroundColor: "#F7F7F7", border: "none" }}
           />
         </Flex>
