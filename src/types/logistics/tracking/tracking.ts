@@ -26,6 +26,7 @@ export interface VehicleTracking {
   driver_id: number;
   driver_name: string;
   driver_phone?: string;
+  fee_description?: string;
   trip_tracking: TrackingEvent[];
 }
 
