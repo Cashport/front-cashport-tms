@@ -12,11 +12,7 @@ export const getAllCarriers = async (): Promise<any> => {
 
 export const getCarrierById = async (id: string): Promise<IListData> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/carrier/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
+    const response: IListData = await API.get(`/carrier/${id}`);
     return response;
   } catch (error) {
     console.log("Error get Driver: ", error);
