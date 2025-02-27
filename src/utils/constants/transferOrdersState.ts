@@ -44,7 +44,7 @@ export const TransferOrdersState = [
   {
     id: STATUS.TO.CANCELADO,
     name: "TO Cancelada",
-    bgColor: "#B94A48"
+    bgColor: "#651515"
   },
   {
     id: STATUS.TR.ESPERANDO_PROVEEDOR,
@@ -74,7 +74,7 @@ export const TransferOrdersState = [
   {
     id: STATUS.TR.CANCELADO,
     name: "TR Cancelada",
-    bgColor: "#B94A48"
+    bgColor: "#651515"
   },
   {
     id: "40f8e08b-1e7b-4412-ba57-e62e7352b729",
