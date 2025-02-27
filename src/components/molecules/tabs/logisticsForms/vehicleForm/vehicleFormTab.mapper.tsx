@@ -23,6 +23,7 @@ export interface VehicleFormTabProps {
   handleFormState?: (newFormState: StatusForm) => void;
   onActiveVehicle?: () => void;
   onDesactivateVehicle?: () => void;
+  onAuditVehicle?: () => void;
   statusForm: "create" | "edit" | "review";
   params: {
     id: string;
@@ -89,7 +90,9 @@ export const normalizeVehicleData = (data: any): any => {
       modified_at: new Date(data.modified_at),
       modified_by: data.modified_by,
       company: "", // Add logic to fetch company name if necessary
-      IS_ACTIVE: data.active
+      IS_ACTIVE: data.active,
+      status: data.status,
+      trip_type: []
     },
     images: images,
     files: documents,

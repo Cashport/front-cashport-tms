@@ -19,6 +19,7 @@ export interface DriverFormTabProps {
   onSubmitForm?: (data: any) => void;
   onActiveProject?: () => Promise<void>;
   onDesactivateProject?: () => Promise<void>;
+  onAuditDriver?: () => Promise<void>;
   statusForm: "create" | "edit" | "review";
   params: {
     id: string;
@@ -76,7 +77,9 @@ export const dataToProjectFormData = (
       glasses: data.glasses,
       birth_date: dayjs(data?.birth_date) as any,
       photo: data.photo,
-      vehicle_type: vehicleTypeArray
+      vehicle_type: vehicleTypeArray,
+      status: data.status,
+      trip_type: []
     }
   };
 };

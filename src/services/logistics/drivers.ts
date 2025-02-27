@@ -104,7 +104,7 @@ export const addDriver = async (
 
 export const updateDriverStatus = async (
   id: string,
-  status: boolean
+  status: number
 ): Promise<AxiosResponse<any, any>> => {
   const response: GenericResponse = await API.put(`/driver/update-status/${id}`, {
     status
