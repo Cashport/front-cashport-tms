@@ -23,10 +23,7 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 import ModalHeader from "./components/ModalHeader";
-import {
-  updateTripTrackingStatus,
-  updateTripTrackingStatusOriginal
-} from "@/services/logistics/tracking";
+import { updateTripTrackingStatus } from "@/services/logistics/tracking";
 
 const { Text } = Typography;
 interface InvoiceDetailModalProps {
