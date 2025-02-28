@@ -1,13 +1,19 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import { IAPIDriver, ICertificates, IFormDriver, VehicleType } from "@/types/logistics/schema";
+import {
+  IAPIDriver,
+  ICertificates,
+  IFormDriver,
+  ITripType,
+  VehicleType
+} from "@/types/logistics/schema";
 import { IFormProject } from "@/types/projects/IFormProject";
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { UseFormSetValue } from "react-hook-form";
 import utc from "dayjs/plugin/utc";
-import { MessageInstance } from "antd/es/message/interface";
+
 dayjs.extend(utc);
 
 export type StatusForm = "review" | "create" | "edit";
@@ -19,6 +25,7 @@ export interface DriverFormTabProps {
   onSubmitForm?: (data: any) => void;
   onActiveProject?: () => Promise<void>;
   onDesactivateProject?: () => Promise<void>;
+  onAuditDriver?: () => Promise<void>;
   statusForm: "create" | "edit" | "review";
   params: {
     id: string;
@@ -28,6 +35,7 @@ export interface DriverFormTabProps {
   documentsTypesList: CertificateType[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
+  tripTypes: ITripType[];
 }
 
 export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICertificates[] };
@@ -76,7 +84,13 @@ export const dataToProjectFormData = (
       glasses: data.glasses,
       birth_date: dayjs(data?.birth_date) as any,
       photo: data.photo,
-      vehicle_type: vehicleTypeArray
+      vehicle_type: vehicleTypeArray,
+      status: data.status,
+      trip_type:
+        data.features?.map((feature: any) => ({
+          label: feature.description,
+          value: feature.id
+        })) ?? []
     }
   };
 };

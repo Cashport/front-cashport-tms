@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import styles from "./details.module.scss";
 import { CaretDoubleRight, CaretLeft, DotsThree } from "phosphor-react";
-import { Button, Drawer, Flex, message, Typography } from "antd";
+import { Button, Drawer, Flex, message, Modal, Typography } from "antd";
 import { MainDescription } from "./main-description/MainDescription";
 import { Step } from "./step/Step";
 import { useEffect, useState } from "react";
@@ -31,6 +31,7 @@ import { BillingByCarrier } from "@/types/logistics/billing/billing";
 import ModalBillingMT from "@/components/molecules/modals/ModalBillingMT/ModalBillingMT";
 import ModalBillingAction from "@/components/molecules/modals/ModalBillingAction/ModalBillingAction";
 import { STATUS, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
+import ModalResumeTracking from "@/components/molecules/modals/ModalResumeTracking";
 
 const Text = Typography;
 
@@ -84,7 +85,7 @@ export const TransferOrderDetails = () => {
     overcostId: undefined
   });
   const [formEvidences, setFormEvidences] = useState<File[]>([]);
-
+  const [isModalTrackingVisible, setIsModalTrackingVisible] = useState(false);
   const { id } = useParams();
   const router = useRouter();
 
@@ -303,7 +304,7 @@ export const TransferOrderDetails = () => {
   }, [isModalVisible, isModalBillingVisible]);
 
   useEffect(() => {
-    if(!!transferRequest){
+    if (!!transferRequest) {
       findNovelties();
       findBilling();
     }
@@ -328,7 +329,12 @@ export const TransferOrderDetails = () => {
               <DotsThree size={24} />
               <Text className={styles.text}>Generar acción</Text>
             </Button>
-            <Button className={styles.tranckingBtn} type="text" size="large">
+            <Button
+              className={styles.tranckingBtn}
+              type="text"
+              size="large"
+              onClick={() => setIsModalTrackingVisible(true)}
+            >
               <Text className={styles.text}>Tracking</Text>
               <CaretDoubleRight size={24} />
             </Button>
@@ -361,7 +367,6 @@ export const TransferOrderDetails = () => {
         </div>
         <div>{renderView()}</div>
       </div>
-
       <Drawer
         placement="right"
         open={openDrawer}
@@ -425,6 +430,11 @@ export const TransferOrderDetails = () => {
         totalValue={billingList?.find((b) => b.id == billingId)?.subtotal ?? 0}
         messageApi={messageApi}
         uploadInvoiceTitle={billingList?.find((b) => b.id == billingId)?.carrier}
+      />
+      <ModalResumeTracking
+        isOpen={isModalTrackingVisible}
+        onClose={() => setIsModalTrackingVisible(false)}
+        idTR={transferRequest?.id || 0}
       />
     </Flex>
   );

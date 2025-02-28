@@ -4,7 +4,7 @@ import io from "socket.io-client";
 import "mapbox-gl/dist/mapbox-gl.css";
 import styles from "./mainDescription.module.scss";
 import { ConfigProvider, Dropdown, Flex, Timeline, Typography } from "antd";
-import { CaretDown, Shuffle, WarningCircle } from "phosphor-react";
+import { CaretDown } from "phosphor-react";
 import { MenuProps } from "antd/lib";
 import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
@@ -185,23 +185,28 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
           "line-width": 6
         }
       });
+      const isSameLocation =
+        transferRequest?.id_start_location === transferRequest?.id_end_location;
 
-      const bounds = transferRequest?.geometry.geometry.coordinates.reduce(
-        (bounds: any, coord: any) => bounds.extend(coord),
-        new mapboxgl.LngLatBounds()
-      );
-
-      // Zoom out to fit the route within the map view
-      map.fitBounds(bounds, {
-        padding: 50
-      });
-      // map.setCenter([-77.634865, 0.823004]);
-      // map.setZoom(14)
+      if (isSameLocation && transferRequest) {
+        const coordinates: [number, number] = [
+          transferRequest.start_location.longitude,
+          transferRequest.start_location.latitude
+        ];
+        new mapboxgl.Marker().setLngLat(coordinates).addTo(map);
+        map.setCenter(coordinates);
+        map.setZoom(14);
+      } else {
+        const bounds = transferRequest?.geometry.geometry.coordinates.reduce(
+          (bounds: any, coord: any) => bounds.extend(coord),
+          new mapboxgl.LngLatBounds()
+        );
+        // Zoom out to fit the route within the map view
+        map.fitBounds(bounds, {
+          padding: 50
+        });
+      }
     });
-
-    // return () => {
-    //   map.remove();
-    // };
     return () => {
       map.remove();
     };
@@ -263,7 +268,6 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
       </div>
     );
   };
-
   return (
     <div className={styles.mainDescription}>
       <div className={styles.trackContainer}>
@@ -344,20 +348,21 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
                 : "-"}
             </Text>
           </div>
-          {transferRequest && transferRequest?.geometry?.distance && (
-            <div className={styles.card}>
-              <Text className={styles.titleCard}>Distancia</Text>
-              <Text className={styles.subtitleCard}>
-                {parseFloat((transferRequest.geometry.distance / 1000).toFixed(2))} Km
-              </Text>
-            </div>
-          )}
-          {transferRequest && transferRequest?.geometry?.duration && (
-            <div className={styles.card}>
-              <Text className={styles.titleCard}>Tiempo</Text>
-              <Text className={styles.subtitleCard}>{getTravelDuration(milliseconds / 1000)}</Text>
-            </div>
-          )}
+          <div className={styles.card}>
+            <Text className={styles.titleCard}>Distancia</Text>
+            <Text className={styles.subtitleCard}>
+              {transferRequest?.geometry?.distance
+                ? parseFloat((transferRequest?.geometry?.distance / 1000).toFixed(2))
+                : "0"}{" "}
+              Km
+            </Text>
+          </div>
+          <div className={styles.card}>
+            <Text className={styles.titleCard}>Tiempo</Text>
+            <Text className={styles.subtitleCard}>
+              {transferRequest?.geometry?.duration ? getTravelDuration(milliseconds / 1000) : "-"}
+            </Text>
+          </div>
         </div>
       </div>
       <div className={styles.mapContainer}>
