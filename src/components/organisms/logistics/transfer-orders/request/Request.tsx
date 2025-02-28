@@ -119,7 +119,7 @@ export const Request: FC<IRequestProps> = ({
         };
         redirect = "/logistics/transfer-request/";
       }
-      const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO];
+      const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO, STATUS.TO.CANCELADO];
       if (statusToDetailsTO.includes(item.statusId)) {
         redirect = "/logistics/orders/details";
       }
