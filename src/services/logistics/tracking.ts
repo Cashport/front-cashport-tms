@@ -11,6 +11,7 @@ export const updateTripTrackingStatus = async (data: IChangeStatusTrip): Promise
     formData.append("status_id", data.tripStatus);
     formData.append("comment", data.comment);
     formData.append("trip_id", data.tripId.toString());
+
     const response: AxiosResponse = await axios.post(
       `${config.API_HOST}/cashport/update-trip-tracking`,
       formData,
@@ -22,9 +23,9 @@ export const updateTripTrackingStatus = async (data: IChangeStatusTrip): Promise
         }
       }
     );
-    return response;
-  } catch (error) {
-    console.log("Error updateTripTrackingStatus: ", error);
-    return error as any;
+    console.log("primer response", response);
+    return response.data;
+  } catch (error: any) {
+    throw error;
   }
 };

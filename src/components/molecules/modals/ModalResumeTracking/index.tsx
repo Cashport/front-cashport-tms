@@ -23,8 +23,11 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 import ModalHeader from "./components/ModalHeader";
-import { updateTripTrackingStatus } from "@/services/logistics/tracking";
-import { set } from "react-hook-form";
+import {
+  updateTripTrackingStatus,
+  updateTripTrackingStatusOriginal
+} from "@/services/logistics/tracking";
+
 const { Text } = Typography;
 interface InvoiceDetailModalProps {
   isOpen: boolean;
@@ -54,10 +57,10 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   const [isLoadingChangeStatus, setIsLoadingChangeStatus] = useState<boolean>(false);
   const onChange = (key: string) => setActiveKey(key);
 
-  const { data, error, isLoading } = useSWR<ApiResponse<VehicleTracking[]>>(
+  const { data, error, isLoading, mutate } = useSWR<ApiResponse<VehicleTracking[]>>(
     isOpen ? `/transfer-request/triptracking/${idTR}` : null,
     fetcher,
-    { revalidateOnFocus: false, revalidateOnMount: false }
+    {}
   );
 
   const vehicles = data?.data;
@@ -103,13 +106,13 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     };
     setIsLoadingChangeStatus(true);
     try {
-      console.log("finalData", finalData);
       const response = await updateTripTrackingStatus(finalData);
-      if (response.status === 200) {
+      if (response) {
         message.success(`Cambio de estado realizado correctamente`, 3);
+        await mutate(undefined, { revalidate: true });
       }
-    } catch (error) {
-      message.error(`Cambio de estado no realizado`, 3);
+    } catch (error: any) {
+      message.error(error?.response?.data?.message || "Cambio de estado no realizado", 3);
     } finally {
       setIsLoadingChangeStatus(false);
       setisModalChangeStatus(false);
