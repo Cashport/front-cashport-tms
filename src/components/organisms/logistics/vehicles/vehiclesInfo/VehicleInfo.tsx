@@ -4,6 +4,7 @@ import "../../../../../styles/_variables_logistics.css";
 import "./vehicleInfo.scss";
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
 import {
+  getFeaturesVehicle,
   getVehicleById,
   getVehicleType,
   updateVehicle,
@@ -26,6 +27,7 @@ interface Props {
 export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const [statusForm, setStatusForm] = useState<StatusForm>("review");
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [revalidate, setRevalidate] = useState("1");
   const { push } = useRouter();
 
   const fetcher = async ({ id }: { id: string }) => {
@@ -36,7 +38,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
     setStatusForm(newFormState);
   }, []);
 
-  const { data, isLoading, isValidating } = useSWR({ id: idParam, key: "1" }, fetcher, {
+  const { data, isLoading, isValidating } = useSWR({ id: idParam, key: revalidate }, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -50,7 +52,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Vehículo editado", 2, () => setStatusForm("review"));
-        mutate({ id: params, key: "1" });
+        setRevalidate(String(Math.random()));
       }
     } catch (error) {
       setIsLoadingSubmit(false);
@@ -86,9 +88,14 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  const { data: features, isLoading: isLoadingFeatures } = useSWR(
+    "/features/vehicles",
+    getFeaturesVehicle,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
 
   return (
-    <Skeleton active loading={isLoading || isValidating || isLoadingDocuments || isLoadingVehicles}>
+    <Skeleton active loading={isLoading || isValidating || isLoadingDocuments || isLoadingVehicles || isLoadingFeatures}>
       <VehicleFormTab
         statusForm={statusForm}
         handleFormState={handleFormState}
@@ -101,6 +108,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
         onActiveVehicle={() => handlechangeStatus(1)}
         onDesactivateVehicle={() => handlechangeStatus(0)}
         onAuditVehicle={() => handlechangeStatus(2)}
+        features={features || []}
       />
     </Skeleton>
   );

@@ -70,8 +70,6 @@ export const getProjectId = async () => {
 };
 
 API.interceptors.request.use(async (request) => {
-  request.headers.set("Accept", "application/json, text/plain, */*");
-  request.headers.set("Content-Type", "application/json; charset=utf-8");
   request.headers.set("Authorization", `Bearer ${await getIdToken()}`);
   if (!request.headers.get("projectId") || request.headers.get("projectId") === "0") {
     const projectId = await getProjectId();

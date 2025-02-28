@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import "../../../../../styles/_variables_logistics.css";
 import "./createVehicle.scss";
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
-import { addVehicle, getVehicleType } from "@/services/logistics/vehicle";
+import { addVehicle, getFeaturesVehicle, getVehicleType } from "@/services/logistics/vehicle";
 import { useState } from "react";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
 import useSWR from "swr";
@@ -45,9 +45,14 @@ export const CreateVehicleView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  const { data: features, isLoading: isLoadingFeatures } = useSWR(
+    "/features/vehicles",
+    getFeaturesVehicle,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
 
   return (
-    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles}>
+    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isLoadingFeatures}>
       <VehicleFormTab
         onSubmitForm={handleSubmit}
         statusForm={"create"}
@@ -55,6 +60,7 @@ export const CreateVehicleView = ({ params }: Props) => {
         documentsTypesList={documentsType ?? []}
         vehiclesTypesList={vehiclesTypesData ?? []}
         isLoading={isLoadingSubmit}
+        features={features || []}
       />
     </Skeleton>
   );
