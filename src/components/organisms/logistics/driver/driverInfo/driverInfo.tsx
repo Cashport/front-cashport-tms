@@ -4,7 +4,12 @@ import React, { useCallback, useState } from "react";
 import "../../../../../styles/_variables_logistics.css";
 import "./driverInfo.scss";
 import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
-import { getDriverById, updateDriver, updateDriverStatus } from "@/services/logistics/drivers";
+import {
+  getDriverById,
+  getTripTypes,
+  updateDriver,
+  updateDriverStatus
+} from "@/services/logistics/drivers";
 import { IFormDriver } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
 import { useRouter } from "next/navigation";
@@ -39,7 +44,7 @@ export const DriverInfoView = ({ params }: Props) => {
     revalidateOnReconnect: false,
     revalidateOnMount: true
   });
-
+  console.log("data", data);
   const handleSubmitForm = async (data: IFormDriver) => {
     data.general.company_id = params.id;
     try {
@@ -89,11 +94,21 @@ export const DriverInfoView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("1", getTripTypes, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
   return (
-    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isLoading || isValidating}>
+    <Skeleton
+      active
+      loading={
+        isLoadingDocuments || isLoadingVehicles || isLoading || isValidating || isloadingTripTypes
+      }
+    >
       <DriverFormTab
         onSubmitForm={handleSubmitForm}
-        data={data?.data?.data[0]}
+        data={data?.[0]}
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}
@@ -103,6 +118,7 @@ export const DriverInfoView = ({ params }: Props) => {
         documentsTypesList={documentsType ?? []}
         vehiclesTypesList={vehiclesTypesData ?? []}
         isLoadingSubmit={isLoadingSubmit}
+        tripTypes={tripTypes ?? []}
       />
     </Skeleton>
   );
