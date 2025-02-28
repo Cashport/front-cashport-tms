@@ -1174,6 +1174,12 @@ export interface ILocation {
   contact_number: string;
   user: string;
 }
+
+export interface ITripType {
+  id: number;
+  description: string;
+  idEntityType: number;
+}
 /**
  * Exposes all fields present in driver as a typescript
  * interface.
@@ -1279,7 +1285,6 @@ export interface ICarrier {
   nit: string;
   icon: string;
   active: any;
-  status?: any;
   vehicles: any;
   drivers: any;
   carrier_type: string;
@@ -1288,6 +1293,26 @@ export interface ICarrier {
   modified_at?: Date | null;
   modified_by?: string | null;
   photo?: string;
+  trip_type: { label: string; value: number }[];
+  status: IStatus;
+}
+export interface IAPICarrier {
+  id: number;
+  description: string;
+  nit: string;
+  icon: string;
+  active: any;
+  vehicles: any;
+  drivers: any;
+  carrier_type: string;
+  created_at: Date;
+  created_by: string;
+  modified_at?: Date | null;
+  modified_by?: string | null;
+  photo?: string;
+  features: Ifeature[];
+  status: IStatus;
+  documents: any[];
 }
 /**
  * Exposes the same fields as Location,
@@ -3238,6 +3263,12 @@ export interface IFormVehicle {
 }
 export interface IFormCarrier {
   general: ICarrier;
+}
+export interface Ifeature {
+  description: string;
+  id: number;
+  idEntityType: number;
+  idFeatureEntity: number;
 }
 
 export interface VehicleType {
