@@ -6,6 +6,7 @@ import { VehicleTracking } from "@/types/logistics/tracking/tracking";
 import ModalHeader from "../ModalHeader";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import { STATUS } from "@/utils/constants/globalConstants";
+import { useEffect } from "react";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -60,6 +61,14 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
     }
   ];
   console.log("comments", comment);
+
+  useEffect(() => {
+    if (isOpen) {
+      setComment("");
+      onChangeStatus(currentVehicle?.state_id ?? "");
+    }
+  }, [isOpen]);
+
   return (
     <Modal
       open={isOpen}
@@ -68,10 +77,11 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
       title={<Text style={{ fontWeight: 600, fontSize: 20 }}>Seguimiento vehículo</Text>}
       footer={
         <FooterButtons
-          titleConfirm="Cambiar de estado"
+          titleConfirm="Guardar"
           onClose={onClose}
           handleOk={onConfirm}
           isConfirmLoading={isLoading}
+          isConfirmDisabled={isLoading || comment.length === 0}
         />
       }
     >
