@@ -12,13 +12,9 @@ export const getAllDrivers = async ({ providerId }: { providerId: number }): Pro
   throw response;
 };
 
-export const getDriverById = async (id: string): Promise<IListData> => {
+export const getDriverById = async (id: string): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/driver/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
+    const response: GenericResponse = await API.get(`/driver/${id}`);
     return response;
   } catch (error) {
     console.log("Error get Driver: ", error);

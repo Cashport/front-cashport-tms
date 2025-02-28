@@ -93,7 +93,7 @@ export const DriverInfoView = ({ params }: Props) => {
     <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isLoading || isValidating}>
       <DriverFormTab
         onSubmitForm={handleSubmitForm}
-        data={data?.data?.data[0]}
+        data={data?.data[0]}
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}

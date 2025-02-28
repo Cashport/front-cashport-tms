@@ -625,7 +625,7 @@ export const VehicleFormTab = ({
           "¿Confirma que el vehículo cumple con los requerimientos legales y de HSEQ?",
           "Confirmo que está autorizado para manejar"
         ]}
-        tags={trip_type.map((tt) => ({
+        tags={trip_type?.map((tt) => ({
           label: features?.find((f) => f.id === tt.value)?.description || ""
         }))}
       />

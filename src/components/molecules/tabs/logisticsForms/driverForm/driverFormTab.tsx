@@ -299,33 +299,34 @@ export const DriverFormTab = ({
               Ver Conductores
             </Button>
           </Link>
-
-          <Flex gap={"0.5rem"} align="center">
-            <Flex>
-              <CustomTag text={driverStatus.description} color={driverStatus.color} />
+          {statusForm !== "create" && (
+            <Flex gap={"0.5rem"} align="center">
+              <Flex>
+                <CustomTag text={driverStatus.description} color={driverStatus.color} />
+              </Flex>
+              <Dropdown
+                menu={{ items }}
+                trigger={["click"]}
+                dropdownRender={(menu) => (
+                  <div>
+                    {React.cloneElement(
+                      menu as React.ReactElement<{
+                        style: React.CSSProperties;
+                      }>,
+                      { style: menuStyle }
+                    )}
+                  </div>
+                )}
+              >
+                <GenerateActionButton
+                  onClick={() => {
+                    console.log("click");
+                  }}
+                  disabled={statusForm === "review"}
+                />
+              </Dropdown>
             </Flex>
-            <Dropdown
-              menu={{ items }}
-              trigger={["click"]}
-              dropdownRender={(menu) => (
-                <div>
-                  {React.cloneElement(
-                    menu as React.ReactElement<{
-                      style: React.CSSProperties;
-                    }>,
-                    { style: menuStyle }
-                  )}
-                </div>
-              )}
-            >
-              <GenerateActionButton
-                onClick={() => {
-                  console.log("click");
-                }}
-                disabled={statusForm === "review"}
-              />
-            </Dropdown>
-          </Flex>
+          )}
         </Flex>
         <Flex component={"main"} flex="1" vertical style={{ paddingRight: "1rem" }}>
           <Row gutter={16}>
