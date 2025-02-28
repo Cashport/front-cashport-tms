@@ -79,8 +79,8 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "1",
-    getDocumentsByEntityType,
+    "documents/type/1",
+    () => getDocumentsByEntityType("1"),
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   const { data: vehiclesTypesData, isLoading: isLoadingVehicles } = useSWR(
@@ -95,7 +95,12 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   );
 
   return (
-    <Skeleton active loading={isLoading || isValidating || isLoadingDocuments || isLoadingVehicles || isLoadingFeatures}>
+    <Skeleton
+      active
+      loading={
+        isLoading || isValidating || isLoadingDocuments || isLoadingVehicles || isLoadingFeatures
+      }
+    >
       <VehicleFormTab
         statusForm={statusForm}
         handleFormState={handleFormState}
