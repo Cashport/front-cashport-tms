@@ -1,25 +1,38 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
-import { ICarrier, ICertificates, IFormCarrier } from "@/types/logistics/schema";
+import {
+  IAPICarrier,
+  ICarrier,
+  ICertificates,
+  IFormCarrier,
+  ITripType
+} from "@/types/logistics/schema";
 import { IFormProject } from "@/types/projects/IFormProject";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
 import { UseFormReset, UseFormSetValue } from "react-hook-form";
+import { StatusForm } from "../driverForm/driverFormTab.mapper";
 
 export interface CarrierFormTabProps {
   idProjectForm?: string;
-  data?: CarrierData[];
+  data?: IAPICarrier[];
   disabled?: boolean;
   onEditProject?: () => void;
   onSubmitForm?: (data: any) => void;
   onActiveProject?: () => void;
   onDesactivateProject?: () => void;
   statusForm: "create" | "edit" | "review";
+  handleFormState?: (newFormState: StatusForm) => void;
+  tripTypes: ITripType[];
+  onActiveProvider?: () => void;
+  onDesactivateProvider?: () => void;
+  onAuditProvider?: () => void;
+  isLoadingSubmit: boolean;
 }
 
 export type CarrierData = ICarrier & { documents?: ICertificates[] };
 
-export const dataToProjectFormData = (data: ICarrier): IFormCarrier => {
+export const dataToProjectFormData = (data: IAPICarrier): IFormCarrier => {
   return {
     general: {
       id: data.id,
@@ -32,7 +45,13 @@ export const dataToProjectFormData = (data: ICarrier): IFormCarrier => {
       carrier_type: data.carrier_type,
       created_at: data.created_at,
       created_by: data.created_by,
-      photo: data.photo
+      photo: data.photo,
+      trip_type:
+        data.features?.map((feature) => ({
+          label: feature.description,
+          value: feature.id
+        })) ?? [],
+      status: data.status
     }
   };
 };
@@ -44,11 +63,12 @@ export const _onSubmit = (
   imageFile: FileObject[] | undefined,
   files: FileObject[] | undefined,
   onSubmitForm: (data: any) => void,
-  reset: UseFormReset<IFormCarrier>
+  reset: UseFormReset<IFormCarrier>,
+  isImageMandatory: boolean
 ) => {
   setloading(true);
   try {
-    if (!imageFile) return setImageError(true);
+    if (!imageFile && isImageMandatory) return setImageError(true);
     setImageError(false);
     onSubmitForm({ ...data, logo: imageFile, files });
     reset(data);

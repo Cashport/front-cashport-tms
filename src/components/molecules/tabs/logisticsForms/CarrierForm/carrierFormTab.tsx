@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Flex, Form, Row, Select, Typography } from "antd";
-import { useForm } from "react-hook-form";
-import { CaretLeft } from "phosphor-react";
+import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Select, Typography } from "antd";
+import { Controller, useForm } from "react-hook-form";
+import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
 
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
@@ -24,17 +24,26 @@ import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDo
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
+import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import ModalConfirmAudit from "../driverForm/components/ModalConfirmAudit";
+import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
+import CustomTag from "@/components/atoms/CustomTag";
+import React from "react";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 export const CarrierFormTab = ({
-  onEditProject = () => {},
   onSubmitForm = () => {},
   statusForm = "review",
   data = [],
-  onActiveProject = () => {},
-  onDesactivateProject = () => {}
+  handleFormState = () => {},
+  tripTypes,
+  onActiveProvider = () => {},
+  onDesactivateProvider = () => {},
+  onAuditProvider = () => {},
+  isLoadingSubmit
 }: CarrierFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
@@ -42,7 +51,7 @@ export const CarrierFormTab = ({
     getDocumentsByEntityType
   );
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
-
+  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [loading, setloading] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -59,6 +68,8 @@ export const CarrierFormTab = ({
     defaultValues,
     disabled: statusForm === "review"
   });
+  const trip_type = watch("general.trip_type");
+  const providerStatus = watch("general.status");
   /*archivos*/
   interface FileObject {
     docReference: string;
@@ -100,8 +111,56 @@ export const CarrierFormTab = ({
       imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
       files,
       onSubmitForm,
-      reset
+      reset,
+      statusForm === "create"
     );
+  };
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <ButtonGenerateAction
+          icon={<Pencil size={"1.5rem"} />}
+          title={statusForm === "review" ? "Editar" : "Cancelar edición"}
+          hideArrow
+          onClick={() => {
+            if (statusForm === "review") {
+              handleFormState("edit");
+            } else {
+              handleFormState("review");
+              reset();
+            }
+          }}
+        />
+      )
+    },
+    {
+      key: "2",
+      label: (
+        <ButtonGenerateAction
+          icon={<ArrowsClockwise size={"1.5rem"} />}
+          title="Cambiar estado"
+          onClick={() => setIsOpenModal(true)}
+          hideArrow
+        />
+      )
+    },
+    {
+      key: "3",
+      label: (
+        <ButtonGenerateAction
+          icon={<CheckCircle size={"1.5rem"} />}
+          title="Auditar"
+          disabled={statusForm !== "review"}
+          hideArrow
+          onClick={() => setIsModalConfirmAuditOpen(true)}
+        />
+      )
+    }
+  ];
+  const menuStyle: React.CSSProperties = {
+    backgroundColor: "white",
+    boxShadow: "none"
   };
   return (
     <>
@@ -116,6 +175,32 @@ export const CarrierFormTab = ({
           >
             Ver Proveedores
           </Button>
+          <Flex gap={"0.5rem"} align="center">
+            <Flex>
+              <CustomTag text={providerStatus.description} color={providerStatus.color} />
+            </Flex>
+            <Dropdown
+              menu={{ items }}
+              trigger={["click"]}
+              dropdownRender={(menu) => (
+                <div>
+                  {React.cloneElement(
+                    menu as React.ReactElement<{
+                      style: React.CSSProperties;
+                    }>,
+                    { style: menuStyle }
+                  )}
+                </div>
+              )}
+            >
+              <GenerateActionButton
+                onClick={() => {
+                  console.log("click");
+                }}
+                disabled={statusForm === "review"}
+              />
+            </Dropdown>
+          </Flex>
         </Flex>
         <Flex component={"main"} flex="1" vertical style={{ paddingRight: "1rem" }}>
           <Row gutter={16}>
@@ -126,7 +211,7 @@ export const CarrierFormTab = ({
                 Logo
               </Title>
               <UploadImg
-                disabled={statusForm === "review"}
+                disabled={statusForm !== "create"}
                 imgDefault={
                   watch("general.photo") ??
                   "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"
@@ -151,6 +236,7 @@ export const CarrierFormTab = ({
                     nameInput="general.nit"
                     control={control}
                     error={undefined}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -159,6 +245,7 @@ export const CarrierFormTab = ({
                     nameInput="general.description"
                     control={control}
                     error={undefined}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -167,6 +254,7 @@ export const CarrierFormTab = ({
                     nameInput="general.carrier_type"
                     control={control}
                     error={undefined}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -175,6 +263,7 @@ export const CarrierFormTab = ({
                     nameInput="general.description"
                     control={control}
                     error={undefined}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -183,6 +272,7 @@ export const CarrierFormTab = ({
                     nameInput="general.description"
                     control={control}
                     error={undefined}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -191,6 +281,7 @@ export const CarrierFormTab = ({
                     nameInput="general.carrier_type"
                     control={control}
                     error={undefined}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
               </Row>
@@ -206,6 +297,7 @@ export const CarrierFormTab = ({
                     nameInput="general.description"
                     control={control}
                     error={errors?.general?.description}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
                 <Col span={8}>
@@ -221,10 +313,38 @@ export const CarrierFormTab = ({
                         message: "Solo se permiten números y un signo '+' al comienzo"
                       }
                     }}
+                    disabled={statusForm !== "create"}
                   />
                 </Col>
               </Row>
             </Col>
+          </Row>
+          {/* ----------------------------------Tipos de viaje--------------------------------- */}
+          <Row style={{ width: "100%", marginTop: "2rem" }}>
+            <Title className="title" level={4}>
+              Tipos de viaje
+            </Title>
+            <Controller
+              name="general.trip_type"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <MultiSelectTags
+                  field={field}
+                  placeholder="Seleccione"
+                  title="Tipos de viaje que esta autorizado"
+                  errors={errors?.general?.trip_type}
+                  options={tripTypes?.map(
+                    (tripType) =>
+                      ({
+                        label: tripType.description,
+                        value: tripType.id
+                      }) ?? []
+                  )}
+                  disabled={statusForm === "review"}
+                />
+              )}
+            />
           </Row>
           <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             {" "}
@@ -274,17 +394,29 @@ export const CarrierFormTab = ({
                 text={validationButtonText(statusForm)}
                 disabled={!isDirty}
                 onClick={handleSubmit(onSubmit)}
+                loading={isLoadingSubmit}
               />
             </Row>
           )}
         </Flex>
       </Form>
+      <ModalConfirmAudit
+        isOpen={isModalConfirmAuditOpen}
+        onClose={() => setIsModalConfirmAuditOpen(false)}
+        onConfirm={onAuditProvider}
+        title="Auditar proveedor"
+        description={[
+          "¿Confirma que el proveedor cumple con los requerimientos legales y de HSEQ?",
+          "Confirmo que está autorizado para manejar"
+        ]}
+        tags={trip_type}
+      />
       <ModalChangeStatus
         isActiveStatus={true}
         isOpen={isOpenModal}
         onClose={() => setIsOpenModal(false)}
-        onActive={onActiveProject}
-        onDesactivate={onDesactivateProject}
+        onActive={onActiveProvider}
+        onDesactivate={onDesactivateProvider}
       />
     </>
   );
