@@ -46,8 +46,8 @@ export const CreateDriverView = ({ params }: Props) => {
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "2",
-    getDocumentsByEntityType,
+    "documents/type/2",
+    () => getDocumentsByEntityType("2"),
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   const { data: vehiclesTypesData, isLoading: isLoadingVehicles } = useSWR(

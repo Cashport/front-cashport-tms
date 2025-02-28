@@ -48,8 +48,8 @@ export const CarrierFormTab = ({
 }: CarrierFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "0",
-    getDocumentsByEntityType
+    "documents/type/0",
+    () => getDocumentsByEntityType("0"),
   );
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
