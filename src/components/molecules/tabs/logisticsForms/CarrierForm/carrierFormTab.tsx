@@ -30,6 +30,7 @@ import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import CustomTag from "@/components/atoms/CustomTag";
 import React from "react";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import Link from "next/link";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -166,15 +167,16 @@ export const CarrierFormTab = ({
     <>
       <Form className="carrierForm">
         <Flex component={"header"} className="headerProyectsForm">
-          <Button
-            type="text"
-            size="large"
-            href="/logistics/providers/all"
-            className="buttonGoBack"
-            icon={<CaretLeft size={"1.45rem"} />}
-          >
-            Ver Proveedores
-          </Button>
+          <Link href="/logistics/providers/all">
+            <Button
+              type="text"
+              size="large"
+              className="buttonGoBack"
+              icon={<CaretLeft size={"1.45rem"} />}
+            >
+              Ver Proveedores
+            </Button>
+          </Link>
           <Flex gap={"0.5rem"} align="center">
             <Flex>
               <CustomTag text={providerStatus.description} color={providerStatus.color} />
