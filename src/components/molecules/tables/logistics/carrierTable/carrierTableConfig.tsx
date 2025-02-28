@@ -40,18 +40,13 @@ export const CarrierTable = () => {
   }, []);
 
   drivers.forEach((element) => {
-    if (element.active) {
-      element.status = true;
-    } else {
-      element.status = false;
-    }
     datasource.push({
       nit: element.nit,
       name: element.description,
       type: element.carrier_type,
       vehicle: element.vehicles,
       drivers: element.drivers,
-      status: element.status
+      status: element.status.description
     });
   });
 
