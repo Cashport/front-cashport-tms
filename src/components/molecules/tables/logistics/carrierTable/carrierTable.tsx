@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Flex, message, Table, Typography } from "antd";
+import { Button, Flex, message, Table } from "antd";
 import type { TableProps } from "antd";
 import { DotsThree, Eye, Triangle } from "phosphor-react";
 import "./carrierTable.scss";
@@ -8,8 +8,8 @@ import { ICarrier } from "@/types/logistics/schema";
 import { getAllCarriers } from "@/services/logistics/carrier";
 import useSWR from "swr";
 import CustomTag from "@/components/atoms/CustomTag";
+import Link from "next/link";
 
-const { Text } = Typography;
 
 export const CarrierTable = () => {
   const [page, setPage] = useState(1);
@@ -101,11 +101,12 @@ export const CarrierTable = () => {
       width: "54px",
       dataIndex: "",
       render: (_, { id }) => (
-        <Button
-          href={`/logistics/providers/${id}`}
-          className="icon-detail"
-          icon={<Eye size={20} />}
-        />
+        <Link href={`/logistics/providers/${id}`} >
+          <Button
+            className="icon-detail"
+            icon={<Eye size={20} />}
+          />
+        </Link>
       )
     }
   ];
