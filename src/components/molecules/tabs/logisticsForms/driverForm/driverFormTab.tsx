@@ -74,6 +74,7 @@ export const DriverFormTab = ({
   documentsTypesList,
   vehiclesTypesList,
   isLoadingSubmit,
+  tripTypes,
   onAuditDriver = async () => {}
 }: DriverFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -85,11 +86,7 @@ export const DriverFormTab = ({
   const [imageError, setImageError] = useState(false);
 
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
-  const typeOfTrip = [
-    { label: "Personas", value: 1 },
-    { label: "Sustancias peligrosas", value: 2 },
-    { label: "Explosivos", value: 3 }
-  ];
+
   const defaultValues =
     statusForm === "create" ? {} : dataToProjectFormData(data, vehiclesTypesList || []);
   const {
@@ -578,7 +575,10 @@ export const DriverFormTab = ({
                   placeholder="Seleccione"
                   title="Tipos de viaje que esta autorizado"
                   errors={errors?.general?.trip_type}
-                  options={typeOfTrip}
+                  options={tripTypes.map((tripType) => ({
+                    label: tripType.description,
+                    value: tripType.id
+                  }))}
                   disabled={statusForm === "review"}
                 />
               )}

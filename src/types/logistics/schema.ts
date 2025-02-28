@@ -1212,6 +1212,7 @@ export interface IAPIDriver {
   birth_date: Date;
   photo?: string;
   company_id?: string;
+  features: Ifeature[];
 }
 export interface IFormGeneralDriver {
   id: number;

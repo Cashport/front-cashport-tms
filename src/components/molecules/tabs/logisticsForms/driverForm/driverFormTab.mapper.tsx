@@ -1,13 +1,19 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import { IAPIDriver, ICertificates, IFormDriver, VehicleType } from "@/types/logistics/schema";
+import {
+  IAPIDriver,
+  ICertificates,
+  IFormDriver,
+  ITripType,
+  VehicleType
+} from "@/types/logistics/schema";
 import { IFormProject } from "@/types/projects/IFormProject";
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { UseFormSetValue } from "react-hook-form";
 import utc from "dayjs/plugin/utc";
-import { MessageInstance } from "antd/es/message/interface";
+
 dayjs.extend(utc);
 
 export type StatusForm = "review" | "create" | "edit";
@@ -29,6 +35,7 @@ export interface DriverFormTabProps {
   documentsTypesList: CertificateType[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
+  tripTypes: ITripType[];
 }
 
 export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICertificates[] };
@@ -79,7 +86,11 @@ export const dataToProjectFormData = (
       photo: data.photo,
       vehicle_type: vehicleTypeArray,
       status: data.status,
-      trip_type: []
+      trip_type:
+        data.features?.map((feature: any) => ({
+          label: feature.description,
+          value: feature.id
+        })) ?? []
     }
   };
 };
