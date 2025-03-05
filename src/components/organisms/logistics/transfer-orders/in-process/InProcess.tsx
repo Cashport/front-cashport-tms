@@ -101,6 +101,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
         children: (
           <TransferOrdersTable
             showColumn={false}
+            showCarriersColumn={true}
             aditionalRow={aditionalRow}
             items={item.items}
             pagination={item.page}

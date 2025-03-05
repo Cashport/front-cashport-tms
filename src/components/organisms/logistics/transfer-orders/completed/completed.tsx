@@ -78,6 +78,7 @@ export const Completed: FC<ICompletedProps> = () => {
       children: (
         <TransferOrdersTable
           showColumn={false}
+          showCarriersColumn={true}
           items={item.items}
           pagination={item.page}
           loading={isLoadingPagination}

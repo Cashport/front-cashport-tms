@@ -119,7 +119,12 @@ export const Request: FC<IRequestProps> = ({
         };
         redirect = "/logistics/transfer-request/";
       }
-      const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO, STATUS.TO.CANCELADO];
+      const statusToDetailsTO = [
+        STATUS.TO.SIN_PROCESAR,
+        STATUS.TO.PROCESANDO,
+        STATUS.TO.PROCESADO,
+        STATUS.TO.CANCELADO
+      ];
       if (statusToDetailsTO.includes(item.statusId)) {
         redirect = "/logistics/orders/details";
       }
@@ -139,6 +144,7 @@ export const Request: FC<IRequestProps> = ({
         children: (
           <TransferOrdersTable
             items={item.items}
+            showCarriersColumn={false}
             pagination={item.page}
             aditionalRow={aditionalRow}
             redirect={redirect}
