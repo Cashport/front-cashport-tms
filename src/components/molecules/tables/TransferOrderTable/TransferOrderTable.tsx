@@ -27,6 +27,7 @@ export interface DataType {
   tipodeviaje: string;
   tiempodeviaje: string;
   valor: number;
+  carriers: string;
 }
 
 interface ITransferOrdersTable {
@@ -37,6 +38,7 @@ interface ITransferOrdersTable {
   redirect?: string;
   showBothIds?: boolean;
   trShouldRedirect?: boolean;
+  showCarriersColumn?: boolean;
   fetchData: (newPage: number) => Promise<void>;
   loading: boolean;
 }
@@ -49,6 +51,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
   redirect,
   showBothIds = false,
   trShouldRedirect = false,
+  showCarriersColumn = false,
   fetchData,
   loading
 }) => {
@@ -60,7 +63,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
   };
 
   const [dataSource, setDataSource] = useState<DataType[]>([]);
-  
+
   useEffect(() => {
     const mappedData = items.map((item) => ({
       key: item.id,
@@ -82,12 +85,19 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
         ispeopleproblem: item.is_people_problem,
         isRejected: !!item.is_rejected,
         tr: String(item.id)
-      }
+      },
+      carriers: item.carriers
     }));
     setDataSource(mappedData);
   }, [items]);
 
-  const columnsShow = columns(showColumn, redirect, showBothIds, trShouldRedirect);
+  const columnsShow = columns(
+    showColumn,
+    redirect,
+    showBothIds,
+    trShouldRedirect,
+    showCarriersColumn
+  );
   if (aditionalRow) {
     columnsShow.unshift(aditionalRow);
   }

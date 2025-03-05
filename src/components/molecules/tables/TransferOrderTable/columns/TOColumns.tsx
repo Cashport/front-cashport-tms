@@ -17,7 +17,8 @@ export const columns = (
   showColumn: boolean,
   redirect?: string,
   showBothIds?: boolean,
-  trShouldRedirect?: boolean
+  trShouldRedirect?: boolean,
+  showCarriersColumn?: boolean
 ): TableColumnsType<DataType> => {
   const timeToTrip = showColumn
     ? {
@@ -31,6 +32,16 @@ export const columns = (
         showSorterTooltip: false
       }
     : {};
+  const carriersColumn = showCarriersColumn
+    ? {
+        title: "Proveedores",
+        dataIndex: "carriers",
+        render: (text: string) => <Text className="row-text">{text ? text : ""}</Text>,
+        sorter: (a: any, b: any) => a.carriers.localeCompare(b.carriers),
+        showSorterTooltip: false
+      }
+    : {};
+
   return [
     {
       title: "TR",
@@ -145,6 +156,7 @@ export const columns = (
       sorter: (a, b) => Number(a.valor) - Number(b.valor),
       showSorterTooltip: false
     },
+    carriersColumn,
     {
       title: "",
       dataIndex: "validator",
