@@ -86,7 +86,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
         isRejected: !!item.is_rejected,
         tr: String(item.id)
       },
-      carriers: item.carriers
+      carriers: item.carriers ?? ""
     }));
     setDataSource(mappedData);
   }, [items]);
