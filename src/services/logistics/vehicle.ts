@@ -5,6 +5,7 @@ import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { VehicleData } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
+import { IFeature } from "@/types/features/feature";
 
 export const getAllVehicles = async ({ id }: { id: string }): Promise<any[]> => {
   const response: GenericResponse<any[]> = await API.get(`/vehicle/provider/${id}`);
@@ -14,6 +15,12 @@ export const getAllVehicles = async ({ id }: { id: string }): Promise<any[]> => 
 
 export const getVehicleType = async (): Promise<VehicleType[]> => {
   const response: GenericResponse<VehicleType[]> = await API.get(`/vehicle/type`);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error");
+};
+
+export const getFeaturesVehicle = async (): Promise<IFeature[]> => {
+  const response: GenericResponse<IFeature[]> = await API.get(`/vehicle/features`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
 };
@@ -77,7 +84,7 @@ export const addVehicle = async (
 ): Promise<AxiosResponse<any, any>> => {
   try {
     const form = createVehicleForm(data, files, formImages);
-    const response = await axios.post(`${config.API_HOST}/vehicle/create`, form, {
+    const response = await API.post(`/vehicle/create`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
         Accept: "application/json, text/plain, */*"
@@ -96,10 +103,10 @@ export const updateVehicle = async (
 ): Promise<AxiosResponse<any, any>> => {
   try {
     const form = createVehicleForm(data, files, formImages);
-    const response = await axios.put(`${config.API_HOST}/vehicle/update`, form, {
+    const response = await API.put(`/vehicle/update`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
+        Accept: "application/json, text/plain, */*",
       }
     });
     return response;
@@ -107,4 +114,15 @@ export const updateVehicle = async (
     console.log("Error updating vehicle: ", error);
     throw error as any;
   }
+};
+
+export const updateVehicleStatus = async (
+  id: string,
+  status: number
+): Promise<AxiosResponse<any, any>> => {
+  const response: GenericResponse = await API.put(`/vehicle/update-status/${id}`, {
+    status
+  });
+  if (response.success) return response.data;
+  throw new Error(response.message || "Error al actualizar el estado del vehiculo");
 };

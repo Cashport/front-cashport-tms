@@ -9,6 +9,7 @@ import { IDrivers } from "@/types/logistics/schema";
 import { getAllDrivers } from "@/services/logistics/drivers";
 import Link from "next/link";
 import useSWR from "swr";
+import CustomTag from "@/components/atoms/CustomTag";
 
 interface Props {
   params: {
@@ -78,20 +79,15 @@ export const DriverTable = ({ params: { id } }: Props) => {
     {
       title: "Status",
       key: "status",
-      className: "tableTitle",
-      width: "130px",
-      dataIndex: "active",
-      render: (_, { active }) => (
-        <Flex>
-          <Flex
-            align="center"
-            className={active ? "statusContainerActive" : "statusContainerInactive"}
-          >
-            <div className={active ? "statusActive" : "statusInactive"} />
-            <Text>{active ? "Activo" : "Inactivo"}</Text>
+      dataIndex: "status",
+      width: "200px",
+      render: (_, { status }) => {
+        return (
+          <Flex>
+            <CustomTag text={status.description} color={status.color} />
           </Flex>
-        </Flex>
-      )
+        );
+      }
     },
     {
       title: "",

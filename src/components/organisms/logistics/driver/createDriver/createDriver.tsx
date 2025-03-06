@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import "./createDriver.scss";
 import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
-import { addDriver } from "@/services/logistics/drivers";
+import { addDriver, getTripTypes } from "@/services/logistics/drivers";
 import { IFormDriver } from "@/types/logistics/schema";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { useState } from "react";
@@ -46,8 +46,8 @@ export const CreateDriverView = ({ params }: Props) => {
     }
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "2",
-    getDocumentsByEntityType,
+    "documents/type/2",
+    () => getDocumentsByEntityType("2"),
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   const { data: vehiclesTypesData, isLoading: isLoadingVehicles } = useSWR(
@@ -55,8 +55,13 @@ export const CreateDriverView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("1", getTripTypes, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
   return (
-    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles}>
+    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isloadingTripTypes}>
       <DriverFormTab
         isLoadingSubmit={isLoadingSubmit}
         onSubmitForm={onCreateDriver}
@@ -64,6 +69,7 @@ export const CreateDriverView = ({ params }: Props) => {
         params={params}
         documentsTypesList={documentsType ?? []}
         vehiclesTypesList={vehiclesTypesData ?? []}
+        tripTypes={tripTypes ?? []}
       />
     </Skeleton>
   );

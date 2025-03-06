@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import config from "@/config";
 import { API } from "@/utils/api/api";
 import { CreateDriver, IFormGeneralDriver, IListData } from "@/types/logistics/schema";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
@@ -12,19 +11,12 @@ export const getAllDrivers = async ({ providerId }: { providerId: number }): Pro
   throw response;
 };
 
-export const getDriverById = async (id: string): Promise<IListData> => {
-  try {
-    const response: IListData = await axios.get(`${config.API_HOST}/driver/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
-    return response;
-  } catch (error) {
-    console.log("Error get Driver: ", error);
-    return error as any;
-  }
+export const getDriverById = async (id: string): Promise<any> => {
+  const response: GenericResponse = await API.get(`/driver/${id}`);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error");
 };
+
 export const createDriverForm = (
   generalData: IFormGeneralDriver,
   logo: FileObject[],
@@ -33,6 +25,10 @@ export const createDriverForm = (
   const form = new FormData();
   const body: any = generalData;
 
+  body.features =
+    generalData.trip_type.map((tripType: any) => ({
+      id: tripType.value
+    })) ?? [];
   body.logo = logo
     ? logo.map((file: any) => ({
         docReference: file.docReference,
@@ -104,11 +100,17 @@ export const addDriver = async (
 
 export const updateDriverStatus = async (
   id: string,
-  status: boolean
+  status: number
 ): Promise<AxiosResponse<any, any>> => {
   const response: GenericResponse = await API.put(`/driver/update-status/${id}`, {
     status
   });
   if (response.success) return response.data;
   throw new Error(response.message || "Error al actualizar el estado del conductor");
+};
+
+export const getTripTypes = async (): Promise<any[]> => {
+  const response: GenericResponse<any[]> = await API.get(`/driver/features`);
+  if (response.success) return response.data;
+  throw new Error(response?.message || "Error");
 };

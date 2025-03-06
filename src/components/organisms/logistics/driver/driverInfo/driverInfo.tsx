@@ -4,7 +4,12 @@ import React, { useCallback, useState } from "react";
 import "../../../../../styles/_variables_logistics.css";
 import "./driverInfo.scss";
 import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
-import { getDriverById, updateDriver, updateDriverStatus } from "@/services/logistics/drivers";
+import {
+  getDriverById,
+  getTripTypes,
+  updateDriver,
+  updateDriverStatus
+} from "@/services/logistics/drivers";
 import { IFormDriver } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
 import { useRouter } from "next/navigation";
@@ -39,7 +44,7 @@ export const DriverInfoView = ({ params }: Props) => {
     revalidateOnReconnect: false,
     revalidateOnMount: true
   });
-
+  console.log("data", data);
   const handleSubmitForm = async (data: IFormDriver) => {
     data.general.company_id = params.id;
     try {
@@ -59,10 +64,15 @@ export const DriverInfoView = ({ params }: Props) => {
       setIsLoadingSubmit(false);
     }
   };
-  const handlechangeStatus = async (status: boolean) => {
+  const handlechangeStatus = async (status: 0 | 1 | 2) => {
+    const statusText = {
+      0: "Conductor desactivado",
+      1: "Conductor activado",
+      2: "Conductor auditado"
+    };
     try {
       await updateDriverStatus(params.driverId, status);
-      message.success(`Conductor ${status ? "activado" : "desactivado"}`, 2).then(() => {
+      message.success(`${statusText[status]} `, 2).then(() => {
         push(`/logistics/providers/${params.id}/driver`);
         setStatusForm("review");
       });
@@ -73,9 +83,10 @@ export const DriverInfoView = ({ params }: Props) => {
       );
     }
   };
+
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "2",
-    getDocumentsByEntityType,
+    "documents/type/2",
+    () => getDocumentsByEntityType("2"),
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
   const { data: vehiclesTypesData, isLoading: isLoadingVehicles } = useSWR(
@@ -83,19 +94,31 @@ export const DriverInfoView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("1", getTripTypes, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false
+  });
   return (
-    <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isLoading || isValidating}>
+    <Skeleton
+      active
+      loading={
+        isLoadingDocuments || isLoadingVehicles || isLoading || isValidating || isloadingTripTypes
+      }
+    >
       <DriverFormTab
         onSubmitForm={handleSubmitForm}
-        data={data?.data?.data[0]}
+        data={data?.[0]}
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}
-        onActiveProject={() => handlechangeStatus(true)}
-        onDesactivateProject={() => handlechangeStatus(false)}
+        onActiveProject={() => handlechangeStatus(1)}
+        onDesactivateProject={() => handlechangeStatus(0)}
+        onAuditDriver={() => handlechangeStatus(2)}
         documentsTypesList={documentsType ?? []}
         vehiclesTypesList={vehiclesTypesData ?? []}
         isLoadingSubmit={isLoadingSubmit}
+        tripTypes={tripTypes ?? []}
       />
     </Skeleton>
   );

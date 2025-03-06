@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Flex, message, Table, Typography } from "antd";
+import { Button, Flex, message, Table } from "antd";
 import type { TableProps } from "antd";
 import { DotsThree, Eye, Triangle } from "phosphor-react";
 import "./carrierTable.scss";
@@ -7,8 +7,9 @@ import UiSearchInput from "@/components/ui/search-input";
 import { ICarrier } from "@/types/logistics/schema";
 import { getAllCarriers } from "@/services/logistics/carrier";
 import useSWR from "swr";
+import CustomTag from "@/components/atoms/CustomTag";
+import Link from "next/link";
 
-const { Text } = Typography;
 
 export const CarrierTable = () => {
   const [page, setPage] = useState(1);
@@ -50,7 +51,7 @@ export const CarrierTable = () => {
           type: element.carrier_type,
           vehicle: element.vehicles,
           drivers: element.drivers,
-          status: element.active
+          status: element.status
         })) || [];
     setDatasource(data);
   }, [carriers, search]);
@@ -82,22 +83,17 @@ export const CarrierTable = () => {
       key: "drivers"
     },
     {
-      title: "Estado",
+      title: "Status",
       key: "status",
-      className: "tableTitle",
-      width: "130px",
       dataIndex: "status",
-      render: (_, { status }) => (
-        <Flex>
-          <Flex
-            align="center"
-            className={status ? "statusContainerActive" : "statusContainerInactive"}
-          >
-            <div className={status ? "statusActive" : "statusInactive"} />
-            <Text>{status ? "Activo" : "Inactivo"}</Text>
+      width: "200px",
+      render: (_, { status }) => {
+        return (
+          <Flex>
+            <CustomTag text={status.description} color={status.color} />
           </Flex>
-        </Flex>
-      )
+        );
+      }
     },
     {
       title: "",
@@ -105,11 +101,12 @@ export const CarrierTable = () => {
       width: "54px",
       dataIndex: "",
       render: (_, { id }) => (
-        <Button
-          href={`/logistics/providers/${id}`}
-          className="icon-detail"
-          icon={<Eye size={20} />}
-        />
+        <Link href={`/logistics/providers/${id}`} >
+          <Button
+            className="icon-detail"
+            icon={<Eye size={20} />}
+          />
+        </Link>
       )
     }
   ];

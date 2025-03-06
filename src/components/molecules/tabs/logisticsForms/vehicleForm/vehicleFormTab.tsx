@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Flex, Row, Switch, Typography, message } from "antd";
+import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, Pencil } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -22,12 +22,17 @@ import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDo
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
+import ModalConfirmAudit from "../driverForm/components/ModalConfirmAudit";
+import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import CustomTag from "@/components/atoms/CustomTag";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import React from "react";
+import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 
 const { Title, Text } = Typography;
 
@@ -38,6 +43,7 @@ interface ImageState {
 export const VehicleFormTab = ({
   data,
   handleFormState = () => {},
+  // eslint-disable-next-line no-unused-vars
   onEditVehicle = () => {},
   onSubmitForm = () => {},
   statusForm = "review",
@@ -46,18 +52,20 @@ export const VehicleFormTab = ({
   params,
   documentsTypesList,
   vehiclesTypesList,
-  isLoading
+  features = [],
+  isLoading,
+  // eslint-disable-next-line no-unused-vars
+  onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
-
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
+  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
   );
-
   const defaultValues = statusForm === "create" ? {} : normalizeVehicleData(data as any);
   const {
     watch,
@@ -66,7 +74,6 @@ export const VehicleFormTab = ({
     resetField,
     reset,
     setValue,
-    getValues,
     trigger,
     formState: { errors, isValid }
   } = useForm<IFormVehicle>({
@@ -75,9 +82,55 @@ export const VehicleFormTab = ({
     mode: "onChange"
   });
 
-  const { push } = useRouter();
   const formImages = watch("images");
 
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <ButtonGenerateAction
+          icon={<Pencil size={"1.5rem"} />}
+          title={statusForm === "review" ? "Editar" : "Cancelar edición"}
+          hideArrow
+          onClick={() => {
+            if (statusForm === "review") {
+              handleFormState("edit");
+            } else {
+              handleFormState("review");
+              reset();
+            }
+          }}
+        />
+      )
+    },
+    {
+      key: "2",
+      label: (
+        <ButtonGenerateAction
+          icon={<ArrowsClockwise size={"1.5rem"} />}
+          title="Cambiar estado"
+          onClick={() => setIsOpenModal(true)}
+          hideArrow
+        />
+      )
+    },
+    {
+      key: "3",
+      label: (
+        <ButtonGenerateAction
+          icon={<CheckCircle size={"1.5rem"} />}
+          title="Auditar"
+          disabled={statusForm !== "review"}
+          hideArrow
+          onClick={() => setIsModalConfirmAuditOpen(true)}
+        />
+      )
+    }
+  ];
+  const menuStyle: React.CSSProperties = {
+    backgroundColor: "white",
+    boxShadow: "none"
+  };
   const hasImages = () => {
     return images.some((img) => img.file) || (formImages && formImages.length > 0);
   };
@@ -106,6 +159,9 @@ export const VehicleFormTab = ({
   }
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+
+  const trip_type = watch("general.trip_type");
+  const driverStatus = watch("general.status");
 
   useEffect(() => {
     if (Array.isArray(documentsTypesList)) {
@@ -198,7 +254,10 @@ export const VehicleFormTab = ({
     const vehicleData: any = {
       ...data.general,
       has_gps: hasGPS,
-      id_carrier: Number(params.id) || 14
+      id_carrier: Number(params.id) || 14,
+      features: data.general.trip_type.map((tripType: any) => ({
+        id: tripType.value
+      }))
     };
     const formImages = [...data.images];
     _onSubmitVehicle(vehicleData, selectedFiles, formImages, setImageError, onSubmitForm);
@@ -222,7 +281,7 @@ export const VehicleFormTab = ({
 
   return (
     <>
-      <form className="vehiclesFormTab" onSubmit={handleSubmit(onSubmit)}>
+      <Form className="vehiclesFormTab">
         <Flex component={"header"} className="headerProyectsForm">
           <Link href={`/logistics/providers/${params.id}/vehicle`} passHref>
             <Button
@@ -234,53 +293,31 @@ export const VehicleFormTab = ({
               Ver vehículos
             </Button>
           </Link>
-          <Flex gap={"1rem"}>
-            {statusForm === "review" && (
-              <Button
-                className="buttons"
-                htmlType="button"
-                disabled={statusForm === "review"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsOpenModal(true);
-                }}
+          {statusForm !== "create" && (
+            <Flex gap={"0.5rem"} align="center">
+              <Flex>
+                {!!driverStatus?.description && (
+                  <CustomTag text={driverStatus.description} color={driverStatus.color} />
+                )}
+              </Flex>
+              <Dropdown
+                menu={{ items }}
+                trigger={["click"]}
+                dropdownRender={(menu) => (
+                  <div>
+                    {React.cloneElement(
+                      menu as React.ReactElement<{
+                        style: React.CSSProperties;
+                      }>,
+                      { style: menuStyle }
+                    )}
+                  </div>
+                )}
               >
-                Cambiar Estado
-                <ArrowsClockwise size={"1.2rem"} />
-              </Button>
-            )}
-            {statusForm === "review" ? (
-              <Button
-                className="buttons -edit"
-                htmlType="button"
-                onClick={(e) => {
-                  handleFormState("edit");
-                  e.preventDefault();
-                }}
-              >
-                {validationButtonText(statusForm)}
-                <Pencil size={"1.2rem"} />
-              </Button>
-            ) : (
-              ""
-            )}
-            {statusForm === "edit" ? (
-              <Button
-                className="buttons -edit"
-                htmlType="button"
-                onClick={(e) => {
-                  handleFormState("review");
-                  e.preventDefault();
-                  reset();
-                  setHasGPS(data?.has_gps || false);
-                }}
-              >
-                {"Cancelar edición"}
-              </Button>
-            ) : (
-              ""
-            )}
-          </Flex>
+                <GenerateActionButton onClick={() => {}} />
+              </Dropdown>
+            </Flex>
+          )}
         </Flex>
         <Flex component={"main"} flex="3" vertical>
           <Row gutter={[16, 16]}>
@@ -483,6 +520,27 @@ export const VehicleFormTab = ({
               </Row>
             </Col>
           </Row>
+          {/* ----------------------------------Tipos de viaje--------------------------------- */}
+          <Row style={{ width: "100%", marginBottom: "2rem" }}>
+            <Title className="title" level={4}>
+              Tipos de viaje
+            </Title>
+            <Controller
+              name="general.trip_type"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <MultiSelectTags
+                  field={field}
+                  placeholder="Seleccione"
+                  title="Tipos de viaje que esta autorizado"
+                  errors={errors?.general?.trip_type}
+                  options={features.map((f) => ({ label: f.description, value: f.id }))}
+                  disabled={statusForm === "review"}
+                />
+              )}
+            />
+          </Row>
           <Row gutter={[16, 16]}>
             {" "}
             {/* Fila Informacion Adicional */}
@@ -557,7 +615,20 @@ export const VehicleFormTab = ({
             </Row>
           )}
         </Flex>
-      </form>
+      </Form>
+      <ModalConfirmAudit
+        isOpen={isModalConfirmAuditOpen}
+        onClose={() => setIsModalConfirmAuditOpen(false)}
+        onConfirm={onAuditVehicle}
+        title="Auditar vehículo"
+        description={[
+          "¿Confirma que el vehículo cumple con los requerimientos legales y de HSEQ?",
+          "Confirmo que está autorizado para manejar"
+        ]}
+        tags={trip_type?.map((tt) => ({
+          label: features?.find((f) => f.id === tt.value)?.description || ""
+        }))}
+      />
       <ModalChangeStatus
         isActiveStatus={true}
         isOpen={isOpenModal}

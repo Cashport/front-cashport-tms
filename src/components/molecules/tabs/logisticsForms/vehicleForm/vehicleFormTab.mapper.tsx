@@ -11,6 +11,7 @@ import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
 import { UseFormReset, UseFormSetValue } from "react-hook-form";
 import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { IFeature } from "@/types/features/feature";
 
 export type StatusForm = "review" | "create" | "edit";
 
@@ -23,6 +24,7 @@ export interface VehicleFormTabProps {
   handleFormState?: (newFormState: StatusForm) => void;
   onActiveVehicle?: () => void;
   onDesactivateVehicle?: () => void;
+  onAuditVehicle?: () => void;
   statusForm: "create" | "edit" | "review";
   params: {
     id: string;
@@ -30,6 +32,7 @@ export interface VehicleFormTabProps {
   };
   documentsTypesList: CertificateType[];
   vehiclesTypesList: VehicleType[];
+  features: IFeature[];
   isLoading: boolean;
 }
 export interface VehicleImage {
@@ -89,7 +92,9 @@ export const normalizeVehicleData = (data: any): any => {
       modified_at: new Date(data.modified_at),
       modified_by: data.modified_by,
       company: "", // Add logic to fetch company name if necessary
-      IS_ACTIVE: data.active
+      IS_ACTIVE: data.active,
+      status: data.status,
+      trip_type: data.features?.map((f:any) => ({value: f.id}))
     },
     images: images,
     files: documents,

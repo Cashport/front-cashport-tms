@@ -35,6 +35,8 @@ import { CaretLeft } from "phosphor-react";
 import { BackButton } from "./components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
+import VehicleChips from "./components/ChipsRow";
+import ChipsRow from "./components/ChipsRow";
 
 interface Props {
   idOrder: string;
@@ -200,28 +202,34 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
           </Flex>
           <Flex className={styles.container} vertical>
             {tripType === TripType.Personas ? (
-              <>
+              <Flex vertical>
                 <p className={styles.sectionTitle}>Personas</p>
                 <Persons persons={transferOrder?.transfer_order_persons ?? []} />
                 <p>&nbsp;</p>
-              </>
+              </Flex>
             ) : (
-              <>
+              <Flex vertical>
                 <p className={styles.sectionTitle}>Carga</p>
                 <Materials materials={dataCarga} />
                 <p>&nbsp;</p>
-              </>
+              </Flex>
             )}
-            <p className={styles.title}>Vehículos sugeridos</p>
-            <Row>
-              <Col span={24} style={{ paddingTop: "0.5rem" }}>
-                {transferOrder?.transfer_order_vehicles?.map((veh) => (
-                  <div className={styles.selected} key={veh.id}>
-                    {veh.vehicle_type_desc} <small>{veh.quantity}</small>
-                  </div>
-                ))}
-              </Col>
-            </Row>
+
+            <Flex vertical gap={"0.5rem"}>
+              <p className={styles.title}>Vehículos sugeridos</p>
+              {transferOrder?.transfer_order_vehicles &&
+                transferOrder?.transfer_order_vehicles?.length > 0 && (
+                  <ChipsRow
+                    chips={transferOrder?.transfer_order_vehicles?.map(
+                      ((vehicle) => ({
+                        name: vehicle.vehicle_type_desc,
+                        quantity: vehicle.quantity,
+                        id: vehicle.id
+                      })) || []
+                    )}
+                  />
+                )}
+            </Flex>
           </Flex>
           <Flex>
             <Col span={12}>
