@@ -64,6 +64,7 @@ export interface ITransferRequestDetail {
   transfer_orders: number[];
   id_end_location: number;
   id_start_location: number;
+  fixed_rate: 0 | 1;
 }
 
 export interface IPagination {

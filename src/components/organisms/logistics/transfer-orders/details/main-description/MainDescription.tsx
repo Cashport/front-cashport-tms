@@ -274,7 +274,10 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
         <div className={styles.trackComponent}>
           <div className={styles.trackTitleContainer}>
             <Flex gap={8}>
-              <Text className={styles.trackTitle}>TR-{transferRequest?.id}</Text>
+              <Text className={styles.trackTitle}>
+                TR-{transferRequest?.id}
+                {transferRequest?.fixed_rate === 1 ? " (Renta fija)" : ""}
+              </Text>
               {!!transferRequest?.transfer_orders?.length && (
                 <OrderList orders={transferRequest?.transfer_orders ?? []} />
               )}
