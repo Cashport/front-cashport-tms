@@ -36,9 +36,10 @@ export const columns = (
     ? {
         title: "Proveedores",
         dataIndex: "carriers",
-        render: (text: string) => <Text className="row-text">{text ? text : ""}</Text>,
+        render: (text: string) => <div className="text-truncate">{text}</div>,
         sorter: (a: any, b: any) => a.carriers.localeCompare(b.carriers),
-        showSorterTooltip: false
+        showSorterTooltip: false,
+        width: 200
       }
     : {};
 
@@ -100,6 +101,7 @@ export const columns = (
       sorter: (a, b) => a.origendestino.origin.localeCompare(b.origendestino.origin),
       showSorterTooltip: false
     },
+    carriersColumn,
     {
       title: "Fechas",
       dataIndex: "fechas",
@@ -156,7 +158,7 @@ export const columns = (
       sorter: (a, b) => Number(a.valor) - Number(b.valor),
       showSorterTooltip: false
     },
-    carriersColumn,
+
     {
       title: "",
       dataIndex: "validator",
