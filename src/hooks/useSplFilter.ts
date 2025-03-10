@@ -1,14 +1,17 @@
-import { API, fetcher } from "@/utils/api/api";
+import { API } from "@/utils/api/api";
+import { getAllValues, getFilteredValues } from "@/utils/logistics/useFilters";
 import { DefaultOptionType } from "antd/es/select";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
   key: string;
+  disableCheckbox?: boolean;
   children?: Option[];
 }
+
 interface UserAPI {
   id: number;
   email: string;
@@ -37,8 +40,10 @@ interface UsePslFilter {
   filter: (inputValue: string, path: DefaultOptionType[]) => boolean;
   selectedValues: string[][];
   setSelectedValues: Dispatch<SetStateAction<string[][]>>;
-  filterQuery: [string, string][];
-  handleUpdateFilterQuery: (query: [string, string][]) => void;
+  pslQuery: [string, string][];
+  vpQuery: string[];
+  handleUpdatePslQuery: (query: [string, string][]) => void;
+  handleUpdateVpQuery: (query: string[]) => void;
   clearFilters: () => void;
   setSearchInput: Dispatch<SetStateAction<string>>;
 }
@@ -46,43 +51,68 @@ interface UsePslFilter {
 export const usePslFilter = (): UsePslFilter => {
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [searchInput, setSearchInput] = useState("");
-  const [filterQuery, setFilterQuery] = useState<[string, string][]>([]);
+  const [pslQuery, setPslQuery] = useState<[string, string][]>([]);
+  const [vpQuery, setVpQuery] = useState<string[]>([]);
 
-  const { data, isLoading } = useSWR<IPslUsers>(
+  const { data: pslData, isLoading: loadingPsl } = useSWR<IPslUsers>(
     `transfer-request/home-screen-filters`,
     async (url) => API.get(url),
     {}
   );
 
-  function transformData(apiData: PslAPI[]): { options: Option[]; preSelectedValues: string[][] } {
+  const { data: vpData, isLoading: loadingVp } = useSWR<{
+    data: { id: number; name: string; description: string }[];
+  }>("zone/all", async (url: any) => API.get(url), {});
+
+  const transformData = (
+    pslApiData: PslAPI[],
+    vpApiData: { id: number; name: string; description: string }[]
+  ): { options: Option[]; preSelectedValues: string[][] } => {
     const preSelectedValues: string[][] = [];
 
-    const options = apiData.map(({ id, description, users }) => {
+    // Transformar PSLs
+    const pslOptions = pslApiData.map(({ id, description, users }) => {
       const children = users.map((user) => {
         if (user.checked) {
-          preSelectedValues.push([id.toString(), user.id.toString()]);
+          preSelectedValues.push(["psls", id.toString(), user.id.toString()]);
         }
         return {
           value: user.id.toString(),
           label: user.name,
-          key: `${id}-user-${user.id}`
+          key: `psl-${id}-user-${user.id}`
         };
       });
 
       return {
         value: id.toString(),
         label: description,
-        key: id.toString(),
+        key: `psl-${id}`,
         children
       };
     });
 
+    // Transformar VPs
+    const vpOptions = vpApiData.map(({ id, name, description }) => {
+      return {
+        value: id.toString(),
+        label: `${name} - ${description}`,
+        key: `vp-${id}`
+      };
+    });
+
+    const options: Option[] = [
+      { value: "psls", label: "PSLs", key: "psls", disableCheckbox: true, children: pslOptions },
+      { value: "vps", label: "VPs", key: "vps", disableCheckbox: true, children: vpOptions }
+    ];
+
     return { options, preSelectedValues };
-  }
+  };
 
-  const { options, preSelectedValues } = useMemo(() => transformData(data?.data || []), [data]);
+  const { options, preSelectedValues } = useMemo(
+    () => transformData(pslData?.data || [], vpData?.data || []),
+    [pslData, vpData]
+  );
 
-  // Actualiza los valores seleccionados cuando se carga la data de la API:
   useEffect(() => {
     if (JSON.stringify(selectedValues) !== JSON.stringify(preSelectedValues)) {
       setSelectedValues(preSelectedValues);
@@ -90,13 +120,15 @@ export const usePslFilter = (): UsePslFilter => {
   }, [preSelectedValues]);
 
   const clearFilters = () => {
-    setFilterQuery([]);
+    setPslQuery([]);
+    setVpQuery([]);
   };
 
   const handleClearFilters = () => {
     setSearchInput("");
     setSelectedValues([]);
-    setFilterQuery([]);
+    setPslQuery([]);
+    setVpQuery([]);
   };
 
   const filter = (inputValue: string, path: DefaultOptionType[]) =>
@@ -104,82 +136,66 @@ export const usePslFilter = (): UsePslFilter => {
       (option.label as string).toLowerCase().includes(inputValue.toLowerCase())
     );
 
-  const getFilteredValues = (options: Option[], inputValue: string): string[][] => {
-    const values: string[][] = [];
-
-    const recurse = (options: Option[], currentPath: string[]) => {
-      options.forEach((option) => {
-        // Si el padre coincide, agrega solo su valor y termina la ejecución para ese nodo
-        if (filter(inputValue, [option])) {
-          values.push([...currentPath, option.value]);
-          return;
-        }
-
-        // Si no coincide, busca en los hijos
-        if (option.children) {
-          recurse(option.children, [...currentPath, option.value]);
-        }
-      });
-    };
-
-    recurse(options, []);
-    return values;
-  };
-
-  const getAllValues = (options: Option[]): string[][] => {
-    const values: string[][] = [];
-    options.forEach((option) => {
-      values.push([option.value]);
-    });
-    return values;
-  };
   const handleSelectAll = () => {
     const filteredValues =
       searchInput.trim() !== "" ? getFilteredValues(options, searchInput) : getAllValues(options);
     setSelectedValues(filteredValues);
   };
 
-  const handleUpdateFilterQuery = (updatedValues: [string, string][]) => {
-    setFilterQuery(updatedValues);
+  const handleUpdatePslQuery = (updatedValues: [string, string][]) => {
+    setPslQuery(updatedValues);
   };
 
-  // Genera filterQuery basado en selectedValues y transformedData
+  const handleUpdateVpQuery = (updatedValues: string[]) => {
+    setVpQuery(updatedValues);
+  };
+  console.log("selectedValues", selectedValues);
+
+  type SelectedValue = string[];
   useEffect(() => {
-    const updatedFilterQuery: [string, string][] = selectedValues.reduce(
-      (acc, [parentValue, childValue]) => {
-        const parent = options.find((option) => option.value === parentValue);
-        if (!parent) return acc;
+    function separatePslsAndVps(selectedValues: SelectedValue[], options: Option[]) {
+      const pslsMap = new Map<string, string>();
+      const vps: string[] = [];
 
-        const existingParent = acc.find(([pValue]) => pValue === parentValue);
-        const childIds = childValue
-          ? [childValue] // Caso: Selección específica de usuario
-          : parent.children?.map((child) => child.value) || []; // Caso: Selección de todos los usuarios
-
-        if (existingParent) {
-          // Si el padre ya existe en el resultado, acumula los IDs de los hijos
-          existingParent[1] = [existingParent[1].split(",").concat(childIds)].join(",");
-        } else {
-          // Si el padre no está en el resultado, añade un nuevo registro
-          acc.push([parentValue, childIds.join(",")]);
+      selectedValues.forEach(([type, second, third]) => {
+        if (type === "psls") {
+          if (third) {
+            // Si ya existe la clave, concatenar el nuevo valor
+            pslsMap.set(second, pslsMap.has(second) ? `${pslsMap.get(second)},${third}` : third);
+          } else {
+            // Buscar en options
+            const pslOption = options.find((opt) => opt.value === "psls");
+            const childOption = pslOption?.children?.find((child) => child.value === second);
+            if (childOption?.children) {
+              const ids = childOption.children.map((c) => c.value).join(",");
+              pslsMap.set(second, ids);
+            }
+          }
+        } else if (type === "vps") {
+          vps.push(second);
         }
+      });
 
-        return acc;
-      },
-      [] as [string, string][]
-    );
-    handleUpdateFilterQuery(updatedFilterQuery);
+      const psls = Array.from(pslsMap.entries());
+      return { psls, vps };
+    }
+    const { vps, psls } = separatePslsAndVps(selectedValues, options);
+    handleUpdatePslQuery(psls);
+    handleUpdateVpQuery(vps);
   }, [selectedValues]);
 
   return {
     options,
-    isLoading,
+    isLoading: loadingPsl || loadingVp,
     handleSelectAll,
     handleClearFilters,
     filter,
     selectedValues,
     setSelectedValues,
-    filterQuery,
-    handleUpdateFilterQuery,
+    pslQuery,
+    vpQuery,
+    handleUpdatePslQuery,
+    handleUpdateVpQuery,
     clearFilters,
     setSearchInput
   };

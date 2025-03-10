@@ -37,7 +37,6 @@ export const columns = (
         title: "Proveedores",
         dataIndex: "carriers",
         render: (text: string) => {
-          console.log("text", text, !text);
           if (!text) return ""; // Manejo de string vacío
           const namesArray: string[] = text.split(",").map((name) => name.trim());
           if (namesArray.length === 1) return <div className="text-truncate">{namesArray[0]}</div>;

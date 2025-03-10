@@ -164,14 +164,19 @@ export const finishTransferRequest = async (data: TransferRequestFinish) => {
 
 export const getAcceptedTransferRequest = async (
   search?: string,
-  filterQuery?: [string, string][],
+  pslQuery?: [string, string][],
+  vpQuery?: string[],
   statusId?: string,
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
+    console.log("getAcceptedTransferRequest pslQuery", pslQuery);
+    console.log("getAcceptedTransferRequest vpQuery", vpQuery);
+
     const body = {
       searchParam: search,
-      psl: filterQuery,
+      psl: pslQuery,
+      vp: vpQuery,
       statusId,
       page
     };
@@ -189,14 +194,16 @@ export const getAcceptedTransferRequest = async (
 
 export const getOnRouteTransferRequest = async (
   search?: string,
-  filterQuery?: [string, string][],
+  pslQuery?: [string, string][],
+  vpQuery?: string[],
   statusId?: string,
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
     const body = {
       searchParam: search,
-      psl: filterQuery,
+      psl: pslQuery,
+      vp: vpQuery,
       statusId,
       page
     };
@@ -214,14 +221,16 @@ export const getOnRouteTransferRequest = async (
 
 export const getFinishedTransferRequest = async (
   search?: string,
-  filterQuery?: [string, string][],
+  pslQuery?: [string, string][],
+  vpQuery?: string[],
   statusId?: string,
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
     const body = {
       searchParam: search,
-      psl: filterQuery,
+      psl: pslQuery,
+      vp: vpQuery,
       statusId,
       page
     };
