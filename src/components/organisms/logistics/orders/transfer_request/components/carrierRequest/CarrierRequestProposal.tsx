@@ -19,7 +19,7 @@ export default function CarrierRequestProposal({ carrier }: Props) {
   };
   const children = (
     <Flex gap={24} className={style.children}>
-      <Flex gap={24} vertical>
+      <Flex gap={10} vertical>
         <Flex justify="space-between">
           <strong>Placas</strong> <div>{carrier.plate_number}</div>
         </Flex>
@@ -33,7 +33,7 @@ export default function CarrierRequestProposal({ carrier }: Props) {
           <strong>Contrato</strong> <div>{carrier.driver_contract}</div>
         </Flex>
       </Flex>
-      <Flex gap={24} vertical>
+      <Flex gap={10} vertical>
         <Flex justify="space-between">
           <strong>Sobre costo promedio</strong> <div>{carrier.driver_overcost}</div>
         </Flex>
@@ -72,8 +72,12 @@ const TitleComponent = ({ carrier }: { carrier: CarriersPricing }) => (
       <Tag color={carrier.color} style={{ height: "fit-content" }}>
         {carrier.statusdesc}
       </Tag>
-        <Text style={{ fontSize: "12px", fontWeight: "600" }}>{carrier.id_transfer_request} - {carrier.order_nro}</Text>
+      <Text style={{ fontSize: "12px", fontWeight: "600" }}>
+        {carrier.id_transfer_request} - {carrier.order_nro}
+      </Text>
     </Flex>
-    <Title level={5}>${carrier.amount.toLocaleString("es-CO")}</Title>
+    <Title level={5} style={{ marginBottom: 0 }}>
+      ${carrier.amount.toLocaleString("es-CO")}{" "}
+    </Title>
   </Flex>
 );

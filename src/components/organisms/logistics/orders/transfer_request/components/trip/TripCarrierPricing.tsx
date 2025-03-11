@@ -29,47 +29,27 @@ export default function TripCarrierPricing({ trip, handleSelectCarrier, fields, 
           <Title level={3} style={{ fontWeight: "bold", margin: 0 }}>
             {trip.vehicle_type_desc}
           </Title>
-          <Flex gap={6} vertical>
-            <Text>
-              <strong>Fecha inicio</strong>
-              <>&nbsp;&nbsp;</>
-              {dayjs.utc(trip.start_date).toDate().toLocaleDateString("es", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                timeZone: "GMT"
-              })}
-            </Text>
-            <Text>
-              <strong>Fecha fin</strong>
-              <>&nbsp;&nbsp;</>
-              {dayjs.utc(trip.end_date).toDate().toLocaleDateString("es", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                timeZone: "GMT"
-              })}
-            </Text>
-          </Flex>
         </Flex>
-        <Flex vertical gap={6} className={style.fromTo} align="end">
+        <Flex vertical gap={8} className={style.fromTo} align="end">
           <Text>
-            <strong>Origen</strong>
+            <strong>Fecha inicio</strong>
             <>&nbsp;&nbsp;</>
-            {trip.start_location_desc}
-            <>&nbsp;&nbsp;</>
-            {dayjs.utc(trip.start_date).toDate().toLocaleTimeString("es", {
+            {dayjs.utc(trip.start_date).toDate().toLocaleDateString("es", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
               timeZone: "GMT"
             })}
           </Text>
           <Text>
-            <strong>Destino</strong>
+            <strong>Fecha fin</strong>
             <>&nbsp;&nbsp;</>
-            {trip.end_location_desc}
-            <>&nbsp;&nbsp;</>
-            {dayjs.utc(trip.end_date).toDate().toLocaleTimeString("es", {
+            {dayjs.utc(trip.end_date).toDate().toLocaleDateString("es", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
               timeZone: "GMT"
@@ -88,7 +68,7 @@ export default function TripCarrierPricing({ trip, handleSelectCarrier, fields, 
           })
         }
       >
-        <Flex vertical gap={24}>
+        <Flex vertical gap={10}>
           {trip.carriers_pricing.map((carrier, index) => (
             <CarrierRequestProposal
               key={`proposal-${index}-${trip.id}-${entity}`}

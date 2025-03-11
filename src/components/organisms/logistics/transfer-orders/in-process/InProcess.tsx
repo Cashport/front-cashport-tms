@@ -16,7 +16,7 @@ interface IInProcessProps {
 }
 
 export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
-  const { searchQuery: search, filterQuery } = useSearchContext();
+  const { searchQuery: search, pslQuery, vpQuery } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
@@ -43,7 +43,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
     setIsLoadingMain(true);
 
     try {
-      const getRequest = await getOnRouteTransferRequest(search, filterQuery);
+      const getRequest = await getOnRouteTransferRequest(search, pslQuery, vpQuery);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
       }
@@ -56,7 +56,13 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
     setIsLoadingPagination(true);
     try {
-      const getRequest = await getOnRouteTransferRequest(search, filterQuery, statusId, newPage);
+      const getRequest = await getOnRouteTransferRequest(
+        search,
+        pslQuery,
+        vpQuery,
+        statusId,
+        newPage
+      );
       if (Array.isArray(getRequest) && getRequest.length > 0) {
         // Nuevo elemento a actualizar
         const updatedItem = getRequest[0];
@@ -76,7 +82,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search, filterQuery]);
+  }, [modalState, search, vpQuery, pslQuery]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
@@ -101,6 +107,7 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
         children: (
           <TransferOrdersTable
             showColumn={false}
+            showCarriersColumn={true}
             aditionalRow={aditionalRow}
             items={item.items}
             pagination={item.page}

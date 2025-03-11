@@ -27,7 +27,7 @@ export const Request: FC<IRequestProps> = ({
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
-  const { searchQuery: search, filterQuery } = useSearchContext();
+  const { searchQuery: search, pslQuery, vpQuery } = useSearchContext();
 
   const getTitile = (stateId: string, transferType: string, number: number) => {
     const getState = TransferOrdersState.find((f) => f.id === stateId);
@@ -49,7 +49,7 @@ export const Request: FC<IRequestProps> = ({
   const getTransferRequestAccepted = async () => {
     setIsLoadingMain(true);
     try {
-      const getRequest = await getAcceptedTransferRequest(search, filterQuery);
+      const getRequest = await getAcceptedTransferRequest(search, pslQuery, vpQuery);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
       }
@@ -63,7 +63,13 @@ export const Request: FC<IRequestProps> = ({
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
     setIsLoadingPagination(true);
     try {
-      const getRequest = await getAcceptedTransferRequest(search, filterQuery, statusId, newPage);
+      const getRequest = await getAcceptedTransferRequest(
+        search,
+        pslQuery,
+        vpQuery,
+        statusId,
+        newPage
+      );
       if (Array.isArray(getRequest) && getRequest.length > 0) {
         // Nuevo elemento a actualizar
         const updatedItem = getRequest[0];
@@ -83,7 +89,7 @@ export const Request: FC<IRequestProps> = ({
     if (!modalState) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search, filterQuery]);
+  }, [modalState, search, pslQuery, vpQuery]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
@@ -119,7 +125,12 @@ export const Request: FC<IRequestProps> = ({
         };
         redirect = "/logistics/transfer-request/";
       }
-      const statusToDetailsTO = [STATUS.TO.SIN_PROCESAR, STATUS.TO.PROCESANDO, STATUS.TO.PROCESADO, STATUS.TO.CANCELADO];
+      const statusToDetailsTO = [
+        STATUS.TO.SIN_PROCESAR,
+        STATUS.TO.PROCESANDO,
+        STATUS.TO.PROCESADO,
+        STATUS.TO.CANCELADO
+      ];
       if (statusToDetailsTO.includes(item.statusId)) {
         redirect = "/logistics/orders/details";
       }
@@ -139,6 +150,7 @@ export const Request: FC<IRequestProps> = ({
         children: (
           <TransferOrdersTable
             items={item.items}
+            showCarriersColumn={false}
             pagination={item.page}
             aditionalRow={aditionalRow}
             redirect={redirect}

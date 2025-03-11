@@ -1204,13 +1204,20 @@ export const CreateOrderView = () => {
       }
 
       const checkPSLs = (psls: IOrderPsl[]) => {
-        const hasValidPsl = psls.some(
-          (psl) => psl.idpsl !== 0 && psl.costcenters.some((cc) => cc.idpslcostcenter !== 0)
+        const allPSLsValid = psls.every((psl) => psl.idpsl !== 0);
+        const allCCsValid = psls.every((psl) =>
+          psl.costcenters.every((cc) => cc.idpslcostcenter !== 0)
         );
 
-        if (!hasValidPsl) {
+        if (!allPSLsValid) {
           isformvalid = false;
-          message.error("Debe haber al menos un PSL válido con un centro de costo válido");
+          message.error("Todos los PSLs deben ser asignados");
+          return;
+        }
+
+        if (!allCCsValid) {
+          isformvalid = false;
+          message.error("Todos los centros de costo deben ser asignados");
           return;
         }
 

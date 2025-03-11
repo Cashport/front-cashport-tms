@@ -17,7 +17,8 @@ export const columns = (
   showColumn: boolean,
   redirect?: string,
   showBothIds?: boolean,
-  trShouldRedirect?: boolean
+  trShouldRedirect?: boolean,
+  showCarriersColumn?: boolean
 ): TableColumnsType<DataType> => {
   const timeToTrip = showColumn
     ? {
@@ -31,6 +32,49 @@ export const columns = (
         showSorterTooltip: false
       }
     : {};
+  const carriersColumn = showCarriersColumn
+    ? {
+        title: "Proveedores",
+        dataIndex: "carriers",
+        render: (text: string) => {
+          if (!text) return ""; // Manejo de string vacío
+          const namesArray: string[] = text.split(",").map((name) => name.trim());
+          if (namesArray.length === 1) return <div className="text-truncate">{namesArray[0]}</div>;
+
+          const firstName = namesArray[0]; // Siempre mostramos el primer nombre
+          const displayedNames = [firstName];
+          let charCount = firstName.length;
+          const maxChars = 30; // Ajusta según necesidad
+          let remainingNames: string[] = [];
+
+          for (let i = 1; i < namesArray.length; i++) {
+            const name = namesArray[i];
+            if (charCount + name.length <= maxChars) {
+              displayedNames.push(name);
+              charCount += name.length;
+            } else {
+              remainingNames = namesArray.slice(i);
+              break;
+            }
+          }
+
+          return (
+            <div className="text-truncate">
+              {displayedNames.join(", ")}
+              {remainingNames.length > 0 && (
+                <Tooltip title={remainingNames.join(", ")}>
+                  <span className="remaining-count"> +{remainingNames.length}</span>
+                </Tooltip>
+              )}
+            </div>
+          );
+        },
+        sorter: (a: any, b: any) => a.carriers.localeCompare(b.carriers),
+        showSorterTooltip: false,
+        width: 200
+      }
+    : {};
+
   return [
     {
       title: "TR",
@@ -89,6 +133,7 @@ export const columns = (
       sorter: (a, b) => a.origendestino.origin.localeCompare(b.origendestino.origin),
       showSorterTooltip: false
     },
+    carriersColumn,
     {
       title: "Fechas",
       dataIndex: "fechas",
@@ -145,6 +190,7 @@ export const columns = (
       sorter: (a, b) => Number(a.valor) - Number(b.valor),
       showSorterTooltip: false
     },
+
     {
       title: "",
       dataIndex: "validator",

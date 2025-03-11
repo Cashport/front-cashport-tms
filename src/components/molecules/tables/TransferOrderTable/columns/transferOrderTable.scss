@@ -1,47 +1,57 @@
 .titleContainer {
-  display: flex;
-  column-gap: 16px;
+    display: flex;
+    column-gap: 16px;
 }
 .textContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-  .title {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: -1px;
-  }
+    .title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: -1px;
+    }
 }
 
 .row-text {
-  text-align: left;
-  font-size: 14px;
-  font-weight: 300;
-  line-height: 18px;
-  color: #141414;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    color: #141414;
 
-  &.id {
-    text-decoration-line: underline;
-    color: #0085FF;
-    font-weight: 400;
-  }
+    &.id {
+        text-decoration-line: underline;
+        color: #0085ff;
+        font-weight: 400;
+    }
 
-  &.value {
-    font-weight: 600;
-  }
-  &.subId {
-    font-size: 12px;
-    text-decoration: underline;
-  }
+    &.value {
+        font-weight: 600;
+    }
+    &.subId {
+        font-size: 12px;
+        text-decoration: underline;
+    }
 }
 
 .btnContainer {
-  display: flex;
-  justify-content: flex-end;
-  column-gap: 8px;
+    display: flex;
+    justify-content: flex-end;
+    column-gap: 8px;
 
-  .btn {
-    background-color: #F7F7F7;
-  }
+    .btn {
+        background-color: #f7f7f7;
+    }
+}
+.text-truncate {
+    width: 200px; /* Asegurar el ancho */
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limita a 2 líneas */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word; /* Para que respete saltos de línea */
+    white-space: normal; /* Permitir saltos de línea */
 }

@@ -11,7 +11,7 @@ import { useSearchContext } from "@/context/SearchContext";
 interface ICompletedProps {}
 
 export const Completed: FC<ICompletedProps> = () => {
-  const { searchQuery: search, filterQuery } = useSearchContext();
+  const { searchQuery: search, vpQuery, pslQuery } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
@@ -38,7 +38,7 @@ export const Completed: FC<ICompletedProps> = () => {
     setIsLoadingMain(true);
 
     try {
-      const getRequest = await getFinishedTransferRequest(search, filterQuery);
+      const getRequest = await getFinishedTransferRequest(search, pslQuery, vpQuery);
       if (Array.isArray(getRequest)) {
         setTransferRequest(getRequest);
       }
@@ -51,7 +51,13 @@ export const Completed: FC<ICompletedProps> = () => {
   const getTransferRequestAcceptedByStatusId = async (statusId?: string, newPage?: number) => {
     setIsLoadingPagination(true);
     try {
-      const getRequest = await getFinishedTransferRequest(search, filterQuery, statusId, newPage);
+      const getRequest = await getFinishedTransferRequest(
+        search,
+        pslQuery,
+        vpQuery,
+        statusId,
+        newPage
+      );
       if (Array.isArray(getRequest) && getRequest.length > 0) {
         // Nuevo elemento a actualizar
         const updatedItem = getRequest[0];
@@ -68,7 +74,7 @@ export const Completed: FC<ICompletedProps> = () => {
   };
   useEffect(() => {
     getTransferRequestAccepted();
-  }, [search, filterQuery]);
+  }, [search, vpQuery, pslQuery]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0) // Filtrar los que tengan al menos un elemento
@@ -78,6 +84,7 @@ export const Completed: FC<ICompletedProps> = () => {
       children: (
         <TransferOrdersTable
           showColumn={false}
+          showCarriersColumn={true}
           items={item.items}
           pagination={item.page}
           loading={isLoadingPagination}
