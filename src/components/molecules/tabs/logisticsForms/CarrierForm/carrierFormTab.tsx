@@ -47,9 +47,8 @@ export const CarrierFormTab = ({
   isLoadingSubmit
 }: CarrierFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
-    "documents/type/0",
-    () => getDocumentsByEntityType("0"),
+  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR("documents/type/0", () =>
+    getDocumentsByEntityType("0")
   );
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
@@ -64,6 +63,7 @@ export const CarrierFormTab = ({
     control,
     handleSubmit,
     reset,
+    trigger,
     formState: { errors, isDirty }
   } = useForm<IFormCarrier>({
     defaultValues,
@@ -393,10 +393,15 @@ export const CarrierFormTab = ({
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
               <SubmitFormButton
-                text={validationButtonText(statusForm)}
-                disabled={!isDirty}
-                onClick={handleSubmit(onSubmit)}
                 loading={isLoadingSubmit}
+                disabled={isLoadingSubmit}
+                text={validationButtonText(statusForm)}
+                onClick={async () => {
+                  const isValidForm = await trigger();
+                  if (isValidForm) {
+                    handleSubmit(onSubmit)();
+                  }
+                }}
               />
             </Row>
           )}
