@@ -134,10 +134,12 @@ export const VehicleFormTab = ({
   const hasImages = () => {
     return images.some((img) => img.file) || (formImages && formImages.length > 0);
   };
-  const isFormCompleted = () => {
-    return isValid && hasImages();
-  };
-  const isSubmitButtonEnabled = isFormCompleted() && !isLoading;
+
+  useEffect(() => {
+    if (images.length > 0) {
+      setImageError(false); // Limpia el error si se carga una imagen
+    }
+  }, [images]);
 
   useEffect(() => {
     if (!hasGPS) {
@@ -246,11 +248,6 @@ export const VehicleFormTab = ({
   };
 
   const onSubmit = async (data: any) => {
-    const hasImage = data.images.length > 0;
-    if (!hasImage) {
-      setImageError(true);
-      return;
-    }
     const vehicleData: any = {
       ...data.general,
       has_gps: hasGPS,
@@ -452,8 +449,7 @@ export const VehicleFormTab = ({
                     nameInput="general.year"
                     control={control}
                     disabled={statusForm === "review"}
-                    error={undefined}
-                    // error={errors.general?.year}
+                    error={errors.general?.year}
                   />
                 </Col>
                 <Col span={8}>
@@ -607,10 +603,21 @@ export const VehicleFormTab = ({
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
               <SubmitFormButton
-                text={validationButtonText(statusForm)}
-                disabled={!isSubmitButtonEnabled}
-                onClick={handleSubmit(onSubmit)}
                 loading={isLoading}
+                disabled={isLoading} // Solo lo deshabilitas mientras está cargando
+                text={validationButtonText(statusForm)}
+                onClick={async () => {
+                  console.log("isvalid", isValid);
+                  console.log("error", errors);
+
+                  if (!hasImages()) {
+                    setImageError(true);
+                  }
+                  const isValidForm = await trigger(); // Valida todos los campos manualmente
+                  if (isValidForm) {
+                    handleSubmit(onSubmit)(); // Solo ejecuta si es válido
+                  }
+                }}
               />
             </Row>
           )}

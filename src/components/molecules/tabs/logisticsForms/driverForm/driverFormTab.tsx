@@ -95,17 +95,14 @@ export const DriverFormTab = ({
     control,
     handleSubmit,
     reset,
-    formState: { errors, isValid },
+    formState: { errors },
     trigger
   } = useForm<IFormDriver>({
     defaultValues,
-    disabled: statusForm === "review"
+    disabled: statusForm === "review",
+    mode: "onChange"
   });
 
-  const isFormCompleted = () => {
-    return isValid && (imageFile || getValues("general.photo"));
-  };
-  const isSubmitButtonEnabled = isFormCompleted();
   const phoneValue = watch("general.phone");
   const driverStatus = watch("general.status");
   const trip_type = watch("general.trip_type");
@@ -281,6 +278,12 @@ export const DriverFormTab = ({
     backgroundColor: "white",
     boxShadow: "none"
   };
+
+  useEffect(() => {
+    if (imageFile) {
+      setImageError(false); // Limpia el error si se carga una imagen
+    }
+  }, [imageFile]);
 
   return (
     <>
@@ -680,9 +683,18 @@ export const DriverFormTab = ({
             <Row justify={"end"}>
               <SubmitFormButton
                 loading={isLoadingSubmit}
-                disabled={isLoadingSubmit || !isSubmitButtonEnabled}
+                disabled={isLoadingSubmit}
                 text={validationButtonText(statusForm)}
-                onClick={handleSubmit(onSubmit)}
+                onClick={async () => {
+                  const hasPhoto = !!imageFile || !!getValues("general.photo");
+                  if (!hasPhoto) {
+                    setImageError(true);
+                  }
+                  const isValidForm = await trigger();
+                  if (isValidForm) {
+                    handleSubmit(onSubmit)();
+                  }
+                }}
               />
             </Row>
           )}
@@ -703,51 +715,6 @@ export const DriverFormTab = ({
           handleFormState("review");
         }}
       />
-      {/* <Modal
-        width={686}
-        open={isModalConfirmAuditOpen}
-        onClose={() => setIsModalConfirmAuditOpen(false)}
-        title={<Text style={{ fontWeight: 600, fontSize: 20 }}>Auditar conductor</Text>}
-        centered
-        footer={
-          <FooterButtons
-            titleConfirm="Confirmar auditoría"
-            onClose={() => setIsModalConfirmAuditOpen(false)}
-            handleOk={() => {
-              setIsModalConfirmAuditOpen(false);
-              onAuditDriver();
-            }}
-          />
-        }
-      >
-        <Flex vertical gap="1.5rem" align="center" style={{ marginBottom: "2rem" }}>
-          <Flex vertical gap={8} align="center">
-            <Text style={{ fontWeight: 300, fontSize: 16 }}>
-              ¿Confirma que el vehiculo cumple con los requerimientos legales y de HSEQ?
-            </Text>
-            <Text style={{ fontWeight: 300, fontSize: 16 }}>
-              Confirmo que está autorizado para manejar
-            </Text>
-          </Flex>
-          <Flex gap={4}>
-            {trip_type?.map((req, index) => (
-              <Tag
-                key={index}
-                color="#3D3D3D"
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "8px",
-                  marginRight: 0,
-                  fontSize: "14px",
-                  fontWeight: "400"
-                }}
-              >
-                {req.label}
-              </Tag>
-            ))}
-          </Flex>
-        </Flex>
-      </Modal> */}
       <ModalConfirmAudit
         isOpen={isModalConfirmAuditOpen}
         onClose={() => setIsModalConfirmAuditOpen(false)}
