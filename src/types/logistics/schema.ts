@@ -2053,6 +2053,7 @@ export interface CarriersPricing {
   end_longitude: number;
   volume: number;
   weight: number;
+  observations: string | null;
 }
 /**
  * Exposes all fields present in transfer_order as a typescript
