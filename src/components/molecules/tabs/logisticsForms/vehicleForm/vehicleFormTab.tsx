@@ -206,17 +206,21 @@ export const VehicleFormTab = ({
   useEffect(() => {
     if (statusForm === "review") {
       if (Array.isArray(documentsTypesList)) {
+        const documentsFromData = documentsTypesList?.filter((f) =>
+          data?.documents?.find((d) => d.id_document_type === f.id)
+        );
+        const nonOptionalDocuments = documentsTypesList.filter((f) => !f?.optional);
+        const documentsUniqueSet = new Set([...documentsFromData, ...nonOptionalDocuments]);
+        const documentsUniqueArray = Array.from(documentsUniqueSet);
         const docsWithLink =
-          documentsTypesList
-            ?.filter((f) => data?.documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
+          documentsUniqueArray.map((f) => ({
+            ...f,
+            file: undefined,
+            link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
+            expirationDate: dayjs(
+              data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
+            )
+          })) || [];
         setSelectedFiles(docsWithLink);
       }
     }
