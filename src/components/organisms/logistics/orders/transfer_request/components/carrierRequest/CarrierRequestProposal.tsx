@@ -49,11 +49,9 @@ export default function CarrierRequestProposal({ carrier }: Props) {
           </Flex>
         </Flex>
       </Flex>
-      {carrier.observations && (
-        <Flex vertical gap={4} className={style.fullWidth}>
-          <strong>Comentarios:</strong> <div>{carrier.observations}</div>
-        </Flex>
-      )}
+      <Flex vertical gap={4} className={style.fullWidth}>
+        <strong>Comentarios:</strong> <div>{carrier.observations ?? ""}</div>
+      </Flex>
     </Flex>
   );
   const itemsCollapse: CollapseProps["items"] = [
