@@ -18,34 +18,39 @@ export default function CarrierRequestProposal({ carrier }: Props) {
     return star;
   };
   const children = (
-    <Flex gap={24} className={style.children}>
-      <Flex gap={24} vertical>
-        <Flex justify="space-between">
-          <strong>Placas</strong> <div>{carrier.plate_number}</div>
+    <Flex vertical flex={1} gap={24}>
+      <Flex gap={24} className={style.children}>
+        <Flex gap={10} vertical>
+          <Flex justify="space-between">
+            <strong>Placas</strong> <div>{carrier.plate_number}</div>
+          </Flex>
+          <Flex justify="space-between">
+            <strong>Conductor</strong> <div>{carrier.driver}</div>
+          </Flex>
+          <Flex justify="space-between">
+            <strong>Teléfono</strong> <div>{carrier.phone}</div>
+          </Flex>
+          <Flex justify="space-between">
+            <strong>Contrato</strong> <div>{carrier.driver_contract}</div>
+          </Flex>
         </Flex>
-        <Flex justify="space-between">
-          <strong>Conductor</strong> <div>{carrier.driver}</div>
-        </Flex>
-        <Flex justify="space-between">
-          <strong>Teléfono</strong> <div>{carrier.phone}</div>
-        </Flex>
-        <Flex justify="space-between">
-          <strong>Contrato</strong> <div>{carrier.driver_contract}</div>
+        <Flex gap={10} vertical>
+          <Flex justify="space-between">
+            <strong>Sobre costo promedio</strong> <div>{carrier.driver_overcost}</div>
+          </Flex>
+          <Flex justify="space-between">
+            <strong>Retraso promedio</strong> <div>{carrier.driver_delay}</div>
+          </Flex>
+          <Flex justify="space-between">
+            <strong>Cantidad de viajes</strong> <div>{carrier.diver_trips}</div>
+          </Flex>
+          <Flex justify="space-between">
+            <strong>Puntaje</strong> <div>{driverScore(carrier.driver_score)}</div>
+          </Flex>
         </Flex>
       </Flex>
-      <Flex gap={24} vertical>
-        <Flex justify="space-between">
-          <strong>Sobre costo promedio</strong> <div>{carrier.driver_overcost}</div>
-        </Flex>
-        <Flex justify="space-between">
-          <strong>Retraso promedio</strong> <div>{carrier.driver_delay}</div>
-        </Flex>
-        <Flex justify="space-between">
-          <strong>Cantidad de viajes</strong> <div>{carrier.diver_trips}</div>
-        </Flex>
-        <Flex justify="space-between">
-          <strong>Puntaje</strong> <div>{driverScore(carrier.driver_score)}</div>
-        </Flex>
+      <Flex vertical gap={4} className={style.fullWidth}>
+        <strong>Comentarios:</strong> <div>{carrier.observations ?? ""}</div>
       </Flex>
     </Flex>
   );
@@ -72,8 +77,12 @@ const TitleComponent = ({ carrier }: { carrier: CarriersPricing }) => (
       <Tag color={carrier.color} style={{ height: "fit-content" }}>
         {carrier.statusdesc}
       </Tag>
-        <Text style={{ fontSize: "12px", fontWeight: "600" }}>{carrier.id_transfer_request} - {carrier.order_nro}</Text>
+      <Text style={{ fontSize: "12px", fontWeight: "600" }}>
+        {carrier.id_transfer_request} - {carrier.order_nro}
+      </Text>
     </Flex>
-    <Title level={5}>${carrier.amount.toLocaleString("es-CO")}</Title>
+    <Title level={5} style={{ marginBottom: 0 }}>
+      ${carrier.amount.toLocaleString("es-CO")}{" "}
+    </Title>
   </Flex>
 );

@@ -12,8 +12,6 @@ interface SearchContextProps {
   searchTerm: string | undefined;
   searchQuery: string | undefined;
   handleChangeSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  filterQuery: [string, string][];
-  handleUpdateFilterQuery: (updatedValues: [string, string][]) => void;
   clearFilters: () => void;
   options: Option[];
   selectedValues: string[][];
@@ -23,6 +21,10 @@ interface SearchContextProps {
   handleSelectAll: () => void;
   handleClearFilters: () => void;
   setSearchInput: (value: string) => void;
+  pslQuery: [string, string][];
+  vpQuery: string[];
+  handleUpdatePslQuery: (query: [string, string][]) => void;
+  handleUpdateVpQuery: (query: string[]) => void;
 }
 // Definir el tipo de las props del proveedor
 interface SearchProviderProps {
@@ -45,8 +47,10 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     handleSelectAll,
     handleClearFilters,
     setSearchInput,
-    filterQuery,
-    handleUpdateFilterQuery,
+    pslQuery,
+    vpQuery,
+    handleUpdatePslQuery,
+    handleUpdateVpQuery,
     clearFilters
   } = usePslFilter();
 
@@ -57,8 +61,10 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
       searchQuery,
       handleChangeSearch,
       //FILTER
-      filterQuery,
-      handleUpdateFilterQuery,
+      pslQuery,
+      vpQuery,
+      handleUpdatePslQuery,
+      handleUpdateVpQuery,
       clearFilters,
       options,
       selectedValues,
@@ -72,7 +78,8 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     [
       searchTerm,
       searchQuery,
-      filterQuery,
+      pslQuery,
+      vpQuery,
       options,
       selectedValues,
       isLoading,
