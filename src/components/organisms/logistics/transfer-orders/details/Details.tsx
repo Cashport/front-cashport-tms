@@ -412,6 +412,7 @@ export const TransferOrderDetails = () => {
         canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
         handleChangeStatus={handleChangeStatus}
         setNav={setNav}
+        transferRequest={transferRequest}
       />
       <ModalBillingMT
         mode="edit"

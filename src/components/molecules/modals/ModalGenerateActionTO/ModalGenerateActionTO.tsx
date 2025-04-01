@@ -9,6 +9,8 @@ import PreauthorizeTrip from "./PreauthorizeTrip/PreauthorizeTrip";
 import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/billing";
 import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
 import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
+import { ModalCancelTR } from "../ModalCancelTR/ModalCancelTR";
+import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
 
 export enum ViewEnum {
   "SELECT_ACTION" = "SELECT_ACTION",
@@ -30,6 +32,7 @@ type PropsModalGenerateActionTO = {
   canChangeStatusToPorLegalizar: boolean;
   handleChangeStatus?: (statusId: string) => Promise<void>;
   setNav: Dispatch<SetStateAction<NavEnum>>;
+  transferRequest: ITransferRequestDetail | null;
 };
 
 export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerateActionTO>) {
@@ -43,7 +46,8 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
     statusTrId,
     canChangeStatusToPorLegalizar,
     handleChangeStatus,
-    setNav
+    setNav,
+    transferRequest
   } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT_ACTION);
   const [selectedCarrier, setSelectedCarrier] = useState<number | null>(null);
@@ -89,6 +93,15 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             onClose={onClose}
             statusTrId={statusTrId}
             setNav={setNav}
+          />
+        );
+      case ViewEnum.CANCEL_TR:
+        return (
+          <ModalCancelTR
+            onCancel={() => setSelectedView(ViewEnum.SELECT_ACTION)}
+            noModal
+            trID={transferRequest?.id}
+            toIDs={transferRequest?.transfer_orders}
           />
         );
       default:
@@ -139,9 +152,11 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
         body: {
           maxHeight: "85vh",
           overflowY: "auto",
-          paddingTop: 24,
           scrollbarWidth: "none" /* Firefox */,
           msOverflowStyle: "none" /* Internet Explorer 10+ */
+        },
+        header: {
+          marginBottom: "1.5rem"
         }
       }}
       centered
