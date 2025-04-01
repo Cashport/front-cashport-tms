@@ -1,6 +1,6 @@
 import { Flex, message, Modal } from "antd";
 import { ArrowsClockwise, Download, LinkBreak, Trash, X } from "phosphor-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import styles from "./ModalGenerateActionOrders.module.scss";
 import {
   deleteOrders,
@@ -11,16 +11,22 @@ import ProtectedComponent from "../../protectedComponent/ProtectedComponent";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { useRouter } from "next/navigation";
 import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+import { MinusCircle } from "@phosphor-icons/react";
 
 type PropsModalGenerateActionTO = {
   isOpen: boolean;
   onClose: () => void;
   ordersId?: number[];
   trsIds?: number[];
+  setIsModalOpen: Dispatch<
+    SetStateAction<{
+      selected: number;
+    }>
+  >;
 };
 
 export default function ModalGenerateActionOrders(props: Readonly<PropsModalGenerateActionTO>) {
-  const { isOpen, onClose, ordersId = [], trsIds = [] } = props;
+  const { isOpen, onClose, ordersId = [], trsIds = [], setIsModalOpen } = props;
   const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,6 +61,12 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
 
   const handleDeleteOrders = async () => {
     setIsLoading(true);
+    if (trsIds?.length === 1 && ordersId?.length === 0) {
+      //open ModalCancel
+      setIsModalOpen({ selected: 2 });
+      message.open({ content: "No se puede eliminar un TR", type: "info" });
+      return setIsLoading(false);
+    }
     try {
       await deleteOrders(trsIds, ordersId);
       message.open({ content: "Operación realizada con éxito", type: "success" });
@@ -121,9 +133,22 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
           />
         </ProtectedComponent>
         <ButtonGenerateAction
-          disabled={ordersId?.length === 0 && trsIds?.length === 0}
-          icon={<Trash size={20} />}
-          title="Eliminar servicio"
+          disabled={
+            (ordersId?.length === 0 && trsIds?.length === 0) ||
+            (ordersId?.length === 0 && trsIds?.length > 1)
+          }
+          icon={
+            trsIds?.length === 1 && ordersId?.length === 0 ? (
+              <MinusCircle size={20} />
+            ) : (
+              <Trash size={20} />
+            )
+          }
+          title={
+            trsIds?.length === 1 && ordersId?.length === 0
+              ? "Cancelación del TR"
+              : "Eliminar servicio"
+          }
           onClick={handleDeleteOrders}
         />
       </Flex>
