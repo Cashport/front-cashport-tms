@@ -12,9 +12,11 @@ interface Props {
   onCancel: () => void;
   modalWidth?: string;
   noModal?: boolean;
+  trID?: number;
+  toIDs?: number[];
 }
 
-export const ModalCancelTR = ({ isOpen, onCancel, modalWidth, noModal }: Props) => {
+export const ModalCancelTR = ({ isOpen, onCancel, modalWidth, noModal, trID, toIDs }: Props) => {
   const [isSecondView, setIsSecondView] = useState(false);
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string | undefined>();
@@ -45,11 +47,11 @@ export const ModalCancelTR = ({ isOpen, onCancel, modalWidth, noModal }: Props) 
             </div>
 
             <p>
-              ¿Está seguro de cancelar la <strong>TR XX</strong>?
+              ¿Está seguro de cancelar la <strong>TR {trID}</strong>?
             </p>
 
             <p>
-              La TR incluye las TO <strong>XXXX, XXXX</strong>
+              La TR incluye las TO <strong>{toIDs?.join(", ")}</strong>
             </p>
 
             <Checkbox className="checkbox" onChange={onChange}>
