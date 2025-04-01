@@ -64,7 +64,6 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     if (trsIds?.length === 1 && ordersId?.length === 0) {
       //open ModalCancel
       setIsModalOpen({ selected: 2 });
-      message.open({ content: "No se puede eliminar un TR", type: "info" });
       return setIsLoading(false);
     }
     try {

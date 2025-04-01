@@ -1,34 +1,36 @@
 import { useState } from "react";
-import { Checkbox, CheckboxProps, Modal } from "antd";
+import { Checkbox, CheckboxProps, Flex, Modal } from "antd";
 import { CaretLeft } from "phosphor-react";
-import ModalAttachEvidence from "../ModalEvidence/ModalAttachEvidence";
 
+import ModalAttachEvidence from "../ModalEvidence/ModalAttachEvidence";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 import "./modalCancelTR.scss";
 
 interface Props {
-  isOpen: boolean;
+  isOpen?: boolean;
   onCancel: () => void;
+  modalWidth?: string;
+  noModal?: boolean;
 }
 
-export const ModalCancelTR = ({ isOpen, onCancel }: Props) => {
+export const ModalCancelTR = ({ isOpen, onCancel, modalWidth, noModal }: Props) => {
   const [isSecondView, setIsSecondView] = useState(false);
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string | undefined>();
 
   const cancelTR = () => {
-    console.log("Cancelando TR");
+    console.info("Cancelando TR");
   };
 
   const onChange: CheckboxProps["onChange"] = (e) => {
-    console.log(`checked = ${e.target.checked}`);
+    console.info(`checked = ${e.target.checked}`);
   };
 
-  return (
-    <Modal className="ModalCancelTR" width="50%" open={isOpen} footer={null} closable={false}>
-      {!isSecondView ? (
-        <>
+  const renderContent = () => {
+    if (!isSecondView) {
+      return (
+        <Flex gap={"1rem"} vertical style={{ width: "100%", height: "100%" }}>
           <button onClick={onCancel} className="ModalCancelTR__header">
             <CaretLeft size="1.25rem" />
             <span>Cancelación de TR</span>
@@ -58,23 +60,46 @@ export const ModalCancelTR = ({ isOpen, onCancel }: Props) => {
           <FooterButtons
             titleConfirm="Cancelar TR"
             handleOk={() => setIsSecondView(true)}
-            onCancel={() => console.log("cancelar")}
+            onCancel={onCancel}
           />
-        </>
-      ) : (
-        <ModalAttachEvidence
-          handleAttachEvidence={cancelTR}
-          selectedEvidence={selectedEvidence}
-          setSelectedEvidence={setSelectedEvidence}
-          commentary={commentary}
-          setCommentary={setCommentary}
-          setShowEvidenceModal={setIsSecondView}
-          handleCancel={() => setIsSecondView(false)}
-          customTexts={{
-            description: "Debes adjuntar el motivo de la cancelación de la TR"
-          }}
-        />
-      )}
+        </Flex>
+      );
+    }
+
+    return (
+      <ModalAttachEvidence
+        handleAttachEvidence={cancelTR}
+        selectedEvidence={selectedEvidence}
+        setSelectedEvidence={setSelectedEvidence}
+        commentary={commentary}
+        setCommentary={setCommentary}
+        setShowEvidenceModal={setIsSecondView}
+        handleCancel={() => setIsSecondView(false)}
+        customTexts={{
+          description: "Debes adjuntar el motivo de la cancelación de la TR"
+        }}
+      />
+    );
+  };
+
+  if (noModal) {
+    return (
+      <Flex gap={"1.5rem"} vertical style={{ width: "100%", height: "100%" }}>
+        {renderContent()}
+      </Flex>
+    );
+  }
+
+  return (
+    <Modal
+      centered
+      className="ModalCancelTR"
+      width={modalWidth ?? "55%"}
+      open={isOpen}
+      footer={null}
+      closable={false}
+    >
+      {renderContent()}
     </Modal>
   );
 };

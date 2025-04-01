@@ -5,16 +5,11 @@
         padding: 2rem !important;
     }
 
-    .ant-modal-body {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
     &__header {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-family: inherit;
         font-size: 1.25rem;
         font-weight: 600;
         border: none;
