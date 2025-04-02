@@ -17,6 +17,7 @@ import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenera
 import { SearchProvider } from "@/context/SearchContext";
 import UiSearchInput from "@/components/ui/search-input-provider";
 import Filter from "@/components/atoms/Filters/FilterOrders";
+import { ModalCancelTR } from "@/components/molecules/modals/ModalCancelTR/ModalCancelTR";
 
 const { Text } = Typography;
 
@@ -40,7 +41,7 @@ export const TransferOrders = () => {
   });
   const tabParam = searchParams.get("tab") as TabEnum | null;
   const [tab, setTab] = useState<TabEnum>();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
 
   useEffect(() => {
     if (isHy) {
@@ -93,6 +94,8 @@ export const TransferOrders = () => {
     );
   };
   const handleCheckboxChangeTR = (id: number, checked: boolean) => {
+    console.log("checked", checked);
+    console.log("id", id);
     setTrsIds((prevTRsIds) =>
       checked ? [...prevTRsIds, id] : prevTRsIds.filter((TRid) => TRid !== id)
     );
@@ -107,14 +110,14 @@ export const TransferOrders = () => {
             ordersId={ordersId}
             trsIds={trsIds}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
-            modalState={isModalOpen}
+            modalState={isModalOpen.selected === 1}
           />
         );
       case TabEnum.IN_PROCESS:
         return (
           <InProcess
             trsIds={trsIds}
-            modalState={isModalOpen}
+            modalState={isModalOpen.selected === 1}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
           />
         );
@@ -137,7 +140,7 @@ export const TransferOrders = () => {
               icon={<DotsThree size={"1.5rem"} />}
               disabled={false}
               loading={false}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsModalOpen({ selected: 1 })}
             >
               Generar acción
             </PrincipalButton>
@@ -192,10 +195,19 @@ export const TransferOrders = () => {
         </div>
         <div>{isHy && renderView()}</div>
         <ModalGenerateActionOrders
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={isModalOpen.selected === 1}
+          onClose={() => setIsModalOpen({ selected: 0 })}
           ordersId={ordersId}
           trsIds={trsIds}
+          setIsModalOpen={setIsModalOpen}
+        />
+        <ModalCancelTR
+          isOpen={isModalOpen.selected === 2}
+          onCancel={() =>
+            setIsModalOpen({
+              selected: 1
+            })
+          }
         />
       </Container>
     </SearchProvider>
