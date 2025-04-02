@@ -1,7 +1,21 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
+import {
+  Button,
+  Col,
+  Dropdown,
+  Flex,
+  Form,
+  MenuProps,
+  Row,
+  Switch,
+  Table,
+  TableProps,
+  Tag,
+  Typography
+} from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, CheckCircle, Eye, Pencil } from "phosphor-react";
+import utc from "dayjs/plugin/utc";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -36,6 +50,7 @@ import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 
 const { Title, Text } = Typography;
 
+dayjs.extend(utc);
 interface ImageState {
   file: File | undefined;
 }
@@ -57,11 +72,14 @@ export const VehicleFormTab = ({
   // eslint-disable-next-line no-unused-vars
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
+  console.log("dataGENERAL", data);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
+  const [files, setFiles] = useState<FileObject[] | any[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
@@ -159,8 +177,6 @@ export const VehicleFormTab = ({
     docReference: string;
     file: File | undefined;
   }
-  const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
 
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
@@ -279,6 +295,60 @@ export const VehicleFormTab = ({
       setValue("general.id_vehicle_type", data?.id_vehicle_type);
     }
   }, [data, setValue]);
+
+  const documentsTableColumns: TableProps<DocumentCompleteType>["columns"] = [
+    {
+      title: "Descripción",
+      dataIndex: "description",
+      key: "description",
+      render: (text) => <Text>{text}</Text>
+    },
+    {
+      title: "Fecha de Cargue",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (date) => {
+        return <Text>{dayjs.utc(date).format("DD/MM/YYYY")}</Text>;
+      }
+    },
+    {
+      title: "Vencimiento",
+      dataIndex: "expirationDate",
+      key: "expirationDate",
+      render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>
+    },
+    {
+      title: "Tipo",
+      dataIndex: "optional",
+      key: "optional",
+      render: (optional) => (
+        <Flex>
+          <Tag
+            color={optional ? "blue" : "red"}
+            bordered={false}
+            style={{ fontSize: "0.875rem", padding: "4px 8px" }}
+          >
+            {optional ? "Opcional" : "Obligatorio"}
+          </Tag>
+        </Flex>
+      )
+    },
+    {
+      title: "",
+      key: "link",
+      dataIndex: "link",
+      render: (link?: string) => (
+        <Button
+          disabled={!link}
+          icon={<Eye size={"1.3rem"} />}
+          href={link}
+          target="_blank"
+          rel="noopener"
+        />
+      ),
+      width: 70
+    }
+  ];
 
   return (
     <>
@@ -575,34 +645,13 @@ export const VehicleFormTab = ({
                 />
               )}
             </Col>
-            <Row style={{ marginTop: "1rem", width: "100%" }}>
-              {selectedFiles.map((file, index) => (
-                <Col
-                  span={12}
-                  key={`file-${file.id}`}
-                  style={{ marginBottom: "16px", paddingRight: index % 2 === 0 ? "16px" : "0" }}
-                >
-                  <UploadDocumentButton
-                    key={file.id}
-                    title={file.description}
-                    isMandatory={!file.optional}
-                    aditionalData={file.id}
-                    setFiles={() => {}}
-                    files={file.file}
-                    disabled
-                  >
-                    {file?.link ? (
-                      <UploadDocumentChild
-                        linkFile={file.link}
-                        nameFile={file.link.split("-").pop() ?? ""}
-                        onDelete={() => {}}
-                        showTrash={false}
-                      />
-                    ) : undefined}
-                  </UploadDocumentButton>
-                </Col>
-              ))}
-            </Row>
+            <Table
+              style={{ width: "100%" }}
+              className="mehtTable"
+              columns={documentsTableColumns}
+              pagination={false}
+              dataSource={selectedFiles.map((data) => ({ ...data, key: data.id }))}
+            />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
