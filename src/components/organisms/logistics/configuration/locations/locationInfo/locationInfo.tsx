@@ -39,7 +39,7 @@ export const LocationInfoView = ({ params }: Props) => {
     return getLocationById(params.id);
   };
 
-  const { data, isLoading } = useSWR({ id: params, key: "1" }, fetcher, {
+  const { data, isLoading } = useSWR({ id: params, key: `GetLocationById-${params.id}` }, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
@@ -87,11 +87,15 @@ export const LocationInfoView = ({ params }: Props) => {
     }
   };
 
-  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR("2", getAllDocumentsType, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
+    "GetAllDocumentsType",
+    getAllDocumentsType,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
   const { data: locationTypesData, isLoading: isLoadingLocationTypes } = useSWR(
     "location-type",
     getAllLocationTypes,
@@ -102,11 +106,15 @@ export const LocationInfoView = ({ params }: Props) => {
     getAllGroupByLocation,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  const { data: statesData, isLoading: isLoadingStates } = useSWR("1", getAllStatesByCountry, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data: statesData, isLoading: isLoadingStates } = useSWR(
+    { id: "1", key: "GetAllStatesByCountry" },
+    () => getAllStatesByCountry(),
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   return (
     <Skeleton
