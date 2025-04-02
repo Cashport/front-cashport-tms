@@ -36,7 +36,7 @@ export const UsersTable = () => {
 
   useEffect(() => {
     const data =
-      users?.data?.data
+      users?.data
         ?.filter((element: any) => {
           if (!search) return true;
           return (

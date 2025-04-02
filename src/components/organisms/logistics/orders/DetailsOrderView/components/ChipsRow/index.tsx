@@ -11,7 +11,7 @@ interface IChipsRow {
   chips: IChip[];
   maxVisibleChips?: number;
 }
-const ChipsRow = ({ chips, maxVisibleChips = 3 }: IChipsRow) => {
+const ChipsRow = ({ chips = [], maxVisibleChips = 3 }: IChipsRow) => {
   const { visibleChips, hiddenChips } = useMemo(() => {
     if (chips.length <= maxVisibleChips) {
       return { visibleChips: chips, hiddenChips: [] };

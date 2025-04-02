@@ -75,7 +75,7 @@ export const UserInfoView = ({ params }: Props) => {
     <Skeleton active loading={isLoading}>
       <UserFormTab
         onSubmitForm={handleSubmitForm}
-        data={data?.data?.data as unknown as IUser}
+        data={data?.data as IUser}
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}

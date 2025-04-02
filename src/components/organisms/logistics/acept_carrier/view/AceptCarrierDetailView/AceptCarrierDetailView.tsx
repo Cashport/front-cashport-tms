@@ -102,9 +102,9 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         setFormMode(getFormMode(to?.statusdesc));
         setCanBeRejected(to?.statusdesc !== "Rechazado");
         const driversResult = await getDriverByCarrierId(to?.id_carrier);
-        setDrivers(driversResult.data.data);
+        setDrivers(driversResult.data);
         const vehiclesResult = await getVehiclesByCarrierId(to?.id_carrier);
-        setVehicles(vehiclesResult.data.data);
+        setVehicles(vehiclesResult.data);
         setCarrier(to);
         to.carrier_request_material_by_trip?.forEach(async (mat) => {
           mat?.material?.forEach(async (m) => {

@@ -1,15 +1,8 @@
-import axios from "axios";
-import { API, getIdToken } from "@/utils/api/api";
-import config from "@/config";
+import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { UploadInvoiceForm } from "@/components/molecules/modals/ModalBillingAction/UploadInvoice/controllers/uploadinvoice.types";
 import createFormData from "@/components/molecules/modals/ModalBillingAction/UploadInvoice/controllers/createFormData";
-import {
-  IBillingDetails,
-  IBillingsRequestList,
-  IPreauthorizedRequest,
-  PreAuthorizationRequestData
-} from "@/types/logistics/billing/billing";
+import { IBillingDetails, IBillingsRequestList } from "@/types/logistics/billing/billing";
 import { PreauthorizeTripForm } from "@/components/molecules/modals/ModalGenerateActionTO/PreauthorizeTrip/controllers/preauthorizetrip.types";
 import createPreauthorizationsFormData from "@/components/molecules/modals/ModalGenerateActionTO/PreauthorizeTrip/controllers/createFormData";
 
@@ -89,19 +82,17 @@ export const sendInvoices = async (
   idBilling: number
 ): Promise<boolean | undefined> => {
   try {
-    const token = await getIdToken();
-    const response: any = await axios.post(
-      `${config.API_HOST}/logistic-billing/invoice/${idBilling}`,
+    const response: any = await API.post(
+      `/logistic-billing/invoice/${idBilling}`,
       createFormData(dataForm),
       {
         headers: {
           Accept: "application/json, text/plain, */*",
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "multipart/form-data"
         }
       }
     );
-    if (response.data) return true;
+    if (response) return true;
     return false;
   } catch (error) {
     return false;
@@ -113,19 +104,17 @@ export const sendPreauthorizations = async (
   idBilling: number
 ): Promise<boolean | undefined> => {
   try {
-    const token = await getIdToken();
-    const response: any = await axios.post(
-      `${config.API_HOST}/logistic-billing/preauthorize/${idBilling}`,
+    const response: any = await API.post(
+      `/logistic-billing/preauthorize/${idBilling}`,
       createPreauthorizationsFormData(dataForm),
       {
         headers: {
           Accept: "application/json, text/plain, */*",
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
         }
       }
     );
-    if (response.data) return true;
+    if (response) return true;
     return false;
   } catch (error) {
     return false;

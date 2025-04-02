@@ -1,8 +1,6 @@
-import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { INovelty, INoveltyBody, INoveltyType, IOvercost } from "@/types/novelty/INovelty";
-import { API, getIdToken } from "@/utils/api/api";
-import axios from "axios";
+import { API } from "@/utils/api/api";
 
 export const getNoveltyDetail = async (id: number): Promise<INovelty | {}> => {
   try {
@@ -66,7 +64,6 @@ export const updateNovelty = async (body: INoveltyBody) => {
 };
 
 export const createNoveltyEvidences = async (noveltyId: number, files: File[]) => {
-  const token = await getIdToken();
   try {
     const formData = new FormData();
     formData.append("noveltyId", String(noveltyId));
@@ -74,13 +71,12 @@ export const createNoveltyEvidences = async (noveltyId: number, files: File[]) =
     files.forEach((file) => {
       formData.append("files", file);
     });
-    const { success }: GenericResponse<boolean> = await axios.post(
-      `${config.API_HOST}/novelty-evidence/upload`,
+    const { success }: GenericResponse<boolean> = await API.post(
+      `/novelty-evidence/upload`,
       formData,
       {
         headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "multipart/form-data"
         }
       }
     );
@@ -92,7 +88,10 @@ export const createNoveltyEvidences = async (noveltyId: number, files: File[]) =
   }
 };
 
-export const getOvercosts = async (idVehicleType: number, idCarrier: number): Promise<IOvercost[]> => {
+export const getOvercosts = async (
+  idVehicleType: number,
+  idCarrier: number
+): Promise<IOvercost[]> => {
   const res: GenericResponse<IOvercost[]> = await API.get(
     `/novelty-type/overcost/${idVehicleType}/${idCarrier}`
   );

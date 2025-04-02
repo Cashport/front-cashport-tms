@@ -29,7 +29,7 @@ export const SecureRoutesTable = () => {
 
   useEffect(() => {
     const data =
-      secureroutes?.data?.data
+      secureroutes?.data
         ?.filter((element: any) => {
           if (!search) return true;
           return element.description.toLowerCase().includes(search.toLowerCase());

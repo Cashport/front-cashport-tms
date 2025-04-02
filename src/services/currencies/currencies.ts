@@ -1,21 +1,9 @@
-import config from "@/config";
 import { IListCurrencies } from "@/types/currencies/IListCurrencies";
-import { getIdToken } from "@/utils/api/api";
-import axios, { AxiosResponse } from "axios";
+import { API } from "@/utils/api/api";
 
-export const getAllCurrencies = async (): Promise<AxiosResponse<IListCurrencies>> => {
-  const token = await getIdToken();
+export const getAllCurrencies = async (): Promise<IListCurrencies> => {
   try {
-    const response: AxiosResponse<IListCurrencies> = await axios.get(
-      `${config.API_HOST}/currency`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: IListCurrencies = await API.get(`/currency`);
     return response;
   } catch (error) {
     return error as any;

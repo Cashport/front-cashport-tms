@@ -2,7 +2,6 @@ import axios from "axios";
 import config from "@/config";
 import { auth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-
 export async function getIdToken(forceRefresh?: boolean) {
   const user = auth.currentUser;
   if (user) {
@@ -16,20 +15,25 @@ export async function getIdToken(forceRefresh?: boolean) {
     });
   }
 }
-const instance = (token: string) =>
-  axios.create({
-    baseURL: config.API_HOST,
-    timeout: 10000,
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json; charset=utf-8",
-      Authorization: `Bearer ${token}`
-    }
-  });
+
+export let idProject: number | null = null;
+
+const instance = axios.create({
+  baseURL: config.API_HOST,
+  timeout: 10000,
+  headers: {
+    Accept: "application/json, text/plain, */*",
+    "Content-Type": "application/json; charset=utf-8"
+  }
+});
+
+interface IError {
+  error: boolean;
+  message: string;
+}
 
 export const fetcher = async (url: string) => {
-  const token = (await getIdToken(false)) as string;
-  return instance(token)
+  return instance
     .get(url)
     .then((res) => {
       if (!res.data) {
@@ -42,6 +46,10 @@ export const fetcher = async (url: string) => {
       if (error.code === "ECONNABORTED") {
         throw new Error("La solicitud ha sido cancelada debido a un timeout");
       } else {
+        if (error.response?.data) {
+          const errorData = error.response.data as IError;
+          throw new Error(errorData.message);
+        }
         if (error?.message) {
           throw new Error(error.message);
         }
@@ -55,12 +63,25 @@ const API = axios.create({
   baseURL: config.API_HOST
 });
 
+// set ProjectId in instance
 export const setProjectInApi = (projectId: number) => {
-  API.interceptors.request.use((request) => {
-    request.headers.set("projectId", `${projectId}`);
-    return request;
-  });
+  idProject = projectId;
 };
+API.interceptors.request.use((request) => {
+  request.headers.set("projectId", `${idProject}`);
+  return request;
+});
+instance.interceptors.request.use((request) => {
+  request.headers.set("projectId", `${idProject}`);
+  return request;
+});
+
+// set tokens in instance
+instance.interceptors.request.use(async (request) => {
+  const token = (await getIdToken(false)) as string;
+  request.headers.set("Authorization", `Bearer ${token}`);
+  return request;
+});
 
 export const getProjectId = async () => {
   await new Promise((resolve) => setTimeout(resolve, 50));
@@ -80,6 +101,7 @@ API.interceptors.request.use(async (request) => {
 
 API.interceptors.response.use(
   function (response) {
+    if (typeof response.data === "string") return response.data;
     response.data.success = true;
     return response.data;
   },
@@ -89,7 +111,7 @@ API.interceptors.response.use(
     if (response?.data?.message) {
       error.message = response.data.message;
     }
-    return Promise.resolve(error);
+    throw error;
   }
 );
 
