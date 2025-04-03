@@ -246,6 +246,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
                                       className={styles.name}
                                     >{`Usuario: ${item.created_by}`}</div>
                                   )}
+                                  {item.comment && (
+                                    <div
+                                      className={styles.name}
+                                    >{`Comentario: ${item.comment}`}</div>
+                                  )}
                                   {item.url_photo && (
                                     <div>
                                       <div className={styles.icons}>
