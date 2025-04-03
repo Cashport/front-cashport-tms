@@ -35,6 +35,7 @@ export const TransferOrders = () => {
   const [ordersId, setOrdersId] = useState<number[]>([]);
   const [trsIds, setTrsIds] = useState<string[]>([]);
   const [childOrdersId, setChildOrdersId] = useState<string[]>([]);
+  const [mutate, setMutate] = useState(false);
 
   const searchParams = useSearchParams();
   const [selectFilters, setSelectFilters] = useState({
@@ -109,6 +110,11 @@ export const TransferOrders = () => {
         : prevOrdersId.filter((orderId) => !row.TOs?.split(",").includes(orderId))
     );
   };
+  useEffect(() => {
+    if (mutate) {
+      setMutate(false);
+    }
+  }, [mutate]);
 
   const renderView = () => {
     switch (tab) {
@@ -120,6 +126,7 @@ export const TransferOrders = () => {
             trsIds={trsIds}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
             modalState={isModalOpen.selected === 1}
+            mutateData={mutate}
           />
         );
       case TabEnum.IN_PROCESS:
@@ -128,6 +135,7 @@ export const TransferOrders = () => {
             trsIds={trsIds}
             modalState={isModalOpen.selected === 1}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
+            mutateData={mutate}
           />
         );
       case TabEnum.COMPLETED:
@@ -217,6 +225,16 @@ export const TransferOrders = () => {
               selected: 1
             })
           }
+          onClose={() => {
+            // clean states
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+
+            // causw reloading of the data
+            setMutate((prev) => !prev);
+            setIsModalOpen({ selected: 0 });
+          }}
           trID={trsIds[0]}
           toIDs={childOrdersId}
         />

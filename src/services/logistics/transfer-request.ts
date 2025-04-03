@@ -325,6 +325,10 @@ export const deleteTransferRequestAndChildren = async (
       formData
     );
     if (response.success) return response.data;
+    else {
+      // Explicitly check for failure
+      throw new Error(response.message || "Error al borrar servicios");
+    }
   } catch (error) {
     let errorMsg;
     if (error instanceof Error) {

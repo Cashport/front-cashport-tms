@@ -11,18 +11,41 @@ import { deleteTransferRequestAndChildren } from "@/services/logistics/transfer-
 interface Props {
   isOpen?: boolean;
   onCancel: () => void;
+  onClose: () => void;
   modalWidth?: string;
   noModal?: boolean;
   trID?: string | number;
   toIDs?: string[] | number[];
+  trStatus?: string;
 }
 
-export const ModalCancelTR = ({ isOpen, onCancel, modalWidth, noModal, trID, toIDs }: Props) => {
+export const ModalCancelTR = ({
+  isOpen,
+  onCancel,
+  onClose,
+  modalWidth,
+  noModal,
+  trID,
+  toIDs,
+  trStatus
+}: Props) => {
   const [isSecondView, setIsSecondView] = useState(false);
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string>();
   const [checkedCancelTOs, setCheckCancelTOs] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // const isProcessing = trStatus === "En curso" ? true : false;
+
+  // useEffect for cleaning states when modal is closed
+  useEffect(() => {
+    return () => {
+      setIsSecondView(false);
+      setSelectedEvidence([]);
+      setCommentary("");
+      setCheckCancelTOs(false);
+    };
+  }, [isOpen]);
 
   const cancelTR = async () => {
     setLoading(true);
@@ -35,8 +58,10 @@ export const ModalCancelTR = ({ isOpen, onCancel, modalWidth, noModal, trID, toI
 
     try {
       await deleteTransferRequestAndChildren(reqData, selectedEvidence[0]);
+      message.success("Cancelación exitosa");
+      onClose();
     } catch (error) {
-      message.error("Error al cancelar la TR");
+      message.error(`Error al cancelar la TR: ${error}`, 4);
     }
     setLoading(false);
   };

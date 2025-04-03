@@ -28,6 +28,7 @@ export interface DataTypeForTransferOrderTable {
   tiempodeviaje: string;
   valor: number;
   carriers: string;
+  statusId: string;
   TOs?: string;
 }
 
@@ -88,6 +89,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
         tr: String(item.id)
       },
       carriers: item.carriers ?? "",
+      statusId: item.statusId,
       TOs: item?.TOs
     }));
     setDataSource(mappedData);

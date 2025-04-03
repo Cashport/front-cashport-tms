@@ -20,9 +20,15 @@ interface IInProcessProps {
     row: DataTypeForTransferOrderTable
   ) => void;
   modalState: boolean;
+  mutateData: boolean;
 }
 
-export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
+export const InProcess: FC<IInProcessProps> = ({
+  trsIds,
+  handleCheckboxChangeTR,
+  modalState,
+  mutateData
+}) => {
   const { searchQuery: search, pslQuery, vpQuery } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
@@ -86,10 +92,10 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
   };
 
   useEffect(() => {
-    if (!modalState) {
+    if (!modalState || mutateData) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search, vpQuery, pslQuery]);
+  }, [modalState, search, vpQuery, pslQuery, mutateData]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)

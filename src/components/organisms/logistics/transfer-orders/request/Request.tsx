@@ -22,6 +22,7 @@ interface IRequestProps {
     row: DataTypeForTransferOrderTable
   ) => void;
   modalState: boolean;
+  mutateData?: boolean;
 }
 
 export const Request: FC<IRequestProps> = ({
@@ -29,7 +30,8 @@ export const Request: FC<IRequestProps> = ({
   ordersId,
   trsIds,
   handleCheckboxChangeTR,
-  modalState
+  modalState,
+  mutateData
 }) => {
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
@@ -93,14 +95,15 @@ export const Request: FC<IRequestProps> = ({
   };
 
   useEffect(() => {
-    if (!modalState) {
+    if (!modalState || mutateData) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search, pslQuery, vpQuery]);
+  }, [modalState, search, pslQuery, vpQuery, mutateData]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
     .map((item, index) => {
+      console.log("item de donde salen los items", item);
       let aditionalRow = undefined;
       let redirect = undefined;
       let showBothIds = false;

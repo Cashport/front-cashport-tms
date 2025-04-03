@@ -149,7 +149,6 @@ export const usePslFilter = (): UsePslFilter => {
   const handleUpdateVpQuery = (updatedValues: string[]) => {
     setVpQuery(updatedValues);
   };
-  console.log("selectedValues", selectedValues);
 
   type SelectedValue = string[];
   useEffect(() => {
