@@ -290,7 +290,7 @@ export const deleteOrders = async (trIds: string[], toIds: number[]): Promise<an
         transferOrderIds: toIds
       }
     };
-    const response: GenericResponse<any> = await API.delete(
+    const response: GenericResponse<any> = await API.post(
       `/transfer-request/delete-to-tr`,
       customConfig
     );
