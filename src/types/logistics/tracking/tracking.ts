@@ -11,7 +11,8 @@ export interface TrackingEvent {
   distanceKm?: number | null;
   hours?: number | null;
   rate?: number | null;
-  driver?: string | null;
+  driver?: string | number | null;
+  comment?: string | null;
 }
 
 export interface VehicleTracking {
