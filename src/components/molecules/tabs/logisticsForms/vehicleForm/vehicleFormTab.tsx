@@ -1,20 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Col,
-  Dropdown,
-  Flex,
-  Form,
-  MenuProps,
-  Row,
-  Switch,
-  Table,
-  TableProps,
-  Tag,
-  Typography
-} from "antd";
+import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, CheckCircle, Eye, Pencil } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
 
 // components
@@ -34,8 +21,6 @@ import "./vehicleformtab.scss";
 import { IFormVehicle, VehicleType } from "@/types/logistics/schema";
 import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
@@ -47,6 +32,7 @@ import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
+import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 
 const { Title, Text } = Typography;
 
@@ -295,60 +281,6 @@ export const VehicleFormTab = ({
       setValue("general.id_vehicle_type", data?.id_vehicle_type);
     }
   }, [data, setValue]);
-
-  const documentsTableColumns: TableProps<DocumentCompleteType>["columns"] = [
-    {
-      title: "Descripción",
-      dataIndex: "description",
-      key: "description",
-      render: (text) => <Text>{text}</Text>
-    },
-    {
-      title: "Fecha de Cargue",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (date) => {
-        return <Text>{dayjs.utc(date).format("DD/MM/YYYY")}</Text>;
-      }
-    },
-    {
-      title: "Vencimiento",
-      dataIndex: "expirationDate",
-      key: "expirationDate",
-      render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>
-    },
-    {
-      title: "Tipo",
-      dataIndex: "optional",
-      key: "optional",
-      render: (optional) => (
-        <Flex>
-          <Tag
-            color={optional ? "blue" : "red"}
-            bordered={false}
-            style={{ fontSize: "0.875rem", padding: "4px 8px" }}
-          >
-            {optional ? "Opcional" : "Obligatorio"}
-          </Tag>
-        </Flex>
-      )
-    },
-    {
-      title: "",
-      key: "link",
-      dataIndex: "link",
-      render: (link?: string) => (
-        <Button
-          disabled={!link}
-          icon={<Eye size={"1.3rem"} />}
-          href={link}
-          target="_blank"
-          rel="noopener"
-        />
-      ),
-      width: 70
-    }
-  ];
 
   return (
     <>
@@ -645,13 +577,7 @@ export const VehicleFormTab = ({
                 />
               )}
             </Col>
-            <Table
-              style={{ width: "100%" }}
-              className="mehtTable"
-              columns={documentsTableColumns}
-              pagination={false}
-              dataSource={selectedFiles.map((data) => ({ ...data, key: data.id }))}
-            />
+            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
