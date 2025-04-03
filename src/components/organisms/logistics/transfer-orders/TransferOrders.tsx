@@ -217,6 +217,8 @@ export const TransferOrders = () => {
               selected: 1
             })
           }
+          trID={trsIds[0]}
+          toIDs={childOrdersId}
         />
       </Container>
     </SearchProvider>

@@ -303,3 +303,33 @@ export const deleteOrders = async (trIds: string[], toIds: number[]): Promise<an
     throw new Error(errorMsg);
   }
 };
+
+interface IDeleteTransferRequestPayload {
+  transferRequestIds: number[]; // Array of transfer request IDs
+  transferOrderIds: number[]; // Array of transfer order IDs
+  comment: string; // Comment for the operation
+}
+
+export const deleteTransferRequestAndChildren = async (
+  requestData: IDeleteTransferRequestPayload,
+  selectedEvidence: File
+): Promise<any> => {
+  // create a FormData object to send the file and data
+  const formData = new FormData();
+  formData.append("request", JSON.stringify(requestData));
+  formData.append("file", selectedEvidence);
+
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/transfer-request/delete-to-tr`,
+      formData
+    );
+    if (response.success) return response.data;
+  } catch (error) {
+    let errorMsg;
+    if (error instanceof Error) {
+      errorMsg = error?.message;
+    } else errorMsg = "Error al borrar servicios, intente nuevamente";
+    throw new Error(errorMsg);
+  }
+};
