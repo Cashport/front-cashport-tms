@@ -170,9 +170,6 @@ export const getAcceptedTransferRequest = async (
   page?: number
 ): Promise<ITransferRequestResponse[]> => {
   try {
-    console.log("getAcceptedTransferRequest pslQuery", pslQuery);
-    console.log("getAcceptedTransferRequest vpQuery", vpQuery);
-
     const body = {
       searchParam: search,
       psl: pslQuery,
@@ -285,7 +282,7 @@ export const downloadCsvTransferOrders = async () => {
   await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.xlsx");
 };
 
-export const deleteOrders = async (trIds: number[], toIds: number[]): Promise<any> => {
+export const deleteOrders = async (trIds: string[], toIds: number[]): Promise<any> => {
   try {
     const customConfig = {
       data: {

@@ -17,7 +17,7 @@ type PropsModalGenerateActionTO = {
   isOpen: boolean;
   onClose: () => void;
   ordersId?: number[];
-  trsIds?: number[];
+  trsIds?: string[];
   setIsModalOpen: Dispatch<
     SetStateAction<{
       selected: number;
