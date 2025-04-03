@@ -33,7 +33,13 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
       title: "Vencimiento",
       dataIndex: "expirationDate",
       key: "expirationDate",
-      render: (date) => <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>
+      render: (date) => (
+        <Text>
+          {dayjs.utc(date).format("DD/MM/YYYY") === "30/11/1899"
+            ? "-"
+            : dayjs.utc(date).format("DD/MM/YYYY")}
+        </Text>
+      )
     },
     {
       title: "Tipo",
