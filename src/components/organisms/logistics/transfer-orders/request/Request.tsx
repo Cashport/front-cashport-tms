@@ -1,7 +1,10 @@
 import { Checkbox, CollapseProps, Spin } from "antd";
 import styles from "./Request.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
-import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
+import {
+  DataTypeForTransferOrderTable,
+  TransferOrdersTable
+} from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 import { FC, useEffect, useState } from "react";
 import { getAcceptedTransferRequest } from "@/services/logistics/transfer-request";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
@@ -12,9 +15,14 @@ import { useSearchContext } from "@/context/SearchContext";
 interface IRequestProps {
   handleCheckboxChange: (id: number, checked: boolean) => void;
   ordersId: number[];
-  trsIds: number[];
-  handleCheckboxChangeTR: (id: number, checked: boolean) => void;
+  trsIds: string[];
+  handleCheckboxChangeTR: (
+    id: string,
+    checked: boolean,
+    row: DataTypeForTransferOrderTable
+  ) => void;
   modalState: boolean;
+  mutateData?: boolean;
 }
 
 export const Request: FC<IRequestProps> = ({
@@ -22,7 +30,8 @@ export const Request: FC<IRequestProps> = ({
   ordersId,
   trsIds,
   handleCheckboxChangeTR,
-  modalState
+  modalState,
+  mutateData
 }) => {
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
@@ -86,10 +95,10 @@ export const Request: FC<IRequestProps> = ({
   };
 
   useEffect(() => {
-    if (!modalState) {
+    if (!modalState || mutateData) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search, pslQuery, vpQuery]);
+  }, [modalState, search, pslQuery, vpQuery, mutateData]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
@@ -116,12 +125,17 @@ export const Request: FC<IRequestProps> = ({
         aditionalRow = {
           title: "",
           dataIndex: "checkbox",
-          render: (_: any, { tr }: any) => (
-            <Checkbox
-              checked={trsIds.includes(tr)}
-              onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
-            />
-          )
+          render: (_: any, row: DataTypeForTransferOrderTable) => {
+            const { tr } = row;
+            return (
+              <Checkbox
+                checked={trsIds.includes(tr)}
+                onChange={(e) => {
+                  return handleCheckboxChangeTR(tr, e.target.checked, row);
+                }}
+              />
+            );
+          }
         };
         redirect = "/logistics/transfer-request/";
       }

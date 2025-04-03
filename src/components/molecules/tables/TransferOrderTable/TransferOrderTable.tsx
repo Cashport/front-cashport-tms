@@ -7,7 +7,7 @@ import { columns } from "./columns/TOColumns";
 import { IPagination } from "@/types/clients/IViewClientsTable";
 dayjs.extend(utc);
 
-export interface DataType {
+export interface DataTypeForTransferOrderTable {
   key: number;
   tr: string;
   id_transfer_request?: number;
@@ -28,6 +28,8 @@ export interface DataType {
   tiempodeviaje: string;
   valor: number;
   carriers: string;
+  statusId: string;
+  TOs?: string;
 }
 
 interface ITransferOrdersTable {
@@ -62,7 +64,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
     fetchData(page);
   };
 
-  const [dataSource, setDataSource] = useState<DataType[]>([]);
+  const [dataSource, setDataSource] = useState<DataTypeForTransferOrderTable[]>([]);
 
   useEffect(() => {
     const mappedData = items.map((item) => ({
@@ -86,7 +88,9 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
         isRejected: !!item.is_rejected,
         tr: String(item.id)
       },
-      carriers: item.carriers ?? ""
+      carriers: item.carriers ?? "",
+      statusId: item.statusId,
+      TOs: item?.TOs
     }));
     setDataSource(mappedData);
   }, [items]);
