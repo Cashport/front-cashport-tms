@@ -21,6 +21,10 @@ const getAuth = async (
   openNotification: ({ api, title, message, placement }: IOpenNotificationProps) => void,
   api: NotificationInstance
 ) => {
+  localStorage.removeItem(STORAGE_TOKEN);
+  const { resetStore, setHydrated } = useAppStore.getState();
+  resetStore();
+  setHydrated();
   if (isSignUp) {
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCred) => {
@@ -50,9 +54,10 @@ const getAuth = async (
             Authorization: `Bearer ${token}`,
             tokenExm: `${JSON.stringify(userCred)}`
           }
-        }).then((response) => {
+        }).then(async (response) => {
+          const data = await response.json();
           if (response.status === 200) {
-            localStorage.setItem(STORAGE_TOKEN, token);
+            localStorage.setItem(STORAGE_TOKEN, data.data.token);
             router.push("/landing");
           }
         });
