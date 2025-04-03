@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Checkbox, CheckboxProps, Flex, message, Modal } from "antd";
 import { CaretLeft } from "phosphor-react";
 
+import { deleteTransferRequestAndChildren } from "@/services/logistics/transfer-request";
+import { STATUS } from "@/utils/constants/globalConstants";
+
 import ModalAttachEvidence from "../ModalEvidence/ModalAttachEvidence";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 import "./modalCancelTR.scss";
-import { deleteTransferRequestAndChildren } from "@/services/logistics/transfer-request";
 
 interface Props {
   isOpen?: boolean;
@@ -35,7 +37,13 @@ export const ModalCancelTR = ({
   const [checkedCancelTOs, setCheckCancelTOs] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // const isProcessing = trStatus === "En curso" ? true : false;
+  const { TR } = STATUS;
+
+  const isNotProcessing = trStatus
+    ? trStatus === TR.ASIGNANDO_VEHICULO || trStatus === TR.ESPERANDO_PROVEEDOR
+      ? true
+      : false
+    : false;
 
   // useEffect for cleaning states when modal is closed
   useEffect(() => {
@@ -80,12 +88,14 @@ export const ModalCancelTR = ({
           </button>
 
           <div className="ModalCancelTR__content" style={{ height: "90%" }}>
-            <div>
-              <p>
-                Tu viaje está en estado <strong>En curso</strong>
-              </p>
-              <p>La cancelación puede tener un costo asociado.</p>
-            </div>
+            {!isNotProcessing && (
+              <div>
+                <p>
+                  Tu viaje está en estado <strong>En curso</strong>
+                </p>
+                <p>La cancelación puede tener un costo asociado.</p>
+              </div>
+            )}
 
             <p>
               ¿Está seguro de cancelar la <strong>TR {trID}</strong>?

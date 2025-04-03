@@ -103,7 +103,6 @@ export const Request: FC<IRequestProps> = ({
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
     .map((item, index) => {
-      console.log("item de donde salen los items", item);
       let aditionalRow = undefined;
       let redirect = undefined;
       let showBothIds = false;

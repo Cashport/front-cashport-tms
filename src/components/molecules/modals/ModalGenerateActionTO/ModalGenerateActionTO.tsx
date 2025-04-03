@@ -105,6 +105,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             noModal
             trID={transferRequest?.id}
             toIDs={transferRequest?.transfer_orders}
+            trStatus={transferRequest?.status_id}
           />
         );
       default:

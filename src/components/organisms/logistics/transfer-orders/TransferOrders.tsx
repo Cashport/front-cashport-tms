@@ -35,6 +35,7 @@ export const TransferOrders = () => {
   const [ordersId, setOrdersId] = useState<number[]>([]);
   const [trsIds, setTrsIds] = useState<string[]>([]);
   const [childOrdersId, setChildOrdersId] = useState<string[]>([]);
+  const [TRStatusId, setTRStatusId] = useState<string>();
   const [mutate, setMutate] = useState(false);
 
   const searchParams = useSearchParams();
@@ -109,6 +110,7 @@ export const TransferOrders = () => {
         ? [...prevOrdersId, ...(row.TOs?.split(",") ?? []).map((order) => order)]
         : prevOrdersId.filter((orderId) => !row.TOs?.split(",").includes(orderId))
     );
+    setTRStatusId(row.statusId);
   };
   useEffect(() => {
     if (mutate) {
@@ -237,6 +239,7 @@ export const TransferOrders = () => {
           }}
           trID={trsIds[0]}
           toIDs={childOrdersId}
+          trStatus={TRStatusId}
         />
       </Container>
     </SearchProvider>
