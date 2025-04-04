@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Flex, UploadFile } from "antd";
 import { CaretLeft, Plus } from "@phosphor-icons/react";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
 import styles from "./modalAttachEvidence.module.scss";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { UploadChangeParam } from "antd/es/upload";
 
 interface FileFromDragger {
   lastModified: number;
@@ -41,6 +42,7 @@ type EvidenceModalProps = {
   customTexts?: customTexts;
   multipleFiles?: boolean;
   noComment?: boolean;
+  loading?: boolean;
 };
 
 const ModalAttachEvidence = ({
@@ -53,24 +55,24 @@ const ModalAttachEvidence = ({
   noComment = false,
   commentary,
   setCommentary,
-  multipleFiles = false
+  multipleFiles = false,
+  loading = false
 }: EvidenceModalProps) => {
   const isAttachButtonDisabled = !noComment
     ? !(commentary && selectedEvidence.length > 0)
     : selectedEvidence.length === 0;
 
-  const handleOnChangeDocument: any = (info: FileObjectFromButton) => {
+  const handleOnChangeDocument: any = (info: UploadChangeParam<File>) => {
     const { file } = info;
-    const rawFile = file.originFileObj;
-    if (rawFile) {
-      const fileSizeInMB = rawFile.size / (1024 * 1024);
+    if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024);
 
       if (fileSizeInMB > 30) {
         alert("El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.");
         return;
       }
 
-      setSelectedEvidence([...selectedEvidence, rawFile]);
+      setSelectedEvidence([...selectedEvidence, file]);
     }
   };
 
@@ -95,6 +97,14 @@ const ModalAttachEvidence = ({
   const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentary(e.target.value);
   };
+
+  //useEffect for cleaning the states when the modal is closed
+  useEffect(() => {
+    return () => {
+      setCommentary("");
+      setSelectedEvidence([]);
+    };
+  }, [setCommentary, setSelectedEvidence]);
 
   return (
     <div className={styles.content}>
@@ -157,7 +167,10 @@ const ModalAttachEvidence = ({
           </>
         )}
 
-        <p>Comentarios</p>
+        <Flex vertical>
+          <p>Comentarios</p>
+          <em className="descriptionDocument">*Obligatorio</em>
+        </Flex>
         <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
       </div>
 
@@ -167,6 +180,8 @@ const ModalAttachEvidence = ({
         titleConfirm={
           customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Adjuntar evidencia"
         }
+        isConfirmLoading={loading}
+        isConfirmDisabled={isAttachButtonDisabled}
       />
     </div>
   );

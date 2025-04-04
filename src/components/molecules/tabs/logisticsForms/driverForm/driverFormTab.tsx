@@ -1,30 +1,16 @@
-import { useEffect, useState } from "react";
-import { Controller, set, useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import dayjs from "dayjs";
 // components
-import {
-  Button,
-  Col,
-  Dropdown,
-  Flex,
-  Form,
-  MenuProps,
-  Modal,
-  Row,
-  Space,
-  Tag,
-  Typography
-} from "antd";
+import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Typography } from "antd";
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import InputPhone from "@/components/atoms/inputs/InputPhone/InputPhone";
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
-import {
-  FileObject,
-  UploadDocumentButton
-} from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
+import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
+
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
@@ -33,10 +19,8 @@ import Link from "next/link";
 //types
 import { IFormDriver, VehicleType } from "@/types/logistics/schema";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-//styles
-import "./driverformtab.scss";
 //icons
-import { ArrowClockwise, ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
 //utils
 import {
   _onSubmit,
@@ -44,7 +28,6 @@ import {
   validationButtonText,
   DriverFormTabProps
 } from "./driverFormTab.mapper";
-import dayjs from "dayjs";
 import {
   bloodTypesOptions,
   documentTypesOptions,
@@ -55,10 +38,12 @@ import runes from "runes2";
 import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import React from "react";
-import ChipsRow from "@/components/organisms/logistics/orders/DetailsOrderView/components/ChipsRow";
-import FooterButtons from "@/components/molecules/modals/ModalBillingAction/FooterButtons/FooterButtons";
+
 import ModalConfirmAudit from "./components/ModalConfirmAudit";
+
+//styles
+import "./driverformtab.scss";
+import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 
 const { Title, Text } = Typography;
 
@@ -650,34 +635,7 @@ export const DriverFormTab = ({
                 />
               )}
             </Col>
-            <Row style={{ marginTop: "1rem", width: "100%" }}>
-              {selectedFiles.map((file, index) => (
-                <Col
-                  span={12}
-                  key={`file-${file.id}`}
-                  style={{ marginBottom: "16px", paddingRight: index % 2 === 0 ? "16px" : "0" }}
-                >
-                  <UploadDocumentButton
-                    key={file.id}
-                    title={file.description}
-                    isMandatory={!file.optional}
-                    aditionalData={file.id}
-                    setFiles={() => {}}
-                    files={file.file}
-                    disabled
-                  >
-                    {file?.link ? (
-                      <UploadDocumentChild
-                        linkFile={file.link}
-                        nameFile={file.link.split("-").pop() ?? ""}
-                        onDelete={() => {}}
-                        showTrash={false}
-                      />
-                    ) : undefined}
-                  </UploadDocumentButton>
-                </Col>
-              ))}
-            </Row>
+            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>

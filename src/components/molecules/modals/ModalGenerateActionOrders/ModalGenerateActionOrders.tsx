@@ -15,9 +15,9 @@ import { MinusCircle } from "@phosphor-icons/react";
 
 type PropsModalGenerateActionTO = {
   isOpen: boolean;
-  onClose: () => void;
-  ordersId?: number[];
-  trsIds?: number[];
+  onClose: (resetStates?: boolean) => void;
+  ordersId?: string[];
+  trsIds?: string[];
   setIsModalOpen: Dispatch<
     SetStateAction<{
       selected: number;
@@ -36,7 +36,7 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     const queryParam = ordersId.join(",");
     setIsLoading(true);
     try {
-      await transferOrderMerge(ordersId);
+      await transferOrderMerge(ordersId.map((id) => Number(id)));
       message.open({ content: "Operación realizada con éxito", type: "success" });
       router.push(`transfer-request/create/${queryParam}`);
     } catch (error) {
@@ -69,7 +69,7 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     try {
       await deleteOrders(trsIds, ordersId);
       message.open({ content: "Operación realizada con éxito", type: "success" });
-      onClose();
+      onClose(true);
     } catch (error) {
       if (error instanceof Error)
         message.open({ content: error.message, type: "error", duration: 5 });
@@ -95,7 +95,7 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
       centered
       open={isOpen}
       onClose={() => onClose()}
-      closeIcon={<X size={20} weight="bold" onClick={onClose} />}
+      closeIcon={<X size={20} weight="bold" onClick={() => onClose()} />}
       footer={<></>}
       loading={isLoading}
     >

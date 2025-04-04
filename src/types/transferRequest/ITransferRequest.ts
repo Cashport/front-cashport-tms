@@ -15,6 +15,9 @@ export interface ITransferRequest {
   created_at: Date;
   id_transfer_request?: number;
   carriers: string;
+  statusId: string;
+  transferType: string;
+  TOs?: string;
 }
 
 export interface ITimeLine {

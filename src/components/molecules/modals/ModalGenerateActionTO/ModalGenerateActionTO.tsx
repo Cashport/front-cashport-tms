@@ -98,10 +98,14 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
       case ViewEnum.CANCEL_TR:
         return (
           <ModalCancelTR
-            onCancel={() => setSelectedView(ViewEnum.SELECT_ACTION)}
+            onCancel={() => {
+              setSelectedView(ViewEnum.SELECT_ACTION);
+            }}
+            onClose={onClose}
             noModal
             trID={transferRequest?.id}
             toIDs={transferRequest?.transfer_orders}
+            trStatus={transferRequest?.status_id}
           />
         );
       default:

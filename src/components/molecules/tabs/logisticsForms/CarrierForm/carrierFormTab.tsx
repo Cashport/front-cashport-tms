@@ -1,39 +1,39 @@
-import { useEffect, useState } from "react";
-import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Select, Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import Link from "next/link";
+import useSWR from "swr";
+import dayjs from "dayjs";
+
+import { getDocumentsByEntityType } from "@/services/logistics/certificates";
 
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import "./carrierformtab.scss";
 import {
   _onSubmit,
   dataToProjectFormData,
   validationButtonText,
   CarrierFormTabProps
 } from "./carrierFormTab.mapper";
-import { IFormCarrier } from "@/types/logistics/schema";
 import { bloodTypes } from "@/components/molecules/logistics/SelectRh/SelectRh";
-import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { licences } from "@/components/molecules/logistics/SelectLicenceCategory/SelectLicenceCategory";
-import useSWR from "swr";
-import { getDocumentsByEntityType } from "@/services/logistics/certificates";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
-import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import ModalConfirmAudit from "../driverForm/components/ModalConfirmAudit";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import CustomTag from "@/components/atoms/CustomTag";
-import React from "react";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-import Link from "next/link";
+import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
+
+import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { IFormCarrier } from "@/types/logistics/schema";
+
+import "./carrierformtab.scss";
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 export const CarrierFormTab = ({
   onSubmitForm = () => {},
@@ -59,12 +59,11 @@ export const CarrierFormTab = ({
   const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data[0]);
   const {
     watch,
-    setValue,
     control,
     handleSubmit,
     reset,
     trigger,
-    formState: { errors, isDirty }
+    formState: { errors }
   } = useForm<IFormCarrier>({
     defaultValues,
     disabled: statusForm === "review"
@@ -361,34 +360,7 @@ export const CarrierFormTab = ({
                 <LoadDocumentsButton text="Cargar documentos" onClick={() => {}} />
               )}
             </Col>
-            <Row style={{ marginTop: "1rem", width: "100%" }}>
-              {selectedFiles.map((file, index) => (
-                <Col
-                  span={12}
-                  key={`file-${file.id}`}
-                  style={{ marginBottom: "16px", paddingRight: index % 2 === 0 ? "16px" : "0" }}
-                >
-                  <UploadDocumentButton
-                    key={file.id}
-                    title={file.description}
-                    isMandatory={!file.optional}
-                    aditionalData={file.id}
-                    setFiles={() => {}}
-                    files={file.file}
-                    disabled
-                  >
-                    {file?.link ? (
-                      <UploadDocumentChild
-                        linkFile={file.link}
-                        nameFile={file.link.split("-").pop() ?? ""}
-                        onDelete={() => {}}
-                        showTrash={false}
-                      />
-                    ) : undefined}
-                  </UploadDocumentButton>
-                </Col>
-              ))}
-            </Row>
+            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
