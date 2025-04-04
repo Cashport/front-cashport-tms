@@ -17,6 +17,8 @@ import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenera
 import { SearchProvider } from "@/context/SearchContext";
 import UiSearchInput from "@/components/ui/search-input-provider";
 import Filter from "@/components/atoms/Filters/FilterOrders";
+import { ModalCancelTR } from "@/components/molecules/modals/ModalCancelTR/ModalCancelTR";
+import { DataTypeForTransferOrderTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 
 const { Text } = Typography;
 
@@ -30,8 +32,11 @@ const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
 export const TransferOrders = () => {
   const { selectedProject: project, isHy } = useAppStore((state) => state);
-  const [ordersId, setOrdersId] = useState<number[]>([]);
-  const [trsIds, setTrsIds] = useState<number[]>([]);
+  const [ordersId, setOrdersId] = useState<string[]>([]);
+  const [trsIds, setTrsIds] = useState<string[]>([]);
+  const [childOrdersId, setChildOrdersId] = useState<string[]>([]);
+  const [TRStatusId, setTRStatusId] = useState<string>();
+  const [mutate, setMutate] = useState(false);
 
   const searchParams = useSearchParams();
   const [selectFilters, setSelectFilters] = useState({
@@ -40,7 +45,7 @@ export const TransferOrders = () => {
   });
   const tabParam = searchParams.get("tab") as TabEnum | null;
   const [tab, setTab] = useState<TabEnum>();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
 
   useEffect(() => {
     if (isHy) {
@@ -87,16 +92,31 @@ export const TransferOrders = () => {
     }
   }, [tabParam, isHy, project]);
 
-  const handleCheckboxChange = (id: number, checked: boolean) => {
+  const handleCheckboxChange = (id: string, checked: boolean) => {
     setOrdersId((prevOrdersId) =>
       checked ? [...prevOrdersId, id] : prevOrdersId.filter((orderId) => orderId !== id)
     );
   };
-  const handleCheckboxChangeTR = (id: number, checked: boolean) => {
+  const handleCheckboxChangeTR = (
+    id: string,
+    checked: boolean,
+    row: DataTypeForTransferOrderTable
+  ) => {
     setTrsIds((prevTRsIds) =>
       checked ? [...prevTRsIds, id] : prevTRsIds.filter((TRid) => TRid !== id)
     );
+    setChildOrdersId((prevOrdersId) =>
+      checked
+        ? [...prevOrdersId, ...(row.TOs?.split(",") ?? []).map((order) => order)]
+        : prevOrdersId.filter((orderId) => !row.TOs?.split(",").includes(orderId))
+    );
+    setTRStatusId(row.statusId);
   };
+  useEffect(() => {
+    if (mutate) {
+      setMutate(false);
+    }
+  }, [mutate]);
 
   const renderView = () => {
     switch (tab) {
@@ -107,15 +127,17 @@ export const TransferOrders = () => {
             ordersId={ordersId}
             trsIds={trsIds}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
-            modalState={isModalOpen}
+            modalState={isModalOpen.selected === 1}
+            mutateData={mutate}
           />
         );
       case TabEnum.IN_PROCESS:
         return (
           <InProcess
             trsIds={trsIds}
-            modalState={isModalOpen}
+            modalState={isModalOpen.selected === 1}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
+            mutateData={mutate}
           />
         );
       case TabEnum.COMPLETED:
@@ -137,7 +159,7 @@ export const TransferOrders = () => {
               icon={<DotsThree size={"1.5rem"} />}
               disabled={false}
               loading={false}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsModalOpen({ selected: 1 })}
             >
               Generar acción
             </PrincipalButton>
@@ -192,10 +214,39 @@ export const TransferOrders = () => {
         </div>
         <div>{isHy && renderView()}</div>
         <ModalGenerateActionOrders
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={isModalOpen.selected === 1}
+          onClose={(resetStates?: boolean) => {
+            setIsModalOpen({ selected: 0 });
+            if (resetStates) {
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+            }
+          }}
           ordersId={ordersId}
           trsIds={trsIds}
+          setIsModalOpen={setIsModalOpen}
+        />
+        <ModalCancelTR
+          isOpen={isModalOpen.selected === 2}
+          onCancel={() =>
+            setIsModalOpen({
+              selected: 1
+            })
+          }
+          onClose={() => {
+            // clean states
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+
+            // causw reloading of the data
+            setMutate((prev) => !prev);
+            setIsModalOpen({ selected: 0 });
+          }}
+          trID={trsIds[0]}
+          toIDs={childOrdersId}
+          trStatus={TRStatusId}
         />
       </Container>
     </SearchProvider>

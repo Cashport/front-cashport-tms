@@ -26,7 +26,11 @@ export default function SecondaryButton({
   const white = token.colorTextSecondary;
 
   const className =
-    (bordered && !fullWidth) ? styles.button__bordered : fullWidth ? styles.button__fullWidth : styles.button;
+    bordered && !fullWidth
+      ? styles.button__bordered
+      : fullWidth
+        ? styles.button__fullWidth
+        : styles.button;
 
   return (
     <ConfigProvider
@@ -34,7 +38,6 @@ export default function SecondaryButton({
         components: {
           Button: {
             colorPrimary: green,
-            colorPrimaryHover: white,
             colorPrimaryActive: white,
             primaryShadow: "none",
             paddingContentHorizontal: 24,

@@ -46,7 +46,6 @@ const ActionList = ({
         onClick={() => setSelectedView(ViewEnum.CHANGE_CARRIER_VEHICLE)}
       />
       <ButtonGenerateAction
-        disabled={true}
         icon={<MinusCircle size={20} />}
         title="Cancelación del TR"
         onClick={() => setSelectedView(ViewEnum.CANCEL_TR)}
