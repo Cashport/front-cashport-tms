@@ -282,17 +282,20 @@ export const downloadCsvTransferOrders = async () => {
   await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.xlsx");
 };
 
-export const deleteOrders = async (trIds: string[], toIds: number[]): Promise<any> => {
+export const deleteOrders = async (trIds: string[], toIds: string[]): Promise<any> => {
   try {
-    const customConfig = {
-      data: {
-        transferRequestIds: trIds,
-        transferOrderIds: toIds
-      }
-    };
+    const formData = new FormData();
+    formData.append(
+      "request",
+      JSON.stringify({
+        transferRequestIds: trIds.map((tr) => Number(tr)),
+        transferOrderIds: toIds.map((to) => Number(to))
+      })
+    );
+
     const response: GenericResponse<any> = await API.post(
       `/transfer-request/delete-to-tr`,
-      customConfig
+      formData
     );
     if (response.success) return response.data;
   } catch (error) {

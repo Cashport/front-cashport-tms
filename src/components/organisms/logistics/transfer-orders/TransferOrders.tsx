@@ -32,7 +32,7 @@ const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
 export const TransferOrders = () => {
   const { selectedProject: project, isHy } = useAppStore((state) => state);
-  const [ordersId, setOrdersId] = useState<number[]>([]);
+  const [ordersId, setOrdersId] = useState<string[]>([]);
   const [trsIds, setTrsIds] = useState<string[]>([]);
   const [childOrdersId, setChildOrdersId] = useState<string[]>([]);
   const [TRStatusId, setTRStatusId] = useState<string>();
@@ -92,7 +92,7 @@ export const TransferOrders = () => {
     }
   }, [tabParam, isHy, project]);
 
-  const handleCheckboxChange = (id: number, checked: boolean) => {
+  const handleCheckboxChange = (id: string, checked: boolean) => {
     setOrdersId((prevOrdersId) =>
       checked ? [...prevOrdersId, id] : prevOrdersId.filter((orderId) => orderId !== id)
     );
@@ -215,7 +215,14 @@ export const TransferOrders = () => {
         <div>{isHy && renderView()}</div>
         <ModalGenerateActionOrders
           isOpen={isModalOpen.selected === 1}
-          onClose={() => setIsModalOpen({ selected: 0 })}
+          onClose={(resetStates?: boolean) => {
+            setIsModalOpen({ selected: 0 });
+            if (resetStates) {
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+            }
+          }}
           ordersId={ordersId}
           trsIds={trsIds}
           setIsModalOpen={setIsModalOpen}

@@ -13,8 +13,8 @@ import { STATUS } from "@/utils/constants/globalConstants";
 import { useSearchContext } from "@/context/SearchContext";
 
 interface IRequestProps {
-  handleCheckboxChange: (id: number, checked: boolean) => void;
-  ordersId: number[];
+  handleCheckboxChange: (id: string, checked: boolean) => void;
+  ordersId: string[];
   trsIds: string[];
   handleCheckboxChangeTR: (
     id: string,
