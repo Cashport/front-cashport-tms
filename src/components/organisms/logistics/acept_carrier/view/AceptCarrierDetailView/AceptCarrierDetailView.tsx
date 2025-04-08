@@ -22,6 +22,7 @@ import { getTravelFreightDuration } from "@/utils/logistics/maps";
 import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier/carrier";
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
+import ModalRejectTripInvite from "@/components/molecules/modals/ModalRejectTripInvite/ModalRejectTripInvite";
 
 interface AceptCarrierDetailProps {
   params: { id: string };
@@ -43,6 +44,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [canBeRejected, setCanBeRejected] = useState<boolean>(false);
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const router = useRouter();
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
@@ -187,7 +189,11 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const handleReject = async () => {
     try {
       setIsLoading(true);
-      const res = await postCarrierReject(String(carrier?.id_carrier), String(carrier?.id));
+      const res = await postCarrierReject({
+        id_carrier: String(carrier?.id_carrier),
+        id_carrier_request: String(carrier?.id),
+        rejection_causes: "TEEEEEST"
+      });
       if (res) {
         message.success("Rechazado", 2, () => router.push("/logistics/acept_carrier"));
       } else message.error("Hubo un error", 3, () => router.push("/logistics/acept_carrier"));
@@ -196,6 +202,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOpenRejectModal = async () => {
+    setIsRejectModalOpen(true);
   };
 
   const stepIndexMap: Record<string, number> = {
@@ -239,7 +249,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             mapContainerRef={mapContainerRef}
             setView={setView}
             showRejectButton={canBeRejected}
-            handleReject={handleReject}
+            handleReject={handleOpenRejectModal}
             entityType={entityType}
           />
         );
@@ -255,7 +265,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             currentVehicle={vehicleSelected}
             formMode={formMode}
             setView={setView}
-            handleReject={handleReject}
+            handleReject={handleOpenRejectModal}
             showRejectButton={canBeRejected}
           />
         );
@@ -271,7 +281,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             currentObservation={observation}
             setView={setView}
             handleSubmit={handleSubmit}
-            handleReject={handleReject}
+            handleReject={handleOpenRejectModal}
             showRejectButton={canBeRejected}
             entityType={entityType}
           />
@@ -316,6 +326,12 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             </Col>
           </Flex>
           {renderView()}
+
+          <ModalRejectTripInvite
+            isOpen={isRejectModalOpen}
+            handleRejectInvite={() => console.log("reject")}
+            handleCancel={() => setIsRejectModalOpen(false)}
+          />
         </Skeleton>
       </Flex>
     </>
