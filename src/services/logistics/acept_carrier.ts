@@ -192,14 +192,25 @@ export const postCarrierRequest = async (
   }
 };
 
-export const postCarrierReject = async (
-  id_carrier: string,
-  id_carrier_request: string
-): Promise<IListData> => {
+interface IPostCarrierRejectParams {
+  id_carrier: string;
+  id_carrier_request: string;
+  rejection_causes: string;
+  commentary?: string;
+}
+
+export const postCarrierReject = async ({
+  id_carrier,
+  id_carrier_request,
+  rejection_causes,
+  commentary
+}: IPostCarrierRejectParams): Promise<IListData> => {
   try {
     const body = {
-      id_carrier: id_carrier,
-      id_carrier_request: id_carrier_request
+      id_carrier,
+      id_carrier_request,
+      rejection_causes,
+      commentary
     };
 
     const response: IListData = await API.post(`/carrier/request/reject`, body);
@@ -209,6 +220,7 @@ export const postCarrierReject = async (
     return error as any;
   }
 };
+
 export const putEditCarrierRequest = async (
   id_carrier: string,
   id_carrier_request: string,
