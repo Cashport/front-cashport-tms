@@ -13,10 +13,27 @@ import {
 import { PreauthorizeTripForm } from "@/components/molecules/modals/ModalGenerateActionTO/PreauthorizeTrip/controllers/preauthorizetrip.types";
 import createPreauthorizationsFormData from "@/components/molecules/modals/ModalGenerateActionTO/PreauthorizeTrip/controllers/createFormData";
 
-export const getAllBillingList = async (): Promise<IBillingsRequestList[]> => {
+interface IBillingRequest {
+  statusId?: string;
+  page?: number;
+  searchQuery?: string;
+}
+export const getAllBillingList = async ({
+  statusId,
+  page,
+  searchQuery
+}: IBillingRequest = {}): Promise<IBillingsRequestList[]> => {
+  const body = {
+    statusId,
+    page,
+    searchParam: searchQuery
+  };
+
   try {
-    const response: GenericResponse<IBillingsRequestList[]> =
-      await API.get(`/logistic-billing/all`);
+    const response: GenericResponse<IBillingsRequestList[]> = await API.post(
+      `/logistic-billing/all`,
+      body
+    );
     return response.data;
   } catch (error) {
     console.log("Error get all getAllBillingList: ", error);
