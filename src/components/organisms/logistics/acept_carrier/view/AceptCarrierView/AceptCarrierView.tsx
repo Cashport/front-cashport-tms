@@ -1,18 +1,25 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Collapse, Flex, Spin } from "antd";
+import React, { useState } from "react";
+import { Flex, Spin } from "antd";
 import LabelCollapse from "@/components/ui/label-collapse";
 import CarrierTable from "@/components/molecules/tables/CarrierTable/CarrierTable";
 import styles from "./AceptCarrierView.module.scss";
-import { ICarriersRequestList } from "@/types/logistics/schema";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
+import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
 
 interface AceptCarrierViewProps {
-  carriers: ICarriersRequestList[];
+  carriers: CarrierCollapseAPI[];
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
+  getAceptCarrierRequestListByStatusId: (statusId?: string, newPage?: number) => Promise<void>;
 }
 
-export default function AceptCarrierView({ carriers, loading }: AceptCarrierViewProps) {
+export default function AceptCarrierView({
+  carriers,
+  loading,
+  getAceptCarrierRequestListByStatusId
+}: AceptCarrierViewProps) {
+  console.log("carriers", carriers);
   const [selectedRows, setSelectedRows] = useState<any[] | undefined>();
 
   return (
@@ -29,7 +36,7 @@ export default function AceptCarrierView({ carriers, loading }: AceptCarrierView
                   label: (
                     <LabelCollapse
                       status={carriersState.description}
-                      quantity={carriersState.carrierrequests.length}
+                      quantity={carriersState.page?.totalRows}
                       color={carriersState.color}
                       quantityText="CR"
                       removeIcons
@@ -37,9 +44,12 @@ export default function AceptCarrierView({ carriers, loading }: AceptCarrierView
                   ),
                   children: (
                     <CarrierTable
-                      carrierData={carriersState.carrierrequests}
+                      carrierData={carriersState}
                       setSelectedRows={setSelectedRows}
                       loading={loading}
+                      fetchData={(newPage: number) =>
+                        getAceptCarrierRequestListByStatusId(carriersState.statusid, newPage)
+                      }
                     />
                   )
                 }))
