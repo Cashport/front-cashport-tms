@@ -35,6 +35,30 @@ export default function AceptBilling() {
     setLoading(false);
   };
 
+  const getBillingListdByStatusId = async (statusId?: string, newPage?: number) => {
+    setLoading(true);
+    try {
+      const response = await getAllBillingList({
+        searchQuery: debouncedSearchQuery,
+        statusId,
+        page: newPage
+      });
+
+      if (Array.isArray(response) && response.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = response[0];
+
+        setBillings((prevState) =>
+          prevState.map((item) => (item.statusId === updatedItem.statusId ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container>
       <Flex className={styles.filters} style={{ marginBottom: "0.5rem" }} gap={8}>
@@ -46,7 +70,11 @@ export default function AceptBilling() {
         />
         <FilterProjects setSelecetedProjects={setSelectFilters} height="48" />
       </Flex>
-      <AceptBillingView billings={billings} loading={loading} />
+      <AceptBillingView
+        billings={billings}
+        loading={loading}
+        getBillingListdByStatusId={getBillingListdByStatusId}
+      />
     </Container>
   );
 }
