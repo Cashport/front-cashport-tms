@@ -1,29 +1,37 @@
 "use client";
+import { useEffect, useState } from "react";
 import { Flex, message } from "antd";
+
+import { getAceptCarrierRequestList } from "@/services/logistics/acept_carrier";
+import { useDebounce } from "@/hooks/useSearch";
+
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import AceptCarrierView from "./view/AceptCarrierView/AceptCarrierView";
-import styles from "./AceptCarrier.module.scss";
-import { getAceptCarrierRequestList } from "@/services/logistics/acept_carrier";
-import { useEffect, useState } from "react";
 import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
 import Container from "@/components/atoms/Container/Container";
+
 import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
 
+import styles from "./AceptCarrier.module.scss";
+
 export default function AceptCarrier() {
-  const [carriers, setCarriers] = useState<CarrierCollapseAPI[]>([]);
-  const [filteredCarriers, setFilteredCarriers] = useState<CarrierCollapseAPI[]>([]);
+  const [carriersData, setCarriersData] = useState<CarrierCollapseAPI[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectFilters, setSelectFilters] = useState({
     country: [] as string[],
     currency: [] as string[]
   });
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
   useEffect(() => {
     const loadCarrierRequestTransferList = async () => {
       setLoading(true);
       try {
-        const data = await getAceptCarrierRequestList();
-        setCarriers(data);
+        const data = await getAceptCarrierRequestList({
+          searchQuery: debouncedSearchQuery
+        });
+        setCarriersData(data);
       } catch (error) {
         if (error instanceof Error) message.error(error.message);
         else message.error("Error al obtener la lista de solicitudes de carga");
@@ -33,29 +41,31 @@ export default function AceptCarrier() {
       }
     };
     loadCarrierRequestTransferList();
-  }, []);
+  }, [debouncedSearchQuery]);
 
-  useEffect(() => {
-    // Filtrar los resultados cada vez que cambia el término de búsqueda
-    if (searchTerm.trim() === "") {
-      setFilteredCarriers(carriers);
-    } else {
-      const lowercasedTerm = searchTerm.toLowerCase();
-      const filtered = carriers
-        .map((carrier) => ({
-          ...carrier,
-          carrierrequests: carrier.carrierrequests.filter(
-            (request) =>
-              request.id_transfer_request.toString().includes(lowercasedTerm) ||
-              request.end_location.toLowerCase().includes(lowercasedTerm) ||
-              request.start_location.toLowerCase().includes(lowercasedTerm) ||
-              request.vehicles.toLowerCase().includes(lowercasedTerm)
-          )
-        }))
-        .filter((carrier) => carrier.carrierrequests.length > 0);
-      setFilteredCarriers(filtered);
+  const getAceptCarrierRequestListByStatusId = async (statusId?: string, newPage?: number) => {
+    setLoading(true);
+    try {
+      const response = await getAceptCarrierRequestList({
+        searchQuery: debouncedSearchQuery,
+        statusId,
+        page: newPage
+      });
+
+      if (Array.isArray(response) && response.length > 0) {
+        // Nuevo elemento a actualizar
+        const updatedItem = response[0];
+
+        setCarriersData((prevState) =>
+          prevState.map((item) => (item.statusid === updatedItem.statusid ? updatedItem : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-  }, [searchTerm, carriers]);
+  };
 
   return (
     <Container>
@@ -63,12 +73,16 @@ export default function AceptCarrier() {
         <UiSearchInput
           placeholder="Buscar"
           onChange={(event) => {
-            setSearchTerm(event.target.value);
+            setSearchQuery(event.target.value);
           }}
         />
         <FilterProjects setSelecetedProjects={setSelectFilters} height="48" />
       </Flex>
-      <AceptCarrierView carriers={filteredCarriers} loading={loading} />
+      <AceptCarrierView
+        carriers={carriersData}
+        loading={loading}
+        getAceptCarrierRequestListByStatusId={getAceptCarrierRequestListByStatusId}
+      />
     </Container>
   );
 }
