@@ -237,3 +237,22 @@ export const putEditCarrierRequest = async (
   if (response.success) return response;
   throw new Error(response?.message || "Error al editar la solicitud de carga");
 };
+
+interface IGetRejectionCauses {
+  id: number;
+  description: string;
+}
+export const getRejectionCauses = async (): Promise<IGetRejectionCauses[]> => {
+  try {
+    const response: GenericResponse<IGetRejectionCauses[]> = await API.get(
+      `/carrier/all-rejection-causes`
+    );
+    if (response.status === 200) return response.data;
+    else {
+      throw new Error(response?.message || "Error al obtener las causas de rechazo");
+    }
+  } catch (error) {
+    console.log("Error get getRejectionCauses: ", error);
+    throw error;
+  }
+};

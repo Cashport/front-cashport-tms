@@ -3,6 +3,8 @@ import { Flex, Modal } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft } from "@phosphor-icons/react";
 
+import { getRejectionCauses } from "@/services/logistics/acept_carrier";
+
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import GeneralSelect from "@/components/ui/general-select";
 
@@ -23,6 +25,7 @@ const ModalRejectTripInvite = ({
   handleCancel,
   loading = false
 }: ModalRejectTripInviteProps) => {
+  const [rejectionCauses, setRejectionCauses] = React.useState<ISelectType[]>();
   const {
     control,
     handleSubmit,
@@ -30,7 +33,7 @@ const ModalRejectTripInvite = ({
     reset,
     setValue
   } = useForm<{
-    rejectionCasuses: ISelectType;
+    rejectionCauses: ISelectType;
     commentary: string;
   }>({});
 
@@ -43,12 +46,25 @@ const ModalRejectTripInvite = ({
     handleRejectInvite();
   };
 
-  //useEffect for cleaning the states when the modal is closed
+  //useEffect for fetching and cleaning the states when isOpen changes
   useEffect(() => {
+    if (!rejectionCauses) {
+      fetchRejectionCauses();
+    }
     return () => {
       reset();
     };
-  }, []);
+  }, [isOpen]);
+
+  const fetchRejectionCauses = async () => {
+    const res = await getRejectionCauses();
+    setRejectionCauses(
+      res.map((item) => ({
+        value: item.id,
+        label: item.description
+      }))
+    );
+  };
 
   return (
     <Modal
@@ -59,6 +75,7 @@ const ModalRejectTripInvite = ({
       footer={null}
       title={null}
       onOk={handleRejectInvite}
+      destroyOnClose
     >
       <button className="modalRejectTripInvite__header" onClick={handleCancel}>
         <CaretLeft size={"1.25rem"} />
@@ -70,21 +87,16 @@ const ModalRejectTripInvite = ({
       </p>
 
       <Controller
-        name="rejectionCasuses"
+        name="rejectionCauses"
         control={control}
         rules={{ required: true, minLength: 1 }}
         render={({ field }) => (
           <GeneralSelect
-            errors={errors?.rejectionCasuses}
+            errors={errors?.rejectionCauses}
             field={field}
             title="Selecciona la causal de rechazo"
             placeholder="Selecciona la causal"
-            options={[
-              {
-                value: 1,
-                label: "Causal 1"
-              }
-            ]}
+            options={rejectionCauses}
           />
         )}
       />
