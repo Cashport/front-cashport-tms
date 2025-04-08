@@ -217,7 +217,7 @@ export const postCarrierReject = async ({
     return response;
   } catch (error) {
     console.log("Error get getTransferRequestById: ", error);
-    return error as any;
+    throw error;
   }
 };
 

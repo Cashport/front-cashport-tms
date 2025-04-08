@@ -7,20 +7,29 @@ import { getRejectionCauses } from "@/services/logistics/acept_carrier";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import GeneralSelect from "@/components/ui/general-select";
+import { IHandleReject } from "@/components/organisms/logistics/acept_carrier/view/AceptCarrierDetailView/AceptCarrierDetailView";
 
 import { ISelectType } from "@/types/global/IGlobal";
 
 import "./modalRejectTripInvite.scss";
 
+interface IRejectForm {
+  rejectionCauses: ISelectType;
+  commentary: string;
+}
+
 type ModalRejectTripInviteProps = {
   isOpen: boolean;
-  handleRejectInvite: () => void;
+  crID: string;
+  // eslint-disable-next-line no-unused-vars
+  handleRejectInvite: ({ rejection_causes, commentary }: IHandleReject) => Promise<void>;
   handleCancel?: () => void;
   loading?: boolean;
 };
 
 const ModalRejectTripInvite = ({
   isOpen,
+  crID,
   handleRejectInvite,
   handleCancel,
   loading = false
@@ -32,18 +41,17 @@ const ModalRejectTripInvite = ({
     formState: { errors, isValid },
     reset,
     setValue
-  } = useForm<{
-    rejectionCauses: ISelectType;
-    commentary: string;
-  }>({});
+  } = useForm<IRejectForm>({});
 
   const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue("commentary", e.target.value);
   };
 
-  const onSubmitRejectInvite = (data: any) => {
-    console.log("data", data);
-    handleRejectInvite();
+  const onSubmitRejectInvite = (data: IRejectForm) => {
+    handleRejectInvite({
+      rejection_causes: data.rejectionCauses.label,
+      commentary: data.commentary
+    });
   };
 
   //useEffect for fetching and cleaning the states when isOpen changes
@@ -69,12 +77,11 @@ const ModalRejectTripInvite = ({
   return (
     <Modal
       className="modalRejectTripInvite"
-      width={"60%"}
+      width={"55%"}
       open={isOpen}
       onCancel={handleCancel}
       footer={null}
       title={null}
-      onOk={handleRejectInvite}
       destroyOnClose
     >
       <button className="modalRejectTripInvite__header" onClick={handleCancel}>
@@ -82,8 +89,8 @@ const ModalRejectTripInvite = ({
         <h4>Rechazar invitación de viaje</h4>
       </button>
       <p className={"modalRejectTripInvite__description"}>
-        Estás rechazando la invitación a pártcipar del proces de selección de proveedor para la{" "}
-        <strong>TR #XXXXX</strong>.
+        Estás rechazando la invitación a participar del proceso de selección de proveedor para la{" "}
+        <strong>CR #{crID}</strong>.
       </p>
 
       <Controller
