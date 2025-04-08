@@ -19,44 +19,39 @@ export default function AceptCarrierView({
   loading,
   getAceptCarrierRequestListByStatusId
 }: AceptCarrierViewProps) {
-  console.log("carriers", carriers);
   const [selectedRows, setSelectedRows] = useState<any[] | undefined>();
 
   return (
     <Flex vertical className={styles.wrapper}>
-      {loading ? (
-        <Spin style={{ margin: "auto", padding: "200px" }} />
-      ) : (
-        <CustomCollapse
-          defaultActiveKey={"0"}
-          items={
-            carriers
-              ? Object.entries(carriers).map(([key, carriersState]) => ({
-                  key: key,
-                  label: (
-                    <LabelCollapse
-                      status={carriersState.description}
-                      quantity={carriersState.page?.totalRows}
-                      color={carriersState.color}
-                      quantityText="CR"
-                      removeIcons
-                    />
-                  ),
-                  children: (
-                    <CarrierTable
-                      carrierData={carriersState}
-                      setSelectedRows={setSelectedRows}
-                      loading={loading}
-                      fetchData={(newPage: number) =>
-                        getAceptCarrierRequestListByStatusId(carriersState.statusid, newPage)
-                      }
-                    />
-                  )
-                }))
-              : []
-          }
-        />
-      )}
+      <CustomCollapse
+        defaultActiveKey={"0"}
+        items={
+          carriers
+            ? Object.entries(carriers).map(([key, carriersState]) => ({
+                key: key,
+                label: (
+                  <LabelCollapse
+                    status={carriersState.description}
+                    quantity={carriersState.page?.totalRows}
+                    color={carriersState.color}
+                    quantityText="CR"
+                    removeIcons
+                  />
+                ),
+                children: (
+                  <CarrierTable
+                    carrierData={carriersState}
+                    setSelectedRows={setSelectedRows}
+                    loading={loading}
+                    fetchData={(newPage: number) =>
+                      getAceptCarrierRequestListByStatusId(carriersState.statusid, newPage)
+                    }
+                  />
+                )
+              }))
+            : []
+        }
+      />
     </Flex>
   );
 }
