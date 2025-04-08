@@ -1,29 +1,41 @@
 "use client";
 import { Dispatch, SetStateAction, useState } from "react";
-import { formatMoney } from "@/utils/utils";
-import { Eye, Warning } from "phosphor-react";
+import { Eye } from "phosphor-react";
 import { Button, Flex, Table, TableProps, Typography } from "antd";
-import { Radioactive } from "@phosphor-icons/react";
 import { ICarrierRequestsListDetail } from "@/types/logistics/schema";
 import Link from "next/link";
-import { useProjects } from "@/hooks/useProjects";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+
+import { formatMoney } from "@/utils/utils";
+import { useProjects } from "@/hooks/useProjects";
+
+import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
+
 dayjs.extend(customParseFormat);
 const { Text } = Typography;
 
 interface PropsCarrierTable {
-  carrierData: ICarrierRequestsListDetail[];
+  carrierData: CarrierCollapseAPI;
   setSelectedRows: Dispatch<SetStateAction<any[] | undefined>>;
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
+  fetchData: (newPage: number) => Promise<void>;
 }
 
 export default function CarrierTable({
   carrierData: data,
   setSelectedRows,
-  loading
+  loading,
+  fetchData
 }: PropsCarrierTable) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(data.page?.actualPage || 1);
+
+  const handleTableChange = (page: number) => {
+    setCurrentPage(page);
+    fetchData(page);
+  };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -158,10 +170,16 @@ export default function CarrierTable({
     <Table
       style={{ width: "100%" }}
       columns={columns}
-      dataSource={data.map((data) => ({ ...data, key: data.id }))}
+      dataSource={data.carrierrequests.map((data) => ({ ...data, key: data.id }))}
       rowSelection={rowSelection}
       rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
-      pagination={false}
+      pagination={{
+        current: currentPage,
+        pageSize: data.page?.rowsperpage,
+        total: data.page?.totalRows,
+        onChange: handleTableChange,
+        showSizeChanger: false
+      }}
       loading={loading}
     />
   );

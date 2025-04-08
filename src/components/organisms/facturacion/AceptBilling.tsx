@@ -29,7 +29,7 @@ export default function AceptBilling() {
   const loadBillingRequestTransferList = async () => {
     setLoading(true);
     const result = await getAllBillingList({
-      searchQuery
+      searchQuery: debouncedSearchQuery
     });
     setBillings(result);
     setLoading(false);

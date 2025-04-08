@@ -22,9 +22,27 @@ export const getAllTransferRequestList = async (): Promise<IListData> => {
   }
 };
 
-export const getAceptCarrierRequestList = async (): Promise<CarrierCollapseAPI[]> => {
-  const response: GenericResponse<CarrierCollapseAPI[]> =
-    await API.post(`/carrier/all/request/list`);
+interface IGetAceptCarrierRequestList {
+  statusId?: string;
+  page?: number;
+  searchQuery?: string;
+}
+
+export const getAceptCarrierRequestList = async ({
+  statusId,
+  page,
+  searchQuery
+}: IGetAceptCarrierRequestList = {}): Promise<CarrierCollapseAPI[]> => {
+  const body = {
+    statusId,
+    page,
+    searchParam: searchQuery
+  };
+
+  const response: GenericResponse<CarrierCollapseAPI[]> = await API.post(
+    `/carrier/all/request/list`,
+    body
+  );
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };
