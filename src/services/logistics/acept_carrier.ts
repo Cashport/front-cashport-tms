@@ -192,23 +192,35 @@ export const postCarrierRequest = async (
   }
 };
 
-export const postCarrierReject = async (
-  id_carrier: string,
-  id_carrier_request: string
-): Promise<IListData> => {
+interface IPostCarrierRejectParams {
+  id_carrier: string;
+  id_carrier_request: string;
+  rejection_causes: string;
+  commentary?: string;
+}
+
+export const postCarrierReject = async ({
+  id_carrier,
+  id_carrier_request,
+  rejection_causes,
+  commentary
+}: IPostCarrierRejectParams): Promise<IListData> => {
   try {
     const body = {
-      id_carrier: id_carrier,
-      id_carrier_request: id_carrier_request
+      id_carrier,
+      id_carrier_request,
+      rejection_causes,
+      commentary
     };
 
     const response: IListData = await API.post(`/carrier/request/reject`, body);
     return response;
   } catch (error) {
     console.log("Error get getTransferRequestById: ", error);
-    return error as any;
+    throw error;
   }
 };
+
 export const putEditCarrierRequest = async (
   id_carrier: string,
   id_carrier_request: string,
@@ -224,4 +236,23 @@ export const putEditCarrierRequest = async (
   const response: GenericResponse = await API.put(`/carrier/request/edit`, body);
   if (response.success) return response;
   throw new Error(response?.message || "Error al editar la solicitud de carga");
+};
+
+interface IGetRejectionCauses {
+  id: number;
+  description: string;
+}
+export const getRejectionCauses = async (): Promise<IGetRejectionCauses[]> => {
+  try {
+    const response: GenericResponse<IGetRejectionCauses[]> = await API.get(
+      `/carrier/all-rejection-causes`
+    );
+    if (response.status === 200) return response.data;
+    else {
+      throw new Error(response?.message || "Error al obtener las causas de rechazo");
+    }
+  } catch (error) {
+    console.log("Error get getRejectionCauses: ", error);
+    throw error;
+  }
 };
