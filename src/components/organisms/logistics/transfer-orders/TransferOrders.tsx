@@ -20,7 +20,7 @@ import UiSearchInput from "@/components/ui/search-input-provider";
 import Filter from "@/components/atoms/Filters/FilterOrders";
 import { ModalCancelTR } from "@/components/molecules/modals/ModalCancelTR/ModalCancelTR";
 import { DataTypeForTransferOrderTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
-import { ModalPosponeTR } from "@/components/molecules/modals/ModalPosponeTR/ModalPosponeTR";
+import { ModalPostponeTR } from "@/components/molecules/modals/ModalPostponeTR/ModalPostponeTR";
 
 import styles from "./transferOrders.module.scss";
 
@@ -253,7 +253,7 @@ export const TransferOrders = () => {
           trStatus={TRStatusId}
         />
 
-        <ModalPosponeTR
+        <ModalPostponeTR
           isOpen={isModalOpen.selected === 3}
           onCancel={() => setIsModalOpen({ selected: 1 })}
           onClose={() => {

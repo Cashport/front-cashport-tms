@@ -7,7 +7,7 @@ import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 import { ISelectType } from "@/types/global/IGlobal";
 
-import "./modalPosponeTR.scss";
+import "./modalPostponeTR.scss";
 import GeneralSelect from "@/components/ui/general-select";
 
 interface IFormModalPostponeTR {
@@ -22,7 +22,7 @@ interface Props {
   trIDs?: string[] | number[];
 }
 
-export const ModalPosponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => {
+export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -56,19 +56,19 @@ export const ModalPosponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => {
   return (
     <Modal
       centered
-      className="ModalPosponeTR"
+      className="ModalPostponeTR"
       width={"55%"}
       open={isOpen}
       footer={null}
       closable={false}
     >
       <Flex gap={"1rem"} vertical style={{ width: "100%", height: "100%" }}>
-        <button onClick={onCancel} className="ModalPosponeTR__header">
+        <button onClick={onCancel} className="ModalPostponeTR__header">
           <CaretLeft size="1.25rem" />
           <span>Cancelación de TR</span>
         </button>
 
-        <div className="ModalPosponeTR__content" style={{ height: "90%" }}>
+        <div className="ModalPostponeTR__content" style={{ height: "90%" }}>
           <p>
             Por favor confirma que estás aplazando los servicios{" "}
             <strong>TR {trIDs?.join(",")}</strong>
@@ -100,7 +100,7 @@ export const ModalPosponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => {
           control={control}
           rules={{ required: "Este campo es obligatorio" }}
           render={({ field }) => (
-            <div className={"ModalPosponeTR__comment"}>
+            <div className={"ModalPostponeTR__comment"}>
               <Flex vertical style={{ width: "100%" }}>
                 <p>Comentarios</p>
                 <textarea
