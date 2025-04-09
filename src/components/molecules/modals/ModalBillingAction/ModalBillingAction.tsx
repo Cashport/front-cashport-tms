@@ -7,12 +7,14 @@ import ConfirmClose from "./ConfirmClose/ConfirmClose";
 import UploadInvoice from "./UploadInvoice/UploadInvoice";
 import { MessageInstance } from "antd/es/message/interface";
 import { BillingStatusEnum } from "@/types/logistics/billing/billing";
+import UploadServiceSupport from "./UploadServiceSupport/UploadServiceSupport";
 
 export enum ViewEnum {
   "SELECT" = "SELECT",
   "CONFIRM_CLOSE" = "CONFIRM_CLOSE",
   "CONFIRM_REJECT" = "CONFIRM_REJECT",
-  "UPLOAD_INVOICE" = "UPLOAD_INVOICE"
+  "UPLOAD_INVOICE" = "UPLOAD_INVOICE",
+  "UPLOAD_SERVICE_SUPPORT" = "UPLOAD_SERVICE_SUPPORT"
 }
 
 type PropsModal = {
@@ -81,6 +83,8 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
             canEditForm={canEditForm}
           />
         );
+      case ViewEnum.UPLOAD_SERVICE_SUPPORT:
+        return <UploadServiceSupport onClose={onClose} />;
       default:
         return <ActionList setSelectedView={setSelectedView} billingStatus={billingStatus} />;
     }
@@ -109,6 +113,13 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
           <p className={styles.actionTitle}>{uploadInvoiceTitle}</p>
         ) : (
           <p className={styles.actionTitle}>Cargar facturas</p>
+        );
+      case ViewEnum.UPLOAD_SERVICE_SUPPORT:
+        return (
+          <Flex gap={8} align="center">
+            <CaretLeft size={20} onClick={() => setSelectedView(ViewEnum.SELECT)} />
+            <p className={styles.actionTitle}>Documentos de legalización</p>
+          </Flex>
         );
       default:
         return "";
