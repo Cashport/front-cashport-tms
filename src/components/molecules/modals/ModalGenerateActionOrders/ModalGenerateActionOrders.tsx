@@ -1,5 +1,5 @@
 import { Flex, message, Modal } from "antd";
-import { ArrowsClockwise, Download, LinkBreak, Trash, X } from "phosphor-react";
+import { ArrowsClockwise, Download, LinkBreak, PauseCircle, Trash, X } from "phosphor-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import styles from "./ModalGenerateActionOrders.module.scss";
 import {
@@ -57,6 +57,10 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePostponeTR = async () => {
+    setIsModalOpen({ selected: 3 });
   };
 
   const handleDeleteOrders = async () => {
@@ -131,6 +135,12 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
             onClick={downloadCsvOrders}
           />
         </ProtectedComponent>
+        <ButtonGenerateAction
+          disabled={false}
+          icon={<PauseCircle size={20} />}
+          title="Aplazar TR"
+          onClick={handlePostponeTR}
+        />
         <ButtonGenerateAction
           disabled={
             (ordersId?.length === 0 && trsIds?.length === 0) ||

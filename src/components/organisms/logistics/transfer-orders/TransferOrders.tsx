@@ -1,24 +1,28 @@
 "use client";
-import styles from "./transferOrders.module.scss";
 import { useEffect, useState } from "react";
-import { Request } from "./request/Request";
-import { InProcess } from "./in-process/InProcess";
-import { Completed } from "./completed/completed";
 import { Empty, Flex, Typography } from "antd";
 import { DotsThree, Plus } from "phosphor-react";
 import { useSearchParams } from "next/navigation";
+
+import { Request } from "./request/Request";
+import { InProcess } from "./in-process/InProcess";
+import { Completed } from "./completed/completed";
+import { SearchProvider } from "@/context/SearchContext";
+import { useAppStore } from "@/lib/store/store";
+import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Container from "@/components/atoms/Container/Container";
 import ProtectedComponent from "@/components/molecules/protectedComponent/ProtectedComponent";
-import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
-import { useAppStore } from "@/lib/store/store";
 import { checkUserComponentPermissions } from "@/utils/utils";
 import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenerateActionOrders/ModalGenerateActionOrders";
-import { SearchProvider } from "@/context/SearchContext";
 import UiSearchInput from "@/components/ui/search-input-provider";
 import Filter from "@/components/atoms/Filters/FilterOrders";
 import { ModalCancelTR } from "@/components/molecules/modals/ModalCancelTR/ModalCancelTR";
 import { DataTypeForTransferOrderTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
+import { ModalPosponeTR } from "@/components/molecules/modals/ModalPosponeTR/ModalPosponeTR";
+
+import styles from "./transferOrders.module.scss";
 
 const { Text } = Typography;
 
@@ -247,6 +251,17 @@ export const TransferOrders = () => {
           trID={trsIds[0]}
           toIDs={childOrdersId}
           trStatus={TRStatusId}
+        />
+
+        <ModalPosponeTR
+          isOpen={isModalOpen.selected === 3}
+          onCancel={() => setIsModalOpen({ selected: 1 })}
+          onClose={() => {
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+            setIsModalOpen({ selected: 0 });
+          }}
         />
       </Container>
     </SearchProvider>
