@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Flex } from "antd";
 import LabelCollapse from "@/components/ui/label-collapse";
 import BillingTable from "@/components/molecules/tables/BillingTable/BillingTable";
@@ -10,9 +10,15 @@ import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 interface AceptBillingViewProps {
   billings: IBillingsRequestList[];
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
+  getBillingListdByStatusId: (statusId?: string, newPage?: number) => Promise<void>;
 }
 
-export default function AceptBillingView({ billings, loading }: AceptBillingViewProps) {
+export default function AceptBillingView({
+  billings,
+  loading,
+  getBillingListdByStatusId
+}: AceptBillingViewProps) {
   const [selectedRows, setSelectedRows] = useState<any[] | undefined>();
 
   return (
@@ -27,7 +33,7 @@ export default function AceptBillingView({ billings, loading }: AceptBillingView
                 label: (
                   <LabelCollapse
                     status={billingsState.statusDesc}
-                    quantity={billingsState.billings.length}
+                    quantity={billingsState.page?.totalRows}
                     color={billingsState.statusColor}
                     quantityText="TR"
                     removeIcons
@@ -35,7 +41,10 @@ export default function AceptBillingView({ billings, loading }: AceptBillingView
                 ),
                 children: (
                   <BillingTable
-                    billingData={billingsState.billings}
+                    billingData={billingsState}
+                    fetchData={(newPage: number) =>
+                      getBillingListdByStatusId(billingsState.statusId, newPage)
+                    }
                     setSelectedRows={setSelectedRows}
                     loading={loading}
                   />

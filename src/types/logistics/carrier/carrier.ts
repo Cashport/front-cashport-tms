@@ -1,3 +1,4 @@
+import { Pagination } from "@/types/global/IGlobal";
 import { Config, WelcomeHeaders } from "../schema";
 
 export interface SendCarrierRequest {
@@ -186,4 +187,5 @@ export interface CarrierCollapseAPI {
   description: string;
   statusid: string;
   carrierrequests: CarrierRequestAPI[];
+  page: Pagination;
 }
