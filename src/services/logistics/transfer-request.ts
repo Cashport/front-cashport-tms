@@ -358,3 +358,28 @@ export const getPostponedReasons = async (): Promise<IGetPostponedReasons[]> => 
     throw error as any;
   }
 };
+
+export const postponeTR = async (
+  transferRequestIds: number[],
+  statusId: string,
+  comments: string,
+  postponementReason: string
+) => {
+  const body = {
+    transferRequestIds,
+    statusId,
+    comments,
+    postponement_reason: postponementReason
+  };
+  try {
+    const response: GenericResponse<IGetPostponedReasons[]> = await API.post(
+      `/transfer-request/postpone`,
+      body
+    );
+    if (response.success) return response.data;
+    throw new Error(response?.message || "Error aplazando la(s) TR");
+  } catch (error) {
+    console.error("Error aplazando la(s) TR: ", error);
+    throw error as any;
+  }
+};

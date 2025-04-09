@@ -36,7 +36,12 @@ interface ITransferOrdersTable {
   items: ITransferRequest[];
   pagination: IPagination;
   showColumn?: boolean;
-  aditionalRow?: any;
+  aditionalRow?: {
+    title: string;
+    dataIndex: string;
+    width: number;
+    render: (_: any, row: DataTypeForTransferOrderTable) => JSX.Element;
+  };
   redirect?: string;
   showBothIds?: boolean;
   trShouldRedirect?: boolean;

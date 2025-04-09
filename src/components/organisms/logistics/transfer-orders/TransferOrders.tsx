@@ -40,6 +40,7 @@ export const TransferOrders = () => {
   const [trsIds, setTrsIds] = useState<string[]>([]);
   const [childOrdersId, setChildOrdersId] = useState<string[]>([]);
   const [TRStatusId, setTRStatusId] = useState<string>();
+  const [allSelectedRows, setAllSelectedRows] = useState<DataTypeForTransferOrderTable[]>();
   const [mutate, setMutate] = useState(false);
 
   const searchParams = useSearchParams();
@@ -96,16 +97,27 @@ export const TransferOrders = () => {
     }
   }, [tabParam, isHy, project]);
 
-  const handleCheckboxChange = (id: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    id: string,
+    checked: boolean,
+    row: DataTypeForTransferOrderTable
+  ) => {
     setOrdersId((prevOrdersId) =>
       checked ? [...prevOrdersId, id] : prevOrdersId.filter((orderId) => orderId !== id)
     );
+
+    setTrsIds((prevTRsIds) =>
+      checked ? [...prevTRsIds, ...(ordersId ?? [])] : prevTRsIds.filter((TRid) => TRid !== id)
+    );
+
+    setTRStatusId(checked ? row.statusId : trsIds.filter((TRid) => TRid !== id)[0]);
   };
   const handleCheckboxChangeTR = (
     id: string,
     checked: boolean,
     row: DataTypeForTransferOrderTable
   ) => {
+    console.log("handleCheckboxrow", row);
     setTrsIds((prevTRsIds) =>
       checked ? [...prevTRsIds, id] : prevTRsIds.filter((TRid) => TRid !== id)
     );
@@ -116,11 +128,30 @@ export const TransferOrders = () => {
     );
     setTRStatusId(row.statusId);
   };
+
+  const handleCheckAllCheckbox = (row: DataTypeForTransferOrderTable, isChecked: boolean) => {
+    console.log("handleCheckAllCheckbox", row, isChecked);
+    setAllSelectedRows((prevSelectedRows) => {
+      if (isChecked) {
+        // Add the selected row to the previous selected rows
+        return [...(prevSelectedRows ?? []), row];
+      } else {
+        // Remove the selected row from the previous selected rows
+        return prevSelectedRows?.filter((selectedRow) => selectedRow.tr !== row.tr);
+      }
+    });
+  };
+
   useEffect(() => {
     if (mutate) {
       setMutate(false);
     }
   }, [mutate]);
+
+  useEffect(() => {
+    console.log("TRStatusId", TRStatusId);
+    console.log("allSelectedRows", allSelectedRows);
+  }, [TRStatusId, allSelectedRows]);
 
   const renderView = () => {
     switch (tab) {
@@ -133,6 +164,8 @@ export const TransferOrders = () => {
             handleCheckboxChangeTR={handleCheckboxChangeTR}
             modalState={isModalOpen.selected === 1}
             mutateData={mutate}
+            allSelectedRows={allSelectedRows}
+            handleCheckAll={handleCheckAllCheckbox}
           />
         );
       case TabEnum.IN_PROCESS:
@@ -142,10 +175,14 @@ export const TransferOrders = () => {
             modalState={isModalOpen.selected === 1}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
             mutateData={mutate}
+            handleCheckAll={handleCheckAllCheckbox}
+            allSelectedRows={allSelectedRows}
           />
         );
       case TabEnum.COMPLETED:
-        return <Completed />;
+        return (
+          <Completed allSelectedRows={allSelectedRows} handleCheckAll={handleCheckAllCheckbox} />
+        );
       default:
         return <Empty />;
     }

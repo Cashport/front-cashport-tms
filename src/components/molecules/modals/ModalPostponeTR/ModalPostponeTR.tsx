@@ -3,7 +3,7 @@ import { Flex, message, Modal } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft } from "phosphor-react";
 
-import { getPostponedReasons } from "@/services/logistics/transfer-request";
+import { getPostponedReasons, postponeTR } from "@/services/logistics/transfer-request";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import GeneralSelect from "@/components/ui/general-select";
@@ -22,9 +22,10 @@ interface Props {
   onCancel: () => void;
   onClose: () => void;
   trIDs?: string[] | number[];
+  trStatus?: string;
 }
 
-export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => {
+export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs, trStatus }: Props) => {
   const [loading, setLoading] = useState(false);
   const [postponedReasons, setPostponedReasons] = useState<ISelectType[]>();
 
@@ -54,18 +55,23 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => 
     );
   };
 
-  const postponeTR = async (data: IFormModalPostponeTR) => {
+  const onPostponeTR = async (data: IFormModalPostponeTR) => {
     setLoading(true);
 
     console.log("data", data);
 
-    // try {
-    //   // await deleteTransferRequestAndChildren(reqData, selectedEvidence[0]);
-    //   message.success("TR(s) aplazada(s) exitosamente");
-    //   onClose();
-    // } catch (error) {
-    //   message.error(`Error al aplazar la(s) TR(s): ${error}`, 4);
-    // }
+    try {
+      await postponeTR(
+        trIDs?.map((id) => Number(id)) ?? [],
+        trStatus ?? "",
+        data.commentary,
+        data.postponeReason.label
+      );
+      message.success("TR(s) aplazada(s) exitosamente");
+      onClose();
+    } catch (error) {
+      message.error(`Error al aplazar la(s) TR(s): ${error}`, 4);
+    }
     setLoading(false);
   };
 
@@ -128,8 +134,8 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => 
         />
 
         <FooterButtons
-          titleConfirm="Cancelar TR"
-          handleOk={handleSubmit(postponeTR)}
+          titleConfirm="Aplazar Servicios"
+          handleOk={handleSubmit(onPostponeTR)}
           onCancel={onCancel}
           isConfirmLoading={loading}
           isConfirmDisabled={!isValid}
