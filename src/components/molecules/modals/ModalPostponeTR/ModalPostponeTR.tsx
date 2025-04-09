@@ -3,12 +3,14 @@ import { Flex, message, Modal } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft } from "phosphor-react";
 
+import { getPostponedReasons } from "@/services/logistics/transfer-request";
+
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import GeneralSelect from "@/components/ui/general-select";
 
 import { ISelectType } from "@/types/global/IGlobal";
 
 import "./modalPostponeTR.scss";
-import GeneralSelect from "@/components/ui/general-select";
 
 interface IFormModalPostponeTR {
   postponeReason: ISelectType;
@@ -24,6 +26,7 @@ interface Props {
 
 export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => {
   const [loading, setLoading] = useState(false);
+  const [postponedReasons, setPostponedReasons] = useState<ISelectType[]>();
 
   const {
     handleSubmit,
@@ -31,12 +34,25 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => 
     reset,
     control
   } = useForm<IFormModalPostponeTR>({});
-  // useEffect for cleaning states when modal is closed
+  //useEffect for fetching and cleaning the states when isOpen changes
   useEffect(() => {
+    if (!postponedReasons) {
+      fetchRejectionCauses();
+    }
     return () => {
       reset();
     };
   }, [isOpen]);
+
+  const fetchRejectionCauses = async () => {
+    const res = await getPostponedReasons();
+    setPostponedReasons(
+      res.map((item) => ({
+        value: item.id,
+        label: item.description
+      }))
+    );
+  };
 
   const postponeTR = async (data: IFormModalPostponeTR) => {
     setLoading(true);
@@ -65,7 +81,7 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => 
       <Flex gap={"1rem"} vertical style={{ width: "100%", height: "100%" }}>
         <button onClick={onCancel} className="ModalPostponeTR__header">
           <CaretLeft size="1.25rem" />
-          <span>Cancelación de TR</span>
+          <span>Confirmar acción</span>
         </button>
 
         <div className="ModalPostponeTR__content" style={{ height: "90%" }}>
@@ -85,12 +101,7 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs }: Props) => 
               field={field}
               title="Selecciona la causal de esta acción"
               placeholder="Selecciona la causal"
-              options={[
-                {
-                  value: 1,
-                  label: "description"
-                }
-              ]}
+              options={postponedReasons}
             />
           )}
         />

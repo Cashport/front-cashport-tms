@@ -340,3 +340,21 @@ export const deleteTransferRequestAndChildren = async (
     throw new Error(errorMsg);
   }
 };
+
+interface IGetPostponedReasons {
+  id: number;
+  description: string;
+}
+
+export const getPostponedReasons = async (): Promise<IGetPostponedReasons[]> => {
+  try {
+    const response: GenericResponse<IGetPostponedReasons[]> = await API.get(
+      `/transfer-request/postponement-reasons`
+    );
+    if (response.success) return response.data;
+    throw new Error(response?.message || "Error obteniendo los motivos de aplazamiento");
+  } catch (error) {
+    console.error("Error getPostponedReasons: ", error);
+    throw error as any;
+  }
+};
