@@ -1,17 +1,22 @@
+import { Dispatch, SetStateAction, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Flex, message, Modal } from "antd";
 import { ArrowsClockwise, Download, LinkBreak, PauseCircle, Trash, X } from "phosphor-react";
-import { Dispatch, SetStateAction, useState } from "react";
-import styles from "./ModalGenerateActionOrders.module.scss";
+import { MinusCircle } from "@phosphor-icons/react";
+
 import {
   deleteOrders,
   downloadCsvTransferOrders,
   transferOrderMerge
 } from "@/services/logistics/transfer-request";
+import { STATUS } from "@/utils/constants/globalConstants";
+import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+
 import ProtectedComponent from "../../protectedComponent/ProtectedComponent";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { useRouter } from "next/navigation";
-import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
-import { MinusCircle } from "@phosphor-icons/react";
+import { DataTypeForTransferOrderTable } from "../../tables/TransferOrderTable/TransferOrderTable";
+
+import styles from "./ModalGenerateActionOrders.module.scss";
 
 type PropsModalGenerateActionTO = {
   isOpen: boolean;
@@ -23,10 +28,13 @@ type PropsModalGenerateActionTO = {
       selected: number;
     }>
   >;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
 };
 
 export default function ModalGenerateActionOrders(props: Readonly<PropsModalGenerateActionTO>) {
-  const { isOpen, onClose, ordersId = [], trsIds = [], setIsModalOpen } = props;
+  const { TR } = STATUS;
+
+  const { isOpen, onClose, ordersId = [], trsIds = [], setIsModalOpen, allSelectedRows } = props;
   const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -83,6 +91,8 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     }
   };
 
+  const validStatus4Postpone = [TR.ASIGNANDO_VEHICULO, TR.ESPERANDO_PROVEEDOR];
+
   return (
     <Modal
       width={698}
@@ -136,7 +146,14 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
           />
         </ProtectedComponent>
         <ButtonGenerateAction
-          disabled={false}
+          disabled={
+            allSelectedRows?.length === 0 ||
+            !allSelectedRows?.every(
+              (row) =>
+                validStatus4Postpone.includes(row.statusId) &&
+                row.statusId === allSelectedRows[0]?.statusId
+            )
+          }
           icon={<PauseCircle size={20} />}
           title="Aplazar TR"
           onClick={handlePostponeTR}

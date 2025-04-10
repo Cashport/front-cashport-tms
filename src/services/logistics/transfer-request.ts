@@ -22,6 +22,7 @@ import {
   ITransferRequestResponse
 } from "@/types/transferRequest/ITransferRequest";
 import { downloadCSVFromEndpoint } from "./download_csv";
+import { STATUS } from "@/utils/constants/globalConstants";
 
 {
   /*export const transferOrderMerge = async (orders: number[]) => {
@@ -361,13 +362,12 @@ export const getPostponedReasons = async (): Promise<IGetPostponedReasons[]> => 
 
 export const postponeTR = async (
   transferRequestIds: number[],
-  statusId: string,
   comments: string,
   postponementReason: string
 ) => {
   const body = {
     transferRequestIds,
-    statusId,
+    statusId: STATUS.TR.APLAZADA,
     comments,
     postponement_reason: postponementReason
   };

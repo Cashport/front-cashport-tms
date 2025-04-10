@@ -7,6 +7,7 @@ import { getPostponedReasons, postponeTR } from "@/services/logistics/transfer-r
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import GeneralSelect from "@/components/ui/general-select";
+import { DataTypeForTransferOrderTable } from "../../tables/TransferOrderTable/TransferOrderTable";
 
 import { ISelectType } from "@/types/global/IGlobal";
 
@@ -21,11 +22,10 @@ interface Props {
   isOpen?: boolean;
   onCancel: () => void;
   onClose: () => void;
-  trIDs?: string[] | number[];
-  trStatus?: string;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
 }
 
-export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs, trStatus }: Props) => {
+export const ModalPostponeTR = ({ isOpen, onCancel, onClose, allSelectedRows }: Props) => {
   const [loading, setLoading] = useState(false);
   const [postponedReasons, setPostponedReasons] = useState<ISelectType[]>();
 
@@ -62,8 +62,7 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs, trStatus }: 
 
     try {
       await postponeTR(
-        trIDs?.map((id) => Number(id)) ?? [],
-        trStatus ?? "",
+        allSelectedRows?.map((row) => Number(row.tr)) ?? [],
         data.commentary,
         data.postponeReason.label
       );
@@ -93,7 +92,7 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, trIDs, trStatus }: 
         <div className="ModalPostponeTR__content" style={{ height: "90%" }}>
           <p>
             Por favor confirma que estás aplazando los servicios{" "}
-            <strong>TR {trIDs?.join(",")}</strong>
+            <strong>{allSelectedRows?.map((row) => `TR #${row.tr}`)?.join(", ")}</strong>
           </p>
         </div>
 

@@ -148,11 +148,6 @@ export const TransferOrders = () => {
     }
   }, [mutate]);
 
-  useEffect(() => {
-    console.log("TRStatusId", TRStatusId);
-    console.log("allSelectedRows", allSelectedRows);
-  }, [TRStatusId, allSelectedRows]);
-
   const renderView = () => {
     switch (tab) {
       case TabEnum.REQUESTS:
@@ -267,6 +262,7 @@ export const TransferOrders = () => {
           ordersId={ordersId}
           trsIds={trsIds}
           setIsModalOpen={setIsModalOpen}
+          allSelectedRows={allSelectedRows}
         />
         <ModalCancelTR
           isOpen={isModalOpen.selected === 2}
@@ -280,6 +276,7 @@ export const TransferOrders = () => {
             setOrdersId([]);
             setTrsIds([]);
             setChildOrdersId([]);
+            setAllSelectedRows([]);
 
             // causw reloading of the data
             setMutate((prev) => !prev);
@@ -297,8 +294,12 @@ export const TransferOrders = () => {
             setOrdersId([]);
             setTrsIds([]);
             setChildOrdersId([]);
+            setAllSelectedRows([]);
+
+            setMutate((prev) => !prev);
             setIsModalOpen({ selected: 0 });
           }}
+          allSelectedRows={allSelectedRows}
         />
       </Container>
     </SearchProvider>
