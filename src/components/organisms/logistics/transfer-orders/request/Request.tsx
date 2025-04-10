@@ -13,7 +13,7 @@ import { STATUS } from "@/utils/constants/globalConstants";
 import { useSearchContext } from "@/context/SearchContext";
 
 interface IRequestProps {
-  handleCheckboxChange: (id: string, checked: boolean) => void;
+  handleCheckboxChange: (id: string, checked: boolean, row: DataTypeForTransferOrderTable) => void;
   ordersId: string[];
   trsIds: string[];
   handleCheckboxChangeTR: (
@@ -23,6 +23,8 @@ interface IRequestProps {
   ) => void;
   modalState: boolean;
   mutateData?: boolean;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
+  handleCheckAll: (row: DataTypeForTransferOrderTable, isChecked: boolean) => void;
 }
 
 export const Request: FC<IRequestProps> = ({
@@ -31,7 +33,9 @@ export const Request: FC<IRequestProps> = ({
   trsIds,
   handleCheckboxChangeTR,
   modalState,
-  mutateData
+  mutateData,
+  allSelectedRows,
+  handleCheckAll
 }) => {
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
@@ -99,46 +103,52 @@ export const Request: FC<IRequestProps> = ({
       getTransferRequestAccepted();
     }
   }, [modalState, search, pslQuery, vpQuery, mutateData]);
-
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
     .map((item, index) => {
-      let aditionalRow = undefined;
+      // Default aditionalRow with Checkbox
+      const aditionalRow = {
+        title: "",
+        dataIndex: "checkbox",
+        width: 50,
+        render: (_: any, row: DataTypeForTransferOrderTable) => (
+          <Checkbox
+            checked={allSelectedRows?.some((selectedRow) => selectedRow.tr === row.tr)}
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              const rowId = row.tr;
+
+              // First handle the "select all" functionality
+              handleCheckAll(row, isChecked);
+
+              // Then handle specific status-based checks
+              if (
+                item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id
+              ) {
+                handleCheckboxChange(rowId, isChecked, row);
+              } else if (
+                [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR].includes(
+                  item.statusId
+                )
+              ) {
+                handleCheckboxChangeTR(rowId, isChecked, row);
+              }
+            }}
+          />
+        )
+      };
+
       let redirect = undefined;
       let showBothIds = false;
       let trShouldRedirect = false;
-      if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
-        aditionalRow = {
-          title: "",
-          dataIndex: "checkbox",
-          render: (_: any, { tr }: any) => (
-            <Checkbox
-              checked={ordersId.includes(tr)}
-              onChange={(e) => handleCheckboxChange(tr, e.target.checked)}
-            />
-          )
-        };
-        redirect = "/logistics/orders/details";
-      }
       const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
-      if (trDeleteable.includes(item.statusId)) {
-        aditionalRow = {
-          title: "",
-          dataIndex: "checkbox",
-          render: (_: any, row: DataTypeForTransferOrderTable) => {
-            const { tr } = row;
-            return (
-              <Checkbox
-                checked={trsIds.includes(tr)}
-                onChange={(e) => {
-                  return handleCheckboxChangeTR(tr, e.target.checked, row);
-                }}
-              />
-            );
-          }
-        };
+
+      if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
+        redirect = "/logistics/orders/details";
+      } else if (trDeleteable.includes(item.statusId)) {
         redirect = "/logistics/transfer-request/";
       }
+
       const statusToDetailsTO = [
         STATUS.TO.SIN_PROCESAR,
         STATUS.TO.PROCESANDO,
@@ -148,16 +158,20 @@ export const Request: FC<IRequestProps> = ({
       if (statusToDetailsTO.includes(item.statusId)) {
         redirect = "/logistics/orders/details";
       }
+
       const tosToTR = [STATUS.TO.PROCESADO, STATUS.TO.PROCESANDO];
       if (tosToTR.includes(item.statusId)) {
         showBothIds = true;
       }
+
       if (item.statusId === STATUS.TO.PROCESADO) {
         trShouldRedirect = true;
       }
+
       if (item.statusId === STATUS.TR.CANCELADO) {
         trShouldRedirect = false;
       }
+
       return {
         key: index,
         label: getTitile(item.statusId, item.transferType, item.page.totalRows),

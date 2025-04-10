@@ -89,7 +89,7 @@ API.interceptors.response.use(
     if (response?.data?.message) {
       error.message = response.data.message;
     }
-    return Promise.resolve(error);
+    return Promise.reject(error);
   }
 );
 

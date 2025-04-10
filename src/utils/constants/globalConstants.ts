@@ -22,7 +22,7 @@ export const STATUS = {
     SIN_PROCESAR: "9f5ba87c-8736-4367-8077-3b914d2ee711",
     PROCESANDO: "00ce0b06-71b8-4981-861f-b4fa100dbd25",
     PROCESADO: "56859d8f-2345-4df2-b811-2371905d80a0",
-    CANCELADO: '3f9d2e88-12b4-4d7c-9e8f-5c6a8b7d4f01'
+    CANCELADO: "3f9d2e88-12b4-4d7c-9e8f-5c6a8b7d4f01"
   },
   CR: {
     POR_CONFIRMAR: "e2210921-8650-44a2-8c3a-b96d9cd492b4",
@@ -54,7 +54,8 @@ export const STATUS = {
     STAND_BY: "73ad61e3-395f-4ae4-8aef-9d24f3f917a9",
     POR_LEGALIZAR: "ce946d35-381e-4bf3-a54a-4d38fb1b5e92",
     POR_ACEPTAR: "49e6c46e-5a57-4a38-8b13-955bbffb7279", // Ex legalizado
-    CANCELADO: 'e2a1c7f4-5d6b-4c9e-8a32-7e4f1d9cbb12'
+    CANCELADO: "e2a1c7f4-5d6b-4c9e-8a32-7e4f1d9cbb12",
+    APLAZADA: "f7b0f0b6-9b7f-47b6-9e53-bf1f5c2f8a92"
   },
   TRIP: {
     SIN_INICIAR: "5d6508db-a151-4b13-b0a7-61459fa953b4",
@@ -62,7 +63,7 @@ export const STATUS = {
     EN_CURSO: "20ccbed7-449e-441c-8635-c37a09120115",
     DESCARGANDO: "8260cd86-df0e-4d52-b5f1-9e18fa4cfd16",
     DETENIDO: "423c2398-9b84-45e2-8534-20f0e6adddca",
-    STAND_BY: "a849c73d-dfd1-4c8d-a803-68100c59034e",
+    STAND_BY: "a849c73d-dfd1-4c8d-a803-68100c59034e"
   },
   NOVELTY: {
     PENDIENTE: "5bffe76c-2707-4088-bdff-1ae66701874b",

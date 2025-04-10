@@ -1,17 +1,22 @@
-import { Flex, message, Modal } from "antd";
-import { ArrowsClockwise, Download, LinkBreak, Trash, X } from "phosphor-react";
 import { Dispatch, SetStateAction, useState } from "react";
-import styles from "./ModalGenerateActionOrders.module.scss";
+import { useRouter } from "next/navigation";
+import { Flex, message, Modal } from "antd";
+import { ArrowsClockwise, Download, LinkBreak, PauseCircle, Trash, X } from "phosphor-react";
+import { MinusCircle } from "@phosphor-icons/react";
+
 import {
   deleteOrders,
   downloadCsvTransferOrders,
   transferOrderMerge
 } from "@/services/logistics/transfer-request";
+import { STATUS } from "@/utils/constants/globalConstants";
+import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+
 import ProtectedComponent from "../../protectedComponent/ProtectedComponent";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { useRouter } from "next/navigation";
-import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
-import { MinusCircle } from "@phosphor-icons/react";
+import { DataTypeForTransferOrderTable } from "../../tables/TransferOrderTable/TransferOrderTable";
+
+import styles from "./ModalGenerateActionOrders.module.scss";
 
 type PropsModalGenerateActionTO = {
   isOpen: boolean;
@@ -23,10 +28,13 @@ type PropsModalGenerateActionTO = {
       selected: number;
     }>
   >;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
 };
 
 export default function ModalGenerateActionOrders(props: Readonly<PropsModalGenerateActionTO>) {
-  const { isOpen, onClose, ordersId = [], trsIds = [], setIsModalOpen } = props;
+  const { TR } = STATUS;
+
+  const { isOpen, onClose, ordersId = [], trsIds = [], setIsModalOpen, allSelectedRows } = props;
   const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -59,6 +67,10 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     }
   };
 
+  const handlePostponeTR = async () => {
+    setIsModalOpen({ selected: 3 });
+  };
+
   const handleDeleteOrders = async () => {
     setIsLoading(true);
     if (trsIds?.length === 1 && ordersId?.length === 0) {
@@ -78,6 +90,8 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
       setIsLoading(false);
     }
   };
+
+  const validStatus4Postpone = [TR.ASIGNANDO_VEHICULO, TR.ESPERANDO_PROVEEDOR];
 
   return (
     <Modal
@@ -131,6 +145,19 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
             onClick={downloadCsvOrders}
           />
         </ProtectedComponent>
+        <ButtonGenerateAction
+          disabled={
+            allSelectedRows?.length === 0 ||
+            !allSelectedRows?.every(
+              (row) =>
+                validStatus4Postpone.includes(row.statusId) &&
+                row.statusId === allSelectedRows[0]?.statusId
+            )
+          }
+          icon={<PauseCircle size={20} />}
+          title="Aplazar TR"
+          onClick={handlePostponeTR}
+        />
         <ButtonGenerateAction
           disabled={
             (ordersId?.length === 0 && trsIds?.length === 0) ||

@@ -90,5 +90,10 @@ export const TransferOrdersState = [
     id: "b46233c0-0587-4a57-a452-adf5c5a70c11",
     name: "Facturado",
     bgColor: "#FF6B00"
+  },
+  {
+    id: "f7b0f0b6-9b7f-47b6-9e53-bf1f5c2f8a92",
+    name: "Aplazada",
+    bgColor: "#969696"
   }
 ];
