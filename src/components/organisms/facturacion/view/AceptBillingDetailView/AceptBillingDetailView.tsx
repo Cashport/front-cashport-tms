@@ -303,6 +303,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         messageApi={messageApi}
         idBilling={billingData?.billing?.id ?? 0}
         tripId={tripId ?? 0}
+        billingData={billingData}
       />
       <Drawer
         placement="right"

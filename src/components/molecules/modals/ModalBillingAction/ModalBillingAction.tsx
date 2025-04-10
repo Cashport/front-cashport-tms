@@ -6,7 +6,7 @@ import ActionList from "./ActionList/ActionList";
 import ConfirmClose from "./ConfirmClose/ConfirmClose";
 import UploadInvoice from "./UploadInvoice/UploadInvoice";
 import { MessageInstance } from "antd/es/message/interface";
-import { BillingStatusEnum } from "@/types/logistics/billing/billing";
+import { BillingStatusEnum, IBillingDetails } from "@/types/logistics/billing/billing";
 import UploadServiceSupport from "./UploadServiceSupport/UploadServiceSupport";
 
 export enum ViewEnum {
@@ -28,6 +28,7 @@ type PropsModal = {
   canEditForm?: boolean;
   uploadInvoiceTitle?: string;
   tripId?: number;
+  billingData?: IBillingDetails;
 };
 
 export default function ModalBillingAction(props: Readonly<PropsModal>) {
@@ -41,7 +42,8 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
     messageApi,
     canEditForm = true,
     uploadInvoiceTitle,
-    tripId
+    tripId,
+    billingData
   } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT);
 
@@ -86,7 +88,7 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
           />
         );
       case ViewEnum.UPLOAD_SERVICE_SUPPORT:
-        return <UploadServiceSupport onClose={onClose} tripId={tripId} />;
+        return <UploadServiceSupport onClose={onClose} journeysData={billingData?.journeys} />;
       default:
         return <ActionList setSelectedView={setSelectedView} billingStatus={billingStatus} />;
     }

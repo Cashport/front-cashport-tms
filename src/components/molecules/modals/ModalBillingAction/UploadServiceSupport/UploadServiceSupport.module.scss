@@ -24,6 +24,12 @@
         scrollbar-width: thin;
     }
 
+    &__tripsContainer {
+        max-height: 460px;
+        overflow-y: scroll;
+        scrollbar-width: thin;
+    }
+
     &__doc {
         display: grid;
         grid-template-columns: 2fr 4fr;
