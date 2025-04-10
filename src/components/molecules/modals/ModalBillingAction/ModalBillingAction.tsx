@@ -27,6 +27,7 @@ type PropsModal = {
   messageApi: MessageInstance;
   canEditForm?: boolean;
   uploadInvoiceTitle?: string;
+  tripId?: number;
 };
 
 export default function ModalBillingAction(props: Readonly<PropsModal>) {
@@ -39,7 +40,8 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
     billingStatus,
     messageApi,
     canEditForm = true,
-    uploadInvoiceTitle
+    uploadInvoiceTitle,
+    tripId
   } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT);
 
@@ -84,7 +86,7 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
           />
         );
       case ViewEnum.UPLOAD_SERVICE_SUPPORT:
-        return <UploadServiceSupport onClose={onClose} />;
+        return <UploadServiceSupport onClose={onClose} tripId={tripId} />;
       default:
         return <ActionList setSelectedView={setSelectedView} billingStatus={billingStatus} />;
     }

@@ -302,6 +302,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         billingStatus={billingData?.billing?.statusDesc}
         messageApi={messageApi}
         idBilling={billingData?.billing?.id ?? 0}
+        tripId={tripId ?? 0}
       />
       <Drawer
         placement="right"

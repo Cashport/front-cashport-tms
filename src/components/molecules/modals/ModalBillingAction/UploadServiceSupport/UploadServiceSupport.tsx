@@ -1,7 +1,9 @@
-import { Button, Flex } from "antd";
+import { Button, Flex, message } from "antd";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Plus } from "phosphor-react";
+
+import { getTripDetails, IGetTripDetails, postAddMTTRipTracking } from "@/services/trips/trips";
 
 import FooterButtons from "../FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
@@ -16,9 +18,11 @@ interface IFormUplaodServiceSupport {
 
 interface IUploadServiceSupportProps {
   onClose: () => void;
+  tripId?: number;
 }
 
-const UploadServiceSupport = ({ onClose }: IUploadServiceSupportProps) => {
+const UploadServiceSupport = ({ onClose, tripId }: IUploadServiceSupportProps) => {
+  const [trips, setTrips] = useState<IGetTripDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -45,43 +49,81 @@ const UploadServiceSupport = ({ onClose }: IUploadServiceSupportProps) => {
     setValue("commentary", e.target.value);
   };
 
-  const onSubmit = (data: IFormUplaodServiceSupport) => {
+  const onSubmit = async (data: IFormUplaodServiceSupport) => {
     setIsLoading(true);
+    try {
+      const documentsMTs = attachments.map((file, i) => ({
+        tripId: trips[0].id,
+        file: `MT-${i + 1}`
+      }));
+      await postAddMTTRipTracking({
+        idTrip: trips[0].id,
+        documentsMTs,
+        commentary: data.commentary,
+        files: attachments
+      });
+      message.success("Documentos cargados correctamente.");
+      onClose();
+    } catch (error) {
+      console.error("Error uploading documents:", error);
+      message.error("Error subiendo documentos.");
+    }
     console.info("data", data);
     setIsLoading(false);
   };
 
   useEffect(() => {
+    fetchTripDetails();
     return () => {
       reset();
     };
   }, []);
+
+  const fetchTripDetails = async () => {
+    try {
+      const response = await getTripDetails(tripId || 0);
+      if (response) {
+        setTrips([response]);
+      }
+    } catch (error) {
+      console.error("Error fetching trip details:", error);
+    }
+  };
 
   return (
     <>
       <div className={styles.content}>
         <p className={styles.content__info}>Ingresa la información para legalizar el viaje</p>
 
-        <strong className={styles.content__detail}>Vehículo XXXXXX</strong>
+        {trips.map((trip, index) => (
+          <>
+            <strong className={styles.content__detail}>Vehículo {trip.plate_number}</strong>
+            <div className={styles.content__docsContainer}>
+              {attachments.length === 0 && (
+                <div className={styles.content__doc}>
+                  <Flex vertical>
+                    <p>Documento MT {index + 1}</p>
+                    <em className="descriptionDocument">*Obligatorio</em>
+                  </Flex>
+                  <Flex vertical gap={"1rem"}>
+                    <DocumentButton
+                      title={attachments[0]?.name}
+                      handleOnChange={handleOnChangeDocument}
+                      handleOnDelete={() => handleOnDeleteDocument(attachments[0]?.name)}
+                      fileName={attachments[0]?.name}
+                      fileSize={attachments[0]?.size}
+                    />
+                  </Flex>
+                </div>
+              )}
 
-        <div className={styles.content__docsContainer}>
-          <Flex vertical>
-            <p>Documento soporte</p>
-            <em className="descriptionDocument">*Obligatorio</em>
-          </Flex>
-          <Flex vertical gap={"1rem"}>
-            <div className={styles.content__docs}>
-              <DocumentButton
-                title={attachments[0]?.name}
-                handleOnChange={handleOnChangeDocument}
-                handleOnDelete={() => handleOnDeleteDocument(attachments[0]?.name)}
-                fileName={attachments[0]?.name}
-                fileSize={attachments[0]?.size}
-              />
               {attachments.length > 0 &&
-                attachments
-                  .slice(1)
-                  .map((file) => (
+                attachments.map((file, j) => (
+                  <div className={styles.content__doc}>
+                    <Flex vertical>
+                      <p>Documento MT {j + 1}</p>
+                      <em className="descriptionDocument">*Obligatorio</em>
+                    </Flex>
                     <DocumentButton
                       key={file.name}
                       className={styles.documentButton}
@@ -91,9 +133,9 @@ const UploadServiceSupport = ({ onClose }: IUploadServiceSupportProps) => {
                       fileName={file.name}
                       fileSize={file.size}
                     />
-                  ))}
+                  </div>
+                ))}
             </div>
-
             {attachments.length > 0 && (
               <>
                 <Button
@@ -117,15 +159,14 @@ const UploadServiceSupport = ({ onClose }: IUploadServiceSupportProps) => {
                 />
               </>
             )}
-          </Flex>
-        </div>
-
-        <div className={styles.content__comment}>
-          <Flex vertical style={{ width: "100%" }}>
-            <p>Comentarios</p>
-            <textarea onChange={handleOnChangeTextArea} placeholder="Comentarios adicionales" />
-          </Flex>
-        </div>
+          </>
+        ))}
+      </div>
+      <div className={styles.content__comment}>
+        <Flex vertical style={{ width: "100%" }}>
+          <p>Comentarios</p>
+          <textarea onChange={handleOnChangeTextArea} placeholder="Comentarios adicionales" />
+        </Flex>
       </div>
 
       <FooterButtons

@@ -16,17 +16,17 @@
     }
 
     &__docsContainer {
-        display: grid;
-        grid-template-columns: 2fr 4fr;
-    }
-
-    &__docs {
         display: flex;
         flex-direction: column;
         gap: 1rem;
         max-height: 160px;
         overflow-y: scroll;
         scrollbar-width: thin;
+    }
+
+    &__doc {
+        display: grid;
+        grid-template-columns: 2fr 4fr;
     }
 
     &__addDocument {
@@ -48,6 +48,7 @@
     &__comment {
         display: flex;
         flex-direction: column;
+        margin-bottom: 1rem;
 
         p {
             font-size: 0.75rem;

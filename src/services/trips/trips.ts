@@ -5,8 +5,16 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { API, getIdToken } from "@/utils/api/api";
 import axios from "axios";
 
-export const getTripDetails = async (idTrip: number): Promise<any | undefined> => {
-  const response: GenericResponse<GenericResponse> = await API.get(
+export interface IGetTripDetails {
+  MT: string[];
+  carrier_id: number;
+  id: number;
+  plate_number: string;
+  provider: string;
+}
+
+export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | undefined> => {
+  const response: GenericResponse<IGetTripDetails> = await API.get(
     `/transfer-request/trip-details/${idTrip}`
   );
   if (response.success) return response.data;
@@ -74,5 +82,47 @@ export const sendFinalizeTripAllCarriers = async (
   } catch (error) {
     console.log(`Error sendFinalizeTrip: `, error);
     return error as any;
+  }
+};
+
+interface IPostAddMTTRipTracking {
+  idTrip: number;
+  documentsMTs: {
+    tripId: number;
+    file: string;
+  }[];
+  commentary: string;
+  files: File[];
+}
+
+export const postAddMTTRipTracking = async ({
+  idTrip,
+  documentsMTs,
+  commentary,
+  files
+}: IPostAddMTTRipTracking) => {
+  const formData = new FormData();
+
+  const request = {
+    documentsMTs,
+    commentary
+  };
+
+  formData.append("request", JSON.stringify(request));
+
+  // for each file in files, append it to formData
+  files.forEach((file, i) => {
+    formData.append(`MT-${i + 1}`, file);
+  });
+
+  try {
+    const response: any = await API.post(
+      `${config.API_HOST}/transfer-request/add-mt-trip-tracking/${idTrip}`,
+      formData
+    );
+    if (response?.data) return true;
+  } catch (error) {
+    console.log(`Error postAddMTTRipTracking: `, error);
+    throw new Error(typeof error === "string" ? error : "An unknown error occurred");
   }
 };
