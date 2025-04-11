@@ -88,7 +88,13 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
           />
         );
       case ViewEnum.UPLOAD_SERVICE_SUPPORT:
-        return <UploadServiceSupport onClose={onClose} journeysData={billingData?.journeys} />;
+        return (
+          <UploadServiceSupport
+            onClose={onClose}
+            journeysData={billingData?.journeys}
+            trId={billingData?.billing.idTransferRequest}
+          />
+        );
       default:
         return <ActionList setSelectedView={setSelectedView} billingStatus={billingStatus} />;
     }

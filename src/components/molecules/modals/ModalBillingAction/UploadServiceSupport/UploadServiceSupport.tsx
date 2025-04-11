@@ -24,9 +24,10 @@ interface IFormUplaodServiceSupport {
 interface IUploadServiceSupportProps {
   onClose: () => void;
   journeysData?: IJourney[];
+  trId?: number;
 }
 
-const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportProps) => {
+const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSupportProps) => {
   const [tripsDetails, setTripsDetails] = useState<IGetTripDetails[]>();
   const trips = useMemo(
     () => journeysData?.flatMap((journey) => journey.trips.map((trip) => trip)),
@@ -62,21 +63,35 @@ const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportPr
       request: true
     });
     try {
-      // const documentsMTs = Object.keys(data.tripAttachments)?.map((tripKey, i) => ({
-      //   tripId: tripKey,
-      //   file: `MT-${i + 1}`
-      // }));
+      const attachments: {
+        name: string;
+        file: File;
+      }[] = [];
 
-      console.log("data", data);
+      const documentsMTs = Object.entries(data.tripAttachments).flatMap(([tripId, filesObj], i) => {
+        if (!filesObj || typeof filesObj !== "object") return [];
 
-      // await postAddMTTRipTracking({
-      //   idTrip: trips?.[0]?.id ?? 0,
-      //   documentsMTs: documentsMTs ?? [],
-      //   commentary: data.commentary,
-      //   files: attachments
-      // });
-      // message.success("Documentos cargados correctamente.");
-      // onClose();
+        return Object.keys(filesObj).map((fileName, j) => {
+          const finalName = `MT-${i}`;
+          attachments.push({
+            name: `${finalName}-${j}`,
+            file: filesObj[fileName]
+          });
+          return {
+            tripId: Number(tripId),
+            file: `${finalName}-${j}`
+          };
+        });
+      });
+
+      await postAddMTTRipTracking({
+        trId: trId || 0,
+        documentsMTs: documentsMTs ?? [],
+        commentary: data.commentary,
+        files: attachments
+      });
+      message.success("Documentos cargados correctamente.");
+      onClose();
     } catch (error) {
       console.error("Error uploading documents:", error);
       message.error("Error subiendo documentos.");
@@ -230,7 +245,6 @@ const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportPr
                                     fileName={"Seleccionar archivo"}
                                     fileSize={""}
                                     handleOnChange={(info: any) => {
-                                      console.log("info", info);
                                       const file = info.file;
                                       if (!file) return;
 

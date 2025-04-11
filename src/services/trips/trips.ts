@@ -86,17 +86,20 @@ export const sendFinalizeTripAllCarriers = async (
 };
 
 interface IPostAddMTTRipTracking {
-  idTrip: number;
+  trId: number;
   documentsMTs: {
     tripId: number;
     file: string;
   }[];
   commentary: string;
-  files: File[];
+  files: {
+    name: string;
+    file: File;
+  }[];
 }
 
 export const postAddMTTRipTracking = async ({
-  idTrip,
+  trId,
   documentsMTs,
   commentary,
   files
@@ -111,13 +114,13 @@ export const postAddMTTRipTracking = async ({
   formData.append("request", JSON.stringify(request));
 
   // for each file in files, append it to formData
-  files.forEach((file, i) => {
-    formData.append(`MT-${i + 1}`, file);
+  files.forEach((file) => {
+    formData.append(file.name, file.file);
   });
 
   try {
     const response: any = await API.post(
-      `${config.API_HOST}/transfer-request/add-mt-trip-tracking/${idTrip}`,
+      `${config.API_HOST}/transfer-request/add-mt-trip-tracking/${trId}`,
       formData
     );
     if (response?.data) return true;
