@@ -10,10 +10,12 @@ import AceptBillingView from "./view/AceptBillingView/AceptBillingView";
 import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
 import Container from "@/components/atoms/Container/Container";
 
+import { IBillingsRequestList } from "@/types/logistics/billing/billing";
+
 import styles from "./AceptBilling.module.scss";
 
 export default function AceptBilling() {
-  const [billings, setBillings] = useState<any[]>([]);
+  const [billings, setBillings] = useState<IBillingsRequestList[]>([]);
   const [selectFilters, setSelectFilters] = useState({
     country: [] as string[],
     currency: [] as string[]

@@ -36,7 +36,8 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
 
   const canMakeAnAction = billingStatus
     ? billingStatus === BillingStatusEnum.PorAceptar ||
-      billingStatus === BillingStatusEnum.Preautorizado
+      billingStatus === BillingStatusEnum.Preautorizado ||
+      billingStatus === BillingStatusEnum.PendienteSoportes
     : false;
 
   const [messageApi, contextHolder] = message.useMessage();

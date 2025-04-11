@@ -52,9 +52,7 @@ const LabelCollapse = ({
           {removeIcons ? null : (
             <Files size={16} className={styles.labelCollapse__quantity__icon} />
           )}
-          {!quantityText ? null : (
-            <Flex>{quantityText}</Flex>
-          )}
+          {!quantityText ? null : <Flex>{quantityText}</Flex>}
           <h5 className={styles.labelCollapse__quantity__title}>{quantity}</h5>
         </Flex>
       )}
@@ -62,8 +60,8 @@ const LabelCollapse = ({
   );
 };
 
-function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+function capitalizeFirstLetter(str?: string): string {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 }
 
 export default LabelCollapse;
