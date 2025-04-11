@@ -1,26 +1,40 @@
+import { Dispatch, SetStateAction, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Flex, message, Modal } from "antd";
-import { ArrowsClockwise, Download, LinkBreak, Trash, X } from "phosphor-react";
-import { useState } from "react";
-import styles from "./ModalGenerateActionOrders.module.scss";
+import { ArrowsClockwise, Download, LinkBreak, PauseCircle, Trash, X } from "phosphor-react";
+import { MinusCircle } from "@phosphor-icons/react";
+
 import {
   deleteOrders,
   downloadCsvTransferOrders,
   transferOrderMerge
 } from "@/services/logistics/transfer-request";
+import { STATUS } from "@/utils/constants/globalConstants";
+import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+
 import ProtectedComponent from "../../protectedComponent/ProtectedComponent";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { useRouter } from "next/navigation";
-import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+import { DataTypeForTransferOrderTable } from "../../tables/TransferOrderTable/TransferOrderTable";
+
+import styles from "./ModalGenerateActionOrders.module.scss";
 
 type PropsModalGenerateActionTO = {
   isOpen: boolean;
-  onClose: () => void;
-  ordersId?: number[];
-  trsIds?: number[];
+  onClose: (resetStates?: boolean) => void;
+  ordersId?: string[];
+  trsIds?: string[];
+  setIsModalOpen: Dispatch<
+    SetStateAction<{
+      selected: number;
+    }>
+  >;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
 };
 
 export default function ModalGenerateActionOrders(props: Readonly<PropsModalGenerateActionTO>) {
-  const { isOpen, onClose, ordersId = [], trsIds = [] } = props;
+  const { TR } = STATUS;
+
+  const { isOpen, onClose, ordersId = [], trsIds = [], setIsModalOpen, allSelectedRows } = props;
   const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -30,7 +44,7 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     const queryParam = ordersId.join(",");
     setIsLoading(true);
     try {
-      await transferOrderMerge(ordersId);
+      await transferOrderMerge(ordersId.map((id) => Number(id)));
       message.open({ content: "Operación realizada con éxito", type: "success" });
       router.push(`transfer-request/create/${queryParam}`);
     } catch (error) {
@@ -53,12 +67,21 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     }
   };
 
+  const handlePostponeTR = async () => {
+    setIsModalOpen({ selected: 3 });
+  };
+
   const handleDeleteOrders = async () => {
     setIsLoading(true);
+    if (trsIds?.length === 1 && ordersId?.length === 0) {
+      //open ModalCancel
+      setIsModalOpen({ selected: 2 });
+      return setIsLoading(false);
+    }
     try {
       await deleteOrders(trsIds, ordersId);
       message.open({ content: "Operación realizada con éxito", type: "success" });
-      onClose();
+      onClose(true);
     } catch (error) {
       if (error instanceof Error)
         message.open({ content: error.message, type: "error", duration: 5 });
@@ -67,6 +90,8 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
       setIsLoading(false);
     }
   };
+
+  const validStatus4Postpone = [TR.ASIGNANDO_VEHICULO, TR.ESPERANDO_PROVEEDOR];
 
   return (
     <Modal
@@ -84,7 +109,7 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
       centered
       open={isOpen}
       onClose={() => onClose()}
-      closeIcon={<X size={20} weight="bold" onClick={onClose} />}
+      closeIcon={<X size={20} weight="bold" onClick={() => onClose()} />}
       footer={<></>}
       loading={isLoading}
     >
@@ -121,9 +146,35 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
           />
         </ProtectedComponent>
         <ButtonGenerateAction
-          disabled={ordersId?.length === 0 && trsIds?.length === 0}
-          icon={<Trash size={20} />}
-          title="Eliminar servicio"
+          disabled={
+            allSelectedRows?.length === 0 ||
+            !allSelectedRows?.every(
+              (row) =>
+                validStatus4Postpone.includes(row.statusId) &&
+                row.statusId === allSelectedRows[0]?.statusId
+            )
+          }
+          icon={<PauseCircle size={20} />}
+          title="Aplazar TR"
+          onClick={handlePostponeTR}
+        />
+        <ButtonGenerateAction
+          disabled={
+            (ordersId?.length === 0 && trsIds?.length === 0) ||
+            (ordersId?.length === 0 && trsIds?.length > 1)
+          }
+          icon={
+            trsIds?.length === 1 && ordersId?.length === 0 ? (
+              <MinusCircle size={20} />
+            ) : (
+              <Trash size={20} />
+            )
+          }
+          title={
+            trsIds?.length === 1 && ordersId?.length === 0
+              ? "Cancelación del TR"
+              : "Eliminar servicio"
+          }
           onClick={handleDeleteOrders}
         />
       </Flex>

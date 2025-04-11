@@ -1,22 +1,28 @@
 "use client";
-import styles from "./transferOrders.module.scss";
 import { useEffect, useState } from "react";
-import { Request } from "./request/Request";
-import { InProcess } from "./in-process/InProcess";
-import { Completed } from "./completed/completed";
 import { Empty, Flex, Typography } from "antd";
 import { DotsThree, Plus } from "phosphor-react";
 import { useSearchParams } from "next/navigation";
+
+import { Request } from "./request/Request";
+import { InProcess } from "./in-process/InProcess";
+import { Completed } from "./completed/completed";
+import { SearchProvider } from "@/context/SearchContext";
+import { useAppStore } from "@/lib/store/store";
+import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
+
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Container from "@/components/atoms/Container/Container";
 import ProtectedComponent from "@/components/molecules/protectedComponent/ProtectedComponent";
-import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
-import { useAppStore } from "@/lib/store/store";
 import { checkUserComponentPermissions } from "@/utils/utils";
 import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenerateActionOrders/ModalGenerateActionOrders";
-import { SearchProvider } from "@/context/SearchContext";
 import UiSearchInput from "@/components/ui/search-input-provider";
 import Filter from "@/components/atoms/Filters/FilterOrders";
+import { ModalCancelTR } from "@/components/molecules/modals/ModalCancelTR/ModalCancelTR";
+import { DataTypeForTransferOrderTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
+import { ModalPostponeTR } from "@/components/molecules/modals/ModalPostponeTR/ModalPostponeTR";
+
+import styles from "./transferOrders.module.scss";
 
 const { Text } = Typography;
 
@@ -30,8 +36,12 @@ const viewName: keyof typeof TMSMODULES = "TMS-Viajes";
 
 export const TransferOrders = () => {
   const { selectedProject: project, isHy } = useAppStore((state) => state);
-  const [ordersId, setOrdersId] = useState<number[]>([]);
-  const [trsIds, setTrsIds] = useState<number[]>([]);
+  const [ordersId, setOrdersId] = useState<string[]>([]);
+  const [trsIds, setTrsIds] = useState<string[]>([]);
+  const [childOrdersId, setChildOrdersId] = useState<string[]>([]);
+  const [TRStatusId, setTRStatusId] = useState<string>();
+  const [allSelectedRows, setAllSelectedRows] = useState<DataTypeForTransferOrderTable[]>();
+  const [mutate, setMutate] = useState(false);
 
   const searchParams = useSearchParams();
   const [selectFilters, setSelectFilters] = useState({
@@ -40,7 +50,7 @@ export const TransferOrders = () => {
   });
   const tabParam = searchParams.get("tab") as TabEnum | null;
   const [tab, setTab] = useState<TabEnum>();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
 
   useEffect(() => {
     if (isHy) {
@@ -87,16 +97,56 @@ export const TransferOrders = () => {
     }
   }, [tabParam, isHy, project]);
 
-  const handleCheckboxChange = (id: number, checked: boolean) => {
+  const handleCheckboxChange = (
+    id: string,
+    checked: boolean,
+    row: DataTypeForTransferOrderTable
+  ) => {
     setOrdersId((prevOrdersId) =>
       checked ? [...prevOrdersId, id] : prevOrdersId.filter((orderId) => orderId !== id)
     );
+
+    setTrsIds((prevTRsIds) =>
+      checked ? [...prevTRsIds, ...(ordersId ?? [])] : prevTRsIds.filter((TRid) => TRid !== id)
+    );
+
+    setTRStatusId(checked ? row.statusId : trsIds.filter((TRid) => TRid !== id)[0]);
   };
-  const handleCheckboxChangeTR = (id: number, checked: boolean) => {
+  const handleCheckboxChangeTR = (
+    id: string,
+    checked: boolean,
+    row: DataTypeForTransferOrderTable
+  ) => {
+    console.log("handleCheckboxrow", row);
     setTrsIds((prevTRsIds) =>
       checked ? [...prevTRsIds, id] : prevTRsIds.filter((TRid) => TRid !== id)
     );
+    setChildOrdersId((prevOrdersId) =>
+      checked
+        ? [...prevOrdersId, ...(row.TOs?.split(",") ?? []).map((order) => order)]
+        : prevOrdersId.filter((orderId) => !row.TOs?.split(",").includes(orderId))
+    );
+    setTRStatusId(row.statusId);
   };
+
+  const handleCheckAllCheckbox = (row: DataTypeForTransferOrderTable, isChecked: boolean) => {
+    console.log("handleCheckAllCheckbox", row, isChecked);
+    setAllSelectedRows((prevSelectedRows) => {
+      if (isChecked) {
+        // Add the selected row to the previous selected rows
+        return [...(prevSelectedRows ?? []), row];
+      } else {
+        // Remove the selected row from the previous selected rows
+        return prevSelectedRows?.filter((selectedRow) => selectedRow.tr !== row.tr);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (mutate) {
+      setMutate(false);
+    }
+  }, [mutate]);
 
   const renderView = () => {
     switch (tab) {
@@ -107,19 +157,27 @@ export const TransferOrders = () => {
             ordersId={ordersId}
             trsIds={trsIds}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
-            modalState={isModalOpen}
+            modalState={isModalOpen.selected === 1}
+            mutateData={mutate}
+            allSelectedRows={allSelectedRows}
+            handleCheckAll={handleCheckAllCheckbox}
           />
         );
       case TabEnum.IN_PROCESS:
         return (
           <InProcess
             trsIds={trsIds}
-            modalState={isModalOpen}
+            modalState={isModalOpen.selected === 1}
             handleCheckboxChangeTR={handleCheckboxChangeTR}
+            mutateData={mutate}
+            handleCheckAll={handleCheckAllCheckbox}
+            allSelectedRows={allSelectedRows}
           />
         );
       case TabEnum.COMPLETED:
-        return <Completed />;
+        return (
+          <Completed allSelectedRows={allSelectedRows} handleCheckAll={handleCheckAllCheckbox} />
+        );
       default:
         return <Empty />;
     }
@@ -137,7 +195,7 @@ export const TransferOrders = () => {
               icon={<DotsThree size={"1.5rem"} />}
               disabled={false}
               loading={false}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsModalOpen({ selected: 1 })}
             >
               Generar acción
             </PrincipalButton>
@@ -192,10 +250,56 @@ export const TransferOrders = () => {
         </div>
         <div>{isHy && renderView()}</div>
         <ModalGenerateActionOrders
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={isModalOpen.selected === 1}
+          onClose={(resetStates?: boolean) => {
+            setIsModalOpen({ selected: 0 });
+            if (resetStates) {
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+            }
+          }}
           ordersId={ordersId}
           trsIds={trsIds}
+          setIsModalOpen={setIsModalOpen}
+          allSelectedRows={allSelectedRows}
+        />
+        <ModalCancelTR
+          isOpen={isModalOpen.selected === 2}
+          onCancel={() =>
+            setIsModalOpen({
+              selected: 1
+            })
+          }
+          onClose={() => {
+            // clean states
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+            setAllSelectedRows([]);
+
+            // causw reloading of the data
+            setMutate((prev) => !prev);
+            setIsModalOpen({ selected: 0 });
+          }}
+          trID={trsIds[0]}
+          toIDs={childOrdersId}
+          trStatus={TRStatusId}
+        />
+
+        <ModalPostponeTR
+          isOpen={isModalOpen.selected === 3}
+          onCancel={() => setIsModalOpen({ selected: 1 })}
+          onClose={() => {
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+            setAllSelectedRows([]);
+
+            setMutate((prev) => !prev);
+            setIsModalOpen({ selected: 0 });
+          }}
+          allSelectedRows={allSelectedRows}
         />
       </Container>
     </SearchProvider>

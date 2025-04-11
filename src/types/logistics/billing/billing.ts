@@ -1,3 +1,4 @@
+import { Pagination } from "@/types/global/IGlobal";
 import { IIncident, IJourney } from "../schema";
 
 export enum BillingStatusEnum {
@@ -13,6 +14,7 @@ export interface IBillingsRequestList {
   statusDesc: string;
   statusColor: string;
   billings: IBillingRequestsListDetail[];
+  page: Pagination;
 }
 
 export interface IBillingRequestsListDetail {

@@ -1,7 +1,10 @@
 import { Checkbox, CollapseProps, Spin } from "antd";
 import styles from "./InProcess.module.scss";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
-import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
+import {
+  DataTypeForTransferOrderTable,
+  TransferOrdersTable
+} from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 import { FC, useEffect, useState } from "react";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import { getOnRouteTransferRequest } from "@/services/logistics/transfer-request";
@@ -10,12 +13,26 @@ import { STATUS } from "@/utils/constants/globalConstants";
 import { useSearchContext } from "@/context/SearchContext";
 
 interface IInProcessProps {
-  trsIds: number[];
-  handleCheckboxChangeTR: (id: number, checked: boolean) => void;
+  trsIds: string[];
+  handleCheckboxChangeTR: (
+    id: string,
+    checked: boolean,
+    row: DataTypeForTransferOrderTable
+  ) => void;
   modalState: boolean;
+  mutateData: boolean;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
+  handleCheckAll: (row: DataTypeForTransferOrderTable, isChecked: boolean) => void;
 }
 
-export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR, modalState }) => {
+export const InProcess: FC<IInProcessProps> = ({
+  trsIds,
+  handleCheckboxChangeTR,
+  modalState,
+  mutateData,
+  allSelectedRows,
+  handleCheckAll
+}) => {
   const { searchQuery: search, pslQuery, vpQuery } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
@@ -79,28 +96,42 @@ export const InProcess: FC<IInProcessProps> = ({ trsIds, handleCheckboxChangeTR,
   };
 
   useEffect(() => {
-    if (!modalState) {
+    if (!modalState || mutateData) {
       getTransferRequestAccepted();
     }
-  }, [modalState, search, vpQuery, pslQuery]);
+  }, [modalState, search, vpQuery, pslQuery, mutateData]);
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
     .map((item, index) => {
-      let aditionalRow = undefined;
+      // Default aditionalRow with null value
       const trDeleteable = [STATUS.TR.SIN_INICIAR];
-      if (trDeleteable.includes(item.statusId)) {
-        aditionalRow = {
-          title: "",
-          dataIndex: "checkbox",
-          render: (_: any, { tr }: any) => (
+
+      const aditionalRow = {
+        title: "",
+        dataIndex: "checkbox",
+        width: 50,
+        render: (_: any, row: DataTypeForTransferOrderTable) => {
+          const tr = row.tr;
+          return (
             <Checkbox
-              checked={trsIds.includes(tr)}
-              onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked)}
+              checked={allSelectedRows?.some((selectedRow) => selectedRow.tr === tr)}
+              onChange={(e) => {
+                const isChecked = e.target.checked;
+
+                // Handle the "select all" functionality
+                handleCheckAll(row, isChecked);
+
+                if (trDeleteable.includes(item.statusId)) {
+                  // Handle the specific row checkbox change for deleteable TRs
+                  handleCheckboxChangeTR(tr, isChecked, row);
+                }
+              }}
             />
-          )
-        };
-      }
+          );
+        }
+      };
+
       return {
         key: index,
         label: getTitile(item.statusId, item.page.totalRows),

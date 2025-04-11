@@ -1,5 +1,5 @@
 import { Button, Flex, TableColumnsType, Tooltip, Typography } from "antd";
-import { DataType } from "../TransferOrderTable";
+import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
 import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
 import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import dayjs from "dayjs";
@@ -19,7 +19,7 @@ export const columns = (
   showBothIds?: boolean,
   trShouldRedirect?: boolean,
   showCarriersColumn?: boolean
-): TableColumnsType<DataType> => {
+): TableColumnsType<DataTypeForTransferOrderTable> => {
   const timeToTrip = showColumn
     ? {
         title: "Tiempo transcurrido",

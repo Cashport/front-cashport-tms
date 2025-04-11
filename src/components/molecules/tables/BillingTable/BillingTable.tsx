@@ -1,13 +1,15 @@
 "use client";
 import { Dispatch, SetStateAction, useState } from "react";
 import { formatMoney } from "@/utils/utils";
-import { Eye, Warning } from "phosphor-react";
+import { Eye } from "phosphor-react";
 import { Button, Flex, Table, TableProps, Typography } from "antd";
-import { Radioactive } from "@phosphor-icons/react";
 
 import Link from "next/link";
-import { useProjects } from "@/hooks/useProjects";
-import { IBillingRequestsListDetail } from "@/types/logistics/billing/billing";
+// import { useProjects } from "@/hooks/useProjects";
+import {
+  IBillingsRequestList,
+  IBillingRequestsListDetail
+} from "@/types/logistics/billing/billing";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
@@ -28,17 +30,26 @@ function formatDate(dateString: string) {
 const { Text } = Typography;
 
 interface PropsBillingTable {
-  billingData: IBillingRequestsListDetail[];
+  billingData: IBillingsRequestList;
   setSelectedRows: Dispatch<SetStateAction<any[] | undefined>>;
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
+  fetchData: (newPage: number) => Promise<void>;
 }
 
 export default function BillingTable({
   billingData: data,
   setSelectedRows,
-  loading
+  loading,
+  fetchData
 }: PropsBillingTable) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(data.page?.actualPage || 1);
+
+  const handleTableChange = (page: number) => {
+    setCurrentPage(page);
+    fetchData(page);
+  };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -155,10 +166,16 @@ export default function BillingTable({
       <Table
         style={{ width: "100%" }}
         columns={columns}
-        dataSource={data.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data.billings.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
-        pagination={false}
+        pagination={{
+          current: currentPage,
+          pageSize: data.page?.rowsperpage,
+          total: data.page?.totalRows,
+          onChange: handleTableChange,
+          showSizeChanger: false
+        }}
         loading={loading}
       />
     </>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import utc from "dayjs/plugin/utc";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -20,8 +21,6 @@ import "./vehicleformtab.scss";
 import { IFormVehicle, VehicleType } from "@/types/logistics/schema";
 import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
@@ -33,9 +32,11 @@ import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
+import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 
 const { Title, Text } = Typography;
 
+dayjs.extend(utc);
 interface ImageState {
   file: File | undefined;
 }
@@ -57,11 +58,14 @@ export const VehicleFormTab = ({
   // eslint-disable-next-line no-unused-vars
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
+  console.log("dataGENERAL", data);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
+  const [files, setFiles] = useState<FileObject[] | any[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
@@ -159,8 +163,6 @@ export const VehicleFormTab = ({
     docReference: string;
     file: File | undefined;
   }
-  const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
 
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
@@ -206,17 +208,21 @@ export const VehicleFormTab = ({
   useEffect(() => {
     if (statusForm === "review") {
       if (Array.isArray(documentsTypesList)) {
+        const documentsFromData = documentsTypesList?.filter((f) =>
+          data?.documents?.find((d) => d.id_document_type === f.id)
+        );
+        const nonOptionalDocuments = documentsTypesList.filter((f) => !f?.optional);
+        const documentsUniqueSet = new Set([...documentsFromData, ...nonOptionalDocuments]);
+        const documentsUniqueArray = Array.from(documentsUniqueSet);
         const docsWithLink =
-          documentsTypesList
-            ?.filter((f) => data?.documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
+          documentsUniqueArray.map((f) => ({
+            ...f,
+            file: undefined,
+            link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
+            expirationDate: dayjs(
+              data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
+            )
+          })) || [];
         setSelectedFiles(docsWithLink);
       }
     }
@@ -571,34 +577,7 @@ export const VehicleFormTab = ({
                 />
               )}
             </Col>
-            <Row style={{ marginTop: "1rem", width: "100%" }}>
-              {selectedFiles.map((file, index) => (
-                <Col
-                  span={12}
-                  key={`file-${file.id}`}
-                  style={{ marginBottom: "16px", paddingRight: index % 2 === 0 ? "16px" : "0" }}
-                >
-                  <UploadDocumentButton
-                    key={file.id}
-                    title={file.description}
-                    isMandatory={!file.optional}
-                    aditionalData={file.id}
-                    setFiles={() => {}}
-                    files={file.file}
-                    disabled
-                  >
-                    {file?.link ? (
-                      <UploadDocumentChild
-                        linkFile={file.link}
-                        nameFile={file.link.split("-").pop() ?? ""}
-                        onDelete={() => {}}
-                        showTrash={false}
-                      />
-                    ) : undefined}
-                  </UploadDocumentButton>
-                </Col>
-              ))}
-            </Row>
+            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>

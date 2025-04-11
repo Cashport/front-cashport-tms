@@ -24,6 +24,7 @@ import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/Bu
 import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 import ModalHeader from "./components/ModalHeader";
 import { updateTripTrackingStatus } from "@/services/logistics/tracking";
+import { FileDownloadModal } from "../FileDownloadModal/FileDownloadModal";
 
 const { Text } = Typography;
 interface InvoiceDetailModalProps {
@@ -49,6 +50,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   const [activeKey, setActiveKey] = useState<string>("1");
   const [isModalChangeStatus, setisModalChangeStatus] = useState(false);
   const [newTripStatus, setNewTripStatus] = useState<string>(STATUS.TR.POR_ACEPTAR);
+  const [urlStep, setUrlStep] = useState<string>("");
 
   const [comment, setComment] = useState<string>("");
   const [isLoadingChangeStatus, setIsLoadingChangeStatus] = useState<boolean>(false);
@@ -161,7 +163,17 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     backgroundColor: "white",
     boxShadow: "none"
   };
-  console.log("tripStatus", currentVehicle?.state_id, newTripStatus);
+
+  const handleDocumentClick = (documentUrl: string) => {
+    const fileExtension = documentUrl?.split(".").pop()?.toLowerCase() ?? "";
+    if (["png", "jpg", "jpeg"].includes(fileExtension)) {
+      setUrlStep(documentUrl);
+      if (isModalOpen === false) setIsModalOpen(true);
+    } else {
+      window.open(documentUrl, "_blank");
+    }
+  };
+
   return (
     <aside className={`${styles.wrapper} ${isOpen ? styles.show : styles.hide}`}>
       <ModalVehicleFollowUp
@@ -177,7 +189,13 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
         onConfirm={onSubmitNewStatus}
         isLoading={isLoadingChangeStatus}
       />
-      <InvoiceDownloadModal isModalOpen={isModalOpen} handleCloseModal={setIsModalOpen} />
+      <FileDownloadModal
+        isModalOpen={isModalOpen}
+        onCloseModal={() => {
+          setIsModalOpen(false);
+        }}
+        url={urlStep}
+      />
       <div>
         <div className={styles.header}>
           <button type="button" className={styles.buttonBack} onClick={onClose}>
@@ -246,13 +264,23 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
                                       className={styles.name}
                                     >{`Usuario: ${item.created_by}`}</div>
                                   )}
+                                  {item.comment && (
+                                    <div
+                                      className={styles.name}
+                                    >{`Comentario: ${item.comment}`}</div>
+                                  )}
+                                  {item.provider_comment && (
+                                    <div
+                                      className={styles.name}
+                                    >{`Comentario proveedor: ${item.provider_comment}`}</div>
+                                  )}
                                   {item.url_photo && (
                                     <div>
                                       <div className={styles.icons}>
                                         <ArrowLineDown
                                           size={14}
                                           onClick={() => {
-                                            setIsModalOpen(true);
+                                            handleDocumentClick(item.url_photo ?? "");
                                           }}
                                         />
                                       </div>
