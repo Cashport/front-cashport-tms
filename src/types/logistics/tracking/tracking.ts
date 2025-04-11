@@ -13,6 +13,7 @@ export interface TrackingEvent {
   rate?: number | null;
   driver?: string | number | null;
   comment?: string | null;
+  provider_comment?: string | null;
 }
 
 export interface VehicleTracking {
