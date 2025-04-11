@@ -76,7 +76,7 @@ export const createDiscount = async (
   }
   body = form;
 
-  const response = await API.post<GenericResponse<DiscountCreateResponse>>(
+  const response: GenericResponse<DiscountCreateResponse> = await API.post(
     `/discount`,
     body,
     {
@@ -112,7 +112,7 @@ export const updateDiscount = async (
   }
   body = form;
 
-  const response = await API.put<GenericResponse<DiscountGetOne>>(
+  const response: GenericResponse<DiscountGetOne> = await API.put(
     `${config.API_HOST}/discount/${discountId}`,
     body,
     {

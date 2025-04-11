@@ -109,7 +109,7 @@ export const postAddMTTRipTracking = async ({
 
   try {
     const response: any = await API.post(
-      `${config.API_HOST}/transfer-request/add-mt-trip-tracking/${trId}`,
+      `/transfer-request/add-mt-trip-tracking/${trId}`,
       formData
     );
     if (response?.data) return true;
