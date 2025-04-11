@@ -6,7 +6,8 @@ export enum BillingStatusEnum {
   Aceptadas = "Aceptadas",
   Preautorizado = "Preautorizado",
   Facturado = "Facturado",
-  RechazadoProveedor = "Rechazado proveedor"
+  RechazadoProveedor = "Rechazado proveedor",
+  PendienteSoportes = "Pendiente soportes"
 }
 
 export interface IBillingsRequestList {

@@ -30,7 +30,7 @@ function formatDate(dateString: string) {
 const { Text } = Typography;
 
 interface PropsBillingTable {
-  billingData: IBillingsRequestList;
+  billingData?: IBillingsRequestList;
   setSelectedRows: Dispatch<SetStateAction<any[] | undefined>>;
   loading: boolean;
   // eslint-disable-next-line no-unused-vars
@@ -44,7 +44,7 @@ export default function BillingTable({
   fetchData
 }: PropsBillingTable) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(data.page?.actualPage || 1);
+  const [currentPage, setCurrentPage] = useState<number>(data?.page?.actualPage || 1);
 
   const handleTableChange = (page: number) => {
     setCurrentPage(page);
@@ -166,13 +166,13 @@ export default function BillingTable({
       <Table
         style={{ width: "100%" }}
         columns={columns}
-        dataSource={data.billings.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data?.billings.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
         pagination={{
           current: currentPage,
-          pageSize: data.page?.rowsperpage,
-          total: data.page?.totalRows,
+          pageSize: data?.page?.rowsperpage,
+          total: data?.page?.totalRows,
           onChange: handleTableChange,
           showSizeChanger: false
         }}
