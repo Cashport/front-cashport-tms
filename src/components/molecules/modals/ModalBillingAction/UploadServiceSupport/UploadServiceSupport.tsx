@@ -14,7 +14,9 @@ import styles from "./UploadServiceSupport.module.scss";
 
 interface IFormUplaodServiceSupport {
   tripAttachments: {
-    [tripId: string]: File[];
+    [tripId: string]: {
+      [mtName: string]: File;
+    };
   };
   commentary: string;
 }
@@ -60,8 +62,8 @@ const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportPr
       request: true
     });
     try {
-      // const documentsMTs = trips?.map((trip, i) => ({
-      //   tripId: trip.id,
+      // const documentsMTs = Object.keys(data.tripAttachments)?.map((tripKey, i) => ({
+      //   tripId: tripKey,
       //   file: `MT-${i + 1}`
       // }));
 
@@ -112,6 +114,7 @@ const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportPr
       });
     } catch (error) {
       console.error("Error fetching trip details:", error);
+      message.error("Error fetching trip details.");
     } finally {
       setIsLoading({
         ...isLoading,
@@ -119,8 +122,6 @@ const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportPr
       });
     }
   };
-
-  console.log("tripsDetails", tripsDetails);
 
   return (
     <>
@@ -135,108 +136,154 @@ const UploadServiceSupport = ({ onClose, journeysData }: IUploadServiceSupportPr
             return (
               <Flex key={trip.id} vertical gap={"1rem"}>
                 <strong className={styles.content__detail}>Vehículo {trip.plate_number}</strong>
-                <div>
+                <Flex vertical gap={"1rem"} className={styles.content__}>
                   <Controller
                     name={fieldName}
                     control={control}
                     render={({ field }) => {
-                      const currentFiles: File[] = field.value || [];
+                      const currentFiles: Record<string, File> = field.value || {};
 
                       const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
 
-                        const updated = [...currentFiles, file];
+                        const backendCount = trip.MT.length;
+                        const existingUserCount = Object.keys(currentFiles).length;
+                        const totalDocs = backendCount + existingUserCount;
+                        const newKey = `MT ${totalDocs}`;
+
+                        const updated = {
+                          ...currentFiles,
+                          [newKey]: file
+                        };
+
                         setValue(fieldName, updated);
                         trigger(fieldName);
                       };
 
-                      const handleFileDelete = (idx: number) => {
-                        const updated = [...currentFiles];
-                        updated.splice(idx, 1);
+                      const handleFileDelete = (key: string) => {
+                        const updated = { ...currentFiles };
+                        delete updated[key];
                         setValue(fieldName, updated);
                         trigger(fieldName);
                       };
 
                       return (
-                        <Flex vertical gap={"1rem"}>
+                        <>
                           <Flex vertical gap={"1rem"}>
-                            {/* Archivos del backend */}
+                            {/* Archivos previos cargados desde backend */}
                             {trip.MT.map((url, j) => {
-                              const displayName = url.split(".com/").pop() || `MT-${j}`;
+                              const displayName = url.split(".com/").pop() || `MT ${j}`;
                               return (
                                 <div key={`${trip.id}-url-${j}`} className={styles.content__doc}>
                                   <Flex vertical>
                                     <p>Documento MT {j}</p>
                                     <em className="descriptionDocument">*Obligatorio</em>
                                   </Flex>
-                                  <Flex vertical>
-                                    <DocumentButton
-                                      title={displayName}
-                                      fileName={displayName}
-                                      fileSize=""
-                                      handleOnChange={() => {}}
-                                      handleOnDelete={() => {
-                                        console.warn(
-                                          "Borrar archivo ya subido aún no implementado."
-                                        );
-                                      }}
-                                      disabled
-                                    />
-                                  </Flex>
+                                  <DocumentButton
+                                    title={displayName}
+                                    fileName={displayName}
+                                    fileSize=""
+                                    handleOnChange={() => {}}
+                                    handleOnDelete={() => {
+                                      console.warn(
+                                        "Eliminar archivo del backend aún no implementado"
+                                      );
+                                    }}
+                                    disabled
+                                  />
                                 </div>
                               );
                             })}
 
                             {/* Archivos subidos localmente */}
-                            {currentFiles.map((file, i) => (
+                            {Object.entries(currentFiles).map(([key, file], idx) => (
                               <div
-                                key={`${trip.id}-${file.name}-${i}`}
+                                key={`${trip.id}-${file.name}-${idx}`}
                                 className={styles.content__doc}
                               >
                                 <Flex vertical>
-                                  <p>Documento MT {i + 1}</p>
+                                  <p>{key}</p>
                                   <em className="descriptionDocument">*Obligatorio</em>
                                 </Flex>
-                                <Flex vertical>
-                                  <DocumentButton
-                                    title={`MT-${i}`}
-                                    fileName={file.name}
-                                    fileSize={file.size}
-                                    handleOnChange={() => {}}
-                                    handleOnDelete={() => handleFileDelete(i)}
-                                    disabled={isLoading.request}
-                                  />
-                                </Flex>
+                                <DocumentButton
+                                  title={key}
+                                  fileName={file.name}
+                                  fileSize={file.size}
+                                  handleOnChange={() => {}}
+                                  handleOnDelete={() => handleFileDelete(key)}
+                                  disabled={isLoading.request}
+                                />
                               </div>
                             ))}
+
+                            {/* Si no hay archivos del backend ni archivos locales, mostrar DocumentButton para el primer archivo */}
+                            {trip.MT.length === 0 && Object.keys(currentFiles).length === 0 && (
+                              <>
+                                <div className={styles.content__doc}>
+                                  <Flex vertical>
+                                    <p>MT 0</p>
+                                    <em className="descriptionDocument">*Obligatorio</em>
+                                  </Flex>
+                                  <DocumentButton
+                                    title={"MT 0"}
+                                    fileName={"Seleccionar archivo"}
+                                    fileSize={""}
+                                    handleOnChange={(info: any) => {
+                                      console.log("info", info);
+                                      const file = info.file;
+                                      if (!file) return;
+
+                                      const updated = {
+                                        ...currentFiles,
+                                        ["MT 0"]: file
+                                      };
+
+                                      setValue(fieldName, updated);
+                                      trigger(fieldName);
+                                    }}
+                                    handleOnDelete={() => {
+                                      const updated = { ...currentFiles };
+                                      delete updated["MT 0"];
+                                      setValue(fieldName, updated);
+                                      trigger(fieldName);
+                                    }}
+                                    disabled={isLoading.request}
+                                  />
+                                </div>
+                              </>
+                            )}
                           </Flex>
 
                           {/* Botón para agregar otro */}
-                          <Button
-                            onClick={() => {
-                              const fileInput = document.getElementById(
-                                inputId
-                              ) as HTMLInputElement;
-                              if (fileInput) fileInput.click();
-                            }}
-                            className={styles.content__addDocument}
-                            icon={<Plus size={"1rem"} weight="bold" />}
-                          >
-                            <p>Agregar otro documento</p>
-                          </Button>
-                          <input
-                            id={inputId}
-                            type="file"
-                            style={{ display: "none" }}
-                            onChange={handleFileChange}
-                            accept=".pdf,.png,.doc,.docx"
-                          />
-                        </Flex>
+                          {(trip.MT.length > 0 || Object.keys(currentFiles).length > 0) && (
+                            <>
+                              <Button
+                                onClick={() => {
+                                  const fileInput = document.getElementById(
+                                    inputId
+                                  ) as HTMLInputElement;
+                                  if (fileInput) fileInput.click();
+                                }}
+                                className={styles.content__addDocument}
+                                icon={<Plus size={"1rem"} weight="bold" />}
+                              >
+                                <p>Agregar otro documento</p>
+                              </Button>
+                              <input
+                                id={inputId}
+                                type="file"
+                                style={{ display: "none" }}
+                                onChange={handleFileChange}
+                                accept=".pdf,.png,.doc,.docx"
+                              />
+                            </>
+                          )}
+                        </>
                       );
                     }}
                   />
-                </div>
+                </Flex>
               </Flex>
             );
           })}
