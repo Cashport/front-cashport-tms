@@ -20,7 +20,7 @@ const ActionList = ({
   return (
     <Flex style={{ width: "100%", height: "100%" }} gap={12} vertical>
       <ButtonGenerateAction
-        disabled={!canAccept}
+        disabled={false}
         icon={<Gavel size={20} />}
         title="Cargar soportes del servicio"
         onClick={() => setSelectedView(ViewEnum.UPLOAD_SERVICE_SUPPORT)}
