@@ -1,9 +1,7 @@
 import { createFormDataFinalizeTrip } from "@/components/molecules/modals/ModalBillingMT/controllers/createFormData";
 import { createFormData } from "@/components/molecules/modals/ModalGenerateActionTO/FinalizeTrip/controllers/createFormData";
-import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { API, getIdToken } from "@/utils/api/api";
-import axios from "axios";
+import { API } from "@/utils/api/api";
 
 export interface IGetTripDetails {
   MT: string[];
@@ -23,20 +21,13 @@ export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | 
 
 export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<boolean | undefined> => {
   try {
-    const token = await getIdToken();
     const formData = createFormDataFinalizeTrip(form);
-    const response: any = await axios.post(
-      `${config.API_HOST}/transfer-request/add-mt-trip/${idTrip}`,
-      formData,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
-        }
+    const response: any = await API.post(`/transfer-request/add-mt-trip/${idTrip}`, formData, {
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "multipart/form-data"
       }
-    );
-    console.log("sendFinalizeTrip res", response);
+    });
     if (response?.data) return true;
     return false;
   } catch (error) {
@@ -63,17 +54,15 @@ export const sendFinalizeTripAllCarriers = async (
   idTR: number
 ): Promise<boolean | undefined> => {
   try {
-    const token = await getIdToken();
     const formData = createFormData(form);
 
-    const response: any = await axios.post(
-      `${config.API_HOST}/transfer-request/finalize-trip/${idTR}`,
+    const response: GenericResponse = await API.post(
+      `/transfer-request/finalize-trip/${idTR}`,
       formData,
       {
         headers: {
           Accept: "application/json, text/plain, */*",
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "multipart/form-data"
         }
       }
     );
@@ -120,7 +109,7 @@ export const postAddMTTRipTracking = async ({
 
   try {
     const response: any = await API.post(
-      `${config.API_HOST}/transfer-request/add-mt-trip-tracking/${trId}`,
+      `/transfer-request/add-mt-trip-tracking/${trId}`,
       formData
     );
     if (response?.data) return true;

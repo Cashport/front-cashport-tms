@@ -1,18 +1,11 @@
-import config from "@/config";
-import { getIdToken, getProjectId } from "@/utils/api/api";
-import axios from "axios";
+import { API } from "@/utils/api/api";
 
 export async function downloadCSVFromEndpoint(endpoint: string, filename: string): Promise<void> {
   try {
-    const projectId = await getProjectId();
-    const token = await getIdToken();
-
-    const response = await axios.get(`${config.API_HOST}/${endpoint}`, {
+    const response = await API.get(`${endpoint}`, {
       responseType: "blob",
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        Authorization: `Bearer ${token}`,
-        projectId: `${projectId}`
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       }
     });
 
@@ -31,4 +24,3 @@ export async function downloadCSVFromEndpoint(endpoint: string, filename: string
     console.error("Error downloading the XLSX file:", error);
   }
 }
-

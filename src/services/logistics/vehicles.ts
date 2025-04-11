@@ -1,19 +1,10 @@
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { getIdToken } from "@/utils/api/api";
-import { IListData } from "@/types/logistics/schema";
+import { API } from "@/utils/api/api";
+import { Data } from "@/types/logistics/schema";
 
-export const getSuggestedVehicles = async (typeOfServiceId:string): Promise<IListData> => {
-  const token = await getIdToken();
+export const getSuggestedVehicles = async (typeOfServiceId: string): Promise<Data> => {
   try {
-    const body = { id : typeOfServiceId }
-    const response: IListData = await axios.post(`${config.API_HOST}/vehicle/suggested`, body, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const body = { id: typeOfServiceId };
+    const response: Data = await API.post(`/vehicle/suggested`, body);
     return response;
   } catch (error) {
     console.log("Error creating new location: ", error);
@@ -21,14 +12,10 @@ export const getSuggestedVehicles = async (typeOfServiceId:string): Promise<ILis
   }
 };
 
-export const getVehicleById = async (id: string): Promise<IListData> => {
+export const getVehicleById = async (id: string): Promise<Data> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/vehicle/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
-    console.log(response)
+    const response: Data = await API.get(`/vehicle/${id}`);
+    console.log(response);
     return response;
   } catch (error) {
     console.log("Error: ", error);

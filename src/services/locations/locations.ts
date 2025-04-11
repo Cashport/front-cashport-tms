@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { API, getIdToken } from "@/utils/api/api";
+import { AxiosResponse } from "axios";
+import { API } from "@/utils/api/api";
 import {
   ICreateLocation,
   ICities,
@@ -10,15 +9,8 @@ import { MessageType } from "@/context/MessageContext";
 
 export const fetchAllLocations = async (): Promise<ICities[]> => {
   try {
-    const { data, status }: AxiosResponse = await axios.get<ICities>(
-      `${config.API_HOST}/location`,
-      {
-        headers: {
-          Authorization: `Bearer ${await getIdToken()}`
-        }
-      }
-    );
-    if (status === 200) return data.data;
+    const { data, status }: AxiosResponse = await API.get<ICities>(`/location`);
+    if (status === 200) return data;
     return [];
   } catch (error) {
     return [];
@@ -43,10 +35,7 @@ export const addAddressToLocation = async (
   };
 
   try {
-    const response: IResponseAddAddressToLocation = await API.post(
-      `${config.API_HOST}/location`,
-      modelData
-    );
+    const response: IResponseAddAddressToLocation = await API.post(`/location`, modelData);
 
     if (response.success !== false) {
       showMessage("success", "Direccion creada exitosamente.");
@@ -62,19 +51,9 @@ export const addAddressToLocation = async (
 };
 
 export const getOneLocation = async (locationId: number, projectId: number): Promise<any> => {
-  const token = await getIdToken();
-
   try {
-    const response: AxiosResponse = await axios.get(
-      `${config.API_HOST}/location/${locationId}/project/${projectId}`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-    return response.data;
+    const response: AxiosResponse = await API.get(`/location/${locationId}/project/${projectId}`);
+    return response;
   } catch (error) {
     console.warn("Error getting location: ", error);
     return error as any;

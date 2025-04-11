@@ -121,9 +121,9 @@ export default function ModalDocuments(props: PropsModalDocuments) {
     .then((result)=>{
       setFileList([]);
       // refresh list 
-      const newvalue : CertificateType = result.data.data;
+      const newvalue : CertificateType = result.data;
       documentsType?.push(newvalue);
-      const newdoccomplete: DocumentCompleteType =result.data.data;
+      const newdoccomplete: DocumentCompleteType =result.data;
       entityTypeData?.filter((f)=> f.id == documentType).map((m)=>  newdoccomplete.entity_type_desc = m.description);
       mockFiles.push(newdoccomplete);
 
@@ -134,7 +134,6 @@ export default function ModalDocuments(props: PropsModalDocuments) {
     .finally(() => {
       setUploading(false);
     });
-    
   };
 
   useEffect(() => {

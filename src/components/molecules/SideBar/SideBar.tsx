@@ -37,31 +37,32 @@ export const SideBar = () => {
   const router = useRouter();
   const path = usePathname();
   const project = useStore(useAppStore, (state) => state.selectedProject);
-  const setProjectsBasicInfo = useAppStore((state) => state.setProjectsBasicInfo);
-  const setSelectedProject = useAppStore((state) => state.setSelectedProject);
-  const { projectsBasicInfo: projects, isHy } = useAppStore((state) => state);
+  const { setProjectsBasicInfo, setSelectedProject, isHy, projectsBasicInfo } = useAppStore(
+    (state) => state
+  );
 
   const LOGO = project?.LOGO;
 
   useEffect(() => {
-    setIsComponentLoading(false);
-  }, []);
+    console.log(project);
+    if (isHy) setIsComponentLoading(false);
+  }, [isHy, project]);
 
   useEffect(() => {
     //to check if there is a project selected
     //if not it should open the modal to select one
-    if (!isComponentLoading && !project?.ID) {
+    if (isHy && !isComponentLoading && !project?.ID) {
       setModalProjectSelectorOpen(true);
     }
-  }, [isComponentLoading, project]);
+  }, [isHy, isComponentLoading, project]);
 
   useEffect(() => {
     //useEffect to call userPermissions and get the projects
     const fetchProjects = async () => {
       const response = await getUserPermissions();
-      if (Array.isArray(response?.data)) {
+      if (response?.data) {
         setProjectsBasicInfo(
-          response?.data?.map((project) => ({
+          response?.data?.permissions.map((project) => ({
             ID: project.project_id,
             NAME: project.name,
             LOGO: project.logo ? project.logo : "",
@@ -72,32 +73,24 @@ export const SideBar = () => {
           }))
         );
 
-        if (response?.data?.length === 1) {
+        if (response?.data?.permissions?.length === 1) {
+          const permission = response.data.permissions[0];
           const project = {
-            ID: response?.data[0].project_id,
-            NAME: response?.data[0].name,
-            LOGO: response?.data[0].logo ? response?.data[0].logo : "",
-            rol_id: response?.data[0].rol_id,
-            views_permissions: response?.data[0].views_permissions,
-            action_permissions: response?.data[0].action_permissions,
-            isSuperAdmin: response?.data[0].is_super_admin
+            ID: permission.project_id,
+            NAME: permission.name,
+            LOGO: permission.logo ? permission.logo : "",
+            rol_id: permission.rol_id,
+            views_permissions: permission.views_permissions,
+            action_permissions: permission.action_permissions,
+            isSuperAdmin: permission.is_super_admin
           };
           setProjectInApi(project.ID);
           setSelectedProject(project);
-          if (path.startsWith("/landing")) {
-            // eslint-disable-next-line no-unused-vars
-            Object.entries(TMSMODULES).some(([key, value]) => {
-              if (checkUserViewPermissions(project, key)) {
-                router.push(value);
-                return true;
-              }
-            });
-          }
         }
       }
     };
 
-    if (projects?.length === 0 && isHy) {
+    if (!projectsBasicInfo?.length && isHy) {
       fetchProjects();
     }
   }, [isHy]);

@@ -1,11 +1,10 @@
 import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { API, getIdToken } from "@/utils/api/api";
+import { API } from "@/utils/api/api";
 import {
   ICity,
   IEntityType,
   IGroupLocation,
-  IListData,
+  Data,
   ILocation,
   ILocationTypes,
   IState
@@ -14,18 +13,9 @@ import { CertificateType, DocumentCompleteType } from "@/types/logistics/certifi
 import { GenericResponse } from "@/types/global/IGlobal";
 import { LocationData } from "@/components/molecules/tabs/logisticsForms/grouplocationForm/grouplocationFormTab.mapper";
 
-export const getAllLocations = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllLocations = async (): Promise<Data> => {
   try {
-    const response: IListData = await axios.get(
-      `${config.API_HOST}/logistic-location/all/locations`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: Data = await API.get(`/logistic-location/all/locations`);
     return response;
   } catch (error) {
     console.log("Error creating new location: ", error);
@@ -74,18 +64,9 @@ export const getAllGroupByLocation = async (): Promise<IGroupLocation[]> => {
   throw new Error(response?.message || "Error");
 };
 
-export const getAllSecureRoutes = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllSecureRoutes = async (): Promise<Data> => {
   try {
-    const response: IListData = await axios.get(
-      `${config.API_HOST}/logistic-location/all/secure-routes`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: Data = await API.get(`/logistic-location/all/secure-routes`);
     return response;
   } catch (error) {
     console.log("Error getAllSecureRoutes: ", error);
@@ -94,18 +75,9 @@ export const getAllSecureRoutes = async (): Promise<IListData> => {
 };
 
 export const getAllEntityType = async (): Promise<IEntityType[]> => {
-  const token = await getIdToken();
   try {
-    const response: IListData = await axios.get(
-      `${config.API_HOST}/logistic-location/all/entity-type`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-    const res: IEntityType[] = response.data.data;
+    const response: Data = await API.get(`/logistic-location/all/entity-type`);
+    const res: IEntityType[] = response.data;
     return res;
   } catch (error) {
     console.log("Error getAllEntityType: ", error);
@@ -142,20 +114,15 @@ export const createLocationForm = (data: ILocation, files: DocumentCompleteType[
 export const addLocation = async (
   data: ILocation,
   files: DocumentCompleteType[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<GenericResponse> => {
   try {
     const form = createLocationForm(data, files);
-    console.log(form);
-    const response = await axios.post(
-      `${config.API_HOST}/logistic-location/create/locations`,
-      form,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json, text/plain, */*"
-        }
+    const response: GenericResponse = await API.post(`/logistic-location/create/locations`, form, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json, text/plain, */*"
       }
-    );
+    });
     return response;
   } catch (error) {
     console.log("Error creating location: ", error);
@@ -165,19 +132,15 @@ export const addLocation = async (
 export const updateLocation = async (
   data: ILocation,
   files: DocumentCompleteType[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<GenericResponse> => {
   try {
     const form = createLocationForm(data, files);
-    const response = await axios.put(
-      `${config.API_HOST}/logistic-location/update/locations`,
-      form,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json, text/plain, */*"
-        }
+    const response: GenericResponse = await API.put(`/logistic-location/update/locations`, form, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json, text/plain, */*"
       }
-    );
+    });
     return response;
   } catch (error) {
     console.log("Error updating location: ", error);
@@ -188,13 +151,13 @@ export const updateLocation = async (
 export const updateLocationStatus = async (
   location_id: string,
   active: string
-): Promise<AxiosResponse<any, any>> => {
+): Promise<GenericResponse> => {
   try {
     const form = new FormData();
     const body: any = { location_id: location_id, active: active };
     form.append("body", JSON.stringify(body));
-    const response = await axios.put(
-      `${config.API_HOST}/logistic-location/updatestatus/locations`,
+    const response: GenericResponse = await API.put(
+      `/logistic-location/updatestatus/locations`,
       form,
       {
         headers: {
@@ -210,11 +173,10 @@ export const updateLocationStatus = async (
   }
 };
 
-export const addDocumentsType = async (formdata: FormData): Promise<AxiosResponse<any, any>> => {
+export const addDocumentsType = async (formdata: FormData): Promise<GenericResponse> => {
   try {
-    console.log(formdata);
-    const response = await axios.post(
-      `${config.API_HOST}/logistic-location/create/documents-type`,
+    const response: GenericResponse = await API.post(
+      `/logistic-location/create/documents-type`,
       formdata,
       {
         headers: {

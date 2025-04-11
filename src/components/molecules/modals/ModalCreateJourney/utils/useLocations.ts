@@ -10,11 +10,11 @@ export const useLocations = () => {
   useEffect(() => {
     const loadLocations = async () => {
       const result = await getAllLocations();
-      if (result.data.data.length > 0) {
+      if (result.data.length > 0) {
         const listlocations: any[] = [];
         const listlocationoptions: { label: any; value: any }[] = [];
 
-        result.data.data.forEach((item) => {
+        result.data.forEach((item) => {
           listlocations.push(item);
           listlocationoptions.push({ label: item.description, value: item.id });
         });

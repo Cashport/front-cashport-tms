@@ -1,21 +1,13 @@
 import axios, { AxiosResponse } from "axios";
-import config from "@/config";
 import { API } from "@/utils/api/api";
-import { getIdToken } from "@/utils/api/api";
-import { IFormGeneralUser, IListData } from "@/types/logistics/schema";
+import { IFormGeneralUser } from "@/types/logistics/schema";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-import { GenericResponse } from "@/types/global/IGlobal";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { GenericResponse } from "@/types/global/IGlobal";
 
-export const getAllUsers = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllUsers = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/logistic-user/all`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/logistic-user/all`);
     return response;
   } catch (error) {
     console.log("Error getAllUsers: ", error);
@@ -23,15 +15,9 @@ export const getAllUsers = async (): Promise<IListData> => {
   }
 };
 
-export const getAllRoles = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllRoles = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/logistic-user/all/roles`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/logistic-user/all/roles`);
     return response;
   } catch (error) {
     console.log("Error getAllRoles: ", error);
@@ -39,15 +25,9 @@ export const getAllRoles = async (): Promise<IListData> => {
   }
 };
 
-export const getAllCarriers = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllCarriers = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/logistic-user/all/carriers`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/logistic-user/all/carriers`);
     return response;
   } catch (error) {
     console.log("Error getAllCarriers: ", error);
@@ -55,15 +35,9 @@ export const getAllCarriers = async (): Promise<IListData> => {
   }
 };
 
-export const getAllPsl = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllPsl = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/logistic-user/all/psl`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/logistic-user/all/psl`);
     return response;
   } catch (error) {
     console.log("Error getAllPsl: ", error);
@@ -71,15 +45,9 @@ export const getAllPsl = async (): Promise<IListData> => {
   }
 };
 
-export const getAllCostCenterByPsl = async (id: string): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllCostCenterByPsl = async (id: string): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/logistic-user/all/psl/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/logistic-user/all/psl/${id}`);
     return response;
   } catch (error) {
     console.log("Error getAllCostCenterByPsl: ", error);
@@ -87,48 +55,39 @@ export const getAllCostCenterByPsl = async (id: string): Promise<IListData> => {
   }
 };
 
-export const getUserById = async (id: string): Promise<IListData> => {
+export const getUserById = async (id: string): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/logistic-user/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
+    const response: GenericResponse = await API.get(`/logistic-user/${id}`);
     return response;
   } catch (error) {
     console.log("Error get User: ", error);
     return error as any;
   }
 };
-export const createUserForm = (
-  generalData: IFormGeneralUser,
-  logo: FileObject[]
-) => {
+export const createUserForm = (generalData: IFormGeneralUser, logo: FileObject[]) => {
   const form = new FormData();
   const body: any = generalData;
- 
-  body.logo = logo ? logo.map((file: any) => ({
-    docReference: file.docReference,
-    uid: file?.file?.uid,
-  })): undefined
 
-  form.append("body", JSON.stringify({...body, rh: body.rhval as any}));
+  body.logo = logo
+    ? logo.map((file: any) => ({
+        docReference: file.docReference,
+        uid: file?.file?.uid
+      }))
+    : undefined;
+
+  form.append("body", JSON.stringify({ ...body, rh: body.rhval as any }));
   logo && form.append("logo", logo[0].file as unknown as File);
 
-  return form
-}
+  return form;
+};
 
 export const updateUser = async (
   generalData: IFormGeneralUser,
-  logo: FileObject[],
+  logo: FileObject[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
-    const form = createUserForm(generalData, logo)
-    const response = await axios.put(`${config.API_HOST}/logistic-user/update`, form, {
-      headers: {
-        Accept: "application/json, text/plain, */*"
-      }
-    });
+    const form = createUserForm(generalData, logo);
+    const response = await API.put(`/logistic-user/update`, form);
     return response;
   } catch (error) {
     console.log("Error update User: ", error);
@@ -141,8 +100,8 @@ export const addUser = async (
   logo: FileObject[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
-    const form = createUserForm(generalData, logo)
-    const response = await axios.post(`${config.API_HOST}/logistic-user/create`, form, {
+    const form = createUserForm(generalData, logo);
+    const response = await API.post(`/logistic-user/create`, form, {
       headers: {
         "content-type": "multipart/form-data",
         Accept: "application/json, text/plain, */*"
@@ -156,18 +115,14 @@ export const addUser = async (
 };
 
 export const updateUserStatus = async (
-  user_id:string, active:string
-): Promise<AxiosResponse<any, any>> => {
+  user_id: string,
+  active: string
+): Promise<GenericResponse> => {
   try {
     const form = new FormData();
-    const body: any = { "user_id":user_id, "active":active };
-    form.append("body", JSON.stringify(body));  
-    const response = await axios.put(`${config.API_HOST}/logistic-user/updatestatus`, form, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
-      }
-    });
+    const body: any = { user_id: user_id, active: active };
+    form.append("body", JSON.stringify(body));
+    const response: GenericResponse = await API.put(`/logistic-user/updatestatus`, form);
     return response;
   } catch (error) {
     console.log("Error updating user: ", error);

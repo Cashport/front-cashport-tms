@@ -1,21 +1,14 @@
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { getIdToken } from "@/utils/api/api";
-import { IListData } from "@/types/logistics/schema";
+import { Data } from "@/types/logistics/schema";
+import { API } from "@/utils/api/api";
 
-export const getOtherRequirements = async (): Promise<IListData> => {
-    const token = await getIdToken();
-    try {
-        const response: IListData = await axios.get(`${config.API_HOST}/carrier/all/other-requirements`, {
-        headers: {
-            Accept: "application/json, text/plain, */*",
-            Authorization: `Bearer ${token}`
-        }
-        });
-        return response;
-    } catch (error) {
-        console.log("Error get all other requeiments: ", error);
-        return error as any;
-    }
+export const getOtherRequirements = async (): Promise<Data> => {
+  try {
+    const response: Data = await API.get(
+      `/carrier/all/other-requirements`,
+    );
+    return response;
+  } catch (error) {
+    console.log("Error get all other requeiments: ", error);
+    return error as any;
+  }
 };
-      

@@ -179,8 +179,8 @@ export default function PricingTransferRequest({
   const loadSuggestedVehicles = async () => {
     const res = await getSuggestedVehicles("1");
     const result: any = [];
-    if (res.data.data.length > 0) {
-      res.data.data.forEach((item) => {
+    if (res.data.length > 0) {
+      res.data.forEach((item) => {
         const strlabel = (
           <Flex align="center" gap={12}>
             <Circle size={24} />
@@ -203,7 +203,7 @@ export default function PricingTransferRequest({
       });
     }
 
-    setSugestedVehicles(res.data.data);
+    setSugestedVehicles(res.data);
     setOptionsVehicles(result);
   };
 
@@ -896,11 +896,11 @@ export default function PricingTransferRequest({
                         {transferRequest.general?.transferRequestVehiclesSugest && (
                           <ChipsRow
                             chips={transferRequest.general?.transferRequestVehiclesSugest?.map(
-                              ((veh) => ({
+                              (veh) => ({
                                 name: veh.vehicle_type_desc,
                                 quantity: veh.units,
                                 id: veh.id
-                              })) || []
+                              })
                             )}
                           />
                         )}
@@ -911,13 +911,11 @@ export default function PricingTransferRequest({
                         </label>
                         {otherRequirements && (
                           <ChipsRow
-                            chips={otherRequirements?.map(
-                              ((req) => ({
-                                name: req.other_requirement_desc,
-                                quantity: req.quantity,
-                                id: req.id_other_requeriments
-                              })) || []
-                            )}
+                            chips={otherRequirements?.map((req) => ({
+                              name: req.other_requirement_desc,
+                              quantity: req.quantity,
+                              id: req.id_other_requeriments
+                            }))}
                           />
                         )}
                       </Flex>
