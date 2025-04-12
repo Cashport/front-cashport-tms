@@ -10,6 +10,7 @@ import {
   IBillingsRequestList,
   IBillingRequestsListDetail
 } from "@/types/logistics/billing/billing";
+import { BillingStatusEnum } from "@/types/logistics/billing/billing";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
@@ -142,7 +143,7 @@ export default function BillingTable({
       key: "buttonSee",
       width: 64,
       dataIndex: "id",
-      render: (id) => (
+      render: (id,record) => (
         <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
           {/*{record.radioactiveIcon && (
             <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Radioactive size={"1.3rem"} />} />
@@ -153,7 +154,10 @@ export default function BillingTable({
           {/*{record.eyeIcon && (
             <Link href={`/aceptacion_de_proveedores/${id}`}><Button style={{ backgroundColor: "#F7F7F7" }} icon={<Eye size={"1.3rem"} />} /></Link>
           )}*/}
-          <Link href={`/facturacion/${id}`}>
+          <Link href={
+            record.statusDesc === BillingStatusEnum.PendienteSoportes
+              ? `/facturacion/${id}/carrier/${record.idCarrier}`
+              : `/facturacion/${id}`}>
             <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Eye size={"1.3rem"} />} />
           </Link>
         </Flex>
