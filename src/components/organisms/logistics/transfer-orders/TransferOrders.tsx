@@ -117,7 +117,6 @@ export const TransferOrders = () => {
     checked: boolean,
     row: DataTypeForTransferOrderTable
   ) => {
-    console.log("handleCheckboxrow", row);
     setTrsIds((prevTRsIds) =>
       checked ? [...prevTRsIds, id] : prevTRsIds.filter((TRid) => TRid !== id)
     );
@@ -130,7 +129,6 @@ export const TransferOrders = () => {
   };
 
   const handleCheckAllCheckbox = (row: DataTypeForTransferOrderTable, isChecked: boolean) => {
-    console.log("handleCheckAllCheckbox", row, isChecked);
     setAllSelectedRows((prevSelectedRows) => {
       if (isChecked) {
         // Add the selected row to the previous selected rows
@@ -251,13 +249,13 @@ export const TransferOrders = () => {
         <div>{isHy && renderView()}</div>
         <ModalGenerateActionOrders
           isOpen={isModalOpen.selected === 1}
-          onClose={(resetStates?: boolean) => {
+          onClose={() => {
             setIsModalOpen({ selected: 0 });
-            if (resetStates) {
-              setOrdersId([]);
-              setTrsIds([]);
-              setChildOrdersId([]);
-            }
+
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+            setAllSelectedRows([]);
           }}
           ordersId={ordersId}
           trsIds={trsIds}
