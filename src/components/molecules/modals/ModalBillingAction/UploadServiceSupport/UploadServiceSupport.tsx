@@ -205,7 +205,10 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                                         "Eliminar archivo del backend aún no implementado"
                                       );
                                     }}
-                                    disabled
+                                    deletable={false}
+                                    handleOnClick={() => {
+                                      window.open(url, "_blank");
+                                    }}
                                   />
                                 </div>
                               );

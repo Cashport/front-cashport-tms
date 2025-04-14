@@ -22,6 +22,8 @@ export interface DocumentButtonProps {
   disabled?: boolean;
   children?: React.ReactNode;
   accept?: string;
+  handleOnClick?: () => void;
+  deletable?: boolean;
 }
 
 export const DocumentButton = ({
@@ -29,9 +31,11 @@ export const DocumentButton = ({
   fileName = "Seleccionar archivo",
   fileSize = "PDF, Word, PNG (Tamaño max 30mb)",
   accept = ".pdf, .png, .doc, .docx",
+  deletable = true,
   handleOnChange,
   handleOnDrop,
   handleOnDelete,
+  handleOnClick,
   disabled,
   className,
   children
@@ -63,30 +67,32 @@ export const DocumentButton = ({
   }
 
   return (
-    <Dragger
-      className={className ? `documentDragger ${className}` : "documentDragger"}
-      {...props}
-      openFileDialogOnClick={fileName === "Seleccionar archivo"}
-    >
-      {children || (
-        <Flex justify="space-between" align="center">
-          <Flex align="left" vertical>
-            <Flex>
-              <FileArrowUp size={"25px"} />
-              <Text className="nameFile">{shortenFileName(fileName, 22)}</Text>
+    <div style={{ minHeight: " 4.75rem" }} onClick={handleOnClick}>
+      <Dragger
+        className={className ? `documentDragger ${className}` : "documentDragger"}
+        {...props}
+        openFileDialogOnClick={fileName === "Seleccionar archivo"}
+      >
+        {children || (
+          <Flex justify="space-between" align="center">
+            <Flex align="left" vertical>
+              <Flex>
+                <FileArrowUp size={"25px"} />
+                <Text className="nameFile">{shortenFileName(fileName, 22)}</Text>
+              </Flex>
+              <Text className="sizeFile">{fileSize}</Text>
             </Flex>
-            <Text className="sizeFile">{fileSize}</Text>
+            {deletable && !disabled && fileName !== "Seleccionar archivo" ? (
+              <Button
+                onClick={handleOnDelete}
+                className="deleteDocButton"
+                type="text"
+                icon={<Trash size={"20px"} />}
+              />
+            ) : null}
           </Flex>
-          {!disabled && fileName !== "Seleccionar archivo" ? (
-            <Button
-              onClick={handleOnDelete}
-              className="deleteDocButton"
-              type="text"
-              icon={<Trash size={"20px"} />}
-            />
-          ) : null}
-        </Flex>
-      )}
-    </Dragger>
+        )}
+      </Dragger>
+    </div>
   );
 };
