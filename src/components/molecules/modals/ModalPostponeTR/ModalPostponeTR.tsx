@@ -40,6 +40,9 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, allSelectedRows }: 
     if (!postponedReasons) {
       fetchRejectionCauses();
     }
+    if (isOpen) {
+      reset();
+    }
     return () => {
       reset();
     };
@@ -82,6 +85,7 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, allSelectedRows }: 
       open={isOpen}
       footer={null}
       closable={false}
+      destroyOnClose
     >
       <Flex gap={"1rem"} vertical style={{ width: "100%", height: "100%" }}>
         <button onClick={onCancel} className="ModalPostponeTR__header">
