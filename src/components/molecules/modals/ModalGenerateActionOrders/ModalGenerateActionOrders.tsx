@@ -20,7 +20,7 @@ import styles from "./ModalGenerateActionOrders.module.scss";
 
 type PropsModalGenerateActionTO = {
   isOpen: boolean;
-  onClose: (resetStates?: boolean) => void;
+  onClose: () => void;
   ordersId?: string[];
   trsIds?: string[];
   setIsModalOpen: Dispatch<
@@ -81,7 +81,7 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     try {
       await deleteOrders(trsIds, ordersId);
       message.open({ content: "Operación realizada con éxito", type: "success" });
-      onClose(true);
+      onClose();
     } catch (error) {
       if (error instanceof Error)
         message.open({ content: error.message, type: "error", duration: 5 });
