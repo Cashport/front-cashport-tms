@@ -45,7 +45,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
   const fetchBillingDetails = async () => {
     try {
       setLoading(true);
-  
+
       let response;
 
       if (params.idCarrier) {
@@ -53,7 +53,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
       } else {
         response = await getBillingDetailsById(params.id);
       }
-  
+
       if (response?.journeys) {
         setBillingData(response);
         setBillingStatus(response.billing.statusDesc);
@@ -64,7 +64,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
       console.error("Error fetching billing details:", error);
     }
     setLoading(false);
-  };  
+  };
   useEffect(() => {
     if (params.id && !isModalVisible) fetchBillingDetails();
   }, [params.id, isModalVisible]);
