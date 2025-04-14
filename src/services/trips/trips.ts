@@ -6,7 +6,7 @@ import { API, getIdToken } from "@/utils/api/api";
 import axios from "axios";
 
 export interface IGetTripDetails {
-  MT?: string[];
+  MT: string[];
   carrier_id: number;
   id: number;
   plate_number: string;
