@@ -22,7 +22,7 @@ import { RequirementHeader } from "@/components/molecules/collapse/Requirementhe
 const { Text } = Typography;
 
 interface AceptBillingDetailProps {
-  params: { id: string; idCarrier: string };
+  params: { id: string; idCarrier?: string };
 }
 
 export default function AceptBillingDetailView({ params }: AceptBillingDetailProps) {
