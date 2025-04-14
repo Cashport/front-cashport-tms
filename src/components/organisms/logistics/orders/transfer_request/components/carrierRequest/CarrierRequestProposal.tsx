@@ -50,7 +50,19 @@ export default function CarrierRequestProposal({ carrier }: Props) {
         </Flex>
       </Flex>
       <Flex vertical gap={4} className={style.fullWidth}>
-        <strong>Comentarios:</strong> <div>{carrier.observations ?? ""}</div>
+        <strong>Comentarios:</strong>
+        <div>
+          {carrier.observations
+            ? carrier.observations.split("\n").map((line, index) => (
+                <div key={index}>
+                  {line}
+                  {carrier.observations && index < carrier.observations.split("\n").length - 1 && (
+                    <br />
+                  )}
+                </div>
+              ))
+            : ""}
+        </div>
       </Flex>
     </Flex>
   );
