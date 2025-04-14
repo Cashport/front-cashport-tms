@@ -162,7 +162,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                         const file = e.target.files?.[0];
                         if (!file) return;
 
-                        const backendCount = trip.MT.length;
+                        const backendCount = trip.MT?.length || 0;
                         const existingUserCount = Object.keys(currentFiles).length;
                         const totalDocs = backendCount + existingUserCount;
                         const newKey = `MT ${totalDocs}`;
@@ -187,7 +187,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                         <>
                           <Flex vertical gap={"1rem"}>
                             {/* Archivos previos cargados desde backend */}
-                            {trip.MT.map((url, j) => {
+                            {trip.MT?.map((url, j) => {
                               const displayName = url.split(".com/").pop() || `MT ${j}`;
                               return (
                                 <div key={`${trip.id}-url-${j}`} className={styles.content__doc}>
@@ -236,7 +236,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                             ))}
 
                             {/* Si no hay archivos del backend ni archivos locales, mostrar DocumentButton para el primer archivo */}
-                            {trip.MT.length === 0 && Object.keys(currentFiles).length === 0 && (
+                            {!trip.MT?.length && Object.keys(currentFiles).length === 0 && (
                               <>
                                 <div className={styles.content__doc}>
                                   <Flex vertical>
@@ -273,7 +273,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                           </Flex>
 
                           {/* Botón para agregar otro */}
-                          {(trip.MT.length > 0 || Object.keys(currentFiles).length > 0) && (
+                          {(trip.MT?.length || Object.keys(currentFiles).length > 0) && (
                             <>
                               <Button
                                 onClick={() => {
