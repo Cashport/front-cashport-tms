@@ -38,9 +38,9 @@ export default function Buttons({
       </div>
       <Flex className={styles.right}>
         {showRejectButton && (
-          <Popconfirm title="Esta seguro de rechazar?" onConfirm={handleReject}>
-            <button className={styles.deleteButton}>Rechazar</button>
-          </Popconfirm>
+          <button className={styles.deleteButton} onClick={handleReject}>
+            Rechazar
+          </button>
         )}
         {canContinue && (
           <button
