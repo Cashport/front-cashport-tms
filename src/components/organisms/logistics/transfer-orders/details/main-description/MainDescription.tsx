@@ -143,6 +143,10 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
+    if (mapRef.current) {
+      return;
+    }
+
 
     mapboxgl.accessToken = mapsAccessToken;
     const map = new mapboxgl.Map({
