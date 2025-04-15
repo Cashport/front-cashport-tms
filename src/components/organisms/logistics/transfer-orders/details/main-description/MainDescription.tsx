@@ -130,6 +130,25 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
     });
   };
 
+  const createMap = (container: HTMLDivElement) => {
+    if (mapRef.current) {
+      console.log("mapa ya existe");
+      return mapRef.current;
+    }
+    console.log("mapa nuevo");
+    mapboxgl.accessToken = mapsAccessToken;
+    const map = new mapboxgl.Map({
+      container: container,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: { lon: -74.07231699675322, lat: 4.66336863727521 },
+      zoom: 12,
+      attributionControl: false
+    });
+
+    mapRef.current = map;
+    return map;
+  };
+
   useEffect(() => {
     const socket = io(SOCKET_URI || "");
     socket.on("changeLocation", (data) => {
@@ -142,18 +161,10 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!transferRequest?.geometry) return;
     if (!mapContainerRef.current) return;
 
-    mapboxgl.accessToken = mapsAccessToken;
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: { lon: -74.07231699675322, lat: 4.66336863727521 },
-      zoom: 12,
-      attributionControl: false
-    });
-
-    mapRef.current = map;
+    const map = createMap(mapContainerRef.current);
 
     map.on("style.load", () => {
       const compassControl = new mapboxgl.NavigationControl({
@@ -208,9 +219,9 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
       }
     });
     return () => {
-      map.remove();
+      console.log("map.remove();")
     };
-  }, [transferRequest]);
+  }, [mapContainerRef.current, transferRequest]);
 
   const timeLineItems =
     transferRequest?.timeLine.map((item, index) => {
