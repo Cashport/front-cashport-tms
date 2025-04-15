@@ -10,6 +10,7 @@ import {
   IBillingsRequestList,
   IBillingRequestsListDetail
 } from "@/types/logistics/billing/billing";
+import { BillingStatusEnum } from "@/types/logistics/billing/billing";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
@@ -68,7 +69,7 @@ export default function BillingTable({
       key: "idTransferRequest",
       render: (idTransferRequest, record) => (
         <Link
-          href={`/facturacion/${record.id}`}
+          href={getLink(idTransferRequest, record)}
           style={{ color: "blue", textDecorationLine: "underline" }}
         >
           {idTransferRequest}
@@ -142,24 +143,22 @@ export default function BillingTable({
       key: "buttonSee",
       width: 64,
       dataIndex: "id",
-      render: (id) => (
+      render: (id,record) => (
         <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
-          {/*{record.radioactiveIcon && (
-            <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Radioactive size={"1.3rem"} />} />
-          )}*/}
-          {/*{record.dangerIcon && (
-            <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Warning size={"1.3rem"} />} />
-          )}*/}
-          {/*{record.eyeIcon && (
-            <Link href={`/aceptacion_de_proveedores/${id}`}><Button style={{ backgroundColor: "#F7F7F7" }} icon={<Eye size={"1.3rem"} />} /></Link>
-          )}*/}
-          <Link href={`/facturacion/${id}`}>
+          <Link href={getLink(id, record)}>
             <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Eye size={"1.3rem"} />} />
           </Link>
         </Flex>
       )
     }
   ];
+
+  const getLink = (id: number, record: IBillingRequestsListDetail) => {
+    if (record.statusDesc === BillingStatusEnum.PendienteSoportes) {
+      return `/facturacion/${id}/carrier/${record.idCarrier}`;
+    }
+    return `/facturacion/${id}`;
+  };
 
   return (
     <>
