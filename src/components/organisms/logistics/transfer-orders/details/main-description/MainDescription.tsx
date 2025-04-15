@@ -163,9 +163,6 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   useEffect(() => {
     if (!transferRequest?.geometry) return;
     if (!mapContainerRef.current) return;
-    if (mapRef.current) {
-      return;
-    }
 
     const map = createMap(mapContainerRef.current);
 
