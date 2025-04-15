@@ -159,7 +159,9 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!transferRequest?.geometry) return;
     if (!mapContainerRef.current) return;
+
     const map = createMap(mapContainerRef.current);
 
     map.on("style.load", () => {
@@ -215,9 +217,9 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
       }
     });
     return () => {
-      map.remove();
+      console.log("map.remove();")
     };
-  }, [transferRequest]);
+  }, [mapContainerRef.current, transferRequest]);
 
   const timeLineItems =
     transferRequest?.timeLine.map((item, index) => {
