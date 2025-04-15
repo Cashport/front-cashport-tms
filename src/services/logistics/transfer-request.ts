@@ -22,6 +22,7 @@ import {
   ITransferRequestResponse
 } from "@/types/transferRequest/ITransferRequest";
 import { downloadCSVFromEndpoint } from "./download_csv";
+import { STATUS } from "@/utils/constants/globalConstants";
 
 {
   /*export const transferOrderMerge = async (orders: number[]) => {
@@ -338,5 +339,47 @@ export const deleteTransferRequestAndChildren = async (
       errorMsg = error?.message;
     } else errorMsg = "Error al borrar servicios, intente nuevamente";
     throw new Error(errorMsg);
+  }
+};
+
+interface IGetPostponedReasons {
+  id: number;
+  description: string;
+}
+
+export const getPostponedReasons = async (): Promise<IGetPostponedReasons[]> => {
+  try {
+    const response: GenericResponse<IGetPostponedReasons[]> = await API.get(
+      `/transfer-request/postponement-reasons`
+    );
+    if (response.success) return response.data;
+    throw new Error(response?.message || "Error obteniendo los motivos de aplazamiento");
+  } catch (error) {
+    console.error("Error getPostponedReasons: ", error);
+    throw error as any;
+  }
+};
+
+export const postponeTR = async (
+  transferRequestIds: number[],
+  comments: string,
+  postponementReason: string
+) => {
+  const body = {
+    transferRequestIds,
+    statusId: STATUS.TR.APLAZADA,
+    comments,
+    postponement_reason: postponementReason
+  };
+  try {
+    const response: GenericResponse<IGetPostponedReasons[]> = await API.post(
+      `/transfer-request/postpone`,
+      body
+    );
+    if (response.success) return response.data;
+    throw new Error(response?.message || "Error aplazando la(s) TR");
+  } catch (error) {
+    console.error("Error aplazando la(s) TR: ", error);
+    throw error as any;
   }
 };

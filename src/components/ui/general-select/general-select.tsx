@@ -20,6 +20,7 @@ interface PropsGeneralSelect<T extends FieldValues> {
   options: { value: number; label: string }[] | undefined;
   loading?: boolean;
   customStyleContainer?: React.CSSProperties;
+  errorMessage?: string;
 }
 
 const GeneralSelect = <T extends FieldValues>({
@@ -29,7 +30,8 @@ const GeneralSelect = <T extends FieldValues>({
   placeholder,
   options,
   loading = false,
-  customStyleContainer
+  customStyleContainer,
+  errorMessage
 }: PropsGeneralSelect<T>) => {
   const usedOptions = options?.map((option) => {
     return {
@@ -54,7 +56,9 @@ const GeneralSelect = <T extends FieldValues>({
         labelInValue
       />
       {errors && (
-        <Typography.Text className="textError">La ciudad es obligatoria *</Typography.Text>
+        <Typography.Text className="textError">
+          {errorMessage ?? "Campo obligatorio *"}
+        </Typography.Text>
       )}
     </Flex>
   );

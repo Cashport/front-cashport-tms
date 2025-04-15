@@ -21,13 +21,17 @@ interface IInProcessProps {
   ) => void;
   modalState: boolean;
   mutateData: boolean;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
+  handleCheckAll: (row: DataTypeForTransferOrderTable, isChecked: boolean) => void;
 }
 
 export const InProcess: FC<IInProcessProps> = ({
   trsIds,
   handleCheckboxChangeTR,
   modalState,
-  mutateData
+  mutateData,
+  allSelectedRows,
+  handleCheckAll
 }) => {
   const { searchQuery: search, pslQuery, vpQuery } = useSearchContext();
 
@@ -100,23 +104,34 @@ export const InProcess: FC<IInProcessProps> = ({
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0)
     .map((item, index) => {
-      let aditionalRow = undefined;
+      // Default aditionalRow with null value
       const trDeleteable = [STATUS.TR.SIN_INICIAR];
-      if (trDeleteable.includes(item.statusId)) {
-        aditionalRow = {
-          title: "",
-          dataIndex: "checkbox",
-          render: (_: any, row: DataTypeForTransferOrderTable) => {
-            const tr = row.tr;
-            return (
-              <Checkbox
-                checked={trsIds.includes(tr)}
-                onChange={(e) => handleCheckboxChangeTR(tr, e.target.checked, row)}
-              />
-            );
-          }
-        };
-      }
+
+      const aditionalRow = {
+        title: "",
+        dataIndex: "checkbox",
+        width: 50,
+        render: (_: any, row: DataTypeForTransferOrderTable) => {
+          const tr = row.tr;
+          return (
+            <Checkbox
+              checked={allSelectedRows?.some((selectedRow) => selectedRow.tr === tr)}
+              onChange={(e) => {
+                const isChecked = e.target.checked;
+
+                // Handle the "select all" functionality
+                handleCheckAll(row, isChecked);
+
+                if (trDeleteable.includes(item.statusId)) {
+                  // Handle the specific row checkbox change for deleteable TRs
+                  handleCheckboxChangeTR(tr, isChecked, row);
+                }
+              }}
+            />
+          );
+        }
+      };
+
       return {
         key: index,
         label: getTitile(item.statusId, item.page.totalRows),

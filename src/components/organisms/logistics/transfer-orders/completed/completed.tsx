@@ -1,16 +1,22 @@
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
 import styles from "./completed.module.scss";
-import { CollapseProps, Spin } from "antd";
-import { TransferOrdersTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
+import { Checkbox, CollapseProps, Spin } from "antd";
+import {
+  DataTypeForTransferOrderTable,
+  TransferOrdersTable
+} from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 import { FC, useEffect, useState } from "react";
 import { ITransferRequestResponse } from "@/types/transferRequest/ITransferRequest";
 import { getFinishedTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { useSearchContext } from "@/context/SearchContext";
 
-interface ICompletedProps {}
+interface ICompletedProps {
+  handleCheckAll: (row: DataTypeForTransferOrderTable, isChecked: boolean) => void;
+  allSelectedRows?: DataTypeForTransferOrderTable[];
+}
 
-export const Completed: FC<ICompletedProps> = () => {
+export const Completed: FC<ICompletedProps> = ({ allSelectedRows, handleCheckAll }) => {
   const { searchQuery: search, vpQuery, pslQuery } = useSearchContext();
 
   const [isLoadingMain, setIsLoadingMain] = useState<boolean>(false);
@@ -78,22 +84,43 @@ export const Completed: FC<ICompletedProps> = () => {
 
   const renderItems: CollapseProps["items"] = transferRequest
     .filter((item) => item?.items?.length > 0) // Filtrar los que tengan al menos un elemento
-    .map((item, index) => ({
-      key: item.statusId,
-      label: getTitile(item.statusId, item.page.totalRows),
-      children: (
-        <TransferOrdersTable
-          showColumn={false}
-          showCarriersColumn={true}
-          items={item.items}
-          pagination={item.page}
-          loading={isLoadingPagination}
-          fetchData={(newPage: number) =>
-            getTransferRequestAcceptedByStatusId(item.statusId, newPage)
-          }
-        />
-      )
-    }));
+    .map((item, index) => {
+      const aditionalRow = {
+        title: "",
+        dataIndex: "checkbox",
+        width: 50,
+        render: (_: any, row: DataTypeForTransferOrderTable) => {
+          const tr = row.tr;
+          return (
+            <Checkbox
+              checked={allSelectedRows?.some((selectedRow) => selectedRow.tr === tr)}
+              onChange={(e) => {
+                const isChecked = e.target.checked;
+                // Handle the "select all" functionality
+                handleCheckAll(row, isChecked);
+              }}
+            />
+          );
+        }
+      };
+      return {
+        key: item.statusId,
+        label: getTitile(item.statusId, item.page.totalRows),
+        children: (
+          <TransferOrdersTable
+            showColumn={false}
+            showCarriersColumn={true}
+            items={item.items}
+            pagination={item.page}
+            loading={isLoadingPagination}
+            fetchData={(newPage: number) =>
+              getTransferRequestAcceptedByStatusId(item.statusId, newPage)
+            }
+            aditionalRow={aditionalRow}
+          />
+        )
+      };
+    });
 
   if (isLoadingMain)
     return (

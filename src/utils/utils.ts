@@ -406,7 +406,7 @@ export const checkUserComponentPermissions = (
   if (!viewPermissions) {
     return false;
   }
-  
+
   const haveViewPermission = viewPermissions.find((permission) => permission.page_name === view);
   if (!haveViewPermission) {
     return false;

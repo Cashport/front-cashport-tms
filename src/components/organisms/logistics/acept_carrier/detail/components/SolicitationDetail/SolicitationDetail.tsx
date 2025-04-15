@@ -37,7 +37,6 @@ export default function SolicitationDetail({
   providerDetail,
   dataCarga,
   service_type,
-  persons,
   geometry,
   distance,
   timetravel,

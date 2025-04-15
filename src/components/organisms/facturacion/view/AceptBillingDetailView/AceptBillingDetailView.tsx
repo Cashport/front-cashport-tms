@@ -1,14 +1,14 @@
 "use client";
 import { Button, Col, Drawer, Flex, message, Row, Spin, Typography } from "antd";
 import { DotsThree, Truck, CraneTower, User } from "@phosphor-icons/react";
-import { getBillingDetailsById } from "@/services/billings/billings";
+import { getBillingDetailsById, getBillingDetailsByTRId } from "@/services/billings/billings";
 import styles from "./AceptBillingDetailView.module.scss";
 import { useState, useEffect } from "react";
 import { NoveltyTable } from "@/components/molecules/tables/NoveltyTable/Novelty";
 import ModalBillingAction from "@/components/molecules/modals/ModalBillingAction/ModalBillingAction";
 import { IJourney, IIncident } from "@/types/logistics/schema";
 import { INovelty, IEvidence } from "@/types/novelty/INovelty";
-import { BillingStatusEnum } from "@/types/logistics/billing/billing";
+import { BillingStatusEnum, IBillingDetails } from "@/types/logistics/billing/billing";
 import { formatMoney, formatNumber } from "@/utils/utils";
 import { BackButton } from "@/components/organisms/logistics/orders/DetailsOrderView/components/BackButton/BackButton";
 import { getNoveltyDetail } from "@/services/logistics/novelty";
@@ -22,12 +22,12 @@ import { RequirementHeader } from "@/components/molecules/collapse/Requirementhe
 const { Text } = Typography;
 
 interface AceptBillingDetailProps {
-  params: { id: string };
+  params: { id: string; idCarrier?: string };
 }
 
 export default function AceptBillingDetailView({ params }: AceptBillingDetailProps) {
   const [loading, setLoading] = useState(true);
-  const [billingData, setBillingData] = useState<any>(null);
+  const [billingData, setBillingData] = useState<IBillingDetails>();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [billingStatus, setBillingStatus] = useState<BillingStatusEnum | null>(null);
   const [openDrawer, setOpenDrawer] = useState<boolean>(false);
@@ -36,7 +36,8 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
 
   const canMakeAnAction = billingStatus
     ? billingStatus === BillingStatusEnum.PorAceptar ||
-      billingStatus === BillingStatusEnum.Preautorizado
+      billingStatus === BillingStatusEnum.Preautorizado ||
+      billingStatus === BillingStatusEnum.PendienteSoportes
     : false;
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -44,10 +45,17 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
   const fetchBillingDetails = async () => {
     try {
       setLoading(true);
-      const response = await getBillingDetailsById(params.id);
+
+      let response;
+
+      if (params.idCarrier) {
+        response = await getBillingDetailsByTRId(params.id, params.idCarrier);
+      } else {
+        response = await getBillingDetailsById(params.id);
+      }
+
       if (response?.journeys) {
         setBillingData(response);
-        console.log(response);
         setBillingStatus(response.billing.statusDesc);
       } else {
         console.error("No se encontraron detalles de facturación.");
@@ -57,7 +65,6 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     }
     setLoading(false);
   };
-
   useEffect(() => {
     if (params.id && !isModalVisible) fetchBillingDetails();
   }, [params.id, isModalVisible]);
@@ -279,7 +286,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
                   }}
                 >
                   <div className={styles.titleText}>
-                    ${formatNumber(billingData?.billing?.fare)}
+                    ${formatNumber(billingData?.billing?.fare ?? 0)}
                   </div>
                 </Col>
               </Row>
@@ -302,7 +309,9 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         totalValue={billingData?.billing?.fare ?? 0}
         billingStatus={billingData?.billing?.statusDesc}
         messageApi={messageApi}
-        idBilling={billingData?.billing?.id}
+        idBilling={billingData?.billing?.id ?? 0}
+        tripId={tripId ?? 0}
+        billingData={billingData}
       />
       <Drawer
         placement="right"
@@ -329,7 +338,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         mode="view"
         isOpen={isModalMTVisible}
         onClose={() => setIsModalMTVisible(false)}
-        idTR={billingData?.billing?.idTransferRequest ?? 0}
+        idTR={billingData?.billing?.idTransferRequest.toString() ?? "0"}
         idTrip={tripId ?? 0}
         messageApi={messageApi}
       />

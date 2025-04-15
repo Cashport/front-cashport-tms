@@ -22,7 +22,12 @@ import { getTravelFreightDuration } from "@/utils/logistics/maps";
 import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier/carrier";
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
+import ModalRejectTripInvite from "@/components/molecules/modals/ModalRejectTripInvite/ModalRejectTripInvite";
 
+export interface IHandleReject {
+  rejection_causes: string;
+  commentary?: string;
+}
 interface AceptCarrierDetailProps {
   params: { id: string };
 }
@@ -33,7 +38,13 @@ export enum FormMode {
 }
 
 export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrierDetailProps>) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<{
+    generalView: boolean;
+    request: boolean;
+  }>({
+    generalView: false,
+    request: false
+  });
   const [view, setView] = useState<"detail" | "asignation" | "confirmation">("detail");
   const [formMode, setFormMode] = useState<FormMode>(FormMode.VIEW);
   const [vehicleSelected, setVehicleSelected] = useState<number | null>(null);
@@ -43,6 +54,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [canBeRejected, setCanBeRejected] = useState<boolean>(false);
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const router = useRouter();
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
@@ -92,7 +104,11 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
   const loadTransferRequests = async () => {
     if (carrier != undefined) return;
-    setIsLoading(true);
+    setIsLoading({
+      ...isLoading,
+      generalView: true
+    });
+
     try {
       const result = await getAceptCarrierRequestById(params.id);
       if (result) {
@@ -116,7 +132,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
     } catch (error) {
       console.error("Error loading transfer requests", error);
     } finally {
-      setIsLoading(false);
+      setIsLoading({
+        ...isLoading,
+        generalView: false
+      });
     }
   };
 
@@ -129,7 +148,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
     observation: string
   ) => {
     try {
-      setIsLoading(true);
+      setIsLoading({
+        ...isLoading,
+        generalView: true
+      });
       await postCarrierRequest(carrierId, requestId, vehicleId, driverIds, status, observation);
       messageApi.open({
         content: "Aceptado"
@@ -140,7 +162,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         content: "Hubo un problema aceptando la orden"
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading({
+        ...isLoading,
+        generalView: false
+      });
     }
   };
   const handleEditCR = async (
@@ -150,7 +175,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
     driverIds: string[]
   ) => {
     try {
-      setIsLoading(true);
+      setIsLoading({
+        ...isLoading,
+        generalView: true
+      });
       const res = await putEditCarrierRequest(carrierId, requestId, vehicleId, driverIds);
       message.open({
         type: "success",
@@ -161,7 +189,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       if (error instanceof Error) messageApi.error(error.message);
       else messageApi.error("Hubo un problema editando la orden");
     } finally {
-      setIsLoading(false);
+      setIsLoading({
+        ...isLoading,
+        generalView: false
+      });
     }
   };
 
@@ -184,18 +215,33 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       );
   };
 
-  const handleReject = async () => {
+  const handleReject = async ({ rejection_causes, commentary }: IHandleReject) => {
     try {
-      setIsLoading(true);
-      const res = await postCarrierReject(String(carrier?.id_carrier), String(carrier?.id));
-      if (res) {
-        message.success("Rechazado", 2, () => router.push("/logistics/acept_carrier"));
-      } else message.error("Hubo un error", 3, () => router.push("/logistics/acept_carrier"));
+      setIsLoading({
+        ...isLoading,
+        request: true
+      });
+      await postCarrierReject({
+        id_carrier: String(carrier?.id_carrier),
+        id_carrier_request: String(carrier?.id),
+        rejection_causes,
+        commentary
+      });
+
+      message.success("Rechazado", 2, () => router.push("/logistics/acept_carrier"));
+      setIsRejectModalOpen(false);
     } catch (error) {
       message.error("Hubo un problema rechazando la orden");
     } finally {
-      setIsLoading(false);
+      setIsLoading({
+        ...isLoading,
+        request: false
+      });
     }
+  };
+
+  const handleOpenRejectModal = async () => {
+    setIsRejectModalOpen(true);
   };
 
   const stepIndexMap: Record<string, number> = {
@@ -239,7 +285,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             mapContainerRef={mapContainerRef}
             setView={setView}
             showRejectButton={canBeRejected}
-            handleReject={handleReject}
+            handleReject={handleOpenRejectModal}
             entityType={entityType}
           />
         );
@@ -255,7 +301,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             currentVehicle={vehicleSelected}
             formMode={formMode}
             setView={setView}
-            handleReject={handleReject}
+            handleReject={handleOpenRejectModal}
             showRejectButton={canBeRejected}
           />
         );
@@ -271,7 +317,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             currentObservation={observation}
             setView={setView}
             handleSubmit={handleSubmit}
-            handleReject={handleReject}
+            handleReject={handleOpenRejectModal}
             showRejectButton={canBeRejected}
             entityType={entityType}
           />
@@ -285,7 +331,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       <Flex className={styles.wrapper}>
         <BackButton href="/logistics/acept_carrier" title={`Detalle de CR ${params.id}`} />
         <CustomStepper steps={steps} currentStepIndex={currentStepIndex} />
-        <Skeleton active loading={isLoading}>
+        <Skeleton active loading={isLoading.generalView}>
           <Flex className={styles.sectionWraper} style={{ marginBottom: "2rem" }}>
             <Col span={11}>
               <div className={styles.vehicle}>
@@ -316,6 +362,14 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             </Col>
           </Flex>
           {renderView()}
+
+          <ModalRejectTripInvite
+            isOpen={isRejectModalOpen}
+            handleRejectInvite={handleReject}
+            handleCancel={() => setIsRejectModalOpen(false)}
+            loading={isLoading.request}
+            crID={params.id}
+          />
         </Skeleton>
       </Flex>
     </>

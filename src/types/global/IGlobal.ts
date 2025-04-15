@@ -20,3 +20,8 @@ export interface GenericResponse<T = any> {
   success?: boolean;
   data: T;
 }
+
+export interface ISelectType {
+  value: number;
+  label: string;
+}
