@@ -130,6 +130,23 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
     });
   };
 
+  const createMap = (container: HTMLDivElement) => {
+    if (mapRef.current) {
+      return mapRef.current;
+    }
+    mapboxgl.accessToken = mapsAccessToken;
+    const map = new mapboxgl.Map({
+      container: container,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: { lon: -74.07231699675322, lat: 4.66336863727521 },
+      zoom: 12,
+      attributionControl: false
+    });
+
+    mapRef.current = map;
+    return map;
+  };
+
   useEffect(() => {
     const socket = io(SOCKET_URI || "");
     socket.on("changeLocation", (data) => {
@@ -143,21 +160,7 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    if (mapRef.current) {
-      return;
-    }
-
-
-    mapboxgl.accessToken = mapsAccessToken;
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: { lon: -74.07231699675322, lat: 4.66336863727521 },
-      zoom: 12,
-      attributionControl: false
-    });
-
-    mapRef.current = map;
+    const map = createMap(mapContainerRef.current);
 
     map.on("style.load", () => {
       const compassControl = new mapboxgl.NavigationControl({
