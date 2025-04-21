@@ -5,8 +5,13 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { API, getIdToken } from "@/utils/api/api";
 import axios from "axios";
 
+interface IMT {
+  id: number;
+  name: string;
+  url: string;
+}
 export interface IGetTripDetails {
-  MT: string[];
+  MT: IMT[];
   carrier_id: number;
   id: number;
   plate_number: string;

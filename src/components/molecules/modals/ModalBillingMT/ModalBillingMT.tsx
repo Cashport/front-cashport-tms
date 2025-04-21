@@ -64,7 +64,10 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
       setIsLoading(true);
       const response = await getTripDetails(idTrip);
       if (response) {
-        setVehicleInfo(response);
+        setVehicleInfo({
+          ...response,
+          MT: response.MT.map((mtItem) => mtItem.url)
+        });
       }
     } catch (error) {
       messageApi?.open({
