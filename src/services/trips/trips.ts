@@ -3,8 +3,13 @@ import { createFormData } from "@/components/molecules/modals/ModalGenerateActio
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
+interface IMT {
+  id: number;
+  name: string;
+  url: string;
+}
 export interface IGetTripDetails {
-  MT: string[];
+  MT: IMT[];
   carrier_id: number;
   id: number;
   plate_number: string;
