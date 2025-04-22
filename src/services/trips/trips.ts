@@ -26,26 +26,24 @@ export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | 
   throw new Error(response.message);
 };
 
-export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<boolean | undefined> => {
+export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<GenericResponse> => {
   try {
-    const token = await getIdToken();
     const formData = createFormDataFinalizeTrip(form);
-    const response: any = await axios.post(
-      `${config.API_HOST}/transfer-request/add-mt-trip/${idTrip}`,
+    const response: GenericResponse<any> = await API.post(
+      `/transfer-request/add-mt-trip/${idTrip}`,
       formData,
       {
         headers: {
           Accept: "application/json, text/plain, */*",
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "multipart/form-data"
         }
       }
     );
-    console.log("sendFinalizeTrip res", response);
-    if (response?.data) return true;
-    return false;
+    if (response?.success || response.status === 200) return response;
+
+    throw new Error(response.message);
   } catch (error) {
-    throw new Error("Hubo un error");
+    throw new Error("Hubo un error finalizando el viaje");
   }
 };
 export const getCarriersTripsDetails = async (idTR: number): Promise<any[] | undefined> => {
