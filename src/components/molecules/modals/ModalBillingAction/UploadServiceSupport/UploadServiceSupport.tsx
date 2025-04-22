@@ -1,4 +1,4 @@
-import { Button, Flex, message } from "antd";
+import { Button, Flex, message, Spin } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Plus } from "phosphor-react";
@@ -130,12 +130,12 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
     } catch (error) {
       console.error("Error fetching trip details:", error);
       message.error("Error fetching trip details.");
-    } finally {
-      setIsLoading({
-        ...isLoading,
-        data: false
-      });
     }
+
+    setIsLoading({
+      ...isLoading,
+      data: false
+    });
   };
 
   return (
@@ -187,8 +187,8 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                         <>
                           <Flex vertical gap={"1rem"}>
                             {/* Archivos previos cargados desde backend */}
-                            {trip.MT.map((url, j) => {
-                              const displayName = url.split(".com/").pop() || `MT ${j}`;
+                            {trip.MT.map((obj, j) => {
+                              const displayName = obj.name.substring(0, obj.name.lastIndexOf("."));
                               return (
                                 <div key={`${trip.id}-url-${j}`} className={styles.content__doc}>
                                   <Flex vertical>
@@ -207,7 +207,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                                     }}
                                     deletable={false}
                                     handleOnClick={() => {
-                                      window.open(url, "_blank");
+                                      window.open(obj.url, "_blank");
                                     }}
                                   />
                                 </div>
@@ -237,7 +237,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
 
                             {/* Si no hay archivos del backend ni archivos locales, mostrar DocumentButton para el primer archivo */}
                             {trip.MT.length === 0 && Object.keys(currentFiles).length === 0 && (
-                              <>
+                              <Flex>
                                 <div className={styles.content__doc}>
                                   <Flex vertical>
                                     <p>MT 0</p>
@@ -268,7 +268,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                                     disabled={isLoading.request}
                                   />
                                 </div>
-                              </>
+                              </Flex>
                             )}
                           </Flex>
 
@@ -306,15 +306,21 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
           })}
         </div>
       </div>
-      <div className={styles.content__comment}>
-        <Flex vertical style={{ width: "100%" }}>
-          <p>Comentarios</p>
-          <textarea onChange={handleOnChangeTextArea} placeholder="Comentarios adicionales" />
+      {isLoading.data || !tripsDetails ? (
+        <Flex justify="center" align="center" style={{ margin: "50px" }}>
+          <Spin />
         </Flex>
-      </div>
+      ) : (
+        <div className={styles.content__comment}>
+          <Flex vertical style={{ width: "100%" }}>
+            <p>Comentarios</p>
+            <textarea onChange={handleOnChangeTextArea} placeholder="Comentarios adicionales" />
+          </Flex>
+        </div>
+      )}
 
       <FooterButtons
-        isConfirmDisabled={!isValid || !watch("commentary")}
+        isConfirmDisabled={!isValid}
         titleConfirm="Cargar soportes"
         onClose={onClose}
         handleOk={handleSubmit(onSubmit)}

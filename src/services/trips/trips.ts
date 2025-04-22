@@ -3,8 +3,13 @@ import { createFormData } from "@/components/molecules/modals/ModalGenerateActio
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
+interface IMT {
+  id: number;
+  name: string;
+  url: string;
+}
 export interface IGetTripDetails {
-  MT: string[];
+  MT: IMT[];
   carrier_id: number;
   id: number;
   plate_number: string;
@@ -19,19 +24,24 @@ export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | 
   throw new Error(response.message);
 };
 
-export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<boolean | undefined> => {
+export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<GenericResponse> => {
   try {
     const formData = createFormDataFinalizeTrip(form);
-    const response: any = await API.post(`/transfer-request/add-mt-trip/${idTrip}`, formData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data"
+    const response: GenericResponse<any> = await API.post(
+      `/transfer-request/add-mt-trip/${idTrip}`,
+      formData,
+      {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "multipart/form-data"
+        }
       }
-    });
-    if (response?.data) return true;
-    return false;
+    );
+    if (response?.success || response.status === 200) return response;
+
+    throw new Error(response.message);
   } catch (error) {
-    throw new Error("Hubo un error");
+    throw new Error("Hubo un error finalizando el viaje");
   }
 };
 export const getCarriersTripsDetails = async (idTR: number): Promise<any[] | undefined> => {
