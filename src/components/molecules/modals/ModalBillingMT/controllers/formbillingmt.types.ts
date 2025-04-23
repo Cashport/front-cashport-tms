@@ -37,3 +37,9 @@ export const emptyVehicle = {
   provider: "",
   MT: []
 };
+
+export interface IParsedFormValues {
+  flag: string;
+  url?: string;
+  file?: undefined;
+}
