@@ -1,4 +1,5 @@
 import { createFormDataFinalizeTrip } from "@/components/molecules/modals/ModalBillingMT/controllers/createFormData";
+import { IParsedFormValues } from "@/components/molecules/modals/ModalBillingMT/controllers/formbillingmt.types";
 import { createFormData } from "@/components/molecules/modals/ModalGenerateActionTO/FinalizeTrip/controllers/createFormData";
 import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
@@ -26,7 +27,7 @@ export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | 
   throw new Error(response.message);
 };
 
-export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<GenericResponse> => {
+export const sendFinalizeTrip = async (form: IParsedFormValues[], idTrip: number): Promise<any> => {
   try {
     const formData = createFormDataFinalizeTrip(form);
     const response: GenericResponse<any> = await API.post(
@@ -40,7 +41,6 @@ export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<Gener
       }
     );
     if (response?.success || response.status === 200) return response;
-
     throw new Error(response.message);
   } catch (error) {
     throw new Error("Hubo un error finalizando el viaje");
