@@ -7,6 +7,7 @@ import {
   emptyForm,
   emptyVehicle,
   EvidenceByVehicleForm,
+  IParsedFormValues,
   IVehicleAPI
 } from "./controllers/formbillingmt.types";
 import { useForm, useWatch } from "react-hook-form";
@@ -29,6 +30,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   const [isLoading, setIsLoading] = useState(false);
   const [vehicleInfo, setVehicleInfo] = useState<IVehicleAPI>(emptyVehicle);
   const [defaultValues, setDefaultValues] = useState<EvidenceByVehicleForm>(emptyForm);
+  const [deletedDocs, setDeletedDocs] = useState<string[]>([]);
 
   const { control, handleSubmit, setValue, reset, trigger, register } =
     useForm<EvidenceByVehicleForm>({
@@ -79,7 +81,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     }
   }
 
-  async function sendForm(form: EvidenceByVehicleForm) {
+  async function sendForm(form: IParsedFormValues[]) {
     try {
       setIsLoading(true);
       const response = await sendFinalizeTrip(form, idTrip);
@@ -106,7 +108,33 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   }
 
   const onSubmit = (data: EvidenceByVehicleForm) => {
-    sendForm(data);
+    const finalDocuments = [];
+
+    // Documentos eliminados
+    for (const link of deletedDocs) {
+      finalDocuments.push({
+        flag: "delete",
+        url: link,
+        file: undefined
+      });
+    }
+
+    // 2. Documentos actuales (nuevos o actualizados)
+    data.documents.forEach((doc) => {
+      const originalDoc = defaultValues.documents.find((d) => d.docReference === doc.docReference);
+
+      if (doc.file) {
+        // Si no existía antes o cambió el archivo
+        const isNew = !originalDoc?.link;
+        finalDocuments.push({
+          flag: isNew ? "new" : "update",
+          url: doc.link,
+          file: doc.file
+        });
+      }
+    });
+
+    sendForm(finalDocuments);
   };
 
   const handleOnChangeDocument = (fileToSave: any, documentIndex: number) => {
@@ -131,6 +159,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     }
     if (!isOpen) {
       setIsInitialized(false);
+      setDeletedDocs([]);
     }
   }, [isInitialized, isOpen]);
 
@@ -175,6 +204,12 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
               register={register}
               handleOnChangeDocument={handleOnChangeDocument}
               currentDocuments={formValues.documents ?? []}
+              handleOnDeleteDocument={(index: number) => {
+                const deletedDocUrl = (formValues.documents ?? [])[index]?.link;
+                if (deletedDocUrl) {
+                  setDeletedDocs((prev) => [...prev, deletedDocUrl]);
+                }
+              }}
             />
           </Flex>
         </Flex>
