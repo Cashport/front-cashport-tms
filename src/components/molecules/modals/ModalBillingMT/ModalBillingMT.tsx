@@ -1,12 +1,13 @@
 import { Flex, Modal, Skeleton } from "antd";
 import { CaretLeft } from "phosphor-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./ModalBillingMT.module.scss";
 import { MessageInstance } from "antd/es/message/interface";
 import {
   emptyForm,
   emptyVehicle,
   EvidenceByVehicleForm,
+  IParsedFormValues,
   IVehicleAPI
 } from "./controllers/formbillingmt.types";
 import { useForm, useWatch } from "react-hook-form";
@@ -29,6 +30,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   const [isLoading, setIsLoading] = useState(false);
   const [vehicleInfo, setVehicleInfo] = useState<IVehicleAPI>(emptyVehicle);
   const [defaultValues, setDefaultValues] = useState<EvidenceByVehicleForm>(emptyForm);
+  const [deletedDocs, setDeletedDocs] = useState<string[]>([]);
 
   const { control, handleSubmit, setValue, reset, trigger, register } =
     useForm<EvidenceByVehicleForm>({
@@ -64,7 +66,10 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
       setIsLoading(true);
       const response = await getTripDetails(idTrip);
       if (response) {
-        setVehicleInfo(response);
+        setVehicleInfo({
+          ...response,
+          MT: response.MT.map((mtItem) => mtItem.url)
+        });
       }
     } catch (error) {
       messageApi?.open({
@@ -76,23 +81,20 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     }
   }
 
-  async function sendForm(form: EvidenceByVehicleForm) {
+  async function sendForm(form: IParsedFormValues[]) {
     try {
       setIsLoading(true);
       const response = await sendFinalizeTrip(form, idTrip);
-      if (response) {
-        messageApi?.open({
-          type: "success",
-          content: "Viaje finalizado correctamente",
-          duration: 3
-        });
-      } else {
-        messageApi?.open({
-          type: "error",
-          content: "Hubo un error finalizando el viaje",
-          duration: 3
-        });
-      }
+      messageApi?.open({
+        type: "success",
+        content: (
+          <>
+            <p>Cambios guardados correctamente</p>
+            <p>{response?.message}</p>
+          </>
+        ),
+        duration: 3
+      });
     } catch (error: any) {
       messageApi?.open({
         type: "error",
@@ -106,7 +108,33 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   }
 
   const onSubmit = (data: EvidenceByVehicleForm) => {
-    sendForm(data);
+    const finalDocuments = [];
+
+    // Documentos eliminados
+    for (const link of deletedDocs) {
+      finalDocuments.push({
+        flag: "delete",
+        url: link,
+        file: undefined
+      });
+    }
+
+    // 2. Documentos actuales (nuevos o actualizados)
+    data.documents.forEach((doc) => {
+      const originalDoc = defaultValues.documents.find((d) => d.docReference === doc.docReference);
+
+      if (doc.file) {
+        // Si no existía antes o cambió el archivo
+        const isNew = !originalDoc?.link;
+        finalDocuments.push({
+          flag: isNew ? "new" : "update",
+          url: doc.link,
+          file: doc.file
+        });
+      }
+    });
+
+    sendForm(finalDocuments);
   };
 
   const handleOnChangeDocument = (fileToSave: any, documentIndex: number) => {
@@ -124,11 +152,6 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     }
   };
 
-  const handleOnDeleteDocument = (documentIndex: number) => {
-    setValue(`documents.${documentIndex}.file`, undefined);
-    trigger(`documents.${documentIndex}`);
-  };
-
   useEffect(() => {
     if (!isInitialized && isOpen) {
       getFormInfo();
@@ -136,6 +159,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     }
     if (!isOpen) {
       setIsInitialized(false);
+      setDeletedDocs([]);
     }
   }, [isInitialized, isOpen]);
 
@@ -147,8 +171,9 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     }
   }, [vehicleInfo, reset]);
 
-  const hasAtLeastOneDoc = formValues.documents?.some((document) => document.file || document.link);
-  const isConfirmDisabled = !hasAtLeastOneDoc;
+  const isConfirmDisabled = useMemo(() => {
+    return areFilesEqual(formValues.documents ?? [], defaultValues.documents ?? []);
+  }, [formValues.documents, defaultValues.documents]);
 
   const renderTitle = () => {
     return (
@@ -178,8 +203,13 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
               control={control}
               register={register}
               handleOnChangeDocument={handleOnChangeDocument}
-              handleOnDeleteDocument={handleOnDeleteDocument}
               currentDocuments={formValues.documents ?? []}
+              handleOnDeleteDocument={(index: number) => {
+                const deletedDocUrl = (formValues.documents ?? [])[index]?.link;
+                if (deletedDocUrl) {
+                  setDeletedDocs((prev) => [...prev, deletedDocUrl]);
+                }
+              }}
             />
           </Flex>
         </Flex>
@@ -199,7 +229,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
         !isLoading && (
           <FooterButtons
             isConfirmDisabled={isConfirmDisabled}
-            titleConfirm={mode === "edit" ? "Finalizar viaje" : "Cerrar"}
+            titleConfirm={mode === "edit" ? "Guardar cambios" : "Cerrar"}
             onClose={onClose}
             handleOk={mode === "edit" ? handleSubmit(onSubmit) : onClose}
           />
@@ -210,3 +240,26 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     </Modal>
   );
 }
+
+const areFilesEqual = (
+  currentDocs: EvidenceByVehicleForm["documents"],
+  initialDocs: EvidenceByVehicleForm["documents"]
+): boolean => {
+  // Si hay menos documentos, asumimos cambio (eliminación)
+  if (currentDocs.length < initialDocs.length) return false;
+
+  return currentDocs.every((doc) => {
+    const currentFile = doc.file;
+
+    // Si no tiene archivo, lo ignoramos (no cuenta como cambio)
+    if (!currentFile) return true;
+
+    // Buscamos el original por docReference
+    const initialMatch = initialDocs.find((init) => init.docReference === doc.docReference);
+    const initialFile = initialMatch?.file;
+
+    if (!initialFile) return false;
+
+    return initialFile.name === currentFile.name && initialFile.size === currentFile.size;
+  });
+};
