@@ -24,5 +24,5 @@ export async function middleware(request: NextRequest) {
 
 //Our protected routes
 export const config = {
-  matcher: ["/", "/proyectos/:path*", "/logistics/:path*"]
+  matcher: ["/", "/proyectos/:path*", "/logistics/:path*","/facturacion", "/facturacion/:path*"]
 };
