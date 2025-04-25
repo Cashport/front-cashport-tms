@@ -1,6 +1,7 @@
 import React from "react";
 import { Select, Flex, Typography } from "antd";
 import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+import type { SelectProps } from "antd";
 
 import "./inputSelect.scss";
 
@@ -22,6 +23,9 @@ interface InputSelectProps {
   className?: string;
   loading?: boolean;
   isError?: boolean;
+  noRequired?: boolean;
+  showSearch?: boolean;
+  filterOption?: SelectProps['filterOption'];
 }
 
 export const InputSelect = ({
@@ -34,16 +38,19 @@ export const InputSelect = ({
   placeholder = "",
   disabled,
   validationRules,
+  noRequired = false,
   className,
   loading = false,
-  isError = false
+  isError = false,
+  showSearch = false,
+  filterOption
 }: InputSelectProps) => {
   return (
     <Flex vertical className={`selectContainer ${className}`}>
       {!hiddenTitle && <p className="select-form-title">{titleInput}</p>}
       <Controller
         name={nameInput}
-        rules={{ required: true, ...validationRules }}
+        rules={{ required: !noRequired, ...validationRules }}
         control={control}
         render={({ field }) => {
           if (isError) {
@@ -58,6 +65,8 @@ export const InputSelect = ({
               disabled={disabled}
               onChange={(value) => field.onChange(value)}
               value={field.value}
+              showSearch={showSearch}
+              filterOption={filterOption}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>

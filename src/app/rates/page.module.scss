@@ -1,0 +1,49 @@
+.pageContainer {
+  padding: 24px;
+  height: 100%;
+  background-color: #f7f7f7;
+
+  .header {
+    margin-bottom: 24px;
+    flex-direction: column;
+    gap: 16px;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  .createButton {
+    background-color: #cbe61e;
+    color: #141414;
+    border: none;
+    font-weight: 600;
+    height: 40px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+
+    @media (min-width: 768px) {
+      width: auto;
+    }
+
+    &:hover {
+      background-color: #cbe61e !important;
+      opacity: 0.9;
+    }
+  }
+
+  .title {
+    text-align: center;
+    margin: 0;
+
+    @media (min-width: 768px) {
+      text-align: left;
+    }
+  }
+} 

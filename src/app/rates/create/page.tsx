@@ -1,0 +1,324 @@
+"use client";
+
+import { Flex, Col, Typography, Card, message } from "antd";
+import type { SelectProps } from "antd";
+import { useForm } from "react-hook-form";
+import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
+import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ratesService } from "@/services/rates";
+import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
+import { RateType, RateTypeLabels, ServiceTypeIds, ServiceTypeLabels } from "@/enums/rates";
+import styles from "./page.module.scss";
+
+const { Title } = Typography;
+
+interface IFormRate {
+  serviceItemSAP: string;
+  serviceDescriptionSAP: string;
+  serviceLineDescriptionSAP: string;
+  oaSAP: string;
+  provider: string;
+  serviceType: (typeof ServiceTypeIds)[keyof typeof ServiceTypeIds];
+  vehicleType: string;
+  rateType: RateType;
+  from: string;
+  to: string;
+  rateDetail: string;
+  otherServices?: string;
+  amount: number;
+  contract: string;
+}
+
+export default function CreateRatePage() {
+  const router = useRouter();
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors }
+  } = useForm<IFormRate>();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Valores observados para los selects dependientes
+  const providerId = watch("provider");
+  const serviceTypeId = watch("serviceType");
+  const rateType = watch("rateType");
+
+  // Hooks para obtener datos
+  const { providers, loading: loadingProviders } = useProviders();
+  const { contracts, loading: loadingContracts } = useContracts(providerId);
+  const { vehicleTypes, loading: loadingVehicleTypes } = useVehicleTypes(serviceTypeId);
+  const { otherServices, loading: loadingOtherServices } = useOtherServices();
+
+  const onSubmit = async (data: IFormRate) => {
+    try {
+      setIsLoading(true);
+      await ratesService.createRate(data);
+      message.success("Tarifa creada exitosamente");
+      router.push("/rates");
+    } catch (error) {
+      console.error(error);
+      message.error("Error al crear la tarifa");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    router.push("/rates");
+  };
+
+  // Función para filtrar las opciones del select de vehículos
+  const filterVehicleOption: SelectProps["filterOption"] = (input, option) => {
+    if (typeof option?.label === "string") {
+      return option.label.toLowerCase().includes(input.toLowerCase());
+    }
+    return false;
+  };
+
+  return (
+    <div className={styles.pageContainer}>
+      <Card className={styles.formCard}>
+        <Title level={2}>Datos de la tarifa</Title>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Flex vertical gap={24}>
+            {/* Primera fila - Campos SAP */}
+            <Flex gap={16}>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Service Item SAP"
+                  nameInput="serviceItemSAP"
+                  control={control}
+                  error={errors?.serviceItemSAP}
+                  placeholder="0000000"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Service Description SAP"
+                  nameInput="serviceDescriptionSAP"
+                  control={control}
+                  error={errors?.serviceDescriptionSAP}
+                  placeholder="0000000"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Service Line Description SAP"
+                  nameInput="serviceLineDescriptionSAP"
+                  control={control}
+                  error={errors?.serviceLineDescriptionSAP}
+                  placeholder="Ingrese el nombre"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+              <Col span={6}>
+                <InputForm
+                  titleInput="OA SAP"
+                  nameInput="oaSAP"
+                  control={control}
+                  error={errors?.oaSAP}
+                  placeholder="Ingrese el nombre"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+            </Flex>
+
+            {/* Segunda fila */}
+            <Flex gap={16}>
+              <Col span={6}>
+                <InputSelect
+                  titleInput="Proveedor"
+                  nameInput="provider"
+                  control={control}
+                  error={errors?.provider}
+                  options={providers}
+                  loading={loadingProviders}
+                  isError={errors?.provider !== undefined}
+                  placeholder="Seleccionar el estado"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+              <Col span={6}>
+                <InputSelect
+                  titleInput="Tipo de servicio"
+                  nameInput="serviceType"
+                  control={control}
+                  error={errors?.serviceType}
+                  options={Object.entries(ServiceTypeLabels).map(([value, label]) => ({
+                    value: ServiceTypeIds[value as keyof typeof ServiceTypeIds],
+                    label
+                  }))}
+                  loading={false}
+                  isError={errors?.serviceType !== undefined}
+                  placeholder="Seleccionar el estado"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+              <Col span={6}>
+                <InputSelect
+                  titleInput="Tipo de vehículo"
+                  nameInput="vehicleType"
+                  control={control}
+                  error={errors?.vehicleType}
+                  options={vehicleTypes}
+                  loading={loadingVehicleTypes}
+                  isError={errors?.vehicleType !== undefined}
+                  placeholder="Seleccionar el estado"
+                  disabled={!serviceTypeId}
+                  validationRules={{ required: "Este campo es requerido" }}
+                  filterOption={filterVehicleOption}
+                />
+              </Col>
+              <Col span={6}>
+                <InputSelect
+                  titleInput="Tipo de tarifa"
+                  nameInput="rateType"
+                  control={control}
+                  error={errors?.rateType}
+                  options={Object.entries(RateTypeLabels).map(([value, label]) => ({
+                    value,
+                    label
+                  }))}
+                  loading={false}
+                  isError={errors?.rateType !== undefined}
+                  placeholder="Seleccionar el estado"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+            </Flex>
+
+            {/* Tercera fila */}
+            <Flex gap={16}>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Desde"
+                  nameInput="from"
+                  control={control}
+                  error={errors?.from}
+                  placeholder="0"
+                  disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
+                  validationRules={
+                    [RateType.KM, RateType.HORAS].includes(rateType as RateType)
+                      ? { required: "Este campo es requerido" }
+                      : undefined
+                  }
+                />
+              </Col>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Hasta"
+                  nameInput="to"
+                  control={control}
+                  error={errors?.to}
+                  placeholder="50"
+                  disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
+                  validationRules={
+                    [RateType.KM, RateType.HORAS].includes(rateType as RateType)
+                      ? { required: "Este campo es requerido" }
+                      : undefined
+                  }
+                />
+              </Col>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Detalle de tarifa"
+                  nameInput="rateDetail"
+                  control={control}
+                  error={errors?.rateDetail}
+                  placeholder="Ingresar el objeto"
+                  disabled={
+                    ![
+                      RateType.OTROS,
+                      RateType.HORAS,
+                      RateType.NOVEDAD,
+                      RateType.MESES,
+                      RateType.DIAS,
+                      RateType.SEMANAS
+                    ].includes(rateType as RateType)
+                  }
+                  validationRules={
+                    [
+                      RateType.OTROS,
+                      RateType.HORAS,
+                      RateType.NOVEDAD,
+                      RateType.MESES,
+                      RateType.DIAS,
+                      RateType.SEMANAS
+                    ].includes(rateType as RateType)
+                      ? { required: "Este campo es requerido" }
+                      : undefined
+                  }
+                />
+              </Col>
+              <Col span={6}>
+                <InputSelect
+                  titleInput="Otros servicios"
+                  nameInput="otherServices"
+                  control={control}
+                  error={errors?.otherServices}
+                  options={otherServices}
+                  loading={loadingOtherServices}
+                  isError={errors?.otherServices !== undefined}
+                  placeholder="Seleccionar el estado"
+                  disabled={rateType !== RateType.OTROS}
+                  validationRules={
+                    rateType === RateType.OTROS
+                      ? { required: "Este campo es requerido" }
+                      : undefined
+                  }
+                  noRequired={rateType !== RateType.OTROS}
+                />
+              </Col>
+            </Flex>
+
+            {/* Cuarta fila */}
+            <Flex gap={16}>
+              <Col span={6}>
+                <InputForm
+                  titleInput="Monto"
+                  nameInput="amount"
+                  control={control}
+                  error={errors?.amount}
+                  placeholder="10,000.00"
+                  typeInput="number"
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+              <Col span={6}>
+                <InputSelect
+                  titleInput="Contrato"
+                  nameInput="contract"
+                  control={control}
+                  error={errors?.contract}
+                  options={contracts}
+                  loading={loadingContracts}
+                  isError={errors?.contract !== undefined}
+                  placeholder="Seleccionar el estado"
+                  disabled={!providerId}
+                  validationRules={{ required: "Este campo es requerido" }}
+                />
+              </Col>
+            </Flex>
+
+            {/* Botones de acción */}
+            <Flex gap={16} justify="end">
+              <button type="button" className={styles.buttonSecondary} onClick={handleCancel}>
+                Cancelar
+              </button>
+              <button type="submit" className={styles.buttonPrimary} disabled={isLoading}>
+                {isLoading ? "Guardando..." : "Guardar"}
+              </button>
+            </Flex>
+          </Flex>
+        </form>
+      </Card>
+    </div>
+  );
+}
