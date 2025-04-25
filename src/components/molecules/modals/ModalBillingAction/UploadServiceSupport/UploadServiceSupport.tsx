@@ -252,7 +252,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                               <div className={styles.content__doc}>
                                 <Flex vertical>
                                   <p>MT 0</p>
-                                  <em className="descriptionDocument">*Obligatorioasas</em>
+                                  <em className="descriptionDocument">*Obligatorio</em>
                                 </Flex>
                                 <DocumentButton
                                   title={"MT 0"}
