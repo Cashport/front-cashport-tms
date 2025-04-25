@@ -232,7 +232,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
                   }}
                 >
                   <Receipt size={20} />
-                  <p>Ver MT</p>
+                  <p>Ver Soportes</p>
                 </Button>
               </Flex>
             </div>

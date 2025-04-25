@@ -16,7 +16,7 @@ export function DocumentFields({
 }: Readonly<{
   control: any;
   register: any;
-  handleOnDeleteDocument: (documentIndex: number) => void;
+  handleOnDeleteDocument?: (documentIndex: number) => void;
   handleOnChangeDocument: (fileToSave: any, documentIndex: number) => void;
   currentDocuments: FileWithLink[];
   mode: "view" | "edit";
@@ -29,6 +29,11 @@ export function DocumentFields({
     control,
     name: `documents`
   });
+
+  const internalDeleteDocument = (index: number) => {
+    handleOnDeleteDocument && handleOnDeleteDocument(index);
+    removeDocument(index);
+  };
 
   return (
     <div>
@@ -46,9 +51,10 @@ export function DocumentFields({
               >
                 <UploadDocumentChild
                   linkFile={document.link}
-                  nameFile={document.link.split("-").pop() ?? ""}
-                  showTrash={false}
-                  onDelete={() => {}}
+                  nameFile={document.name || document.link.split("-").pop() || ""}
+                  showTrash={mode === "edit"}
+                  onDelete={() => internalDeleteDocument(documentIndex)}
+                  fullName
                 />
               </UploadDocumentButton>
             );
@@ -58,7 +64,7 @@ export function DocumentFields({
               key={`doc-${documentIndex}-${document.id}`}
               title={"Documento MT"}
               showTitleAndMandatory={documentIndex === 0}
-              handleOnDelete={() => handleOnDeleteDocument(documentIndex)}
+              handleOnDelete={() => internalDeleteDocument(documentIndex)}
               handleOnChange={(file) => handleOnChangeDocument(file, documentIndex)}
               fileName={currentDocuments?.[documentIndex]?.file?.name ?? undefined}
               fileSize={currentDocuments?.[documentIndex]?.file?.size ?? undefined}

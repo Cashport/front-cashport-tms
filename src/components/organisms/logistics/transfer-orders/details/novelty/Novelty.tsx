@@ -88,7 +88,7 @@ export const Novelty: FC<INoveltyProps> = ({
                             }}
                           >
                             <Receipt size={20} />
-                            <p>Ver MT</p>
+                            <p>Ver soportes</p>
                           </button>
                           <div className={styles.btnContainer}>
                             <Button
