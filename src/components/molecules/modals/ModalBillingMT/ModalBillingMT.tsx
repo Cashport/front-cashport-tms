@@ -7,13 +7,12 @@ import {
   emptyForm,
   emptyVehicle,
   EvidenceByVehicleForm,
-  IParsedFormValues,
-  IVehicleAPI
+  IParsedFormValues
 } from "./controllers/formbillingmt.types";
 import { useForm, useWatch } from "react-hook-form";
 import FooterButtons from "../ModalBillingAction/FooterButtons/FooterButtons";
 import { DocumentFields } from "./components/DocumentsFields";
-import { getTripDetails, sendFinalizeTrip } from "@/services/trips/trips";
+import { getTripDetails, IGetTripDetails, sendFinalizeTrip } from "@/services/trips/trips";
 
 type PropsModalBillingMT = {
   idTR: string;
@@ -28,7 +27,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   const { isOpen, onClose, idTrip, messageApi, mode } = props;
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [vehicleInfo, setVehicleInfo] = useState<IVehicleAPI>(emptyVehicle);
+  const [vehicleInfo, setVehicleInfo] = useState<IGetTripDetails>(emptyVehicle);
   const [defaultValues, setDefaultValues] = useState<EvidenceByVehicleForm>(emptyForm);
   const [deletedDocs, setDeletedDocs] = useState<string[]>([]);
 
@@ -38,24 +37,26 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     });
   const formValues = useWatch({ control });
 
-  function createDefaultValues(vehicle: IVehicleAPI): EvidenceByVehicleForm {
+  function createDefaultValues(vehicle: IGetTripDetails): EvidenceByVehicleForm {
     return {
       plate: vehicle.plate_number,
       idTrip: vehicle.id,
       documents:
         vehicle.MT?.length > 0
-          ? vehicle.MT.map((MTlink, index) => {
+          ? vehicle.MT.map((MT, index) => {
               return {
-                link: MTlink ?? undefined,
+                link: MT.url ?? undefined,
                 file: undefined,
-                docReference: index.toString()
+                docReference: index.toString(),
+                name: MT.name ?? ""
               };
             })
           : [
               {
                 link: undefined,
                 file: undefined,
-                docReference: ""
+                docReference: "",
+                name: ""
               }
             ]
     };
@@ -65,10 +66,11 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     try {
       setIsLoading(true);
       const response = await getTripDetails(idTrip);
+      console.log("responseTripDetails", response);
       if (response) {
         setVehicleInfo({
           ...response,
-          MT: response.MT.map((mtItem) => mtItem.url)
+          MT: response.MT
         });
       }
     } catch (error) {
@@ -170,6 +172,20 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
       reset(newDefaultValues);
     }
   }, [vehicleInfo, reset]);
+
+  useEffect(() => {
+    const allDocsAreEmpty = !formValues.documents || formValues.documents.length === 0;
+
+    if (allDocsAreEmpty) {
+      setValue("documents", [
+        {
+          link: undefined,
+          file: undefined,
+          docReference: ""
+        }
+      ]);
+    }
+  }, [formValues, setValue]);
 
   const isConfirmDisabled = useMemo(() => {
     return areFilesEqual(formValues.documents ?? [], defaultValues.documents ?? []);
