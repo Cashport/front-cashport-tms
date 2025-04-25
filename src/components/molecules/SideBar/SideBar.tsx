@@ -15,7 +15,8 @@ import {
   Receipt,
   Clipboard,
   Bank,
-  TrendUp
+  TrendUp,
+  CurrencyDollar
 } from "phosphor-react";
 
 import "./sidebar.scss";
@@ -286,6 +287,18 @@ export const SideBar = () => {
               }
             >
               {isSideBarLarge && "Ajustes"}
+            </Button>
+          </Link>
+        )}
+        { (
+          <Link href="/rates" passHref legacyBehavior>
+            <Button
+              type="primary"
+              size="large"
+              icon={<CurrencyDollar size={26} />}
+              className={path.startsWith("/rates") ? "buttonIcon" : "buttonIconActive"}
+            >
+              {isSideBarLarge && "Tarifas"}
             </Button>
           </Link>
         )}
