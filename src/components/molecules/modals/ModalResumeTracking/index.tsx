@@ -1,3 +1,4 @@
+import "./modalResumeTracking.scss";
 import { FC, useMemo, useState } from "react";
 import useSWR from "swr";
 import {
@@ -7,8 +8,7 @@ import {
   ArrowsClockwise,
   CaretDown
 } from "phosphor-react";
-import styles from "./ModalResumeTracking.module.scss";
-import { Dropdown, MenuProps, Skeleton, Typography, message } from "antd";
+import { Dropdown, Flex, MenuProps, Skeleton, Typography, message } from "antd";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal/invoice-download-modal";
 import UiTab from "@/components/ui/ui-tab";
 import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
@@ -25,6 +25,7 @@ import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 import ModalHeader from "./components/ModalHeader";
 import { updateTripTrackingStatus } from "@/services/logistics/tracking";
 import { FileDownloadModal } from "../FileDownloadModal/FileDownloadModal";
+import TimelineEvents from "@/components/ui/timeline-events";
 
 const { Text } = Typography;
 interface InvoiceDetailModalProps {
@@ -63,6 +64,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   );
 
   const vehicles = data?.data;
+  console.log("vehicles", vehicles);
   const generateTabsFromVehicles = (vehicles: VehicleTracking[]) => {
     return vehicles.map((vehicle, index) => ({
       key: (index + 1).toString(),
@@ -90,8 +92,8 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     }
 
     return (
-      <div className={styles.trackStateContainer}>
-        <Text className={styles.trackState} style={{ backgroundColor: getState?.bgColor }}>
+      <div className="trackStateContainer">
+        <Text className="trackState" style={{ backgroundColor: getState?.bgColor }}>
           {getState?.name}
         </Text>
       </div>
@@ -117,19 +119,6 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
       setisModalChangeStatus(false);
     }
   };
-  // const getStepState = (stateName: string) => {
-  //   const getState = TrackingStepState.find((f) => f.name === stateName);
-  //   return (
-  //     <div className={styles.trackStateContainer}>
-  //       <Text
-  //         className={styles.stepState}
-  //         style={{ backgroundColor: getState?.bgColor, color: getState?.textColor }}
-  //       >
-  //         {getState?.name}
-  //       </Text>
-  //     </div>
-  //   );
-  // };
 
   const getStateDropdown = (stateId: string) => {
     let getState = TransferOrdersState.find((f) => f.id === stateId);
@@ -138,8 +127,8 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     }
 
     return (
-      <div className={styles.trackStateContainer}>
-        <Text className={styles.trackState} style={{ backgroundColor: getState?.bgColor }}>
+      <div className="trackStateContainer">
+        <Text className="trackState" style={{ backgroundColor: getState?.bgColor }}>
           {getState?.name}
         </Text>
         <CaretDown size={16} />
@@ -174,8 +163,51 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     }
   };
 
+  const timelineItems = (timeLineData ?? []).map((item) => ({
+    id: item.id,
+    title: item.event_description,
+    date: item.event_time,
+    leftIcon: item.url_photo ? (
+      <ArrowLineDown
+        size={14}
+        onClick={() => handleDocumentClick(item.url_photo ?? "")}
+        style={{ cursor: "pointer" }}
+      />
+    ) : undefined,
+    content: (
+      <>
+        {item.created_by && <div className="name">{`Usuario: ${item.created_by}`}</div>}
+        {item.comment && <div className="name">{`Comentario: ${item.comment}`}</div>}
+        {item.provider_comment && (
+          <div className="name">{`Comentario proveedor: ${item.provider_comment}`}</div>
+        )}
+        {item.responsible && <div className="name">{`Responsable: ${item.responsible}`}</div>}
+        {item.estimatedValue && (
+          <p className="name">
+            {`Valor estimado: `}
+            <span style={{ fontWeight: 600 }}>{formatMoney(item.estimatedValue ?? "0")}</span>
+          </p>
+        )}
+        {item.distanceKm && (
+          <div className="name">
+            {`# Kms: `}
+            <span style={{ fontWeight: 600 }}>{item.distanceKm}</span>
+          </div>
+        )}
+        {item.hours && <div className="name">{`# Hrs: ${item.hours}`}</div>}
+        {item.rate && (
+          <div className="name">
+            {`Tarifa: `}
+            <span style={{ fontWeight: 600 }}>{formatMoney(item.rate ?? "0")}</span>
+          </div>
+        )}
+        {item.driver && <div className="name">{`Conductor: ${item.driver}`}</div>}
+      </>
+    )
+  }));
+
   return (
-    <aside className={`${styles.wrapper} ${isOpen ? styles.show : styles.hide}`}>
+    <aside className={`modalResumeTrackingWrapper ${isOpen ? "show" : "hide"}`}>
       <ModalVehicleFollowUp
         isOpen={isModalChangeStatus}
         onClose={() => setisModalChangeStatus(false)}
@@ -196,143 +228,51 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
         }}
         url={urlStep}
       />
-      <div>
-        <div className={styles.header}>
-          <button type="button" className={styles.buttonBack} onClick={onClose}>
-            <CaretDoubleRight />
-          </button>
-          <h4 className={styles.numberInvoice}>Tracking</h4>
-          <div className={styles.viewInvoice}>
-            <Receipt size={20} />
-            Ver MT
-          </div>
-          <Dropdown
-            menu={{ items: itemsGenerateAction }}
-            trigger={["click"]}
-            dropdownRender={(menu) => (
-              <div>
-                {React.cloneElement(
-                  menu as React.ReactElement<{
-                    style: React.CSSProperties;
-                  }>,
-                  { style: menuStyle }
-                )}
-              </div>
-            )}
-          >
-            <GenerateActionButton
-              onClick={() => {
-                console.log("click");
-              }}
-            />
-          </Dropdown>
+      <div className="header">
+        <button type="button" className="buttonBack" onClick={onClose}>
+          <CaretDoubleRight />
+        </button>
+        <h4 className="numberInvoice">Tracking</h4>
+        <div className="viewInvoice">
+          <Receipt size={20} />
+          Ver MT
         </div>
-        <Skeleton loading={isLoading} active>
-          {currentVehicle && (
-            <>
-              <UiTab tabs={items} sticky onChange={onChange} />
-              <ModalHeader
-                vehicle={currentVehicle}
-                transferOrderStates={TransferOrdersState}
-                defaultStateId={STATUS.TR.SIN_INICIAR}
-                showState={true}
-              />
-              <hr />
-              <div className={styles.body}>
-                <div className={styles.content}>
-                  <div className={styles.progress}></div>
-                  <div className={styles.description}>
-                    <div className={styles.stepperContainer}>
-                      <div className={styles.stepperContent}>
-                        {(timeLineData ?? []).map((item) => {
-                          return (
-                            <div key={item.id} className={styles.mainStep}>
-                              <div className={`${styles.stepLine} ${styles.active}`} />
-                              <div className={`${styles.stepCircle} ${styles.active}`} />
-                              <div className={styles.stepLabel}>
-                                <div className={styles.cardInvoiceFiling}>
-                                  <div
-                                    style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                                  >
-                                    <h5 className={styles.title}>{item.event_description}</h5>
-                                    {/* {item.status && getStepState(item.status)}
-                    {item.} */}
-                                  </div>
-                                  <div className={styles.date}>{formatDate(item.event_time)}</div>
-                                  {item.created_by && (
-                                    <div
-                                      className={styles.name}
-                                    >{`Usuario: ${item.created_by}`}</div>
-                                  )}
-                                  {item.comment && (
-                                    <div
-                                      className={styles.name}
-                                    >{`Comentario: ${item.comment}`}</div>
-                                  )}
-                                  {item.provider_comment && (
-                                    <div
-                                      className={styles.name}
-                                    >{`Comentario proveedor: ${item.provider_comment}`}</div>
-                                  )}
-                                  {item.url_photo && (
-                                    <div>
-                                      <div className={styles.icons}>
-                                        <ArrowLineDown
-                                          size={14}
-                                          onClick={() => {
-                                            handleDocumentClick(item.url_photo ?? "");
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                  {item.responsible && (
-                                    <div
-                                      className={styles.name}
-                                    >{`Responsable: ${item.responsible}`}</div>
-                                  )}
-                                  {item.estimatedValue && (
-                                    <p className={styles.name}>
-                                      {`Valor estimado: `}
-                                      <span style={{ fontWeight: 600 }}>
-                                        {formatMoney(item.estimatedValue ?? "0")}
-                                      </span>
-                                    </p>
-                                  )}
-                                  {item.distanceKm && (
-                                    <div className={styles.name}>
-                                      {`# Kms: `}
-                                      <span style={{ fontWeight: 600 }}>{item.distanceKm}</span>
-                                    </div>
-                                  )}
-                                  {item.hours && (
-                                    <div className={styles.name}>{`# Hrs: ${item.hours}`}</div>
-                                  )}
-                                  {item.rate && (
-                                    <div className={styles.name}>
-                                      {`Tarifa: `}
-                                      <span style={{ fontWeight: 600 }}>
-                                        {formatMoney(item.rate ?? "0")}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {item.driver && (
-                                    <div className={styles.name}>{`Conductor: ${item.driver}`}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+        <Dropdown
+          menu={{ items: itemsGenerateAction }}
+          trigger={["click"]}
+          dropdownRender={(menu) => (
+            <div>
+              {React.cloneElement(
+                menu as React.ReactElement<{
+                  style: React.CSSProperties;
+                }>,
+                { style: menuStyle }
+              )}
+            </div>
           )}
-        </Skeleton>
+        >
+          <GenerateActionButton
+            onClick={() => {
+              console.log("click");
+            }}
+          />
+        </Dropdown>
       </div>
+      <Skeleton loading={isLoading} active>
+        {currentVehicle && (
+          <>
+            <UiTab tabs={items} sticky onChange={onChange} />
+            <ModalHeader
+              vehicle={currentVehicle}
+              transferOrderStates={TransferOrdersState}
+              defaultStateId={STATUS.TR.SIN_INICIAR}
+              showState={true}
+            />
+            <hr />
+            <TimelineEvents events={timelineItems} />
+          </>
+        )}
+      </Skeleton>
     </aside>
   );
 };
