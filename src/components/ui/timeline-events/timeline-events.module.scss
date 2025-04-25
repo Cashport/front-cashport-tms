@@ -1,0 +1,125 @@
+@import "@/styles/variables.scss";
+
+.timeLineEventscontent {
+    width: 100%;
+    display: flex;
+    padding-top: 5px;
+    margin-top: 10px;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    .progress {
+        width: 42px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stepperContainer {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 530px;
+
+        .mainStep {
+            display: flex;
+            column-gap: 10px;
+            position: relative;
+            padding-bottom: 20px;
+            padding-left: 5px;
+            width: 100%;
+
+            &:last-child {
+                min-height: auto;
+                padding-bottom: 0;
+            }
+
+            .leftIcon {
+                position: absolute;
+                left: -42px;
+                top: -6px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                background: $background;
+                padding: 6px;
+                height: fit-content;
+            }
+
+            .stepLine {
+                width: 1px;
+                position: absolute;
+                top: 10px;
+                bottom: 0;
+                left: -1px;
+
+                background-color: #dddddd;
+
+                &.active {
+                    background-color: transparent;
+                    border-left: 1px dashed #cbe71e;
+                }
+
+                &.inactive {
+                    display: none;
+                }
+            }
+
+            .stepCircle {
+                top: 0px;
+                left: -5px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                position: absolute;
+                background-color: #dddddd;
+
+                &.active {
+                    background-color: #cbe71e;
+                }
+            }
+
+            .stepLabel {
+                display: flex;
+                margin-top: -7px;
+                width: 100%;
+
+                .cardInvoiceFiling {
+                    display: flex;
+                    flex-direction: column;
+                    padding-left: 8px;
+                    // If we want a minimun height for each event
+                    min-height: 90px;
+                    width: 100%;
+
+                    .title {
+                        display: flex;
+                        gap: 10px;
+                        justify-content: flex-start;
+                    }
+
+                    .eventName {
+                        display: flex;
+                        font-size: 1rem;
+                        font-weight: 300;
+                        color: #141414;
+                        line-height: normal;
+                    }
+
+                    .date {
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        color: #a5a5a5;
+                        line-height: normal;
+                    }
+                }
+            }
+        }
+    }
+}

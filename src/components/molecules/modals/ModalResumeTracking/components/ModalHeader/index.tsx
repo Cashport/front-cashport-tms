@@ -42,32 +42,30 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
   return (
     <div className={styles.currentTrip}>
       <div>
-        <Text>Proveedor </Text>
-        <Text strong style={{ fontWeight: "bold" }}>
+        <Text className={styles.title}>Proveedor </Text>
+        <Text className={styles.Info} strong>
           {vehicle.provider ?? ""}
         </Text>
         <br />
-        <Text>Tarifa </Text>
-        <Text strong style={{ fontWeight: "bold" }}>
+        <Text className={styles.title}>Tarifa </Text>
+        <Text className={styles.Info} strong>
           {vehicle.fee_description ?? ""}
         </Text>
         <br />
-        <Text>Vehículo </Text>
+        <Text className={styles.title}>Vehículo </Text>
         <Link
           href={`/logistics/providers/${vehicle.id_provider}/vehicle/${vehicle.id_vehicle}`}
           target="_blank"
           className={styles.link}
-          style={{ textDecoration: "underline" }}
         >
           {vehicle.vehicle_type ?? ""}
         </Link>
         <br />
-        <Text>Conductor </Text>
+        <Text className={styles.title}>Conductor </Text>
         <Link
           href={`/logistics/providers/${vehicle.id_provider}/driver/${vehicle.driver_id}`}
           target="_blank"
           className={styles.link}
-          style={{ textDecoration: "underline" }}
         >
           {vehicle.driver_name ?? ""} - {vehicle.driver_phone ?? ""}
         </Link>
