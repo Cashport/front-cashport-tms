@@ -1,5 +1,4 @@
-import "./modalResumeTracking.scss";
-import { FC, useMemo, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import useSWR from "swr";
 import {
   CaretDoubleRight,
@@ -8,24 +7,27 @@ import {
   ArrowsClockwise,
   CaretDown
 } from "phosphor-react";
-import { Dropdown, Flex, MenuProps, Skeleton, Typography, message } from "antd";
-import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal/invoice-download-modal";
-import UiTab from "@/components/ui/ui-tab";
-import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
-import { STATUS } from "@/utils/constants/globalConstants";
-import { fetcher } from "@/utils/api/api";
+import { Dropdown, MenuProps, Skeleton, Typography, message } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/es"; // Importar el idioma español
+
+import { updateTripTrackingStatus } from "@/services/logistics/tracking";
+import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
+import { fetcher } from "@/utils/api/api";
 import { formatMoney } from "@/utils/utils";
-import { ApiResponse, VehicleTracking } from "@/types/logistics/tracking/tracking";
-import React from "react";
+
+import UiTab from "@/components/ui/ui-tab";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 import ModalHeader from "./components/ModalHeader";
-import { updateTripTrackingStatus } from "@/services/logistics/tracking";
 import { FileDownloadModal } from "../FileDownloadModal/FileDownloadModal";
 import TimelineEvents from "@/components/ui/timeline-events";
+
+import { STATUS } from "@/utils/constants/globalConstants";
+import { ApiResponse, VehicleTracking } from "@/types/logistics/tracking/tracking";
+
+import "./modalResumeTracking.scss";
 
 const { Text } = Typography;
 interface InvoiceDetailModalProps {
@@ -35,14 +37,22 @@ interface InvoiceDetailModalProps {
 }
 export const TrackingStepState = [
   {
-    name: "Abierta",
+    name: "Aprobado",
     bgColor: "#CBE71E",
-    textColor: "#141414"
+    textColor: "#141414",
+    id: STATUS.NOVELTY.ACEPTADA
   },
   {
-    name: "Cerrada",
+    name: "Rechazado",
+    bgColor: "#EE0D0D",
+    textColor: "#FFFFFF",
+    id: STATUS.NOVELTY.RECHAZADA
+  },
+  {
+    name: "Abierto",
     bgColor: "#495057",
-    textColor: "#FFFFFF"
+    textColor: "#FFFFFF",
+    id: STATUS.NOVELTY.PENDIENTE
   }
 ];
 
@@ -64,7 +74,6 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   );
 
   const vehicles = data?.data;
-  console.log("vehicles", vehicles);
   const generateTabsFromVehicles = (vehicles: VehicleTracking[]) => {
     return vehicles.map((vehicle, index) => ({
       key: (index + 1).toString(),
@@ -163,45 +172,43 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     }
   };
 
+  const getStepState = (statusId: string) => {
+    const getState = TrackingStepState.find((f) => f.id === statusId);
+    if (!getState) return undefined;
+    return (
+      <div className="trackStateContainer">
+        <Text
+          className="eventTag"
+          style={{ backgroundColor: getState?.bgColor, color: getState?.textColor }}
+        >
+          {getState?.name}
+        </Text>
+      </div>
+    );
+  };
+
   const timelineItems = (timeLineData ?? []).map((item) => ({
     id: item.id,
     title: item.event_description,
-    date: item.event_time,
+    date: formatDate(item.event_time),
     leftIcon: item.url_photo ? (
-      <ArrowLineDown
-        size={14}
-        onClick={() => handleDocumentClick(item.url_photo ?? "")}
-        style={{ cursor: "pointer" }}
-      />
+      <ArrowLineDown size={14} style={{ cursor: "pointer" }} />
     ) : undefined,
+    handleLeftIconClick: () => handleDocumentClick(item.url_photo ?? ""),
+    tag: getStepState(item.id_status),
     content: (
       <>
-        {item.created_by && <div className="name">{`Usuario: ${item.created_by}`}</div>}
+        {item.created_by && <div className="name">{`Responsable: ${item.created_by}`}</div>}
+        {item.quantity && <div className="name">{`Cantidad: ${item.quantity}`}</div>}
+        {item.fare && (
+          <p className="name">
+            Tarifa: <span style={{ fontWeight: 600 }}>{formatMoney(item.fare ?? "0")}</span>
+          </p>
+        )}
         {item.comment && <div className="name">{`Comentario: ${item.comment}`}</div>}
         {item.provider_comment && (
           <div className="name">{`Comentario proveedor: ${item.provider_comment}`}</div>
         )}
-        {item.responsible && <div className="name">{`Responsable: ${item.responsible}`}</div>}
-        {item.estimatedValue && (
-          <p className="name">
-            {`Valor estimado: `}
-            <span style={{ fontWeight: 600 }}>{formatMoney(item.estimatedValue ?? "0")}</span>
-          </p>
-        )}
-        {item.distanceKm && (
-          <div className="name">
-            {`# Kms: `}
-            <span style={{ fontWeight: 600 }}>{item.distanceKm}</span>
-          </div>
-        )}
-        {item.hours && <div className="name">{`# Hrs: ${item.hours}`}</div>}
-        {item.rate && (
-          <div className="name">
-            {`Tarifa: `}
-            <span style={{ fontWeight: 600 }}>{formatMoney(item.rate ?? "0")}</span>
-          </div>
-        )}
-        {item.driver && <div className="name">{`Conductor: ${item.driver}`}</div>}
       </>
     )
   }));
@@ -268,7 +275,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
               defaultStateId={STATUS.TR.SIN_INICIAR}
               showState={true}
             />
-            <hr />
+            <hr style={{ marginBottom: ".5rem" }} />
             <TimelineEvents events={timelineItems} />
           </>
         )}
