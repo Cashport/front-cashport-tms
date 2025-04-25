@@ -16,6 +16,7 @@ export interface TrackingEvent {
   base_value: number | null;
   quantity: number;
   novelty_type_id: number;
+  novelty_type_description: string;
   fare: number;
 }
 

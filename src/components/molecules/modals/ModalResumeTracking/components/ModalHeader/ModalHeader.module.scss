@@ -17,12 +17,24 @@
         background-color: #cbe71e;
         border-radius: 8px;
         padding: 6px 12px;
+        white-space: nowrap;
     }
 }
 .link {
     text-decoration: underline;
+    font-style: italic;
     color: #1e8ff3;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
+}
+
+.title {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+.Info {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
 }

@@ -67,7 +67,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   const [isLoadingChangeStatus, setIsLoadingChangeStatus] = useState<boolean>(false);
   const onChange = (key: string) => setActiveKey(key);
 
-  const { data, error, isLoading, mutate } = useSWR<ApiResponse<VehicleTracking[]>>(
+  const { data, isLoading, mutate } = useSWR<ApiResponse<VehicleTracking[]>>(
     isOpen ? `/transfer-request/triptracking/${idTR}` : null,
     fetcher,
     {}
@@ -94,20 +94,6 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
 
   const timeLineData = currentVehicle?.trip_tracking;
 
-  const getState = (stateId: string) => {
-    let getState = TransferOrdersState.find((f) => f.id === stateId);
-    if (!getState) {
-      getState = TransferOrdersState.find((f) => f.id === STATUS.TR.SIN_INICIAR);
-    }
-
-    return (
-      <div className="trackStateContainer">
-        <Text className="trackState" style={{ backgroundColor: getState?.bgColor }}>
-          {getState?.name}
-        </Text>
-      </div>
-    );
-  };
   const onSubmitNewStatus = async () => {
     const finalData = {
       tripId: currentVehicle?.id ?? 0,
@@ -199,6 +185,9 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     content: (
       <>
         {item.created_by && <div className="name">{`Responsable: ${item.created_by}`}</div>}
+        {item.novelty_type_description && (
+          <div className="name">{`Tipo de sobrecosto: ${item.novelty_type_description}`}</div>
+        )}
         {item.quantity && <div className="name">{`Cantidad: ${item.quantity}`}</div>}
         {item.fare && (
           <p className="name">
