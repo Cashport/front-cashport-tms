@@ -82,12 +82,12 @@ export default function CreateRatePage() {
 
   return (
     <div className={styles.pageContainer}>
-      <Card className={styles.formCard}>
+      <Card className={styles.formCard} style={{ width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
         <Title level={2}>Datos de la tarifa</Title>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex vertical gap={24}>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
+          <Flex vertical gap={24} style={{ width: '100%' }}>
             {/* Primera fila - Campos SAP */}
-            <Flex gap={16}>
+            <Flex gap={16} style={{ width: '100%' }}>
               <Col span={6}>
                 <InputForm
                   titleInput="Service Item SAP"
@@ -96,6 +96,7 @@ export default function CreateRatePage() {
                   error={errors?.serviceItemSAP}
                   placeholder="0000000"
                   validationRules={{ required: "Este campo es requerido" }}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -106,6 +107,7 @@ export default function CreateRatePage() {
                   error={errors?.serviceDescriptionSAP}
                   placeholder="0000000"
                   validationRules={{ required: "Este campo es requerido" }}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -116,6 +118,7 @@ export default function CreateRatePage() {
                   error={errors?.serviceLineDescriptionSAP}
                   placeholder="Ingrese el nombre"
                   validationRules={{ required: "Este campo es requerido" }}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -126,12 +129,13 @@ export default function CreateRatePage() {
                   error={errors?.oaSAP}
                   placeholder="Ingrese el nombre"
                   validationRules={{ required: "Este campo es requerido" }}
+                  style={{ width: '100%' }}
                 />
               </Col>
             </Flex>
 
             {/* Segunda fila */}
-            <Flex gap={16}>
+            <Flex gap={16} style={{ width: '100%' }}>
               <Col span={6}>
                 <InputSelect
                   titleInput="Proveedor"
@@ -143,6 +147,8 @@ export default function CreateRatePage() {
                   isError={errors?.provider !== undefined}
                   placeholder="Seleccionar el estado"
                   validationRules={{ required: "Este campo es requerido" }}
+                  dropdownMatchSelectWidth={false}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -159,6 +165,8 @@ export default function CreateRatePage() {
                   isError={errors?.serviceType !== undefined}
                   placeholder="Seleccionar el estado"
                   validationRules={{ required: "Este campo es requerido" }}
+                  dropdownMatchSelectWidth={false}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -174,6 +182,8 @@ export default function CreateRatePage() {
                   disabled={!serviceTypeId}
                   validationRules={{ required: "Este campo es requerido" }}
                   filterOption={filterVehicleOption}
+                  dropdownMatchSelectWidth={false}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -190,12 +200,14 @@ export default function CreateRatePage() {
                   isError={errors?.rateType !== undefined}
                   placeholder="Seleccionar el estado"
                   validationRules={{ required: "Este campo es requerido" }}
+                  dropdownMatchSelectWidth={false}
+                  style={{ width: '100%' }}
                 />
               </Col>
             </Flex>
 
             {/* Tercera fila */}
-            <Flex gap={16}>
+            <Flex gap={16} style={{ width: '100%' }}>
               <Col span={6}>
                 <InputForm
                   titleInput="Desde"
@@ -209,6 +221,7 @@ export default function CreateRatePage() {
                       ? { required: "Este campo es requerido" }
                       : undefined
                   }
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -224,6 +237,7 @@ export default function CreateRatePage() {
                       ? { required: "Este campo es requerido" }
                       : undefined
                   }
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -255,6 +269,7 @@ export default function CreateRatePage() {
                       ? { required: "Este campo es requerido" }
                       : undefined
                   }
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -274,12 +289,14 @@ export default function CreateRatePage() {
                       : undefined
                   }
                   noRequired={rateType !== RateType.OTROS}
+                  dropdownMatchSelectWidth={false}
+                  style={{ width: '100%' }}
                 />
               </Col>
             </Flex>
 
             {/* Cuarta fila */}
-            <Flex gap={16}>
+            <Flex gap={16} style={{ width: '100%' }}>
               <Col span={6}>
                 <InputForm
                   titleInput="Monto"
@@ -289,6 +306,7 @@ export default function CreateRatePage() {
                   placeholder="10,000.00"
                   typeInput="number"
                   validationRules={{ required: "Este campo es requerido" }}
+                  style={{ width: '100%' }}
                 />
               </Col>
               <Col span={6}>
@@ -303,6 +321,8 @@ export default function CreateRatePage() {
                   placeholder="Seleccionar el estado"
                   disabled={!providerId}
                   validationRules={{ required: "Este campo es requerido" }}
+                  dropdownMatchSelectWidth={false}
+                  style={{ width: '100%' }}
                 />
               </Col>
             </Flex>

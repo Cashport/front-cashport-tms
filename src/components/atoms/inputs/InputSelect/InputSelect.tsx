@@ -26,6 +26,8 @@ interface InputSelectProps {
   noRequired?: boolean;
   showSearch?: boolean;
   filterOption?: SelectProps['filterOption'];
+  dropdownMatchSelectWidth?: boolean;
+  style?: React.CSSProperties;
 }
 
 export const InputSelect = ({
@@ -43,10 +45,12 @@ export const InputSelect = ({
   loading = false,
   isError = false,
   showSearch = false,
-  filterOption
+  filterOption,
+  dropdownMatchSelectWidth = true,
+  style
 }: InputSelectProps) => {
   return (
-    <Flex vertical className={`selectContainer ${className}`}>
+    <Flex vertical className={`selectContainer ${className}`} style={style}>
       {!hiddenTitle && <p className="select-form-title">{titleInput}</p>}
       <Controller
         name={nameInput}
@@ -67,6 +71,8 @@ export const InputSelect = ({
               value={field.value}
               showSearch={showSearch}
               filterOption={filterOption}
+              dropdownMatchSelectWidth={dropdownMatchSelectWidth}
+              style={style}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
