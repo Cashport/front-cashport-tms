@@ -290,18 +290,6 @@ export const SideBar = () => {
             </Button>
           </Link>
         )}
-        { (
-          <Link href="/rates" passHref legacyBehavior>
-            <Button
-              type="primary"
-              size="large"
-              icon={<CurrencyDollar size={26} />}
-              className={path.startsWith("/rates") ? "buttonIcon" : "buttonIconActive"}
-            >
-              {isSideBarLarge && "Tarifas"}
-            </Button>
-          </Link>
-        )}
       </Flex>
       <Flex className="exit">
         <Button
