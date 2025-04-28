@@ -15,7 +15,8 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import {
   normalizeLocationData,
   validationButtonText,
-  LocationFormTabProps
+  LocationFormTabProps,
+  LocationData
 } from "./locationFormTab.mapper";
 import "./locationformtab.scss";
 import {
@@ -38,6 +39,7 @@ import { SelectInputForm } from "@/components/molecules/logistics/SelectInputFor
 import ModalDocumentsType from "@/components/molecules/modals/ModalDocumentsType/ModalDocumentsType";
 import useSWR from "swr";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
+import { API } from "@/utils/api/api";
 
 const { Title } = Typography;
 
@@ -67,6 +69,9 @@ export const LocationFormTab = ({
     getAllCitiesByState,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  const { data: zonesData, isLoading: loadingZones } = useSWR<{
+    data: { id: number; name: string; description: string }[];
+  }>("zone/all", async (url: any) => API.get(url), {});
 
   useEffect(() => {
     const subscription = watch((data, { name, type }) => {
@@ -105,7 +110,7 @@ export const LocationFormTab = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  const defaultValues = statusForm === "create" ? {} : normalizeLocationData(data as any);
+  const defaultValues = statusForm === "create" ? {} : normalizeLocationData(data as LocationData);
   const {
     watch,
     control,
@@ -239,7 +244,7 @@ export const LocationFormTab = ({
 
       setTimeout(() => {
         //const group_location:number = Number(data?.group_location?.valueOf());
-        setValue("general.group_location", data?.group_location);
+        setValue("general.group_location_id", data?.group_location_id);
 
         const location_type: number = Number(data?.location_type?.valueOf());
         setValue("general.location_type", location_type);
@@ -541,17 +546,41 @@ export const LocationFormTab = ({
                     Grupo de ubicación
                   </Title>
                   <Controller
-                    name="general.group_location"
+                    name="general.group_location_id"
                     control={control}
                     disabled={statusForm === "review"}
                     rules={{ required: false }}
                     render={({ field }) => (
                       <SelectInputForm
                         placeholder="Seleccionar"
-                        error={errors?.general?.group_location}
+                        error={errors?.general?.group_location_id}
                         field={field}
                         options={convertGroupLocationsToSelectOptions(groupLocationData)}
                         allowClear={true}
+                        showSearch={true}
+                      />
+                    )}
+                  />
+                </Col>
+                <Col span={12} className="selectButton">
+                  <Title className="title" level={5}>
+                    Zona
+                  </Title>
+                  <Controller
+                    name="general.zone_id"
+                    control={control}
+                    disabled={statusForm === "review"}
+                    rules={{ required: false }}
+                    render={({ field }) => (
+                      <SelectInputForm
+                        placeholder="Zona"
+                        error={errors?.general?.zone_id}
+                        field={field}
+                        options={zonesData?.data.map((zone) => ({
+                          id: zone.id,
+                          value: zone.name
+                        }))}
+                        loading={loadingZones}
                         showSearch={true}
                       />
                     )}
