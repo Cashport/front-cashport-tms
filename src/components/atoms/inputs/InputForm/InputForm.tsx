@@ -22,6 +22,7 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   oninputInterceptor?: (e: any) => void;
   suffix?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 export const InputForm = ({
@@ -39,10 +40,11 @@ export const InputForm = ({
   readOnly,
   changeInterceptor,
   oninputInterceptor,
-  suffix
+  suffix,
+  style
 }: Props) => {
   return (
-    <Flex vertical className={`containerInput ${className}`} style={customStyle}>
+    <Flex vertical className={`containerInput ${className}`} style={{ ...customStyle, ...style }}>
       {!hiddenTitle && (
         <Typography.Title className="input-form-title" level={5}>
           {titleInput}
