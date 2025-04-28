@@ -1,9 +1,7 @@
-import { Typography } from "antd";
 import Link from "next/link";
-import styles from "./ModalHeader.module.scss"; // Ajusta la ruta según tu estructura
 import { VehicleTracking } from "@/types/logistics/tracking/tracking";
 
-const { Text } = Typography;
+import styles from "./ModalHeader.module.scss";
 
 interface TransferOrderState {
   id: string;
@@ -32,27 +30,21 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
 
     return state ? (
       <div className={styles.trackStateContainer}>
-        <Text className={styles.trackState} style={{ backgroundColor: state.bgColor }}>
+        <p className={styles.trackState} style={{ backgroundColor: state.bgColor }}>
           {state.name}
-        </Text>
+        </p>
       </div>
     ) : null;
   };
   if (!vehicle) return <></>;
   return (
     <div className={styles.currentTrip}>
-      <div>
-        <Text className={styles.title}>Proveedor </Text>
-        <Text className={styles.Info} strong>
-          {vehicle.provider ?? ""}
-        </Text>
-        <br />
-        <Text className={styles.title}>Tarifa </Text>
-        <Text className={styles.Info} strong>
-          {vehicle.fee_description ?? ""}
-        </Text>
-        <br />
-        <Text className={styles.title}>Vehículo </Text>
+      <div className={styles.currentTrip__container}>
+        <p className={styles.title}>Proveedor </p>
+        <p className={styles.Info}>{vehicle.provider ?? ""}</p>
+        <p className={styles.title}>Tarifa </p>
+        <p className={styles.Info}>{vehicle.fee_description ?? ""}</p>
+        <p className={styles.title}>Vehículo </p>
         <Link
           href={`/logistics/providers/${vehicle.id_provider}/vehicle/${vehicle.id_vehicle}`}
           target="_blank"
@@ -60,8 +52,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
         >
           {vehicle.vehicle_type ?? ""}
         </Link>
-        <br />
-        <Text className={styles.title}>Conductor </Text>
+        <p className={styles.title}>Conductor </p>
         <Link
           href={`/logistics/providers/${vehicle.id_provider}/driver/${vehicle.driver_id}`}
           target="_blank"

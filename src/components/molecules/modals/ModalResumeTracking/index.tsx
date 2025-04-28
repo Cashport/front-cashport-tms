@@ -231,7 +231,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
         <h4 className="numberInvoice">Tracking</h4>
         <div className="viewInvoice">
           <Receipt size={20} />
-          Ver MT
+          Ver Soportes
         </div>
         <Dropdown
           menu={{ items: itemsGenerateAction }}
