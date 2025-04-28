@@ -2,6 +2,7 @@ import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocume
 
 export interface FileWithLink extends FileObject {
   link?: string;
+  name?: string;
 }
 
 export interface EvidenceByVehicleForm {
@@ -17,7 +18,7 @@ export const emptyForm: EvidenceByVehicleForm = {
     {
       docReference: "",
       file: undefined, // No file uploaded yet
-      aditionalData: undefined // Empty object for additional data
+      name: ""
     }
   ]
 };

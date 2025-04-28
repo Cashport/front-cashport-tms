@@ -51,9 +51,10 @@ export function DocumentFields({
               >
                 <UploadDocumentChild
                   linkFile={document.link}
-                  nameFile={document.link.split("-").pop() ?? ""}
+                  nameFile={document.name || document.link.split("-").pop() || ""}
                   showTrash={mode === "edit"}
                   onDelete={() => internalDeleteDocument(documentIndex)}
+                  fullName
                 />
               </UploadDocumentButton>
             );

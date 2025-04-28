@@ -68,10 +68,7 @@ export default function BillingTable({
       dataIndex: "idTransferRequest",
       key: "idTransferRequest",
       render: (idTransferRequest, record) => (
-        <Link
-          href={getLink(idTransferRequest, record)}
-          style={{ color: "blue", textDecorationLine: "underline" }}
-        >
+        <Link href={getLink(record)} style={{ color: "blue", textDecorationLine: "underline" }}>
           {idTransferRequest}
         </Link>
       ),
@@ -143,9 +140,9 @@ export default function BillingTable({
       key: "buttonSee",
       width: 64,
       dataIndex: "id",
-      render: (id,record) => (
+      render: (id, record) => (
         <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
-          <Link href={getLink(id, record)}>
+          <Link href={getLink(record)}>
             <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Eye size={"1.3rem"} />} />
           </Link>
         </Flex>
@@ -153,11 +150,11 @@ export default function BillingTable({
     }
   ];
 
-  const getLink = (id: number, record: IBillingRequestsListDetail) => {
+  const getLink = (record: IBillingRequestsListDetail) => {
     if (record.statusDesc === BillingStatusEnum.PendienteSoportes) {
-      return `/facturacion/${id}/carrier/${record.idCarrier}`;
+      return `/facturacion/${record.idTransferRequest}/carrier/${record.idCarrier}`;
     }
-    return `/facturacion/${id}`;
+    return `/facturacion/${record.id}`;
   };
 
   return (
