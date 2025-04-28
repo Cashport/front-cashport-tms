@@ -185,6 +185,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     content: (
       <>
         {item.created_by && <div className="name">{`Responsable: ${item.created_by}`}</div>}
+        {item.base_value && (
+          <p className="name">
+            Valor base <span style={{ fontWeight: 600 }}>{formatMoney(item.base_value)}</span>
+          </p>
+        )}
         {item.novelty_type_description && (
           <div className="name">{`Tipo de sobrecosto: ${item.novelty_type_description}`}</div>
         )}
