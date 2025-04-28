@@ -15,7 +15,8 @@ import {
   Receipt,
   Clipboard,
   Bank,
-  TrendUp
+  TrendUp,
+  CurrencyDollar
 } from "phosphor-react";
 
 import "./sidebar.scss";
