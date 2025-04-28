@@ -581,7 +581,6 @@ export const LocationFormTab = ({
                           value: zone.name
                         }))}
                         loading={loadingZones}
-                        showSearch={true}
                       />
                     )}
                   />
