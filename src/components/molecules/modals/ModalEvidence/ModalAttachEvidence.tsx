@@ -1,11 +1,15 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from "react";
 import { Button, Flex, UploadFile } from "antd";
-import { CaretLeft, Plus } from "@phosphor-icons/react";
-import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
-import styles from "./modalAttachEvidence.module.scss";
-import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadChangeParam } from "antd/es/upload";
+import { CaretLeft, Plus } from "@phosphor-icons/react";
+
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
+
+import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+
+import styles from "./modalAttachEvidence.module.scss";
 
 interface FileFromDragger {
   lastModified: number;
@@ -162,7 +166,7 @@ const ModalAttachEvidence = ({
               id="fileInput"
               style={{ display: "none" }}
               onChange={handleFileChange}
-              accept=".pdf,.png,.doc,.docx"
+              accept={FILE_EXTENSIONS.join(",")}
             />
           </>
         )}

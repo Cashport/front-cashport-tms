@@ -4,6 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Plus } from "phosphor-react";
 
 import { getTripDetails, IGetTripDetails, postAddMTTRipTracking } from "@/services/trips/trips";
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
 import FooterButtons from "../FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
@@ -302,7 +303,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                                 type="file"
                                 style={{ display: "none" }}
                                 onChange={handleFileChange}
-                                accept=".pdf,.png,.doc,.docx"
+                                accept={FILE_EXTENSIONS.join(",")}
                               />
                             </>
                           )}
