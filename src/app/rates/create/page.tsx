@@ -33,6 +33,8 @@ export interface IFormRate {
   otherServices?: string;
   amount: string;
   contract: string;
+  destination: string;
+  origin: string;
 }
 
 export default function CreateRatePage() {
@@ -43,7 +45,7 @@ export default function CreateRatePage() {
     watch,
     formState: { errors }
   } = useForm<IFormRate>({
-    shouldUnregister: true // 👈🏻 Importante aquí
+    shouldUnregister: true
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -71,10 +73,6 @@ export default function CreateRatePage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCancel = () => {
-    router.push("/rates");
   };
 
   return (
@@ -142,6 +140,7 @@ export default function CreateRatePage() {
                       options={providers?.map((p) => ({ id: p.value, value: p.label })) ?? []}
                       loading={loadingProviders}
                       showSearch
+                      dropdownStyles={{ width: "450px" }}
                     />
                   )}
                 />
@@ -353,6 +352,46 @@ export default function CreateRatePage() {
                         })) ?? []
                       }
                       loading={loadingContracts}
+                    />
+                  )}
+                />
+              </Flex>
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Destino</p>
+                <Controller
+                  name="destination"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar destino"
+                      error={errors?.destination}
+                      field={field}
+                      options={[
+                        { id: "1", value: "Opción 1" },
+                        { id: "2", value: "Opción 2" }
+                      ]}
+                    />
+                  )}
+                />
+              </Flex>
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Origen</p>
+                <Controller
+                  name="origin"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar origen"
+                      error={errors?.origin}
+                      field={field}
+                      options={[
+                        { id: "1", value: "Opción 1" },
+                        { id: "2", value: "Opción 2" }
+                      ]}
                     />
                   )}
                 />

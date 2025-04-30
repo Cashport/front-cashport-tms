@@ -11,6 +11,7 @@ interface Props {
   loading?: boolean;
   allowClear?: boolean;
   showSearch?: boolean;
+  dropdownStyles?: React.CSSProperties;
 }
 
 export const SelectInputForm = ({
@@ -21,7 +22,8 @@ export const SelectInputForm = ({
   options,
   loading = false,
   allowClear = false,
-  showSearch = false
+  showSearch = false,
+  dropdownStyles
 }: Props) => {
   const optionsFormated = options.map((option: { id: number | string; value: string }) => {
     return {
@@ -45,6 +47,7 @@ export const SelectInputForm = ({
         filterOption={(input, option) =>
           (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
         }
+        dropdownStyle={dropdownStyles}
       />
       {error && (
         <Typography.Text type="danger" className="textMessageError">
