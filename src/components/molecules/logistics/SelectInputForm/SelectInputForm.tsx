@@ -3,18 +3,27 @@ import { Select, Typography } from "antd";
 import "./SelectInputForm.scss";
 
 interface Props {
-    placeholder?: string;
-    error: any;
-    field: any;
-    selected?: any;
-    options: { id: number; value: string }[]
-    loading?: boolean
-    allowClear?: boolean
-    showSearch?: boolean
+  placeholder?: string;
+  error: any;
+  field: any;
+  selected?: any;
+  options: { id: number | string; value: string }[];
+  loading?: boolean;
+  allowClear?: boolean;
+  showSearch?: boolean;
 }
 
-export const SelectInputForm = ({ placeholder = "Selecciona", error, field, selected, options, loading = false, allowClear= false , showSearch= false}: Props) => {
-  const optionsFormated = options.map((option: {id: number, value: string}) => {
+export const SelectInputForm = ({
+  placeholder = "Selecciona",
+  error,
+  field,
+  selected,
+  options,
+  loading = false,
+  allowClear = false,
+  showSearch = false
+}: Props) => {
+  const optionsFormated = options.map((option: { id: number | string; value: string }) => {
     return {
       value: option.id,
       label: option.value
@@ -34,7 +43,7 @@ export const SelectInputForm = ({ placeholder = "Selecciona", error, field, sele
         allowClear={allowClear}
         showSearch={showSearch}
         filterOption={(input, option) =>
-          (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+          (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
         }
       />
       {error && (
