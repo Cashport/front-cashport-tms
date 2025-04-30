@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' blob: https://api.mapbox.com 'nonce-${nonce}' ;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://api.mapbox.com ;
     style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com;
     img-src 'self' https://*.amazonaws.com https://api.mapbox.com data: blob: https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
