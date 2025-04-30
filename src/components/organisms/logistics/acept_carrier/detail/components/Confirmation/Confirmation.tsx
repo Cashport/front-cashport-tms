@@ -87,8 +87,8 @@ export function Confirmation({
             disabled={formMode === FormMode.VIEW}
           />
           <div className={styles.text}>
-            Confirmo que el conductor asignado cumple con todos los requerimientos del contrato y
-            estipulados por HSQ.
+            Confirmo que el conductor y el vehículo asignados cumplen con todos los requerimientos contractuales y
+            estipulados por HSQ, y acepto el valor establecido para la ejecución del servicio.
           </div>
         </Flex>
       </Flex>
