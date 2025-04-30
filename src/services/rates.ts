@@ -1,5 +1,6 @@
 import { API } from "@/utils/api/api";
 import { RateType, RateTypeIds } from "@/enums/rates";
+import { IFormRate } from "@/app/rates/create/page";
 
 interface ICreateRateDTO {
   serviceItemSAP: string;
@@ -24,7 +25,7 @@ interface PricingData {
   SAP_Item: string;
   SAP_Service: string;
   SAP_description: string;
-  SAP_value: string;
+  SAP_value: number;
   SAP_unit: string;
   OA: string;
   VENDOR: string;
@@ -36,7 +37,7 @@ interface PricingData {
 }
 
 export const ratesService = {
-  async createRate(data: ICreateRateDTO) {
+  async createRate(data: IFormRate) {
     try {
       const pricingData: PricingData = {
         id_carrier: Number(data.provider),
@@ -44,12 +45,12 @@ export const ratesService = {
         SAP_Item: data.serviceItemSAP,
         SAP_Service: data.serviceDescriptionSAP,
         SAP_description: data.serviceLineDescriptionSAP,
-        SAP_value: data.amount.toString(),
+        SAP_value: Number(data.amount.replaceAll(".", "").replaceAll(",", ".")) || 0,
         SAP_unit: "JOB",
         OA: data.oaSAP,
         VENDOR: data.provider,
         id_vehicle_type: Number(data.vehicleType),
-        price: data.amount,
+        price: Number(data.amount.replaceAll(".", "").replaceAll(",", ".")) || 0,
         pricing_type: RateTypeIds[data.rateType],
         from_units: data.from ? Number(data.from) : undefined,
         to_units: data.to ? Number(data.to) : undefined

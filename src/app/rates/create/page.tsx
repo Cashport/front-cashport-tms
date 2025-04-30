@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
-import { Flex, Typography, message } from "antd";
+import { Flex, Input, Typography, message } from "antd";
+import { NumericFormat } from "react-number-format";
 
 import { ratesService } from "@/services/rates";
 
@@ -17,7 +18,7 @@ import styles from "./page.module.scss";
 
 const { Title } = Typography;
 
-interface IFormRate {
+export interface IFormRate {
   serviceItemSAP: string;
   serviceDescriptionSAP: string;
   serviceLineDescriptionSAP: string;
@@ -30,7 +31,7 @@ interface IFormRate {
   to: string;
   rateDetail: string;
   otherServices?: string;
-  amount: number;
+  amount: string;
   contract: string;
 }
 
@@ -306,16 +307,32 @@ export default function CreateRatePage() {
 
             {/* Cuarta fila */}
             <div className={styles.inputRow}>
-              <InputForm
-                titleInput="Monto"
-                nameInput="amount"
-                control={control}
-                error={errors?.amount}
-                placeholder="10,000.00"
-                typeInput="number"
-                validationRules={{ required: "Este campo es requerido" }}
-                style={{ width: "100%" }}
-              />
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Monto</p>
+                <Controller
+                  name="amount"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <NumericFormat
+                      {...field}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      decimalScale={2}
+                      fixedDecimalScale
+                      allowNegative={false}
+                      customInput={Input}
+                      placeholder="10,000.00"
+                      className={!errors?.amount ? styles.inputForm : styles.inputFormError}
+                    />
+                  )}
+                />
+                {errors?.amount && (
+                  <Typography.Text type="danger" className="textMessageError">
+                    {errors.amount.message}
+                  </Typography.Text>
+                )}
+              </Flex>
 
               <Flex vertical className="selectButton">
                 <p className={styles.inputTitle}>Contrato</p>
@@ -343,12 +360,11 @@ export default function CreateRatePage() {
             </div>
 
             {/* Botones de acción */}
-            <Flex gap={16} justify="end">
+            <Flex gap={16} style={{ alignSelf: "flex-end" }}>
               <FooterButtons
-                titleCancel="Cancelar"
+                showLeftButton={false}
                 titleConfirm={isLoading ? "Guardando..." : "Guardar"}
-                isConfirmDisabled={isLoading}
-                onCancel={handleCancel}
+                isConfirmLoading={isLoading}
                 handleOk={handleSubmit(onSubmit)}
               />
             </Flex>
