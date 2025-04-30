@@ -1,3 +1,5 @@
+@import "@styles/variables.scss";
+
 .selectContainer {
     .select-form-title {
         color: #909090;
@@ -27,9 +29,22 @@
     }
 
     .selectInputError {
-        border-color: red !important;
-    }
+        width: 100%;
+        border: 1px dashed red;
+        height: 3rem !important;
+        margin-bottom: 0.2rem;
+        background-color: $background;
+        padding: 0.45rem;
+        border-radius: 0.25rem;
+        font-weight: 300;
 
+        .ant-select-selector {
+            .ant-select-selection-placeholder {
+                color: $dark-gray;
+                font-size: 1rem;
+            }
+        }
+    }
     .textError {
         color: red;
         margin-top: 0.5rem;
