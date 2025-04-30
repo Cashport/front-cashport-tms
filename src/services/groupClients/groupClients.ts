@@ -22,16 +22,8 @@ export const createGroup = async (data: any, id: number): Promise<any> => {
     project_id: id
   };
 
-  const token = await getIdToken();
-
   try {
-    const response: AxiosResponse = await axios.post(`${config.API_HOST}/group-client`, modelData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: AxiosResponse = await API.post(`${config.API_HOST}/group-client`, modelData);
     return response;
   } catch (error) {
     return error as any;
@@ -49,16 +41,8 @@ export const updateGroup = async (
     project_id
   };
 
-  const token = await getIdToken();
-
   try {
-    const response: AxiosResponse = await axios.put(`${config.API_HOST}/group-client`, modelData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: AxiosResponse = await API.put(`${config.API_HOST}/group-client`, modelData);
 
     return response;
   } catch (error) {
@@ -74,10 +58,7 @@ export const deleteGroups = async (groupsId: number[], project_id: number): Prom
   };
 
   try {
-    const response: AxiosResponse = await API.put(
-      `${config.API_HOST}/group-client/delete`,
-      modelData
-    );
+    const response: AxiosResponse = await API.put(`/group-client/delete`, modelData);
 
     return response;
   } catch (error) {
@@ -96,20 +77,8 @@ export const changeGroupState = async (
     status
   };
 
-  const token = await getIdToken();
-
   try {
-    const response: AxiosResponse = await axios.put(
-      `${config.API_HOST}/group-client/change-status`,
-      modelData,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: AxiosResponse = await API.put(`/group-client/change-status`, modelData);
 
     return response;
   } catch (error) {

@@ -1,9 +1,6 @@
-import { ProjectsView } from "@/components/organisms/projects/ProjectsView/ProjectsView";
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Profitline"
-};
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  return <ProjectsView />;
+export default function Page() {
+  // Redirect to the new page
+  redirect("/landing");
 }

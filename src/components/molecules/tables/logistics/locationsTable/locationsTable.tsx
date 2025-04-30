@@ -36,7 +36,7 @@ export const LocationsTable = () => {
 
   useEffect(() => {
     const data =
-      locations?.data?.data
+      locations?.data
         ?.filter((element: any) => {
           if (!search) return true;
           return element.description.toLowerCase().includes(search.toLowerCase());

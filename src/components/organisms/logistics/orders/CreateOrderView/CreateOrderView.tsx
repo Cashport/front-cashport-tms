@@ -234,11 +234,11 @@ export const CreateOrderView = () => {
   const loadLocations = async () => {
     if (locations.length > 0) return;
     const result = await getAllLocations();
-    if (result?.data?.data?.length > 0) {
+    if (result?.data?.length > 0) {
       const listlocations: any[] | ((prevState: ILocation[]) => ILocation[]) = [];
       const listlocationoptions: { label: any; value: any }[] = [];
 
-      result.data.data.forEach((item) => {
+      result.data.forEach((item) => {
         listlocations.push(item);
         listlocationoptions.push({ label: item.description, value: item.id });
       });
@@ -579,8 +579,8 @@ export const CreateOrderView = () => {
 
     const res = await getAllMaterials();
     const result: any = [];
-    if (res?.data?.data?.length > 0) {
-      res.data.data.forEach((item) => {
+    if (res?.data?.length > 0) {
+      res.data.forEach((item: any) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>
@@ -632,7 +632,7 @@ export const CreateOrderView = () => {
     const results = await Promise.all(promises);
 
     const combinedResults = results
-      .map((result) => result?.data?.data)
+      .map((result) => result?.data)
       .reduce((acc, data) => acc.concat(data), []);
     const result: any = [];
 
@@ -713,8 +713,8 @@ export const CreateOrderView = () => {
 
     const res = await getPsl();
     const result: any = [];
-    if (res?.data?.data?.length > 0) {
-      res.data.data.forEach((item) => {
+    if (res?.data?.length > 0) {
+      res.data.forEach((item: any) => {
         result.push({ value: item.id, label: item.description, costcenters: item.cost_center });
       });
     }
@@ -937,8 +937,8 @@ export const CreateOrderView = () => {
 
     const res = await getOtherRequirements();
     const result: any = [];
-    if (res?.data?.data?.length > 0) {
-      res.data.data.forEach((item) => {
+    if (res?.data?.length > 0) {
+      res.data.forEach((item) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>
@@ -1030,8 +1030,8 @@ export const CreateOrderView = () => {
 
     const res = await getCompanyCodes();
     let result: any = [];
-    if (res?.data?.data?.length > 0) {
-      result = res.data.data.map((item) => ({
+    if (res?.data?.length > 0) {
+      result = res.data.map((item) => ({
         value: item.id.toString(),
         label: item.description
       }));
@@ -1051,8 +1051,8 @@ export const CreateOrderView = () => {
 
     const res = await getClients();
     let result: any = [];
-    if (res?.data?.data?.length > 0) {
-      result = res.data.data.map((item) => ({ value: item.id, label: item.description }));
+    if (res?.data?.length > 0) {
+      result = res.data.map((item) => ({ value: item.id, label: item.description }));
     }
     setOptionsClients(result);
   };
@@ -1069,8 +1069,8 @@ export const CreateOrderView = () => {
 
     const res = await getAllUsers();
     const result: any = [];
-    if (res?.data?.data?.length > 0) {
-      res.data.data.forEach((item) => {
+    if (res?.data?.length > 0) {
+      res.data.forEach((item: any) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>

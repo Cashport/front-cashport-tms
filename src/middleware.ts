@@ -49,6 +49,7 @@ export async function middleware(request: NextRequest) {
     return res;
   }
   if (!session) {
+    console.info("No hay cookie de sesión");
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
   //Call the API to validate the token

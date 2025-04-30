@@ -53,8 +53,8 @@ export const OrdersTable = () => {
     try {
       if (transferOrderList.length > 0) return;
       const result = await getAllTransferOrderList();
-      if (result.data.data.length > 0) {
-        setTransferOrderList(result.data.data);
+      if (result.data.length > 0) {
+        setTransferOrderList(result.data);
       }
     } catch (error) {
       if (error instanceof Error) messageApi.open({ content: error.message, type: "error" });
