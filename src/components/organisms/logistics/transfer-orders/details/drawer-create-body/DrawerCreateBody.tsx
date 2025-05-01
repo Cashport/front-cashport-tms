@@ -1,7 +1,9 @@
-import { Button, Input, Select, Typography, Upload } from "antd";
-import { NumericFormat } from "react-number-format";
-import styles from "./drawerCreateBody.module.scss";
 import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import useSWR from "swr";
+import { Button, Input, Select, Typography, Upload } from "antd";
+import { UploadFile } from "antd/lib";
+import { UploadChangeParam } from "antd/es/upload";
+import { NumericFormat } from "react-number-format";
 import {
   CaretDoubleRight,
   ChartBar,
@@ -13,12 +15,15 @@ import {
   PlusCircle,
   User
 } from "phosphor-react";
+
 import { getNoveltyTypes, getOvercosts } from "@/services/logistics/novelty";
-import { INovelty, INoveltyType } from "@/types/novelty/INovelty";
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
+
 import { IForm } from "../Details";
-import { UploadFile } from "antd/lib";
-import { UploadChangeParam } from "antd/es/upload";
-import useSWR from "swr";
+
+import { INovelty, INoveltyType } from "@/types/novelty/INovelty";
+
+import styles from "./drawerCreateBody.module.scss";
 
 const Text = Typography;
 
@@ -263,10 +268,7 @@ export const DrawerCreateBody: FC<IDrawerBodyProps> = ({
             const extension = evidence.url.split(".").pop()?.toLowerCase();
             if (extension && imageExtensions.includes(extension)) {
               return (
-                <div
-                  key={evidence.id}
-                  className={styles.evidence}
-                >
+                <div key={evidence.id} className={styles.evidence}>
                   <Text className={styles.evidenceTitle}>{evidence.name}</Text>
                   <FileArrowDown color="#141414" size={20} />
                 </div>
@@ -292,7 +294,7 @@ export const DrawerCreateBody: FC<IDrawerBodyProps> = ({
             </div>
           ))}
           <Upload
-            accept=".pdf, .png, .doc, .docx"
+            accept={FILE_EXTENSIONS.join(",")}
             showUploadList={false}
             onChange={handleUploadFile}
           >

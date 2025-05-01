@@ -100,3 +100,20 @@ export const TMS_COMPONENTS = {
     LOCATIONS: "Ubicacion"
   }
 };
+
+export const FILE_EXTENSIONS = [
+  ".pdf",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".xltm",
+  ".csv",
+  ".xml",
+  ".msg",
+  ".eml",
+  ".zip"
+];

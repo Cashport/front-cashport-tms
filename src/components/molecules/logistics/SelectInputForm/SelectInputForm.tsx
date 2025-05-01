@@ -7,7 +7,7 @@ interface Props {
   error: any;
   field: any;
   selected?: any;
-  options: { id: number | string; value: string }[];
+  options?: { id: number | string; value: string }[];
   loading?: boolean;
   allowClear?: boolean;
   showSearch?: boolean;
@@ -25,7 +25,7 @@ export const SelectInputForm = ({
   showSearch = false,
   dropdownStyles
 }: Props) => {
-  const optionsFormated = options.map((option: { id: number | string; value: string }) => {
+  const optionsFormated = options?.map((option: { id: number | string; value: string }) => {
     return {
       value: option.id,
       label: option.value

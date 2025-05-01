@@ -1,13 +1,15 @@
 import { Button, Flex, Typography, Upload } from "antd";
 import { FileArrowUp, Trash } from "phosphor-react";
 import type { UploadFile, UploadProps } from "antd";
-const { Dragger } = Upload;
+import { UploadChangeParam } from "antd/es/upload";
+
+import { shortenFileName } from "@/utils/utils";
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
 import "./documentbutton.scss";
-import { UploadChangeParam } from "antd/es/upload";
-import { shortenFileName } from "@/utils/utils";
 
 const { Text } = Typography;
+const { Dragger } = Upload;
 
 export interface DocumentButtonProps {
   title?: string;
@@ -30,7 +32,7 @@ export const DocumentButton = ({
   title = "file",
   fileName = "Seleccionar archivo",
   fileSize = "PDF, Word, PNG (Tamaño max 30mb)",
-  accept = ".pdf, .png, .doc, .docx",
+  accept = FILE_EXTENSIONS.join(","),
   deletable = true,
   handleOnChange,
   handleOnDrop,

@@ -15,7 +15,7 @@ import {
 import { IFormLocation, ILocation } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab.mapper";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { LocationFormTab } from "@/components/molecules/tabs/logisticsForms/locationForm/locationFormTab";
 import { useRouter } from "next/navigation";
 
@@ -39,11 +39,15 @@ export const LocationInfoView = ({ params }: Props) => {
     return getLocationById(params.id);
   };
 
-  const { data, isLoading } = useSWR({ id: params, key: `GetLocationById-${params.id}` }, fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data, isLoading, mutate } = useSWR(
+    { id: params, key: `GetLocationById-${params.id}` },
+    fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   const handleSubmitForm = async (dataform: IFormLocation) => {
     const sendata: IFormLocation = {
@@ -65,6 +69,7 @@ export const LocationInfoView = ({ params }: Props) => {
           setStatusForm("review");
         });
       }
+      mutate();
     } catch (error) {
       setIsLoadingSubmit(false);
       message.error(error instanceof Error ? error.message : "Error al editar ubicación", 3);
