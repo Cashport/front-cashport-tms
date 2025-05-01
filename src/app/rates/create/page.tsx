@@ -1,16 +1,17 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { Flex, Col, Typography, Card, message } from "antd";
-import type { SelectProps } from "antd";
+import { Controller, useForm } from "react-hook-form";
+import { Flex, Input, Modal, Typography, message } from "antd";
+import { NumericFormat } from "react-number-format";
 
 import { ratesService } from "@/services/rates";
+import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
+import { useLocations } from "@/hooks/logistics/useLocations";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
-import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 
 import { RateType, RateTypeLabels, ServiceTypeIds, ServiceTypeLabels } from "@/enums/rates";
 
@@ -18,7 +19,7 @@ import styles from "./page.module.scss";
 
 const { Title } = Typography;
 
-interface IFormRate {
+export interface IFormRate {
   serviceItemSAP: string;
   serviceDescriptionSAP: string;
   serviceLineDescriptionSAP: string;
@@ -31,23 +32,26 @@ interface IFormRate {
   to: string;
   rateDetail: string;
   otherServices?: string;
-  amount: number;
+  amount: string;
   contract: string;
+  destination: string;
+  origin: string;
 }
 
 export default function CreateRatePage() {
-  const router = useRouter();
   const {
     control,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors }
   } = useForm<IFormRate>({
-    shouldUnregister: true // 👈🏻 Importante aquí
+    shouldUnregister: true
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpenShowEvidenceModal, setShowEvidenceModal] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
+  const [commentary, setCommentary] = useState<string>();
 
   // Valores observados para los selects dependientes
   const providerId = watch("provider");
@@ -59,13 +63,17 @@ export default function CreateRatePage() {
   const { contracts, loading: loadingContracts } = useContracts(providerId);
   const { vehicleTypes, loading: loadingVehicleTypes } = useVehicleTypes(serviceTypeId);
   const { otherServices, loading: loadingOtherServices } = useOtherServices();
+  const { data: locationsData, isLoading: loadingLocations } = useLocations();
 
   const onSubmit = async (data: IFormRate) => {
     try {
       setIsLoading(true);
-      await ratesService.createRate(data);
+
+      await ratesService.createRate({ data, commentary, file: selectedEvidence[0] });
       message.success("Tarifa creada exitosamente");
-      router.push("/rates");
+      setShowEvidenceModal(false);
+      setSelectedEvidence([]);
+      setCommentary("");
     } catch (error) {
       console.error(error);
       message.error("Error al crear la tarifa");
@@ -74,281 +82,384 @@ export default function CreateRatePage() {
     }
   };
 
-  const handleCancel = () => {
-    router.push("/rates");
-  };
-
-  // Función para filtrar las opciones del select de vehículos
-  const filterVehicleOption: SelectProps["filterOption"] = (input, option) => {
-    if (typeof option?.label === "string") {
-      return option.label.toLowerCase().includes(input.toLowerCase());
-    }
-    return false;
+  const handleSaveRate = async () => {
+    //  open evidenceModal
+    setShowEvidenceModal(true);
   };
 
   return (
     <div className={styles.pageContainer}>
-      <Card
-        className={styles.formCard}
-        style={{ width: "100%", maxWidth: "1400px", margin: "0 auto" }}
-      >
+      <div className={styles.formCard}>
         <Title level={2}>Datos de la tarifa</Title>
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
           <Flex vertical gap={24} style={{ width: "100%" }}>
             {/* Primera fila - Campos SAP */}
-            <Flex gap={16} style={{ width: "100%" }}>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Service Item SAP"
-                  nameInput="serviceItemSAP"
-                  control={control}
-                  error={errors?.serviceItemSAP}
-                  placeholder="0000000"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  style={{ width: "100%" }}
-                />
-              </Col>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Service Description SAP"
-                  nameInput="serviceDescriptionSAP"
-                  control={control}
-                  error={errors?.serviceDescriptionSAP}
-                  placeholder="0000000"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  style={{ width: "100%" }}
-                />
-              </Col>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Service Line Description SAP"
-                  nameInput="serviceLineDescriptionSAP"
-                  control={control}
-                  error={errors?.serviceLineDescriptionSAP}
-                  placeholder="Ingrese el nombre"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  style={{ width: "100%" }}
-                />
-              </Col>
-              <Col span={6}>
-                <InputForm
-                  titleInput="OA SAP"
-                  nameInput="oaSAP"
-                  control={control}
-                  error={errors?.oaSAP}
-                  placeholder="Ingrese el nombre"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  style={{ width: "100%" }}
-                />
-              </Col>
-            </Flex>
+            <div className={styles.inputRow}>
+              <InputForm
+                titleInput="Service Item SAP"
+                nameInput="serviceItemSAP"
+                control={control}
+                error={errors?.serviceItemSAP}
+                placeholder="0000000"
+                validationRules={{ required: "Este campo es requerido" }}
+                style={{ width: "100%" }}
+              />
+
+              <InputForm
+                titleInput="Service Description SAP"
+                nameInput="serviceDescriptionSAP"
+                control={control}
+                error={errors?.serviceDescriptionSAP}
+                placeholder="0000000"
+                validationRules={{ required: "Este campo es requerido" }}
+                style={{ width: "100%" }}
+              />
+
+              <InputForm
+                titleInput="Service Line Description SAP"
+                nameInput="serviceLineDescriptionSAP"
+                control={control}
+                error={errors?.serviceLineDescriptionSAP}
+                placeholder="Ingrese el nombre"
+                validationRules={{ required: "Este campo es requerido" }}
+                style={{ width: "100%" }}
+              />
+
+              <InputForm
+                titleInput="OA SAP"
+                nameInput="oaSAP"
+                control={control}
+                error={errors?.oaSAP}
+                placeholder="Ingrese el nombre"
+                validationRules={{ required: "Este campo es requerido" }}
+                style={{ width: "100%" }}
+              />
+            </div>
 
             {/* Segunda fila */}
-            <Flex gap={16} style={{ width: "100%" }}>
-              <Col span={6}>
-                <InputSelect
-                  titleInput="Proveedor"
-                  nameInput="provider"
+            <div className={styles.inputRow}>
+              <Flex vertical>
+                <p className={styles.inputTitle}>Proveedor</p>
+                <Controller
+                  name="provider"
                   control={control}
-                  error={errors?.provider}
-                  options={providers}
-                  loading={loadingProviders}
-                  isError={errors?.provider !== undefined}
-                  placeholder="Seleccionar el estado"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  dropdownMatchSelectWidth={false}
-                  style={{ width: "100%" }}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar proveedor"
+                      error={errors?.provider}
+                      field={field}
+                      options={providers?.map((p) => ({ id: p.value, value: p.label })) ?? []}
+                      loading={loadingProviders}
+                      showSearch
+                      dropdownStyles={{ width: "450px" }}
+                    />
+                  )}
                 />
-              </Col>
-              <Col span={6}>
-                <InputSelect
-                  titleInput="Tipo de servicio"
-                  nameInput="serviceType"
+              </Flex>
+
+              <Flex vertical>
+                <p className={styles.inputTitle}>Tipo de servicio</p>
+                <Controller
+                  name="serviceType"
                   control={control}
-                  error={errors?.serviceType}
-                  options={Object.entries(ServiceTypeLabels).map(([value, label]) => ({
-                    value: ServiceTypeIds[value as keyof typeof ServiceTypeIds],
-                    label
-                  }))}
-                  loading={false}
-                  isError={errors?.serviceType !== undefined}
-                  placeholder="Seleccionar el estado"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  dropdownMatchSelectWidth={false}
-                  style={{ width: "100%" }}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar tipo de servicio"
+                      error={errors?.serviceType}
+                      field={field}
+                      options={Object.entries(ServiceTypeLabels).map(([value, label]) => ({
+                        id: ServiceTypeIds[value as keyof typeof ServiceTypeIds],
+                        value: label
+                      }))}
+                    />
+                  )}
                 />
-              </Col>
-              <Col span={6}>
-                <InputSelect
-                  titleInput="Tipo de vehículo"
-                  nameInput="vehicleType"
+              </Flex>
+
+              <Flex vertical>
+                <p className={styles.inputTitle}> Tipo de vehículo</p>
+                <Controller
+                  name="vehicleType"
                   control={control}
-                  error={errors?.vehicleType}
-                  options={vehicleTypes}
-                  loading={loadingVehicleTypes}
-                  isError={errors?.vehicleType !== undefined}
-                  placeholder="Seleccionar el estado"
+                  rules={{ required: "Este campo es requerido" }}
                   disabled={!serviceTypeId}
-                  validationRules={{ required: "Este campo es requerido" }}
-                  filterOption={filterVehicleOption}
-                  dropdownMatchSelectWidth={false}
-                  style={{ width: "100%" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar tipo de vehículo"
+                      error={errors?.vehicleType}
+                      field={field}
+                      options={
+                        vehicleTypes.map((vehicleType) => ({
+                          id: vehicleType.value,
+                          value: vehicleType.label
+                        })) ?? []
+                      }
+                      loading={loadingVehicleTypes}
+                      showSearch
+                    />
+                  )}
                 />
-              </Col>
-              <Col span={6}>
-                <InputSelect
-                  titleInput="Tipo de tarifa"
-                  nameInput="rateType"
+              </Flex>
+
+              <Flex vertical>
+                <p className={styles.inputTitle}>Tipo de tarifa</p>
+                <Controller
+                  name="rateType"
                   control={control}
-                  error={errors?.rateType}
-                  options={Object.entries(RateTypeLabels).map(([value, label]) => ({
-                    value,
-                    label
-                  }))}
-                  loading={false}
-                  isError={errors?.rateType !== undefined}
-                  placeholder="Seleccionar el estado"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  dropdownMatchSelectWidth={false}
-                  style={{ width: "100%" }}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar tipo de tarifa"
+                      error={errors?.rateType}
+                      field={field}
+                      options={Object.entries(RateTypeLabels).map(([value, label]) => ({
+                        id: value,
+                        value: label
+                      }))}
+                    />
+                  )}
                 />
-              </Col>
-            </Flex>
+              </Flex>
+            </div>
 
             {/* Tercera fila */}
-            <Flex gap={16} style={{ width: "100%" }}>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Desde"
-                  nameInput="from"
+            <div className={styles.inputRow}>
+              <InputForm
+                titleInput="Desde"
+                nameInput="from"
+                control={control}
+                error={errors?.from}
+                placeholder="0"
+                disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
+                validationRules={
+                  [RateType.KM, RateType.HORAS].includes(rateType as RateType)
+                    ? { required: "Este campo es requerido" }
+                    : undefined
+                }
+                style={{ width: "100%" }}
+              />
+
+              <InputForm
+                titleInput="Hasta"
+                nameInput="to"
+                control={control}
+                error={errors?.to}
+                placeholder="50"
+                disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
+                validationRules={
+                  [RateType.KM, RateType.HORAS].includes(rateType as RateType)
+                    ? { required: "Este campo es requerido" }
+                    : undefined
+                }
+                style={{ width: "100%" }}
+              />
+
+              <InputForm
+                titleInput="Detalle de tarifa"
+                nameInput="rateDetail"
+                control={control}
+                error={errors?.rateDetail}
+                placeholder="Ingresar el objeto"
+                disabled={
+                  ![
+                    RateType.OTROS,
+                    RateType.HORAS,
+                    RateType.NOVEDAD,
+                    RateType.MESES,
+                    RateType.DIAS,
+                    RateType.SEMANAS
+                  ].includes(rateType as RateType)
+                }
+                validationRules={
+                  [
+                    RateType.OTROS,
+                    RateType.HORAS,
+                    RateType.NOVEDAD,
+                    RateType.MESES,
+                    RateType.DIAS,
+                    RateType.SEMANAS
+                  ].includes(rateType as RateType)
+                    ? { required: "Este campo es requerido" }
+                    : undefined
+                }
+                style={{ width: "100%" }}
+              />
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Otros servicios</p>
+                <Controller
+                  name="otherServices"
                   control={control}
-                  error={errors?.from}
-                  placeholder="0"
-                  disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
-                  validationRules={
-                    [RateType.KM, RateType.HORAS].includes(rateType as RateType)
-                      ? { required: "Este campo es requerido" }
-                      : undefined
-                  }
-                  style={{ width: "100%" }}
-                />
-              </Col>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Hasta"
-                  nameInput="to"
-                  control={control}
-                  error={errors?.to}
-                  placeholder="50"
-                  disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
-                  validationRules={
-                    [RateType.KM, RateType.HORAS].includes(rateType as RateType)
-                      ? { required: "Este campo es requerido" }
-                      : undefined
-                  }
-                  style={{ width: "100%" }}
-                />
-              </Col>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Detalle de tarifa"
-                  nameInput="rateDetail"
-                  control={control}
-                  error={errors?.rateDetail}
-                  placeholder="Ingresar el objeto"
-                  disabled={
-                    ![
-                      RateType.OTROS,
-                      RateType.HORAS,
-                      RateType.NOVEDAD,
-                      RateType.MESES,
-                      RateType.DIAS,
-                      RateType.SEMANAS
-                    ].includes(rateType as RateType)
-                  }
-                  validationRules={
-                    [
-                      RateType.OTROS,
-                      RateType.HORAS,
-                      RateType.NOVEDAD,
-                      RateType.MESES,
-                      RateType.DIAS,
-                      RateType.SEMANAS
-                    ].includes(rateType as RateType)
-                      ? { required: "Este campo es requerido" }
-                      : undefined
-                  }
-                  style={{ width: "100%" }}
-                />
-              </Col>
-              <Col span={6}>
-                <InputSelect
-                  titleInput="Otros servicios"
-                  nameInput="otherServices"
-                  control={control}
-                  error={errors?.otherServices}
-                  options={otherServices}
-                  loading={loadingOtherServices}
-                  isError={errors?.otherServices !== undefined}
-                  placeholder="Seleccionar el estado"
                   disabled={rateType !== RateType.OTROS}
-                  validationRules={
+                  rules={
                     rateType === RateType.OTROS
                       ? { required: "Este campo es requerido" }
                       : undefined
                   }
-                  noRequired={rateType !== RateType.OTROS}
-                  dropdownMatchSelectWidth={false}
-                  style={{ width: "100%" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar otros servicios"
+                      error={errors?.otherServices}
+                      field={field}
+                      options={
+                        otherServices.map((service) => ({
+                          id: service.value,
+                          value: service.label
+                        })) ?? []
+                      }
+                      loading={loadingOtherServices}
+                    />
+                  )}
                 />
-              </Col>
-            </Flex>
+              </Flex>
+            </div>
 
             {/* Cuarta fila */}
-            <Flex gap={16} style={{ width: "100%" }}>
-              <Col span={6}>
-                <InputForm
-                  titleInput="Monto"
-                  nameInput="amount"
+            <div className={styles.inputRow}>
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Monto</p>
+                <Controller
+                  name="amount"
                   control={control}
-                  error={errors?.amount}
-                  placeholder="10,000.00"
-                  typeInput="number"
-                  validationRules={{ required: "Este campo es requerido" }}
-                  style={{ width: "100%" }}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <NumericFormat
+                      {...field}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      decimalScale={2}
+                      fixedDecimalScale
+                      allowNegative={false}
+                      customInput={Input}
+                      placeholder="10,000.00"
+                      className={!errors?.amount ? styles.inputForm : styles.inputFormError}
+                    />
+                  )}
                 />
-              </Col>
-              <Col span={6}>
-                <InputSelect
-                  titleInput="Contrato"
-                  nameInput="contract"
+                {errors?.amount && (
+                  <Typography.Text type="danger" className="textMessageError">
+                    {errors.amount.message}
+                  </Typography.Text>
+                )}
+              </Flex>
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Contrato</p>
+                <Controller
+                  name="contract"
                   control={control}
-                  error={errors?.contract}
-                  options={contracts}
-                  loading={loadingContracts}
-                  isError={errors?.contract !== undefined}
-                  placeholder="Seleccionar el estado"
                   disabled={!providerId}
-                  validationRules={{ required: "Este campo es requerido" }}
-                  dropdownMatchSelectWidth={false}
-                  style={{ width: "100%" }}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar contrato"
+                      error={errors?.contract}
+                      field={field}
+                      options={
+                        contracts.map((contract) => ({
+                          id: contract.value,
+                          value: contract.label
+                        })) ?? []
+                      }
+                      loading={loadingContracts}
+                    />
+                  )}
                 />
-              </Col>
-            </Flex>
+              </Flex>
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Destino</p>
+                <Controller
+                  name="destination"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar destino"
+                      error={errors?.destination}
+                      field={field}
+                      options={
+                        locationsData?.map((location) => ({
+                          id: location.id,
+                          value: location.city
+                        })) ?? []
+                      }
+                      loading={loadingLocations}
+                      showSearch
+                    />
+                  )}
+                />
+              </Flex>
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Origen</p>
+                <Controller
+                  name="origin"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar origen"
+                      error={errors?.origin}
+                      field={field}
+                      options={
+                        locationsData?.map((location) => ({
+                          id: location.id,
+                          value: location.city
+                        })) ?? []
+                      }
+                      loading={loadingLocations}
+                      showSearch
+                    />
+                  )}
+                />
+              </Flex>
+            </div>
 
             {/* Botones de acción */}
-            <Flex gap={16} justify="end">
+            <Flex gap={16} style={{ alignSelf: "flex-end" }}>
               <FooterButtons
-                titleCancel="Cancelar"
+                showLeftButton={false}
                 titleConfirm={isLoading ? "Guardando..." : "Guardar"}
-                isConfirmDisabled={isLoading}
-                onCancel={handleCancel}
-                handleOk={handleSubmit(onSubmit)}
+                isConfirmLoading={isLoading}
+                handleOk={handleSaveRate}
               />
             </Flex>
           </Flex>
         </form>
-      </Card>
+      </div>
+
+      <Modal
+        centered
+        className="ModalAttachEvidence"
+        onCancel={() => setShowEvidenceModal(false)}
+        width={"55%"}
+        open={isOpenShowEvidenceModal}
+        footer={null}
+        closable={false}
+        destroyOnClose={true}
+      >
+        <ModalAttachEvidence
+          handleAttachEvidence={handleSubmit(onSubmit)}
+          selectedEvidence={selectedEvidence}
+          setSelectedEvidence={setSelectedEvidence}
+          commentary={commentary}
+          setCommentary={setCommentary}
+          setShowEvidenceModal={setShowEvidenceModal}
+          handleCancel={() => {
+            setShowEvidenceModal(false);
+            setSelectedEvidence([]);
+            setCommentary("");
+          }}
+          customTexts={{
+            description: "Adjuntar evidencia"
+          }}
+          loading={isLoading}
+          multipleFiles={false}
+        />
+      </Modal>
     </div>
   );
 }

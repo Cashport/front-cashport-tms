@@ -7,10 +7,11 @@ interface Props {
   error: any;
   field: any;
   selected?: any;
-  options?: { id: number; value: string }[];
+  options?: { id: number | string; value: string }[];
   loading?: boolean;
   allowClear?: boolean;
   showSearch?: boolean;
+  dropdownStyles?: React.CSSProperties;
 }
 
 export const SelectInputForm = ({
@@ -21,9 +22,10 @@ export const SelectInputForm = ({
   options,
   loading = false,
   allowClear = false,
-  showSearch = false
+  showSearch = false,
+  dropdownStyles
 }: Props) => {
-  const optionsFormated = options?.map((option: { id: number; value: string }) => {
+  const optionsFormated = options?.map((option: { id: number | string; value: string }) => {
     return {
       value: option.id,
       label: option.value
@@ -45,6 +47,7 @@ export const SelectInputForm = ({
         filterOption={(input, option) =>
           (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
         }
+        dropdownStyle={dropdownStyles}
       />
       {error && (
         <Typography.Text type="danger" className="textMessageError">
