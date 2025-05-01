@@ -34,12 +34,23 @@ interface PricingData {
   pricing_type: number;
   from_units?: number;
   to_units?: number;
+  id_location_from: string;
+  id_location_to: string;
+  approval_comment?: string;
 }
 
 export const ratesService = {
-  async createRate(data: IFormRate) {
+  async createRate({
+    data,
+    commentary,
+    file
+  }: {
+    data: IFormRate;
+    commentary?: string;
+    file?: File;
+  }) {
     try {
-      const pricingData: PricingData = {
+      const request: PricingData = {
         id_carrier: Number(data.provider),
         id_service_type: data.serviceType,
         SAP_Item: data.serviceItemSAP,
@@ -53,10 +64,17 @@ export const ratesService = {
         price: Number(data.amount.replaceAll(".", "").replaceAll(",", ".")) || 0,
         pricing_type: RateTypeIds[data.rateType],
         from_units: data.from ? Number(data.from) : undefined,
-        to_units: data.to ? Number(data.to) : undefined
+        to_units: data.to ? Number(data.to) : undefined,
+        id_location_from: data.origin,
+        id_location_to: data.destination,
+        approval_comment: commentary
       };
 
-      await API.post("/pricing", pricingData);
+      const formData = new FormData();
+      formData.append("file", file as Blob);
+      formData.append("data", JSON.stringify(request));
+
+      await API.post("/pricing", formData);
       return true;
     } catch (error) {
       console.error("Error al crear la tarifa:", error);

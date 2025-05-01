@@ -1,16 +1,17 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
-import { Flex, Input, Typography, message } from "antd";
+import { Flex, Input, Modal, Typography, message } from "antd";
 import { NumericFormat } from "react-number-format";
 
 import { ratesService } from "@/services/rates";
+import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
+import { useLocations } from "@/hooks/logistics/useLocations";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 
 import { RateType, RateTypeLabels, ServiceTypeIds, ServiceTypeLabels } from "@/enums/rates";
 
@@ -38,7 +39,6 @@ export interface IFormRate {
 }
 
 export default function CreateRatePage() {
-  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -49,6 +49,9 @@ export default function CreateRatePage() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpenShowEvidenceModal, setShowEvidenceModal] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
+  const [commentary, setCommentary] = useState<string>();
 
   // Valores observados para los selects dependientes
   const providerId = watch("provider");
@@ -60,19 +63,27 @@ export default function CreateRatePage() {
   const { contracts, loading: loadingContracts } = useContracts(providerId);
   const { vehicleTypes, loading: loadingVehicleTypes } = useVehicleTypes(serviceTypeId);
   const { otherServices, loading: loadingOtherServices } = useOtherServices();
+  const { data: locationsData, isLoading: loadingLocations } = useLocations();
 
   const onSubmit = async (data: IFormRate) => {
     try {
       setIsLoading(true);
-      await ratesService.createRate(data);
+      console.log("Data to create rate:", data);
+      console.log("Selected evidence:", selectedEvidence);
+      console.log("Commentary:", commentary);
+      await ratesService.createRate({ data, commentary, file: selectedEvidence[0] });
       message.success("Tarifa creada exitosamente");
-      router.push("/rates");
     } catch (error) {
       console.error(error);
       message.error("Error al crear la tarifa");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSaveRate = async () => {
+    //  open evidenceModal
+    setShowEvidenceModal(true);
   };
 
   return (
@@ -368,10 +379,14 @@ export default function CreateRatePage() {
                       placeholder="Seleccionar destino"
                       error={errors?.destination}
                       field={field}
-                      options={[
-                        { id: "1", value: "Opción 1" },
-                        { id: "2", value: "Opción 2" }
-                      ]}
+                      options={
+                        locationsData?.map((location) => ({
+                          id: location.id,
+                          value: location.city
+                        })) ?? []
+                      }
+                      loading={loadingLocations}
+                      showSearch
                     />
                   )}
                 />
@@ -388,10 +403,14 @@ export default function CreateRatePage() {
                       placeholder="Seleccionar origen"
                       error={errors?.origin}
                       field={field}
-                      options={[
-                        { id: "1", value: "Opción 1" },
-                        { id: "2", value: "Opción 2" }
-                      ]}
+                      options={
+                        locationsData?.map((location) => ({
+                          id: location.id,
+                          value: location.city
+                        })) ?? []
+                      }
+                      loading={loadingLocations}
+                      showSearch
                     />
                   )}
                 />
@@ -404,12 +423,42 @@ export default function CreateRatePage() {
                 showLeftButton={false}
                 titleConfirm={isLoading ? "Guardando..." : "Guardar"}
                 isConfirmLoading={isLoading}
-                handleOk={handleSubmit(onSubmit)}
+                handleOk={handleSaveRate}
               />
             </Flex>
           </Flex>
         </form>
       </div>
+
+      <Modal
+        centered
+        className="ModalAttachEvidence"
+        onCancel={() => setShowEvidenceModal(false)}
+        width={"55%"}
+        open={isOpenShowEvidenceModal}
+        footer={null}
+        closable={false}
+        destroyOnClose={true}
+      >
+        <ModalAttachEvidence
+          handleAttachEvidence={handleSubmit(onSubmit)}
+          selectedEvidence={selectedEvidence}
+          setSelectedEvidence={setSelectedEvidence}
+          commentary={commentary}
+          setCommentary={setCommentary}
+          setShowEvidenceModal={setShowEvidenceModal}
+          handleCancel={() => {
+            setShowEvidenceModal(false);
+            setSelectedEvidence([]);
+            setCommentary("");
+          }}
+          customTexts={{
+            description: "Adjuntar evidencia"
+          }}
+          loading={isLoading}
+          multipleFiles={false}
+        />
+      </Modal>
     </div>
   );
 }
