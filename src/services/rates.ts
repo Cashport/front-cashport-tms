@@ -25,18 +25,19 @@ interface PricingData {
   SAP_Item: string;
   SAP_Service: string;
   SAP_description: string;
-  SAP_value: number;
+  SAP_value: string;
   SAP_unit: string;
   OA: string;
   VENDOR: string;
   id_vehicle_type: number;
-  price: number;
+  price: string;
   pricing_type: number;
   from_units?: number;
   to_units?: number;
   id_location_from: string;
   id_location_to: string;
   approval_comment?: string;
+  id_contract: string;
 }
 
 export const ratesService = {
@@ -56,23 +57,24 @@ export const ratesService = {
         SAP_Item: data.serviceItemSAP,
         SAP_Service: data.serviceDescriptionSAP,
         SAP_description: data.serviceLineDescriptionSAP,
-        SAP_value: Number(data.amount.replaceAll(".", "").replaceAll(",", ".")) || 0,
+        SAP_value: data.amount.replaceAll(".", "").replaceAll(",", ".").split(".")[0] || "0",
         SAP_unit: "JOB",
         OA: data.oaSAP,
         VENDOR: data.provider,
         id_vehicle_type: Number(data.vehicleType),
-        price: Number(data.amount.replaceAll(".", "").replaceAll(",", ".")) || 0,
+        price: data.amount.replaceAll(".", "").replaceAll(",", ".").split(".")[0] || "0",
         pricing_type: RateTypeIds[data.rateType],
         from_units: data.from ? Number(data.from) : undefined,
         to_units: data.to ? Number(data.to) : undefined,
         id_location_from: data.origin,
         id_location_to: data.destination,
-        approval_comment: commentary
+        approval_comment: commentary,
+        id_contract: data.contract
       };
 
       const formData = new FormData();
       formData.append("file", file as Blob);
-      formData.append("data", JSON.stringify(request));
+      formData.append("request", JSON.stringify(request));
 
       await API.post("/pricing", formData);
       return true;

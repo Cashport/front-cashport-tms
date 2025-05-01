@@ -68,11 +68,12 @@ export default function CreateRatePage() {
   const onSubmit = async (data: IFormRate) => {
     try {
       setIsLoading(true);
-      console.log("Data to create rate:", data);
-      console.log("Selected evidence:", selectedEvidence);
-      console.log("Commentary:", commentary);
+
       await ratesService.createRate({ data, commentary, file: selectedEvidence[0] });
       message.success("Tarifa creada exitosamente");
+      setShowEvidenceModal(false);
+      setSelectedEvidence([]);
+      setCommentary("");
     } catch (error) {
       console.error(error);
       message.error("Error al crear la tarifa");
