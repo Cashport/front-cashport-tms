@@ -44,6 +44,7 @@ export interface IFormRate {
   destination?: string;
   origin?: string;
   noveltyType?: string;
+  unit_type?: string;
 }
 
 export default function CreateRatePage() {
@@ -313,9 +314,9 @@ export default function CreateRatePage() {
 
               <InputForm
                 titleInput="Detalle de tarifa"
-                nameInput="rateDetail"
+                nameInput="unit_type"
                 control={control}
-                error={errors?.rateDetail}
+                error={errors?.unit_type}
                 placeholder="Ingresar el objeto"
                 style={{ width: "100%" }}
               />
