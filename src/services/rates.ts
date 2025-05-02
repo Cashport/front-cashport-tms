@@ -84,7 +84,7 @@ export const ratesService = {
       if (data.contract) request.id_contract = data.contract;
       if (data.noveltyType) request.id_novelty_type = Number(data.noveltyType);
       if (data.unit_type) request.unit_type = data.unit_type;
-      if (data.otherServices) request.id_unit_type = Number(data.id_unit_type);
+      if (data.otherServices || data.id_unit_type) request.id_unit_type = Number(data.id_unit_type);
 
       const formData = new FormData();
       if (file) formData.append("file", file);

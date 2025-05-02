@@ -102,6 +102,14 @@ export default function CreateRatePage() {
     try {
       setIsLoading(true);
 
+      // getting id_unit_type from otherServices
+      if (data.otherServices) {
+        const otherServicesData = otherServices.find((service) => service.label === data.otherServices);
+        if (otherServicesData) {
+          data.id_unit_type = Number(otherServicesData.value);
+        }
+      }
+
       await ratesService.createRate({ data, commentary, file: selectedEvidence[0] });
       message.success("Tarifa creada exitosamente");
       setShowEvidenceModal(false);
