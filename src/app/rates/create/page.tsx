@@ -402,14 +402,17 @@ export default function CreateRatePage() {
                   rules={{ required: "Este campo es requerido" }}
                   render={({ field }) => (
                     <NumericFormat
-                      {...field}
+                      value={field.value}
+                      onValueChange={(values) => {
+                        field.onChange(values.value); // the raw, unformatted value
+                      }}
                       thousandSeparator="."
                       decimalSeparator=","
-                      decimalScale={2}
+                      decimalScale={0}
                       fixedDecimalScale
                       allowNegative={false}
                       customInput={Input}
-                      placeholder="10,000.00"
+                      placeholder="10.000"
                       className={!errors?.amount ? styles.inputForm : styles.inputFormError}
                     />
                   )}
