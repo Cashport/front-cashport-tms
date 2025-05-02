@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Flex, Input, Modal, Typography, message } from "antd";
 import { NumericFormat } from "react-number-format";
@@ -35,15 +35,15 @@ export interface IFormRate {
   serviceType: (typeof ServiceTypeIds)[keyof typeof ServiceTypeIds];
   vehicleType: string;
   rateType: number;
-  from: string;
-  to: string;
+  from?: string;
+  to?: string;
   rateDetail: string;
   otherServices?: string;
   amount: string;
   contract: string;
-  destination: string;
-  origin: string;
-  noveltyType: string;
+  destination?: string;
+  origin?: string;
+  noveltyType?: string;
 }
 
 export default function CreateRatePage() {
@@ -51,6 +51,7 @@ export default function CreateRatePage() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors }
   } = useForm<IFormRate>({
     shouldUnregister: true
@@ -74,6 +75,18 @@ export default function CreateRatePage() {
   const { data: locationsData, isLoading: loadingLocations } = useLocations();
   const { data: ratesData, isLoading: loadingRates } = useRates();
   const { data: noveltyTypes, isLoading: loadingNoveltyTypes } = useNoveltyTypes();
+
+  // Reset fields when rateType changes
+  useEffect(() => {
+    if (rateType) {
+      setValue("from", undefined);
+      setValue("to", undefined);
+      setValue("origin", undefined);
+      setValue("destination", undefined);
+      setValue("otherServices", undefined);
+      setValue("noveltyType", undefined);
+    }
+  }, [rateType, control]);
 
   const onSubmit = async (data: IFormRate) => {
     try {
