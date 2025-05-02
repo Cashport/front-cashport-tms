@@ -45,6 +45,7 @@ export interface IFormRate {
   origin?: string;
   noveltyType?: string;
   unit_type?: string;
+  id_unit_type?: number;
 }
 
 export default function CreateRatePage() {
