@@ -5,9 +5,15 @@ import { Flex, Input, Modal, Typography, message } from "antd";
 import { NumericFormat } from "react-number-format";
 
 import { ratesService } from "@/services/rates";
-import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
-import { useLocations } from "@/hooks/logistics/useLocations";
-import { useRates } from "@/hooks/logistics/useRates";
+import {
+  useProviders,
+  useContracts,
+  useVehicleTypes,
+  useOtherServices,
+  useLocations,
+  useRates,
+  useNoveltyTypes
+} from "@/hooks/useRates";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -67,6 +73,7 @@ export default function CreateRatePage() {
   const { otherServices, loading: loadingOtherServices } = useOtherServices();
   const { data: locationsData, isLoading: loadingLocations } = useLocations();
   const { data: ratesData, isLoading: loadingRates } = useRates();
+  const { data: noveltyTypes, isLoading: loadingNoveltyTypes } = useNoveltyTypes();
 
   const onSubmit = async (data: IFormRate) => {
     try {
@@ -353,12 +360,11 @@ export default function CreateRatePage() {
                       placeholder="Seleccionar tipo de novedad"
                       error={errors?.noveltyType}
                       field={field}
-                      options={[
-                        { id: "1", value: "Novedad 1" },
-                        { id: "2", value: "Novedad 2" },
-                        { id: "3", value: "Novedad 3" }
-                      ]}
-                      loading={false}
+                      options={noveltyTypes?.map((novelty) => ({
+                        id: novelty.id,
+                        value: novelty.name
+                      }))}
+                      loading={loadingNoveltyTypes}
                     />
                   )}
                 />

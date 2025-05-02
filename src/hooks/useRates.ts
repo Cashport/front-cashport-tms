@@ -1,5 +1,8 @@
+import useSWR from "swr";
 import { useEffect, useState } from "react";
-import { API } from "@/utils/api/api";
+import { API, fetcher } from "@/utils/api/api";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { INoveltyType } from "@/types/novelty/INovelty";
 
 interface Option {
   value: string | number;
@@ -165,4 +168,51 @@ export const useOtherServices = () => {
   }, []);
 
   return { otherServices, loading, error };
+};
+
+export const useRates = () => {
+  const { data, isLoading, error } = useSWR<
+    GenericResponse<
+      {
+        active: boolean;
+        id: number;
+        description: string;
+      }[]
+    >
+  >(`/pricing/pricing-type`, fetcher, {});
+
+  return {
+    data: data?.data,
+    error,
+    isLoading
+  };
+};
+
+export const useLocations = () => {
+  const { data, isLoading, error } = useSWR<
+    {
+      id: number;
+      city: string;
+    }[]
+  >(`/location`, fetcher, {});
+
+  return {
+    data,
+    error,
+    isLoading
+  };
+};
+
+export const useNoveltyTypes = () => {
+  const { data, isLoading, error } = useSWR<GenericResponse<INoveltyType[]>>(
+    `/novelty-type/all`,
+    fetcher,
+    {}
+  );
+
+  return {
+    data: data?.data,
+    error,
+    isLoading
+  };
 };
