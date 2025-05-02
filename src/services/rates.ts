@@ -1,5 +1,5 @@
 import { API } from "@/utils/api/api";
-import { RateType, RateTypeIds } from "@/enums/rates";
+import { RateType } from "@/enums/rates";
 import { IFormRate } from "@/app/rates/create/page";
 
 interface ICreateRateDTO {
@@ -63,7 +63,7 @@ export const ratesService = {
         VENDOR: data.provider,
         id_vehicle_type: Number(data.vehicleType),
         price: data.amount.replaceAll(".", "").replaceAll(",", ".").split(".")[0] || "0",
-        pricing_type: RateTypeIds[data.rateType],
+        pricing_type: data.rateType,
         from_units: data.from ? Number(data.from) : undefined,
         to_units: data.to ? Number(data.to) : undefined,
         id_location_from: data.origin,

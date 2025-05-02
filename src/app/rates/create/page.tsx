@@ -7,13 +7,14 @@ import { NumericFormat } from "react-number-format";
 import { ratesService } from "@/services/rates";
 import { useProviders, useContracts, useVehicleTypes, useOtherServices } from "@/hooks/useRates";
 import { useLocations } from "@/hooks/logistics/useLocations";
+import { useRates } from "@/hooks/logistics/useRates";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 
-import { RateType, RateTypeLabels, ServiceTypeIds, ServiceTypeLabels } from "@/enums/rates";
+import { RateType, RateTypeIds, ServiceTypeIds, ServiceTypeLabels } from "@/enums/rates";
 
 import styles from "./page.module.scss";
 
@@ -27,7 +28,7 @@ export interface IFormRate {
   provider: string;
   serviceType: (typeof ServiceTypeIds)[keyof typeof ServiceTypeIds];
   vehicleType: string;
-  rateType: RateType;
+  rateType: number;
   from: string;
   to: string;
   rateDetail: string;
@@ -36,6 +37,7 @@ export interface IFormRate {
   contract: string;
   destination: string;
   origin: string;
+  noveltyType: string;
 }
 
 export default function CreateRatePage() {
@@ -64,6 +66,7 @@ export default function CreateRatePage() {
   const { vehicleTypes, loading: loadingVehicleTypes } = useVehicleTypes(serviceTypeId);
   const { otherServices, loading: loadingOtherServices } = useOtherServices();
   const { data: locationsData, isLoading: loadingLocations } = useLocations();
+  const { data: ratesData, isLoading: loadingRates } = useRates();
 
   const onSubmit = async (data: IFormRate) => {
     try {
@@ -82,10 +85,10 @@ export default function CreateRatePage() {
     }
   };
 
-  const handleSaveRate = async () => {
-    //  open evidenceModal
+  const handleSaveRate = handleSubmit(() => {
+    // Solo entra aquí si el form es válido
     setShowEvidenceModal(true);
-  };
+  });
 
   return (
     <div className={styles.pageContainer}>
@@ -214,10 +217,11 @@ export default function CreateRatePage() {
                       placeholder="Seleccionar tipo de tarifa"
                       error={errors?.rateType}
                       field={field}
-                      options={Object.entries(RateTypeLabels).map(([value, label]) => ({
-                        id: value,
-                        value: label
+                      options={ratesData?.map((rate) => ({
+                        id: rate.id,
+                        value: rate.description
                       }))}
+                      loading={loadingRates}
                     />
                   )}
                 />
@@ -226,35 +230,31 @@ export default function CreateRatePage() {
 
             {/* Tercera fila */}
             <div className={styles.inputRow}>
-              <InputForm
-                titleInput="Desde"
-                nameInput="from"
-                control={control}
-                error={errors?.from}
-                placeholder="0"
-                disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
-                validationRules={
-                  [RateType.KM, RateType.HORAS].includes(rateType as RateType)
-                    ? { required: "Este campo es requerido" }
-                    : undefined
-                }
-                style={{ width: "100%" }}
-              />
+              <Flex gap={16}>
+                <InputForm
+                  titleInput="Desde"
+                  nameInput="from"
+                  control={control}
+                  error={errors?.from}
+                  placeholder="0"
+                  disabled={
+                    ![RateTypeIds[RateType.KM], RateTypeIds[RateType.HORAS]].includes(rateType)
+                  }
+                  style={{ width: "100%" }}
+                />
 
-              <InputForm
-                titleInput="Hasta"
-                nameInput="to"
-                control={control}
-                error={errors?.to}
-                placeholder="50"
-                disabled={![RateType.KM, RateType.HORAS].includes(rateType as RateType)}
-                validationRules={
-                  [RateType.KM, RateType.HORAS].includes(rateType as RateType)
-                    ? { required: "Este campo es requerido" }
-                    : undefined
-                }
-                style={{ width: "100%" }}
-              />
+                <InputForm
+                  titleInput="Hasta"
+                  nameInput="to"
+                  control={control}
+                  error={errors?.to}
+                  placeholder="50"
+                  disabled={
+                    ![RateTypeIds[RateType.KM], RateTypeIds[RateType.HORAS]].includes(rateType)
+                  }
+                  style={{ width: "100%" }}
+                />
+              </Flex>
 
               <InputForm
                 titleInput="Detalle de tarifa"
@@ -262,42 +262,68 @@ export default function CreateRatePage() {
                 control={control}
                 error={errors?.rateDetail}
                 placeholder="Ingresar el objeto"
-                disabled={
-                  ![
-                    RateType.OTROS,
-                    RateType.HORAS,
-                    RateType.NOVEDAD,
-                    RateType.MESES,
-                    RateType.DIAS,
-                    RateType.SEMANAS
-                  ].includes(rateType as RateType)
-                }
-                validationRules={
-                  [
-                    RateType.OTROS,
-                    RateType.HORAS,
-                    RateType.NOVEDAD,
-                    RateType.MESES,
-                    RateType.DIAS,
-                    RateType.SEMANAS
-                  ].includes(rateType as RateType)
-                    ? { required: "Este campo es requerido" }
-                    : undefined
-                }
                 style={{ width: "100%" }}
               />
 
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Origen</p>
+                <Controller
+                  name="origin"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  disabled={rateType !== RateTypeIds[RateType.TRAYECTOS]}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar origen"
+                      error={errors?.origin}
+                      field={field}
+                      options={
+                        locationsData?.map((location) => ({
+                          id: location.id,
+                          value: location.city
+                        })) ?? []
+                      }
+                      loading={loadingLocations}
+                      showSearch
+                    />
+                  )}
+                />
+              </Flex>
+
+              <Flex vertical className="selectButton">
+                <p className={styles.inputTitle}>Destino</p>
+                <Controller
+                  name="destination"
+                  control={control}
+                  rules={{ required: "Este campo es requerido" }}
+                  disabled={rateType !== RateTypeIds[RateType.TRAYECTOS]}
+                  render={({ field }) => (
+                    <SelectInputForm
+                      placeholder="Seleccionar destino"
+                      error={errors?.destination}
+                      field={field}
+                      options={
+                        locationsData?.map((location) => ({
+                          id: location.id,
+                          value: location.city
+                        })) ?? []
+                      }
+                      loading={loadingLocations}
+                      showSearch
+                    />
+                  )}
+                />
+              </Flex>
+            </div>
+
+            {/* Cuarta fila */}
+            <div className={styles.inputRow}>
               <Flex vertical className="selectButton">
                 <p className={styles.inputTitle}>Otros servicios</p>
                 <Controller
                   name="otherServices"
                   control={control}
-                  disabled={rateType !== RateType.OTROS}
-                  rules={
-                    rateType === RateType.OTROS
-                      ? { required: "Este campo es requerido" }
-                      : undefined
-                  }
+                  disabled={rateType !== RateTypeIds[RateType.OTROS]}
                   render={({ field }) => (
                     <SelectInputForm
                       placeholder="Seleccionar otros servicios"
@@ -314,35 +340,28 @@ export default function CreateRatePage() {
                   )}
                 />
               </Flex>
-            </div>
 
-            {/* Cuarta fila */}
-            <div className={styles.inputRow}>
               <Flex vertical className="selectButton">
-                <p className={styles.inputTitle}>Monto</p>
+                <p className={styles.inputTitle}>Tipo de novedad</p>
                 <Controller
-                  name="amount"
+                  name="noveltyType"
                   control={control}
+                  disabled={rateType !== RateTypeIds[RateType.NOVEDAD]}
                   rules={{ required: "Este campo es requerido" }}
                   render={({ field }) => (
-                    <NumericFormat
-                      {...field}
-                      thousandSeparator="."
-                      decimalSeparator=","
-                      decimalScale={2}
-                      fixedDecimalScale
-                      allowNegative={false}
-                      customInput={Input}
-                      placeholder="10,000.00"
-                      className={!errors?.amount ? styles.inputForm : styles.inputFormError}
+                    <SelectInputForm
+                      placeholder="Seleccionar tipo de novedad"
+                      error={errors?.noveltyType}
+                      field={field}
+                      options={[
+                        { id: "1", value: "Novedad 1" },
+                        { id: "2", value: "Novedad 2" },
+                        { id: "3", value: "Novedad 3" }
+                      ]}
+                      loading={false}
                     />
                   )}
                 />
-                {errors?.amount && (
-                  <Typography.Text type="danger" className="textMessageError">
-                    {errors.amount.message}
-                  </Typography.Text>
-                )}
               </Flex>
 
               <Flex vertical className="selectButton">
@@ -370,51 +389,30 @@ export default function CreateRatePage() {
               </Flex>
 
               <Flex vertical className="selectButton">
-                <p className={styles.inputTitle}>Destino</p>
+                <p className={styles.inputTitle}>Costo</p>
                 <Controller
-                  name="destination"
+                  name="amount"
                   control={control}
                   rules={{ required: "Este campo es requerido" }}
                   render={({ field }) => (
-                    <SelectInputForm
-                      placeholder="Seleccionar destino"
-                      error={errors?.destination}
-                      field={field}
-                      options={
-                        locationsData?.map((location) => ({
-                          id: location.id,
-                          value: location.city
-                        })) ?? []
-                      }
-                      loading={loadingLocations}
-                      showSearch
+                    <NumericFormat
+                      {...field}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      decimalScale={2}
+                      fixedDecimalScale
+                      allowNegative={false}
+                      customInput={Input}
+                      placeholder="10,000.00"
+                      className={!errors?.amount ? styles.inputForm : styles.inputFormError}
                     />
                   )}
                 />
-              </Flex>
-
-              <Flex vertical className="selectButton">
-                <p className={styles.inputTitle}>Origen</p>
-                <Controller
-                  name="origin"
-                  control={control}
-                  rules={{ required: "Este campo es requerido" }}
-                  render={({ field }) => (
-                    <SelectInputForm
-                      placeholder="Seleccionar origen"
-                      error={errors?.origin}
-                      field={field}
-                      options={
-                        locationsData?.map((location) => ({
-                          id: location.id,
-                          value: location.city
-                        })) ?? []
-                      }
-                      loading={loadingLocations}
-                      showSearch
-                    />
-                  )}
-                />
+                {errors?.amount && (
+                  <Typography.Text type="danger" className="textMessageError">
+                    {errors.amount.message}
+                  </Typography.Text>
+                )}
               </Flex>
             </div>
 
