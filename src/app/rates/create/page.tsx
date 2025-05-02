@@ -33,7 +33,7 @@ export interface IFormRate {
   oaSAP: string;
   provider: string;
   serviceType: (typeof ServiceTypeIds)[keyof typeof ServiceTypeIds];
-  vehicleType: string;
+  vehicleType?: string;
   rateType: number;
   from?: string;
   to?: string;
@@ -86,7 +86,14 @@ export default function CreateRatePage() {
       setValue("otherServices", undefined);
       setValue("noveltyType", undefined);
     }
-  }, [rateType, control]);
+  }, [rateType, setValue]);
+
+  // Reset vehicleType when serviceTypeId changes
+  useEffect(() => {
+    if (serviceTypeId) {
+      setValue("vehicleType", undefined);
+    }
+  }, [serviceTypeId, setValue]);
 
   const onSubmit = async (data: IFormRate) => {
     try {
@@ -113,7 +120,9 @@ export default function CreateRatePage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.formCard}>
-        <Title level={2}>Datos de la tarifa</Title>
+        <Title level={4} style={{ marginBottom: "18px" }}>
+          Datos de la tarifa
+        </Title>
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
           <Flex vertical gap={24} style={{ width: "100%" }}>
             {/* Primera fila - Campos SAP */}
