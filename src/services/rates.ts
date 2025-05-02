@@ -39,6 +39,7 @@ interface PricingData {
   approval_comment?: string;
   id_contract: string;
   id_novelty_type?: number;
+  unit_type?: string;
 }
 
 export const ratesService = {
@@ -81,6 +82,7 @@ export const ratesService = {
       if (commentary) request.approval_comment = commentary;
       if (data.contract) request.id_contract = data.contract;
       if (data.noveltyType) request.id_novelty_type = Number(data.noveltyType);
+      if (data.unit_type) request.unit_type = data.unit_type;
 
       const formData = new FormData();
       if (file) formData.append("file", file);
