@@ -52,6 +52,7 @@ export default function CreateRatePage() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors }
   } = useForm<IFormRate>({
     shouldUnregister: true
@@ -109,6 +110,10 @@ export default function CreateRatePage() {
       message.error("Error al crear la tarifa");
     } finally {
       setIsLoading(false);
+      // Reset form fields after submission
+      requestAnimationFrame(() => {
+        reset();
+      });
     }
   };
 
@@ -270,6 +275,16 @@ export default function CreateRatePage() {
                     ![RateTypeIds[RateType.KM], RateTypeIds[RateType.HORAS]].includes(rateType)
                   }
                   style={{ width: "100%" }}
+                  typeInput="number"
+                  validationRules={{
+                    required: "Este campo es requerido",
+                    validate: (value) => {
+                      if (value && parseFloat(value) < 0) {
+                        return "El valor de 'Desde' no puede ser negativo";
+                      }
+                      return true;
+                    }
+                  }}
                 />
 
                 <InputForm
@@ -282,6 +297,17 @@ export default function CreateRatePage() {
                     ![RateTypeIds[RateType.KM], RateTypeIds[RateType.HORAS]].includes(rateType)
                   }
                   style={{ width: "100%" }}
+                  // cretae a validation rule that checks if the value is greater than from
+                  validationRules={{
+                    validate: (value) => {
+                      const fromValue = watch("from");
+                      if (fromValue && value && parseFloat(value) <= parseFloat(fromValue)) {
+                        return "El valor de 'Hasta' debe ser mayor que 'Desde'";
+                      }
+                      return true;
+                    }
+                  }}
+                  typeInput="number"
                 />
               </Flex>
 
@@ -424,7 +450,7 @@ export default function CreateRatePage() {
                   rules={{ required: "Este campo es requerido" }}
                   render={({ field }) => (
                     <NumericFormat
-                      value={field.value}
+                      value={field.value || ""}
                       onValueChange={(values) => {
                         field.onChange(values.value); // the raw, unformatted value
                       }}
