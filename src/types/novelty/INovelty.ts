@@ -4,6 +4,7 @@ export interface INoveltyType {
   icon_id: string;
   updated_at: Date;
   created_at: Date;
+  service_type_id: number;
 }
 
 export interface IEvidence {
