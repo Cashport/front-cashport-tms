@@ -4,9 +4,7 @@ export enum RateType {
   HORAS = "HORAS",
   NOVEDAD = "NOVEDAD",
   TRAYECTOS = "TRAYECTOS",
-  MESES = "MESES",
-  DIAS = "DIAS",
-  SEMANAS = "SEMANAS"
+  RENTA_FIJA = "RENTA_FIJA"
 }
 
 export enum SERVICE_TYPES {
@@ -29,9 +27,7 @@ export const RateTypeLabels: Record<RateType, string> = {
   [RateType.HORAS]: "Horas",
   [RateType.NOVEDAD]: "Novedad",
   [RateType.TRAYECTOS]: "Trayectos",
-  [RateType.MESES]: "Meses",
-  [RateType.DIAS]: "Días",
-  [RateType.SEMANAS]: "Semanas"
+  [RateType.RENTA_FIJA]: "Renta fija"
 };
 
 export const RateTypeIds: Record<RateType, number> = {
@@ -40,9 +36,7 @@ export const RateTypeIds: Record<RateType, number> = {
   [RateType.TRAYECTOS]: 3,
   [RateType.OTROS]: 4,
   [RateType.NOVEDAD]: 5,
-  [RateType.MESES]: 6,
-  [RateType.DIAS]: 7,
-  [RateType.SEMANAS]: 8
+  [RateType.RENTA_FIJA]: 6
 };
 
 export const ServiceTypeLabels: Record<SERVICE_TYPES, string> = {
