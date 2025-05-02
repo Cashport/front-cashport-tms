@@ -45,6 +45,7 @@ export interface IFormRate {
   origin?: string;
   noveltyType?: string;
   unit_type?: string;
+  id_unit_type?: number;
 }
 
 export default function CreateRatePage() {
@@ -100,6 +101,12 @@ export default function CreateRatePage() {
   const onSubmit = async (data: IFormRate) => {
     try {
       setIsLoading(true);
+
+      // getting id_unit_type from otherServices
+      if (data.otherServices) {
+          data.id_unit_type = Number(data.otherServices);
+        
+      }
 
       await ratesService.createRate({ data, commentary, file: selectedEvidence[0] });
       message.success("Tarifa creada exitosamente");
