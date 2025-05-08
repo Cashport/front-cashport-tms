@@ -25,7 +25,7 @@ interface InputSelectProps {
   isError?: boolean;
   noRequired?: boolean;
   showSearch?: boolean;
-  filterOption?: SelectProps['filterOption'];
+  filterOption?: SelectProps["filterOption"];
   dropdownMatchSelectWidth?: boolean;
   style?: React.CSSProperties;
 }
