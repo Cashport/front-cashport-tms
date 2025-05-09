@@ -177,9 +177,11 @@ export const CarrierFormTab = ({
             </Button>
           </Link>
           <Flex gap={"0.5rem"} align="center">
-            <Flex>
-              <CustomTag text={providerStatus.description} color={providerStatus.color} />
-            </Flex>
+            {providerStatus && (
+              <Flex>
+                <CustomTag text={providerStatus.description} color={providerStatus.color} />
+              </Flex>
+            )}
             <Dropdown
               menu={{ items }}
               trigger={["click"]}
