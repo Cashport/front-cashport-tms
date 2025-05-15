@@ -436,6 +436,7 @@ export const TransferOrderDetails = () => {
         isOpen={isModalTrackingVisible}
         onClose={() => setIsModalTrackingVisible(false)}
         idTR={transferRequest?.id || 0}
+        refetchNovelty={findNovelties}
       />
     </Flex>
   );

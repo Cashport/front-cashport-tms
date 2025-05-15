@@ -22,8 +22,8 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
   defaultStateId,
   showState = true
 }) => {
-  const getState = (stateId: string) => {
-    let state = transferOrderStates.find((f) => f.id === stateId);
+  const getState = (vehicle: VehicleTracking) => {
+    let state = transferOrderStates.find((f) => f.id === vehicle.state_id);
     if (!state) {
       state = transferOrderStates.find((f) => f.id === defaultStateId);
     }
@@ -31,7 +31,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
     return state ? (
       <div className={styles.trackStateContainer}>
         <p className={styles.trackState} style={{ backgroundColor: state.bgColor }}>
-          {state.name}
+          {vehicle.trip_status ?? state.name}
         </p>
       </div>
     ) : null;
@@ -61,7 +61,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
           {vehicle.driver_name ?? ""} - {vehicle.driver_phone ?? ""}
         </Link>
       </div>
-      {showState && getState(vehicle.state_id ?? "")}
+      {showState && getState(vehicle)}
     </div>
   );
 };

@@ -1,12 +1,16 @@
-import { Modal, Flex, Typography, ConfigProvider, Dropdown, Input, MenuProps } from "antd";
-import Link from "next/link";
-import styles from "./ModalVehicleFollowUp.module.scss"; // Ajusta según tu estructura
-import FooterButtons from "../../../ModalBillingAction/FooterButtons/FooterButtons";
-import { VehicleTracking } from "@/types/logistics/tracking/tracking";
-import ModalHeader from "../ModalHeader";
-import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
-import { STATUS } from "@/utils/constants/globalConstants";
 import { useEffect } from "react";
+import { Modal, Flex, Typography, ConfigProvider, Dropdown, Input, MenuProps } from "antd";
+
+import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
+import { TransferOrdersTripState } from "@/utils/constants/transferOrdersState";
+import { STATUS } from "@/utils/constants/globalConstants";
+
+import FooterButtons from "../../../ModalBillingAction/FooterButtons/FooterButtons";
+import ModalHeader from "../ModalHeader";
+
+import { VehicleTracking } from "@/types/logistics/tracking/tracking";
+
+import styles from "./ModalVehicleFollowUp.module.scss"; // Ajusta según tu estructura
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -38,29 +42,10 @@ export const ModalVehicleFollowUp: React.FC<ModalVehicleFollowUpProps> = ({
   isLoading,
   tripStatus
 }) => {
-  const items: MenuProps["items"] = [
-    {
-      key: "0f7cccf5-1764-44c6-bb2a-874f419bc8f1",
-      label: "Cargando"
-    },
-    {
-      key: "b9e5ce08-16a7-4880-88a5-ebca7737c55d",
-      label: "En curso"
-    },
-    {
-      key: "780fa2f9-1b89-4d92-83dc-52de4c932056",
-      label: "Descargando"
-    },
-    {
-      key: "9f37afd7-1852-457d-964b-378fa6150471",
-      label: "Detenido"
-    },
-    {
-      key: "73ad61e3-395f-4ae4-8aef-9d24f3f917a9",
-      label: "Stand by"
-    }
-  ];
-  console.log("comments", comment);
+  const items: MenuProps["items"] = TransferOrdersTripState.map((item) => ({
+    key: item.id,
+    label: item.name
+  }));
 
   useEffect(() => {
     if (isOpen) {
