@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/es"; // Importar el idioma español
 
 import { updateTripTrackingStatus } from "@/services/logistics/tracking";
-import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
+import { TransferOrdersTripState } from "@/utils/constants/transferOrdersState";
 import { fetcher } from "@/utils/api/api";
 import { formatMoney } from "@/utils/utils";
 
@@ -116,9 +116,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   };
 
   const getStateDropdown = (stateId: string) => {
-    let getState = TransferOrdersState.find((f) => f.id === stateId);
+    let getState = TransferOrdersTripState.find((f) => f.id === stateId);
     if (!getState) {
-      getState = TransferOrdersState.find((f) => f.id === "d33e062f-51a5-457e-946e-a45cbbffbf95");
+      getState = TransferOrdersTripState.find(
+        (f) => f.id === "d33e062f-51a5-457e-946e-a45cbbffbf95"
+      );
     }
 
     return (
@@ -265,7 +267,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
             <UiTab tabs={items} sticky onChange={onChange} />
             <ModalHeader
               vehicle={currentVehicle}
-              transferOrderStates={TransferOrdersState}
+              transferOrderStates={TransferOrdersTripState}
               defaultStateId={STATUS.TR.SIN_INICIAR}
               showState={true}
             />
