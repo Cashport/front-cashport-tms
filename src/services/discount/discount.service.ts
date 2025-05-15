@@ -9,8 +9,7 @@ import {
 } from "@/types/discount/DiscountBasics";
 import { DiscountContractRange } from "@/types/discount/DiscountContractRange";
 import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
-import { API, getIdToken } from "@/utils/api/api";
-import axios, { AxiosResponse } from "axios";
+import { API } from "@/utils/api/api";
 
 const defaultRes = {
   data: [],
@@ -77,19 +76,17 @@ export const createDiscount = async (
   }
   body = form;
 
-  const token = await getIdToken();
-  const response = await axios.post<GenericResponse<DiscountCreateResponse>>(
-    `${config.API_HOST}/discount`,
+  const response: GenericResponse<DiscountCreateResponse> = await API.post(
+    `/discount`,
     body,
     {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
       }
     }
   );
-  return response.data;
+  return response;
 };
 
 export const updateDiscount = async (
@@ -115,19 +112,17 @@ export const updateDiscount = async (
   }
   body = form;
 
-  const token = await getIdToken();
-  const response = await axios.put<GenericResponse<DiscountGetOne>>(
+  const response: GenericResponse<DiscountGetOne> = await API.put(
     `${config.API_HOST}/discount/${discountId}`,
     body,
     {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
       }
     }
   );
-  return response.data;
+  return response;
 };
 
 export const getDiscount = async (id: number) => {

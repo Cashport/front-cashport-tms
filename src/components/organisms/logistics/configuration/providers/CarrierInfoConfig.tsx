@@ -78,13 +78,13 @@ export const CarrierInfoConfigView = () => {
   const loadLocations = async () => {
     if (locations.length > 0) return;
     const result = await getAllLocations();
-    if (result.data.data.length > 0) {
-      console.log(result.data.data);
+    if (result.data.length > 0) {
+      console.log(result.data);
 
       const listlocations: any[] | ((prevState: ILocation[]) => ILocation[]) = [];
       const listlocationoptions: { label: any; value: any }[] = [];
 
-      result.data.data.forEach((item, index) => {
+      result.data.forEach((item, index) => {
         listlocations.push(item);
         listlocationoptions.push({ label: item.description, value: item.id });
       });

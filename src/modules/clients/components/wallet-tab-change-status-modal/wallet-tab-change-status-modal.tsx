@@ -61,7 +61,6 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
         projectId as number,
         clientId as number
       );
-      console.log(response);
 
       messageShow.open({
         type: "success",
