@@ -34,6 +34,7 @@ interface InvoiceDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   idTR: number;
+  refetchNovelty: () => void;
 }
 export const TrackingStepState = [
   {
@@ -56,7 +57,12 @@ export const TrackingStepState = [
   }
 ];
 
-const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idTR }) => {
+const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
+  isOpen,
+  onClose,
+  idTR,
+  refetchNovelty
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeKey, setActiveKey] = useState<string>("1");
   const [isModalChangeStatus, setisModalChangeStatus] = useState(false);
@@ -102,11 +108,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     };
     setIsLoadingChangeStatus(true);
     try {
-      const response = await updateTripTrackingStatus(finalData);
-      if (response) {
-        message.success(`Cambio de estado realizado correctamente`, 3);
-        await mutate(undefined, { revalidate: true });
-      }
+      await updateTripTrackingStatus(finalData);
+
+      message.success(`Cambio de estado realizado correctamente`, 3);
+      await mutate(undefined, { revalidate: true });
+      refetchNovelty();
     } catch (error: any) {
       message.error(error?.response?.data?.message || "Cambio de estado no realizado", 3);
     } finally {
