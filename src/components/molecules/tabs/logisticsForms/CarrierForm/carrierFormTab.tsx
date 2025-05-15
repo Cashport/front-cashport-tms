@@ -68,8 +68,8 @@ export const CarrierFormTab = ({
     defaultValues,
     disabled: statusForm === "review"
   });
-  const trip_type = watch("general.trip_type");
-  const providerStatus = watch("general.status");
+  const trip_type = watch("trip_type");
+  const providerStatus = watch("status");
   /*archivos*/
   interface FileObject {
     docReference: string;
@@ -99,21 +99,23 @@ export const CarrierFormTab = ({
     console.log(files);
   }, [files]);
 
-  const onSubmit = (data: any) => {
-    data.general.license_categorie = licences.data.find(
-      (item) => item.id === data.general.license_category
-    )?.value;
-    data.general.rh = bloodTypes.data.find((item) => item.id === data.general.rh)?.value;
-    _onSubmit(
-      data,
-      setloading,
-      setImageError,
-      imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
-      files,
-      onSubmitForm,
-      reset,
-      statusForm === "create"
-    );
+  const onSubmit = (data: IFormCarrier) => {
+    if (statusForm === "edit") {
+      _onSubmit(
+        data,
+        setloading,
+        setImageError,
+        imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
+        files,
+        onSubmitForm,
+        reset,
+        false
+      );
+    }
+
+    if (statusForm === "create") {
+      console.info("crear con data", data);
+    }
   };
   const items: MenuProps["items"] = [
     {
@@ -216,7 +218,7 @@ export const CarrierFormTab = ({
               <UploadImg
                 disabled={statusForm !== "create"}
                 imgDefault={
-                  watch("general.photo") ??
+                  watch("photo") ??
                   "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"
                 }
                 setImgFile={setImageFile}
@@ -236,7 +238,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Nit"
-                    nameInput="general.nit"
+                    nameInput="nit"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -245,7 +247,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Nombre"
-                    nameInput="general.description"
+                    nameInput="description"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -254,7 +256,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Tipo de proveedor"
-                    nameInput="general.carrier_type"
+                    nameInput="carrier_type"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -263,7 +265,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Razon social"
-                    nameInput="general.description"
+                    nameInput="description"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -272,7 +274,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Correo de facturacion"
-                    nameInput="general.description"
+                    nameInput="email"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -281,7 +283,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Correo de comunicacion"
-                    nameInput="general.carrier_type"
+                    nameInput="carrier_type"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -297,9 +299,9 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Nombres y apellidos"
-                    nameInput="general.description"
+                    nameInput="description"
                     control={control}
-                    error={errors?.general?.description}
+                    error={errors?.description}
                     disabled={statusForm !== "create"}
                   />
                 </Col>
@@ -307,9 +309,9 @@ export const CarrierFormTab = ({
                   <InputForm
                     typeInput="tel"
                     titleInput="Teléfono"
-                    nameInput="general.description"
+                    nameInput="phone"
                     control={control}
-                    error={errors?.general?.description}
+                    error={errors?.phone}
                     validationRules={{
                       pattern: {
                         value: /^\+?\d+$/,
@@ -328,7 +330,7 @@ export const CarrierFormTab = ({
               Tipos de viaje
             </Title>
             <Controller
-              name="general.trip_type"
+              name="trip_type"
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
@@ -336,14 +338,11 @@ export const CarrierFormTab = ({
                   field={field}
                   placeholder="Seleccione"
                   title="Tipos de viaje que esta autorizado"
-                  errors={errors?.general?.trip_type}
-                  options={tripTypes?.map(
-                    (tripType) =>
-                      ({
-                        label: tripType.description,
-                        value: tripType.id
-                      }) ?? []
-                  )}
+                  errors={errors?.trip_type}
+                  options={tripTypes?.map((tripType) => ({
+                    label: tripType.description,
+                    value: tripType.id
+                  }))}
                   disabled={statusForm === "review"}
                 />
               )}

@@ -3268,8 +3268,10 @@ export interface IFormVehicle {
   images: CustomFile[];
   IS_ACTIVE: boolean;
 }
-export interface IFormCarrier {
-  general: ICarrier;
+export interface IFormCarrier extends ICarrier {
+  // TEMPORARY - MADE UP:
+  phone?: string;
+  email?: string;
 }
 export interface Ifeature {
   description: string;

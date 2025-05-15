@@ -10,12 +10,10 @@ export const getAllCarriers = async (): Promise<any> => {
   else throw response;
 };
 
-
 export const getCarrierById = async (id: string): Promise<any> => {
   const response: GenericResponse = await API.get(`/carrier/${id}`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
-
 };
 
 export const updateCarrier = async (form: any): Promise<any> => {
@@ -25,17 +23,7 @@ export const updateCarrier = async (form: any): Promise<any> => {
     }))
   };
   try {
-    const token = await getIdToken();
-    const response: IListData = await axios.put(
-      `${config.API_HOST}/carrier/update/${form.id}`,
-      data,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: IListData = await API.put(`${config.API_HOST}/carrier/update/${form.id}`, data);
     return response;
   } catch (error) {
     console.log("Error get carrier: ", error);

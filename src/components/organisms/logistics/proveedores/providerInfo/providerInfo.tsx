@@ -36,16 +36,20 @@ export const ProviderInfoView = ({ isEdit = false, idParam, statusFormProp = "re
     setStatusForm(newFormState);
   }, []);
 
-  const { data, isLoading, isValidating, mutate } = useSWR({ id: idParam, key: "1" }, fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateOnMount: true
-  });
+  const { data, isLoading, isValidating, mutate } = useSWR(
+    statusForm !== "create" && idParam ? { id: idParam, key: "1" } : null,
+    fetcher,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateOnMount: true
+    }
+  );
 
   const onUpdateCarrier = async (finalData: any) => {
     try {
-      const response = await updateCarrier(finalData.general);
+      const response = await updateCarrier(finalData);
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Proveedor editado", 2, () => setStatusForm("review"));

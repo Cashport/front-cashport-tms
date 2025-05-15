@@ -1,12 +1,6 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
-import {
-  IAPICarrier,
-  ICarrier,
-  ICertificates,
-  IFormCarrier,
-  ITripType
-} from "@/types/logistics/schema";
+import { IAPICarrier, ICertificates, IFormCarrier, ITripType } from "@/types/logistics/schema";
 import { IFormProject } from "@/types/projects/IFormProject";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
@@ -30,34 +24,32 @@ export interface CarrierFormTabProps {
   isLoadingSubmit: boolean;
 }
 
-export type CarrierData = ICarrier & { documents?: ICertificates[] };
+export type CarrierData = IFormCarrier & { documents?: ICertificates[] };
 
 export const dataToProjectFormData = (data: IAPICarrier): IFormCarrier => {
   return {
-    general: {
-      id: data.id,
-      description: data.description,
-      nit: data.nit,
-      icon: data.icon,
-      active: data.active,
-      vehicles: data.vehicles,
-      drivers: data.drivers,
-      carrier_type: data.carrier_type,
-      created_at: data.created_at,
-      created_by: data.created_by,
-      photo: data.photo,
-      trip_type:
-        data.features?.map((feature) => ({
-          label: feature.description,
-          value: feature.id
-        })) ?? [],
-      status: data.status
-    }
+    id: data.id,
+    description: data.description,
+    nit: data.nit,
+    icon: data.icon,
+    active: data.active,
+    vehicles: data.vehicles,
+    drivers: data.drivers,
+    carrier_type: data.carrier_type,
+    created_at: data.created_at,
+    created_by: data.created_by,
+    photo: data.photo,
+    trip_type:
+      data.features?.map((feature) => ({
+        label: feature.description,
+        value: feature.id
+      })) ?? [],
+    status: data.status
   };
 };
 
 export const _onSubmit = (
-  data: any,
+  data: IFormCarrier,
   setloading: (value: SetStateAction<boolean>) => void,
   setImageError: (value: SetStateAction<boolean>) => void,
   imageFile: FileObject[] | undefined,
