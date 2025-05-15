@@ -141,7 +141,11 @@ export const Request: FC<IRequestProps> = ({
       let redirect = undefined;
       let showBothIds = false;
       let trShouldRedirect = false;
-      const trDeleteable = [STATUS.TR.ASIGNANDO_VEHICULO, STATUS.TR.ESPERANDO_PROVEEDOR];
+      const trDeleteable = [
+        STATUS.TR.ASIGNANDO_VEHICULO,
+        STATUS.TR.ESPERANDO_PROVEEDOR,
+        STATUS.TR.APLAZADA
+      ];
 
       if (item.statusId === TransferOrdersState.find((f) => f.name === "Sin procesar")?.id) {
         redirect = "/logistics/orders/details";

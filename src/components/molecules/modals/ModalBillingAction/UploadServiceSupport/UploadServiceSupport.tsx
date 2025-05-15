@@ -1,9 +1,10 @@
-import { Button, Flex, message } from "antd";
+import { Button, Flex, message, Spin } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Plus } from "phosphor-react";
 
 import { getTripDetails, IGetTripDetails, postAddMTTRipTracking } from "@/services/trips/trips";
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
 import FooterButtons from "../FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
@@ -29,6 +30,7 @@ interface IUploadServiceSupportProps {
 
 const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSupportProps) => {
   const [tripsDetails, setTripsDetails] = useState<IGetTripDetails[]>();
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const trips = useMemo(
     () => journeysData?.flatMap((journey) => journey.trips.map((trip) => trip)),
     [journeysData]
@@ -42,7 +44,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { isValid },
     setValue,
     reset,
     watch,
@@ -52,6 +54,8 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
       tripAttachments: {}
     }
   });
+
+  const tripAttachments = watch("tripAttachments");
 
   const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue("commentary", e.target.value);
@@ -106,8 +110,16 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
     fetchTripsDetails();
     return () => {
       reset();
+      setIsFirstLoad(true);
+      setTripsDetails(undefined);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isFirstLoad && (!tripsDetails || tripsDetails.length === 0)) {
+      message.error("No se encontraron detalles de ningun viaje.");
+    }
+  }, [isFirstLoad]);
 
   const fetchTripsDetails = async () => {
     setIsLoading({
@@ -115,27 +127,28 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
       data: true
     });
     try {
-      trips?.forEach(async (trip) => {
+      const fetchPromises = trips?.map(async (trip) => {
         const response = await getTripDetails(trip.id || 0);
         if (response) {
           setTripsDetails((prev) => {
-            const isDuplicate = prev?.some((trip) => trip.id === response.id);
-            if (!isDuplicate) {
-              return [...(prev || []), response];
-            }
-            return prev || [];
+            const isDuplicate = prev?.some((t) => t.id === response.id);
+            return isDuplicate ? prev || [] : [...(prev || []), response];
           });
         }
       });
+
+      await Promise.all(fetchPromises || []);
     } catch (error) {
       console.error("Error fetching trip details:", error);
       message.error("Error fetching trip details.");
-    } finally {
-      setIsLoading({
-        ...isLoading,
-        data: false
-      });
     }
+
+    setIsFirstLoad(false);
+
+    setIsLoading({
+      ...isLoading,
+      data: false
+    });
   };
 
   return (
@@ -162,7 +175,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                         const file = e.target.files?.[0];
                         if (!file) return;
 
-                        const backendCount = trip.MT.length;
+                        const backendCount = trip.MT?.length || 0;
                         const existingUserCount = Object.keys(currentFiles).length;
                         const totalDocs = backendCount + existingUserCount;
                         const newKey = `MT ${totalDocs}`;
@@ -187,8 +200,8 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                         <>
                           <Flex vertical gap={"1rem"}>
                             {/* Archivos previos cargados desde backend */}
-                            {trip.MT.map((url, j) => {
-                              const displayName = url.split(".com/").pop() || `MT ${j}`;
+                            {trip?.MT?.map((obj, j) => {
+                              const displayName = obj.name.substring(0, obj.name.lastIndexOf("."));
                               return (
                                 <div key={`${trip.id}-url-${j}`} className={styles.content__doc}>
                                   <Flex vertical>
@@ -205,7 +218,10 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                                         "Eliminar archivo del backend aún no implementado"
                                       );
                                     }}
-                                    disabled
+                                    deletable={false}
+                                    handleOnClick={() => {
+                                      window.open(obj.url, "_blank");
+                                    }}
                                   />
                                 </div>
                               );
@@ -233,44 +249,42 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                             ))}
 
                             {/* Si no hay archivos del backend ni archivos locales, mostrar DocumentButton para el primer archivo */}
-                            {trip.MT.length === 0 && Object.keys(currentFiles).length === 0 && (
-                              <>
-                                <div className={styles.content__doc}>
-                                  <Flex vertical>
-                                    <p>MT 0</p>
-                                    <em className="descriptionDocument">*Obligatorio</em>
-                                  </Flex>
-                                  <DocumentButton
-                                    title={"MT 0"}
-                                    fileName={"Seleccionar archivo"}
-                                    fileSize={""}
-                                    handleOnChange={(info: any) => {
-                                      const file = info.file;
-                                      if (!file) return;
+                            {!trip.MT?.length && Object.keys(currentFiles).length === 0 && (
+                              <div className={styles.content__doc}>
+                                <Flex vertical>
+                                  <p>MT 0</p>
+                                  <em className="descriptionDocument">*Obligatorio</em>
+                                </Flex>
+                                <DocumentButton
+                                  title={"MT 0"}
+                                  fileName={"Seleccionar archivo"}
+                                  fileSize={""}
+                                  handleOnChange={(info: any) => {
+                                    const file = info.file;
+                                    if (!file) return;
 
-                                      const updated = {
-                                        ...currentFiles,
-                                        ["MT 0"]: file
-                                      };
+                                    const updated = {
+                                      ...currentFiles,
+                                      ["MT 0"]: file
+                                    };
 
-                                      setValue(fieldName, updated);
-                                      trigger(fieldName);
-                                    }}
-                                    handleOnDelete={() => {
-                                      const updated = { ...currentFiles };
-                                      delete updated["MT 0"];
-                                      setValue(fieldName, updated);
-                                      trigger(fieldName);
-                                    }}
-                                    disabled={isLoading.request}
-                                  />
-                                </div>
-                              </>
+                                    setValue(fieldName, updated);
+                                    trigger(fieldName);
+                                  }}
+                                  handleOnDelete={() => {
+                                    const updated = { ...currentFiles };
+                                    delete updated["MT 0"];
+                                    setValue(fieldName, updated);
+                                    trigger(fieldName);
+                                  }}
+                                  disabled={isLoading.request}
+                                />
+                              </div>
                             )}
                           </Flex>
 
                           {/* Botón para agregar otro */}
-                          {(trip.MT.length > 0 || Object.keys(currentFiles).length > 0) && (
+                          {(trip.MT?.length || Object.keys(currentFiles).length > 0) && (
                             <>
                               <Button
                                 onClick={() => {
@@ -289,7 +303,7 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
                                 type="file"
                                 style={{ display: "none" }}
                                 onChange={handleFileChange}
-                                accept=".pdf,.png,.doc,.docx"
+                                accept={FILE_EXTENSIONS.join(",")}
                               />
                             </>
                           )}
@@ -303,15 +317,27 @@ const UploadServiceSupport = ({ onClose, journeysData, trId }: IUploadServiceSup
           })}
         </div>
       </div>
-      <div className={styles.content__comment}>
-        <Flex vertical style={{ width: "100%" }}>
-          <p>Comentarios</p>
-          <textarea onChange={handleOnChangeTextArea} placeholder="Comentarios adicionales" />
+      {isLoading.data && !tripsDetails ? (
+        <Flex justify="center" align="center" style={{ margin: "50px" }}>
+          <Spin />
         </Flex>
-      </div>
+      ) : (
+        <div className={styles.content__comment}>
+          <Flex vertical style={{ width: "100%" }}>
+            <p>Comentarios</p>
+            <textarea onChange={handleOnChangeTextArea} placeholder="Comentarios adicionales" />
+          </Flex>
+        </div>
+      )}
 
       <FooterButtons
-        isConfirmDisabled={!isValid || !watch("commentary")}
+        isConfirmDisabled={
+          !isValid ||
+          !tripsDetails ||
+          !Object.values(tripAttachments || {}).some(
+            (filesObj) => filesObj && Object.keys(filesObj).length > 0
+          )
+        }
         titleConfirm="Cargar soportes"
         onClose={onClose}
         handleOk={handleSubmit(onSubmit)}

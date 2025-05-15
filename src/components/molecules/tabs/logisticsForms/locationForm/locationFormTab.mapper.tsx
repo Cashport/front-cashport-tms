@@ -39,7 +39,7 @@ export interface FileObject {
   docReference?: string;
 }
 
-export const normalizeLocationData = (data: any): any => {
+export const normalizeLocationData = (data: LocationData): any => {
   if (!data) return {};
 
   const documents = data?.documents?.map((doc: any) => ({
@@ -58,18 +58,19 @@ export const normalizeLocationData = (data: any): any => {
       url_location: "",
       latitude: data.latitude,
       longitude: data.longitude,
-      location_type: data.location_type_id?.toString(),
+      location_type: data.location_type?.toString(),
       active: data.active,
       created_at: new Date(data.created_at),
       created_by: data.created_by,
-      modified_at: new Date(data.modified_at),
+      modified_at: data.modified_at ? new Date(data.modified_at) : null,
       modified_by: data.modified_by,
       state_id: data.state_id?.toString(),
       group_location: data.group_location_id,
       additional_info: data.additional_info,
       contact_name: data.contact_name,
       contact_number: data.contact_number,
-      IS_ACTIVE: data.active
+      IS_ACTIVE: data.active,
+      zone_id: data.zone_id
     },
     files: documents,
     IS_ACTIVE: data.active

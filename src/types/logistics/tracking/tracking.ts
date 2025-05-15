@@ -1,19 +1,23 @@
 export interface TrackingEvent {
   id: number;
+  id_trip: number;
   event_time: string;
+  id_driver: number;
+  id_event_type: number;
   event_description: string;
-  url_photo?: string | null;
+  url_photo: string | null;
   created_at: string;
   created_by: string;
-  aditional_data?: string | null;
-  responsible?: string | null;
-  estimatedValue?: number | null;
-  distanceKm?: number | null;
-  hours?: number | null;
-  rate?: number | null;
-  driver?: string | number | null;
-  comment?: string | null;
-  provider_comment?: string | null;
+  aditional_data: string | null;
+  comment: string | null;
+  provider_comment: string | null;
+  id_status: string;
+  description: string;
+  base_value: number | null;
+  quantity: number;
+  novelty_type_id: number;
+  novelty_type_description: string;
+  fare: number;
 }
 
 export interface VehicleTracking {

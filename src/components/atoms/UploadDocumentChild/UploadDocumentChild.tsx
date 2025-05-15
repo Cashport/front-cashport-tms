@@ -9,15 +9,16 @@ type Props = {
   onDelete: () => void;
   linkFile: string;
   nameFile: string;
+  fullName?: boolean;
 };
 
 export default function UploadDocumentChild(props: Props) {
-  const { showTrash, onDelete, linkFile, nameFile } = props;
+  const { showTrash, onDelete, linkFile, nameFile, fullName } = props;
   return (
-    <Flex gap={20} align="center">
+    <Flex gap={20} align="center" justify="space-between">
       <Button type="text" href={linkFile} target="_blank" style={{ padding: 0 }}>
         <FileArrowDown size={"25px"} />
-        <Text className="nameFile">{shortenFileName(nameFile, 22)}</Text>
+        <Text className="nameFile">{fullName ? nameFile : shortenFileName(nameFile, 22)}</Text>
       </Button>
       {showTrash && (
         <Button

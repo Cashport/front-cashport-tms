@@ -48,6 +48,20 @@ export const getBillingDetailsById = async (id: string): Promise<IBillingDetails
   }
 };
 
+export const getBillingDetailsByTRId = async (idTR: string, idCarrier: string): Promise<IBillingDetails | undefined> => {
+  try {
+    const response: GenericResponse<IBillingDetails> = await API.get(`/logistic-billing/tr_id/${idTR}/${idCarrier}`);
+    if (response.data) {
+      return response.data;
+    } else {
+      console.log(`Error: ${response.data}`);
+    }
+  } catch (error) {
+    console.log(`Error getBillingDetailsById: `, error);
+    return error as any;
+  }
+};
+
 export const getAceptBilling = async (idBilling: number): Promise<boolean | undefined> => {
   try {
     const response: GenericResponse<boolean> = await API.get(

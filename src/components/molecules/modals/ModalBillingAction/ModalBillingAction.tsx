@@ -162,6 +162,7 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
         selectedView !== ViewEnum.CONFIRM_CLOSE && <X size={20} weight="bold" onClick={onClose} />
       }
       footer={<></>}
+      destroyOnClose
     >
       {renderView()}
     </Modal>

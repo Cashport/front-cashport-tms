@@ -13,6 +13,7 @@ import {
 } from "@/services/logistics/locations";
 import { useState } from "react";
 import useSWR from "swr";
+import { ILocation } from "@/types/logistics/schema";
 
 type Props = {
   params: {
@@ -25,7 +26,7 @@ export const CreateLocationView = ({ params }: Props) => {
   const { push } = useRouter();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: any | ILocation) => {
     setIsLoadingSubmit(true);
     try {
       const response = await addLocation({ ...data }, data.files);

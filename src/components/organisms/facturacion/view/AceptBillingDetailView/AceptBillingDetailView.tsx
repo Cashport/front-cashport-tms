@@ -1,7 +1,7 @@
 "use client";
 import { Button, Col, Drawer, Flex, message, Row, Spin, Typography } from "antd";
 import { DotsThree, Truck, CraneTower, User } from "@phosphor-icons/react";
-import { getBillingDetailsById } from "@/services/billings/billings";
+import { getBillingDetailsById, getBillingDetailsByTRId } from "@/services/billings/billings";
 import styles from "./AceptBillingDetailView.module.scss";
 import { useState, useEffect } from "react";
 import { NoveltyTable } from "@/components/molecules/tables/NoveltyTable/Novelty";
@@ -22,7 +22,7 @@ import { RequirementHeader } from "@/components/molecules/collapse/Requirementhe
 const { Text } = Typography;
 
 interface AceptBillingDetailProps {
-  params: { id: string };
+  params: { id: string; idCarrier?: string };
 }
 
 export default function AceptBillingDetailView({ params }: AceptBillingDetailProps) {
@@ -36,7 +36,8 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
 
   const canMakeAnAction = billingStatus
     ? billingStatus === BillingStatusEnum.PorAceptar ||
-      billingStatus === BillingStatusEnum.Preautorizado
+      billingStatus === BillingStatusEnum.Preautorizado ||
+      billingStatus === BillingStatusEnum.PendienteSoportes
     : false;
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -44,7 +45,15 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
   const fetchBillingDetails = async () => {
     try {
       setLoading(true);
-      const response = await getBillingDetailsById(params.id);
+
+      let response;
+
+      if (params.idCarrier) {
+        response = await getBillingDetailsByTRId(params.id, params.idCarrier);
+      } else {
+        response = await getBillingDetailsById(params.id);
+      }
+
       if (response?.journeys) {
         setBillingData(response);
         setBillingStatus(response.billing.statusDesc);
@@ -56,7 +65,6 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     }
     setLoading(false);
   };
-
   useEffect(() => {
     if (params.id && !isModalVisible) fetchBillingDetails();
   }, [params.id, isModalVisible]);
@@ -224,7 +232,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
                   }}
                 >
                   <Receipt size={20} />
-                  <p>Ver MT</p>
+                  <p>Ver Soportes</p>
                 </Button>
               </Flex>
             </div>

@@ -1,10 +1,16 @@
 import { createFormDataFinalizeTrip } from "@/components/molecules/modals/ModalBillingMT/controllers/createFormData";
+import { IParsedFormValues } from "@/components/molecules/modals/ModalBillingMT/controllers/formbillingmt.types";
 import { createFormData } from "@/components/molecules/modals/ModalGenerateActionTO/FinalizeTrip/controllers/createFormData";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
+interface IMT {
+  id: number;
+  name: string;
+  url: string;
+}
 export interface IGetTripDetails {
-  MT: string[];
+  MT: IMT[];
   carrier_id: number;
   id: number;
   plate_number: string;
@@ -19,7 +25,7 @@ export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | 
   throw new Error(response.message);
 };
 
-export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<boolean | undefined> => {
+export const sendFinalizeTrip = async (form: IParsedFormValues[], idTrip: number): Promise<any> => {
   try {
     const formData = createFormDataFinalizeTrip(form);
     const response: any = await API.post(`/transfer-request/add-mt-trip/${idTrip}`, formData, {
@@ -31,7 +37,7 @@ export const sendFinalizeTrip = async (form: any, idTrip: number): Promise<boole
     if (response?.data) return true;
     return false;
   } catch (error) {
-    throw new Error("Hubo un error");
+    throw new Error("Hubo un error finalizando el viaje");
   }
 };
 export const getCarriersTripsDetails = async (idTR: number): Promise<any[] | undefined> => {

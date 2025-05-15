@@ -1167,12 +1167,17 @@ export interface ILocation {
   created_by: string;
   modified_at?: Date | null;
   modified_by?: string | null;
+  precision_radio?: number;
+  zone_id?: number;
   state_id?: number;
-  group_location?: string;
+  group_location_id?: string;
   additional_info: string;
   contact_name: string;
   contact_number: string;
   user: string;
+  is_community?: boolean;
+  community_name?: string;
+  documents?: any[];
 }
 
 export interface ITripType {
