@@ -254,11 +254,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
             </div>
           )}
         >
-          <GenerateActionButton
-            onClick={() => {
-              console.log("click");
-            }}
-          />
+          <GenerateActionButton onClick={() => {}} />
         </Dropdown>
       </div>
       <Skeleton loading={isLoading} active>
