@@ -144,7 +144,7 @@ export default function ModalDocuments(props: PropsModalDocuments) {
                 options={documentsType?.map((document) => ({
                   label: <span>{document.description}</span>,
                   value: document.id.toString(),
-                  disabled: allOptional ? false : !document.optional
+                  disabled: allOptional ? false : mockFiles.some((file) => file.id === document.id) && !document.optional,
                 }))}
               />
             ) : (
