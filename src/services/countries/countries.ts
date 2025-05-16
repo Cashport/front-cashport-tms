@@ -1,18 +1,9 @@
-import config from "@/config";
-import { IListCountries } from "@/types/countries/IListCountries";
-import { getIdToken } from "@/utils/api/api";
-import axios from "axios";
+import { Data } from "@/types/countries/IListCountries";
+import { API } from "@/utils/api/api";
 
-export const getAllCountries = async (): Promise<IListCountries> => {
-  const token = await getIdToken();
+export const getAllCountries = async (): Promise<Data> => {
   try {
-    const response: IListCountries = await axios.get(`${config.API_HOST}/country`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: Data = await API.get(`/country`);
     return response;
   } catch (error) {
     return error as any;

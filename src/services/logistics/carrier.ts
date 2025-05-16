@@ -1,7 +1,4 @@
-import axios from "axios";
-import config from "@/config";
-import { IListData } from "@/types/logistics/schema";
-import { API, getIdToken } from "@/utils/api/api";
+import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export const getAllCarriers = async (): Promise<any> => {
@@ -23,7 +20,7 @@ export const updateCarrier = async (form: any): Promise<any> => {
     }))
   };
   try {
-    const response: IListData = await API.put(`${config.API_HOST}/carrier/update/${form.id}`, data);
+    const response: GenericResponse = await API.put(`/carrier/update/${form.id}`, data);
     return response;
   } catch (error) {
     console.log("Error get carrier: ", error);

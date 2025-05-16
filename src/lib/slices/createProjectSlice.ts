@@ -30,7 +30,7 @@ export const createProjectSlice = (set: any): ProjectSlice => ({
   setProjects: (by: IProject[]) => set({ projects: by }),
   setSelectedProject: (by: ISelectedProject) => {
     setProjectInApi(by.ID);
-    set({ selectedProject: by });
+    return set({ selectedProject: by });
   },
   setProjectsBasicInfo: (by: ISelectedProject[]) => set({ projectsBasicInfo: by })
 });

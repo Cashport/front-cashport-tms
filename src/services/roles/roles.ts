@@ -1,18 +1,10 @@
 import config from "@/config";
 import { IRoles } from "@/types/roles/IRoles";
-import { getIdToken } from "@/utils/api/api";
-import axios, { AxiosResponse } from "axios";
+import { API } from "@/utils/api/api";
 
-export const getAllRoles = async (): Promise<AxiosResponse<IRoles>> => {
-  const token = await getIdToken();
+export const getAllRoles = async (): Promise<IRoles> => {
   try {
-    const response: AxiosResponse<IRoles> = await axios.get(`${config.API_HOST}/role`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: IRoles = await API.get(`${config.API_HOST}/role`);
     return response;
   } catch (error) {
     return error as any;

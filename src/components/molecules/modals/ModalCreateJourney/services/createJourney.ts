@@ -1,6 +1,4 @@
-import { API, getIdToken } from "@/utils/api/api";
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
+import { API } from "@/utils/api/api";
 import { Journey, JourneyFormValues } from "../utils/types";
 import { createData } from "../utils/createData";
 import { Dispatch, SetStateAction } from "react";
@@ -12,16 +10,14 @@ export const createJourney = async (
 ): Promise<Journey> => {
   try {
     setIsLoadingSubmit(true);
-    const token = await getIdToken();
     const body = createData({ data, idTransferRequest: trId });
-    const response = await axios.post(`${config.API_HOST}/journey/create`, body, {
+    const response = await API.post(`/journey/create`, body, {
       headers: {
         Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
-    return response?.data?.data;
+    return response?.data;
   } catch (error) {
     console.log("Error post transfer-order/: ", error);
     throw error as any;
@@ -38,16 +34,14 @@ export const updateJourney = async (
   try {
     setIsLoadingSubmit(true);
 
-    const token = await getIdToken();
     const body = createData({ data, idTransferRequest: trId });
-    const response = await axios.put(`${config.API_HOST}/journey/update`, body, {
+    const response = await API.put(`/journey/update`, body, {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
       }
     });
-    return response?.data?.data;
+    return response?.data;
   } catch (error) {
     console.log("Error post transfer-order/: ", error);
     throw error as any;
@@ -66,7 +60,7 @@ export const deleteJourney = async (
     const customConfig = {
       data: { id: idJourney, idTransferRequest }
     };
-    const response = await API.delete(`${config.API_HOST}/journey/delete`, customConfig);
+    const response = await API.delete(`/journey/delete`, customConfig);
     return response?.data?.data;
   } catch (error) {
     console.log("Error post transfer-order/: ", error);

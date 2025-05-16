@@ -3,7 +3,6 @@ import { Modal, Button, Form, Row, Col, Select, Input, Flex } from "antd";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import axios from "axios";
 import { FooterButtons } from "../ModalCreateJourney/components/FooterButtons/FooterButtons";
 import styles from "./ModalCreateVehicle.module.scss";
 import {
@@ -16,6 +15,7 @@ import {
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import { useFormState } from "react-dom";
+import { API } from "@/utils/api/api";
 const { Option } = Select;
 
 // Define the interface for the form
@@ -72,7 +72,7 @@ const ModalCreateVehicleRate: React.FC<IModalProps> = ({ isOpen, closeModal }) =
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
     try {
-      await axios.post("/api/endpoint", data); // Change '/api/endpoint' to the correct endpoint
+      await API.post("/api/endpoint", data); // Change '/api/endpoint' to the correct endpoint
       closeModal();
       reset();
     } catch (error) {

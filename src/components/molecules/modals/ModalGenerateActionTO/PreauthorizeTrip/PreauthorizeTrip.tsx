@@ -116,9 +116,9 @@ const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
   const pendingPAValue = totalValue - getAlreadyPreautorized();
   const isFormCompleted = pendingPAValue === 0 && allPAHaveEvidence && isValid;
 
-  const handleDownloadCsv = () => {
+  const handleDownloadCsv = async () => {
     const endpoint = `logistic-billing/export-csv/${billingId}`;
-    downloadCSVFromEndpoint(endpoint, `TR-${idTR}_Billing.csv`);
+    await downloadCSVFromEndpoint(endpoint, `TR-${idTR}_Billing.xlsx`);
   };
 
   if (isLoading) {

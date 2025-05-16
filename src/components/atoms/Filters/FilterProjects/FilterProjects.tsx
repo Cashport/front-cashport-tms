@@ -51,7 +51,7 @@ export const FilterProjects = ({ setSelecetedProjects, height }: Props) => {
 
     if (targetOption.value === "Pais" && countries.length === 0) {
       const { data } = await getAllCountries();
-      const countriesToShow = data.data.map((country) => ({
+      const countriesToShow = data.map((country) => ({
         label: `${country.country_name}`,
         value: `${country.id}`
       }));
@@ -61,7 +61,7 @@ export const FilterProjects = ({ setSelecetedProjects, height }: Props) => {
     }
     if (targetOption.value === "Currencia" && currencies.length === 0) {
       const { data } = await getAllCurrencies();
-      const countriesToShow = data.data.map((country) => ({
+      const countriesToShow = data.map((country) => ({
         label: `${country.CURRENCY_NAME}`,
         value: `${country.ID}`
       }));

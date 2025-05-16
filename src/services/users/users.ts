@@ -1,20 +1,18 @@
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { IUserAxios, IUserForm } from "@/types/users/IUser";
-import { getIdToken } from "@/utils/api/api";
+import { WelcomeData, IUserForm } from "@/types/users/IUser";
+import { API } from "@/utils/api/api";
 import { SUCCESS } from "@/utils/constants/globalConstants";
 import { ISelectedBussinessRules } from "@/types/bre/IBRE";
 import { IGroupsByUser } from "@/types/clientsGroups/IClientsGroups";
 import { MessageType } from "@/context/MessageContext";
+import { GenericResponse } from "@/types/global/IGlobal";
+import axios from "axios";
 
-export const getUserById = async (idUser: string): Promise<IUserAxios> => {
-  const token = await getIdToken();
+export const getUserById = async (idUser: string): Promise<WelcomeData> => {
   try {
-    const response: IUserAxios = await axios.get(`${config.API_HOST}/user/${idUser}`, {
+    const response: WelcomeData = await API.get(`/user/${idUser}`, {
       headers: {
         Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
 
@@ -46,19 +44,11 @@ export const inviteUser = async (
     rol_id: data.info.rol?.value,
     groups_id: selectedGroups
   };
-  const token = await getIdToken();
   const endpointRole = data.info.rol?.value === 2 ? "admin" : "user";
   try {
-    const response: AxiosResponse = await axios.post(
-      `${config.API_HOST}/user/invitation/${endpointRole}/email`,
-      modelData,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const response: GenericResponse = await API.post(
+      `/user/invitation/${endpointRole}/email`,
+      modelData
     );
     return response;
   } catch (error) {
@@ -92,15 +82,8 @@ export const updateUser = async (
     groups_id: selectedGroups
   };
 
-  const token = await getIdToken();
   try {
-    const response: AxiosResponse = await axios.put(`${config.API_HOST}/user`, modelData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.put(`/user`, modelData);
     return response;
   } catch (error) {
     console.warn("error updating user: ", error);
@@ -118,18 +101,10 @@ export const onChangeStatusById = async (
   const modelData = {
     active: isActive
   };
-  const token = await getIdToken();
   try {
-    const response: AxiosResponse = await axios.put(
-      `${config.API_HOST}/user/${userId}/user-change-status`,
-      modelData,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const response: GenericResponse = await API.put(
+      `/user/${userId}/user-change-status`,
+      modelData
     );
     if (response.status === SUCCESS) {
       showMessage(
@@ -158,18 +133,10 @@ export const onRemoveUserById = async (
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
   onClose: () => void
-): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
+): Promise<GenericResponse> => {
   try {
-    const response: AxiosResponse<any> = await axios.delete(
-      `${config.API_HOST}/user/id=${idUser}&project_id=${idProject}`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const response: GenericResponse = await API.delete(
+      `/user/id=${idUser}&project_id=${idProject}`
     );
     if (response.status === SUCCESS) {
       showMessage("success", "El usuario fue eliminado exitosamente.");
@@ -184,20 +151,9 @@ export const onRemoveUserById = async (
     return error as any;
   }
 };
-export const onResendInvitationUser = async (email: string): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
+export const onResendInvitationUser = async (email: string): Promise<GenericResponse> => {
   try {
-    const response: AxiosResponse<any> = await axios.post(
-      `${config.API_HOST}/user/invitation/resend`,
-      { email },
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: GenericResponse = await API.post(`/user/invitation/resend`, { email });
 
     return response;
   } catch (error) {
@@ -208,26 +164,14 @@ export const onResendInvitationUser = async (email: string): Promise<AxiosRespon
 export const deleteUsersById = async (
   users_id: number[],
   project_id: string
-): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
-
+): Promise<GenericResponse> => {
   const modelData = {
     users: users_id,
     project_id
   };
 
   try {
-    const response: AxiosResponse = await axios.put(
-      `${config.API_HOST}/massive-action/user/delete`,
-      modelData,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: GenericResponse = await API.put(`/massive-action/user/delete`, modelData);
 
     return response;
   } catch (error) {
@@ -236,24 +180,15 @@ export const deleteUsersById = async (
   }
 };
 
-export const resendInvitationUsers = async (users_id: number[]): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
-
+export const resendInvitationUsers = async (users_id: number[]): Promise<GenericResponse> => {
   const modelData = {
     users: users_id
   };
 
   try {
-    const response: AxiosResponse = await axios.post(
-      `${config.API_HOST}/massive-action/user/resend-invitation`,
-      modelData,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const response: GenericResponse = await API.post(
+      `/massive-action/user/resend-invitation`,
+      modelData
     );
 
     return response;
@@ -264,20 +199,12 @@ export const resendInvitationUsers = async (users_id: number[]): Promise<AxiosRe
 };
 
 export const getGroupsByUser = async (userID: number, projectID: number) => {
-  const token = await getIdToken();
   try {
-    const response: AxiosResponse<IGroupsByUser> = await axios.get(
-      `${config.API_HOST}/group-client/user/${userID}/project/${projectID}`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const response: IGroupsByUser = await API.get(
+      `/group-client/user/${userID}/project/${projectID}`
     );
 
-    return response.data;
+    return response;
   } catch (error) {
     console.warn("error getting groups by user: ", error);
     return error as any;

@@ -93,7 +93,7 @@ export const UserFormTab = ({
         const psl_id: string = data.psl.id_psl;
         setValue("general.psl_id", psl_id);
         getAllCostCenterByPsl(psl_id).then((cc) => {
-          setCostCenters(convertCostCenterToSelectOptions(cc.data.data));
+          setCostCenters(convertCostCenterToSelectOptions(cc.data));
           setValue("general.cost_center_id", data.psl.id_cost_center);
         });
       }
@@ -140,7 +140,7 @@ export const UserFormTab = ({
       if (name == "general.psl_id") {
         const psl_id: any = data.general?.psl_id?.toString();
         getAllCostCenterByPsl(psl_id).then((cc) => {
-          setCostCenters(convertCostCenterToSelectOptions(cc.data.data));
+          setCostCenters(convertCostCenterToSelectOptions(cc.data));
         });
       }
     });
@@ -303,7 +303,7 @@ export const UserFormTab = ({
                           error={errors?.general?.rol_id}
                           field={field}
                           loading={isLoadingRoles}
-                          options={converRolestToSelectOptions((rolesType?.data.data as any) || [])}
+                          options={converRolestToSelectOptions((rolesType?.data as any) || [])}
                           showSearch={true}
                         />
                       )}
@@ -327,7 +327,7 @@ export const UserFormTab = ({
                           field={field}
                           loading={isLoadingCarriers}
                           options={converCarrierstToSelectOptions(
-                            (carriersType?.data.data as any) || []
+                            (carriersType?.data as any) || []
                           )}
                           allowClear={true}
                           showSearch={true}
@@ -352,7 +352,7 @@ export const UserFormTab = ({
                           error={errors?.general?.psl_id}
                           field={field}
                           loading={isLoadingPsls}
-                          options={converPslstToSelectOptions((pslsType?.data.data as any) || [])}
+                          options={converPslstToSelectOptions((pslsType?.data as any) || [])}
                           showSearch={true}
                         />
                       )}
