@@ -7,8 +7,42 @@ export const getAllCarriers = async (): Promise<any> => {
   else throw response;
 };
 
-export const getCarrierById = async (id: string): Promise<any> => {
-  const response: GenericResponse = await API.get(`/carrier/${id}`);
+export interface ICarrierById {
+  id: number;
+  business_name: string;
+  description: string;
+  billing_email: string;
+  communication_email: string;
+  contact_name: string;
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  nit: string;
+  phone_number: number;
+  id_vendor: number;
+  id_carrier_type: number | null;
+  subject_id: number | null;
+  active: boolean; // 1 o 0
+  icon: string;
+  documents: any[];
+  features: {
+    id: number;
+    description: string;
+    idEntityType: number;
+    idFeatureEntity: number;
+  }[];
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
+}
+
+export const getCarrierById = async (id: string): Promise<ICarrierById> => {
+  const response: GenericResponse<ICarrierById> = await API.get(`/carrier/${id}`);
+  console.log("response getCarrierById", response);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
 };

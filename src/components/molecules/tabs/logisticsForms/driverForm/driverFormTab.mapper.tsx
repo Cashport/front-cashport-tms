@@ -1,6 +1,10 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
-import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  DocumentCompleteType,
+  ICertificateAndDocuments,
+  IGetCertificate
+} from "@/types/logistics/certificate/certificate";
 import {
   IAPIDriver,
   ICertificates,
@@ -32,7 +36,7 @@ export interface DriverFormTabProps {
     driverId: string;
   };
   handleFormState?: (newFormState: StatusForm) => void;
-  documentsTypesList: CertificateType[];
+  documentsTypesList: IGetCertificate[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
   tripTypes: ITripType[];
@@ -97,7 +101,7 @@ export const dataToProjectFormData = (
 
 export const _onSubmit = (
   data: any,
-  files: DocumentCompleteType[],
+  files: ICertificateAndDocuments[],
   imageFile: FileObject[] | undefined,
   onSubmitForm: (data: any) => void
 ) => {

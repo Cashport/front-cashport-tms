@@ -21,25 +21,25 @@ export const CreateVehicleView = ({ params }: Props) => {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const handleSubmit = async (data: any) => {
+    console.log("data", data);
     setIsLoadingSubmit(true);
     try {
       const response = await addVehicle({ ...data }, data.files, data.images);
-      if (response && response.status === 200) {
-        setIsLoadingSubmit(false);
-        message.success("Vehículo creado", 3, () =>
-          push(`/logistics/providers/${params.id}/vehicle`)
-        );
-      }
+
+      message.success("Vehículo creado", 3, () =>
+        push(`/logistics/providers/${params.id}/vehicle`)
+      );
     } catch (error) {
-      setIsLoadingSubmit(false);
       message.error(error instanceof Error ? error.message : "Error al crear vehículo", 3);
     }
+    setIsLoadingSubmit(false);
   };
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR(
     "documents/type/1",
     () => getDocumentsByEntityType("1"),
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+  console.log("documentsType", documentsType);
   const { data: vehiclesTypesData, isLoading: isLoadingVehicles } = useSWR(
     "/vehicle/type",
     getVehicleType,

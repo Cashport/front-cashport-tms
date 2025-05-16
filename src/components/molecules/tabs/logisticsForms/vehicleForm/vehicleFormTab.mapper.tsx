@@ -10,7 +10,12 @@ import { MessageInstance } from "antd/es/message/interface";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
 import { UseFormReset, UseFormSetValue } from "react-hook-form";
-import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  CertificateType,
+  DocumentCompleteType,
+  ICertificateAndDocuments,
+  IGetCertificate
+} from "@/types/logistics/certificate/certificate";
 import { IFeature } from "@/types/features/feature";
 
 export type StatusForm = "review" | "create" | "edit";
@@ -30,7 +35,7 @@ export interface VehicleFormTabProps {
     id: string;
     vehicleId: string;
   };
-  documentsTypesList: CertificateType[];
+  documentsTypesList: IGetCertificate[];
   vehiclesTypesList: VehicleType[];
   features: IFeature[];
   isLoading: boolean;
@@ -94,7 +99,7 @@ export const normalizeVehicleData = (data: any): any => {
       company: "", // Add logic to fetch company name if necessary
       IS_ACTIVE: data.active,
       status: data.status,
-      trip_type: data.features?.map((f:any) => ({value: f.id}))
+      trip_type: data.features?.map((f: any) => ({ value: f.id }))
     },
     images: images,
     files: documents,
@@ -104,7 +109,7 @@ export const normalizeVehicleData = (data: any): any => {
 
 export const _onSubmitVehicle = (
   data: any,
-  selectedFiles: DocumentCompleteType[],
+  selectedFiles: ICertificateAndDocuments[],
   imageFiles: { docReference: string; file: File }[],
   setImageError: (value: SetStateAction<boolean>) => void,
   onSubmitForm: (data: any) => void

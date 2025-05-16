@@ -28,17 +28,21 @@ import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  DocumentCompleteType,
+  ICertificateAndDocuments
+} from "@/types/logistics/certificate/certificate";
 import { IFormCarrier } from "@/types/logistics/schema";
 
 import "./carrierformtab.scss";
+import { ICarrierById } from "@/services/logistics/carrier";
 
 const { Title, Text } = Typography;
 
 export const CarrierFormTab = ({
   onSubmitForm = () => {},
   statusForm = "review",
-  data = [],
+  data = {} as ICarrierById,
   handleFormState = () => {},
   tripTypes,
   onActiveProvider = () => {},
@@ -50,13 +54,13 @@ export const CarrierFormTab = ({
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR("documents/type/0", () =>
     getDocumentsByEntityType("0")
   );
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<ICertificateAndDocuments[]>([]);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [loading, setloading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data[0]);
+  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data);
   const {
     watch,
     control,
@@ -78,18 +82,19 @@ export const CarrierFormTab = ({
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
   useEffect(() => {
     if (Array.isArray(documentsType)) {
-      if (data[0]?.documents?.length) {
+      if (data?.documents?.length) {
         const fileSelected =
           documentsType
-            ?.filter((f) => data[0].documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data[0].documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data[0].documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
+            ?.filter((f) => data.documents?.find((d) => d.id_document_type === f.id))
+            .map((f) => {
+              const doc = data.documents?.find((d) => d.id_document_type === f.id);
+              return {
+                ...f,
+                file: undefined,
+                link: doc?.url_archive,
+                expirationDate: doc?.expiration_date
+              };
+            }) || [];
         setSelectedFiles(fileSelected);
       }
     }

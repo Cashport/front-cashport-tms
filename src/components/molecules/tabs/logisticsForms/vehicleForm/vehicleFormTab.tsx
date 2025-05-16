@@ -19,8 +19,7 @@ import {
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
 import { IFormVehicle, VehicleType } from "@/types/logistics/schema";
-import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { ICertificateAndDocuments } from "@/types/logistics/certificate/certificate";
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
@@ -58,14 +57,13 @@ export const VehicleFormTab = ({
   // eslint-disable-next-line no-unused-vars
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
-  console.log("dataGENERAL", data);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<ICertificateAndDocuments[]>([]);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
@@ -167,6 +165,7 @@ export const VehicleFormTab = ({
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
 
+  console.log("documentsTypesList", documentsTypesList);
   useEffect(() => {
     if (Array.isArray(documentsTypesList)) {
       const isFirstLoad = data?.documents?.length && selectedFiles.length === 0;
@@ -182,11 +181,13 @@ export const VehicleFormTab = ({
                 data.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
               )
             })) || [];
+
         setSelectedFiles(docsWithLink);
       } else {
         const documentsFiltered = documentsTypesList?.filter(
-          (f) => !f?.optional || selectedFiles?.find((f2) => f2.id === f.id)
+          (f) => f?.isMandatory || selectedFiles?.find((f2) => f2.id === f.id)
         );
+        console.log("documentsFiltered", documentsFiltered);
         const docsWithFile = documentsFiltered.map((f) => {
           const prevFile = selectedFiles.find((f2) => f2.id === f.id);
           return {
@@ -211,7 +212,7 @@ export const VehicleFormTab = ({
         const documentsFromData = documentsTypesList?.filter((f) =>
           data?.documents?.find((d) => d.id_document_type === f.id)
         );
-        const nonOptionalDocuments = documentsTypesList.filter((f) => !f?.optional);
+        const nonOptionalDocuments = documentsTypesList.filter((f) => !f?.isMandatory);
         const documentsUniqueSet = new Set([...documentsFromData, ...nonOptionalDocuments]);
         const documentsUniqueArray = Array.from(documentsUniqueSet);
         const docsWithLink =
@@ -583,7 +584,7 @@ export const VehicleFormTab = ({
             <Row justify={"end"}>
               <SubmitFormButton
                 loading={isLoading}
-                disabled={isLoading} // Solo lo deshabilitas mientras está cargando
+                disabled={isLoading}
                 text={validationButtonText(statusForm)}
                 onClick={async () => {
                   console.log("isvalid", isValid);
@@ -621,17 +622,6 @@ export const VehicleFormTab = ({
         onClose={() => setIsOpenModal(false)}
         onActive={onActiveVehicle}
         onDesactivate={onDesactivateVehicle}
-      />
-      <ModalDocuments
-        isOpen={isOpenModalDocuments}
-        mockFiles={selectedFiles}
-        setFiles={setFiles}
-        documentsType={documentsTypesList}
-        isLoadingDocuments={false}
-        onClose={() => setIsOpenModalDocuments(false)}
-        handleChange={handleChange}
-        handleChangeExpirationDate={handleChangeExpirationDate}
-        setSelectedFiles={setSelectedFiles}
       />
     </>
   );

@@ -53,7 +53,7 @@ export const ProviderInfoView = ({ isEdit = false, idParam, statusFormProp = "re
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Proveedor editado", 2, () => setStatusForm("review"));
-        mutate({ id: idParam, key: "1" });
+        mutate();
       }
     } catch (error) {
       setIsLoadingSubmit(false);
