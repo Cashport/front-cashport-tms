@@ -108,7 +108,7 @@ export const DriverInfoView = ({ params }: Props) => {
     >
       <DriverFormTab
         onSubmitForm={handleSubmitForm}
-        data={data?.[0]}
+        data={data}
         params={params}
         statusForm={statusForm}
         handleFormState={handleFormState}

@@ -75,7 +75,7 @@ export const DriverFormTab = ({
   const [selectedFiles, setSelectedFiles] = useState<ICertificateAndDocuments[]>([]);
 
   const defaultValues =
-    statusForm === "create" ? {} : dataToProjectFormData(data, vehiclesTypesList || []);
+    statusForm === "create" ? {} : data && dataToProjectFormData(data, vehiclesTypesList || []);
   const {
     watch,
     getValues,

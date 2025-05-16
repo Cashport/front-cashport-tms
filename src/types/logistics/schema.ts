@@ -1191,33 +1191,38 @@ export interface ITripType {
  */
 export interface IAPIDriver {
   id: number;
-  phone: number;
-  email: string;
-  document_type: number;
-  vehicle_type: ApiVehicleType[];
-  document: string;
-  license: string;
-  license_category: string;
-  licence_category?: string;
-  license_expiration: Date;
   name: string;
   last_name: string;
-  emergency_number: number;
-  emergency_contact: string;
-  firebaseguid?: string;
-  active: any;
-  status?: any;
-  created_at: Date;
-  created_by: string;
-  modified_at?: Date | null;
-  modified_by?: string | null;
-  company: string;
+  document: string;
+  document_type: number;
+  licence: string;
+  licence_category: string;
+  licence_expiration: string;
+  birth_date: string;
+  email: string;
+  phone: string;
   rh: string;
-  glasses: any;
-  birth_date: Date;
-  photo?: string;
-  company_id?: string;
-  features: Ifeature[];
+  glasses: boolean; // originalmente 0 o 1
+  emergency_contact: string;
+  emergency_number: number;
+  photo: string | null;
+  firebaseguid: string;
+  firebase_push_token: string | null;
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  active: boolean; // originalmente 0 o 1
+  subject_id: number | null;
+  documents: any[]; // se puede tipar si se conoce estructura
+  features: Ifeature[]; // igual que arriba
+  vehicle_type: ApiVehicleType[]; // idem
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
 }
 export interface IFormGeneralDriver {
   id: number;
