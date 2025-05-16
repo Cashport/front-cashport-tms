@@ -1,83 +1,76 @@
-import { Button, Flex, Table, Tag, Typography } from "antd";
-import type { TableProps } from "antd";
+import { Table } from "antd";
+
 import { Eye } from "phosphor-react";
 
-import dayjs from "dayjs";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-
-const { Text } = Typography;
+import { ICertificateAndDocuments } from "@/types/logistics/certificate/certificate";
+import IconButton from "@/components/atoms/IconButton/IconButton";
+import { ColumnsType } from "antd/es/table";
+import { formatDate } from "@/utils/utils";
+import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
 
 type DocumentsTableProps = {
-  selectedFiles: DocumentCompleteType[];
+  selectedFiles: ICertificateAndDocuments[];
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
   const { selectedFiles } = props;
 
-  const documentsTableColumns: TableProps<DocumentCompleteType>["columns"] = [
+  const tableColumns: ColumnsType<ICertificateAndDocuments> = [
+    { title: "Nombre", dataIndex: "name", key: "name", width: "20%" },
     {
       title: "Descripción",
       dataIndex: "description",
       key: "description",
-      render: (text) => <Text>{text}</Text>
+      width: "35%"
     },
     {
-      title: "Fecha de Cargue",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (date) => {
-        return <Text>{dayjs.utc(date).format("DD/MM/YYYY")}</Text>;
-      }
+      title: "Fecha cargue",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (_: string, record: any) => (record.createdAt ? formatDate(record.createdAt) : "-"),
+      width: "15%"
     },
     {
       title: "Vencimiento",
       dataIndex: "expirationDate",
       key: "expirationDate",
-      render: (date) => (
-        <Text>
-          {dayjs.utc(date).format("DD/MM/YYYY") === "30/11/1899"
-            ? "-"
-            : dayjs.utc(date).format("DD/MM/YYYY")}
-        </Text>
-      )
+      render: (expirationDate) => (expirationDate ? formatDate(expirationDate) : "-"),
+      width: "15%"
     },
     {
-      title: "Tipo",
-      dataIndex: "optional",
-      key: "optional",
-      render: (optional) => (
-        <Flex>
-          <Tag
-            color={optional ? "blue" : "red"}
-            bordered={false}
-            style={{ fontSize: "0.875rem", padding: "4px 8px" }}
-          >
-            {optional ? "Opcional" : "Obligatorio"}
-          </Tag>
-        </Flex>
-      )
+      title: "Obligatorio",
+      dataIndex: "isMandatory",
+      key: "isMandatory",
+      render: (isMandatory: boolean) => <p>{isMandatory ? "Sí" : "No"}</p>,
+      width: "10%"
+    },
+    {
+      title: "Estado",
+      dataIndex: "statusId",
+      key: "statusId",
+      render: (statusId: string) => <BadgeDocumentStatus statusId={statusId} />
     },
     {
       title: "",
-      key: "link",
-      dataIndex: "link",
-      render: (link?: string) => (
-        <Button
-          disabled={!link}
+      dataIndex: "seeMore",
+      key: "seeMore",
+      render: (_: any, record: any) => (
+        <IconButton
+          onClick={() => {
+            // setSelectedDocument(record);
+            // handleOpenDrawer();
+          }}
           icon={<Eye size={"1.3rem"} />}
-          href={link}
-          target="_blank"
-          rel="noopener"
+          style={{ backgroundColor: "#F4F4F4" }}
         />
       ),
-      width: 70
+      align: "right"
     }
   ];
-
   return (
     <Table
       style={{ width: "100%" }}
-      columns={documentsTableColumns}
+      columns={tableColumns}
       pagination={false}
       dataSource={selectedFiles.map((data) => ({ ...data, key: data.id }))}
     />
