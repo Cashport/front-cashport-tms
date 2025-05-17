@@ -68,7 +68,7 @@ export const VehicleFormTab = ({
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
   );
-  const defaultValues = statusForm === "create" ? {} : normalizeVehicleData(data as any);
+  const defaultValues = statusForm === "create" ? {} : data && normalizeVehicleData(data);
   const {
     watch,
     control,
@@ -300,8 +300,8 @@ export const VehicleFormTab = ({
           {statusForm !== "create" && (
             <Flex gap={"0.5rem"} align="center">
               <Flex>
-                {!!driverStatus?.description && (
-                  <CustomTag text={driverStatus.description} color={driverStatus.color} />
+                {!!driverStatus?.name && (
+                  <CustomTag text={driverStatus.name} color={driverStatus.color} />
                 )}
               </Flex>
               <Dropdown

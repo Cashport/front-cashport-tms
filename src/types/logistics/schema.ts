@@ -1259,10 +1259,9 @@ export interface IFormGeneralDriver {
  * interface.
  */
 export interface IVehicle {
-  id: string;
-  id_carrier: string;
-  id_vehicle_type: string;
-  vehicle_type: string;
+  id: number;
+  id_carrier: number;
+  id_vehicle_type: number;
   plate_number: string;
   brand: string;
   line: string;
@@ -1274,17 +1273,21 @@ export interface IVehicle {
   gps_link: string;
   gps_user: string;
   gps_password: string;
-  active: any;
-  created_at: Date;
-  created_by: string;
-  modified_at: Date;
-  modified_by: string;
-  company: string;
-  images: CustomFile[];
-  IS_ACTIVE: boolean;
   has_gps: boolean;
-  status: IStatus;
-  trip_type: { label: string; value: number }[];
+  active: boolean; // originalmente 0 o 1
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
+  subject_id: number | null;
+  documents: any[];
+  features: any[];
 }
 /**
  * Exposes all fields present in carrier as a typescript
@@ -3267,14 +3270,21 @@ export interface CustomFile extends File {
   url_archive: string;
   uid?: string;
 }
+export interface IFormGeneralVehicle extends IVehicle {
+  // Aquí puedes agregar campos específicos para el formulario de vehículo
+  trip_type?: {
+    label: string;
+    value: number;
+  }[];
+}
 export interface IFormVehicle {
-  general: IVehicle;
+  general: IFormGeneralVehicle;
   files?: DocumentCompleteType[];
   images: CustomFile[];
   IS_ACTIVE: boolean;
 }
 export interface IFormCarrier extends ICarrier {
-  // TEMPORARY - MADE UP:
+  // TEMPORARY - MADE UP:`
   phone?: string;
   email?: string;
 }

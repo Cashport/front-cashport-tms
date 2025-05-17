@@ -28,8 +28,8 @@ export const getFeaturesVehicle = async (): Promise<IFeature[]> => {
   throw new Error(response?.message || "Error");
 };
 
-export const getVehicleById = async (id: string): Promise<VehicleData> => {
-  const response: GenericResponse<VehicleData> = await API.get(`/vehicle/${id}`);
+export const getVehicleById = async (id: string): Promise<IVehicle> => {
+  const response: GenericResponse<IVehicle> = await API.get(`/vehicle/${id}`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
 };

@@ -22,7 +22,7 @@ export type StatusForm = "review" | "create" | "edit";
 
 export interface VehicleFormTabProps {
   idVehicleForm?: string;
-  data?: VehicleData;
+  data?: IVehicle;
   disabled?: boolean;
   onEditVehicle?: () => void;
   onSubmitForm?: (data: any) => void;
@@ -56,7 +56,7 @@ export interface FileObject {
   docReference?: string;
 }
 
-export const normalizeVehicleData = (data: any): any => {
+export const normalizeVehicleData = (data: IVehicle): any => {
   if (!data) return {};
 
   const documents = data.documents.map((doc: any) => ({
@@ -65,14 +65,6 @@ export const normalizeVehicleData = (data: any): any => {
       url: doc.url_archive
     }
   }));
-
-  const images = data.images.map((image: any) => {
-    const fileData = image.data;
-    const fileName = image.url_archive.split("/").pop();
-    const file = new File([fileData], fileName);
-    (file as any).url_archive = image.url_archive;
-    return file;
-  });
 
   return {
     general: {
@@ -101,7 +93,6 @@ export const normalizeVehicleData = (data: any): any => {
       status: data.status,
       trip_type: data.features?.map((f: any) => ({ value: f.id }))
     },
-    images: images,
     files: documents,
     IS_ACTIVE: data.active
   };
