@@ -1,17 +1,13 @@
-import axios from "axios";
-
-import { getIdToken } from "@/utils/api/api";
-import config from "@/config";
+import { API } from "@/utils/api/api";
 
 import {
-  ICreateProject,
+  WelcomeData,
   IProjectForFormData,
   IUpdateProjectData
 } from "@/types/projects/ICreateProject";
 import { IFormProject } from "@/types/projects/IFormProject";
 
-export const addProject = async (data: IFormProject): Promise<ICreateProject> => {
-  const token = await getIdToken();
+export const addProject = async (data: IFormProject): Promise<WelcomeData> => {
   const currenciesFinal = data.general.currencies.map((currency) => ({
     id: currency.value,
     currency_name: currency.label
@@ -37,9 +33,10 @@ export const addProject = async (data: IFormProject): Promise<ICreateProject> =>
     name: data.general.name,
     position_contact: data.contact.position_contact,
     day_flag: billingPeriod.day_flag,
-    day: billingPeriod.day_flag === 'true' ? billingPeriod.day : undefined,
-    order: billingPeriod.day_flag === 'true' ? undefined : billingPeriod.order.toLowerCase(),
-    day_of_week: billingPeriod.day_flag === 'true' ? undefined : billingPeriod.day_of_week.toLowerCase()
+    day: billingPeriod.day_flag === "true" ? billingPeriod.day : undefined,
+    order: billingPeriod.day_flag === "true" ? undefined : billingPeriod.order.toLowerCase(),
+    day_of_week:
+      billingPeriod.day_flag === "true" ? undefined : billingPeriod.day_of_week.toLowerCase()
   };
   const formData = new FormData();
   formData.append("logo", finalData.logo);
@@ -73,13 +70,7 @@ export const addProject = async (data: IFormProject): Promise<ICreateProject> =>
   }
 
   try {
-    const response: ICreateProject = await axios.post(`${config.API_HOST}/project`, formData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: WelcomeData = await API.post(`/project`, formData);
     return response;
   } catch (error) {
     console.warn("error creating project: ", error);
@@ -91,8 +82,7 @@ export const updateProject = async (
   data: IFormProject,
   id: string,
   UUID: string
-): Promise<ICreateProject> => {
-  const token = await getIdToken();
+): Promise<WelcomeData> => {
   const currenciesFinal = data.general.currencies.map((currency) => ({
     id: currency.value,
     currency_name: currency.label
@@ -162,11 +152,10 @@ export const updateProject = async (
   }
 
   try {
-    const response: ICreateProject = await axios.put(`${config.API_HOST}/project`, formData, {
+    const response: WelcomeData = await API.put(`/project`, formData, {
       headers: {
         Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
+        "Content-Type": "multipart/form-data"
       }
     });
     return response;
@@ -175,20 +164,9 @@ export const updateProject = async (
     return error as any;
   }
 };
-export const activateProject = async (id: string): Promise<ICreateProject> => {
-  const token = await getIdToken();
+export const activateProject = async (id: string): Promise<WelcomeData> => {
   try {
-    const response: ICreateProject = await axios.put(
-      `${config.API_HOST}/project/active/${id}`,
-      {},
-      {
-        headers: {
-          Accept: "*/*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response: WelcomeData = await API.put(`/project/active/${id}`);
 
     return response;
   } catch (error) {
@@ -196,16 +174,9 @@ export const activateProject = async (id: string): Promise<ICreateProject> => {
   }
 };
 
-export const desactiveProject = async (id: string): Promise<ICreateProject> => {
-  const token = await getIdToken();
+export const desactiveProject = async (id: string): Promise<WelcomeData> => {
   try {
-    const response: ICreateProject = await axios.delete(`${config.API_HOST}/project/${id}`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: WelcomeData = await API.delete(`/project/${id}`);
     return response;
   } catch (error) {
     console.warn("error desactivating project: ", error);

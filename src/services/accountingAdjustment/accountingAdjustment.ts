@@ -1,7 +1,6 @@
-import config from "@/config";
 import { DiscountRequestBody } from "@/types/accountingAdjustment/IAccountingAdjustment";
-import { API, getIdToken } from "@/utils/api/api";
-import axios, { AxiosResponse } from "axios";
+import { API } from "@/utils/api/api";
+import { AxiosResponse } from "axios";
 
 interface RadicationData {
   invoices_id: number[];
@@ -13,16 +12,14 @@ interface RadicationData {
 export const createAccountingAdjustment = async (
   requestBody: DiscountRequestBody
 ): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
   try {
     const response: AxiosResponse<any> = await API.post(
-      `${config.API_HOST}/financial-discount/project/${requestBody.project_id}/client/${requestBody.client_id}`,
+      `/financial-discount/project/${requestBody.project_id}/client/${requestBody.client_id}`,
       requestBody,
       {
         headers: {
           Accept: "application/json, text/plain, */*",
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
         }
       }
     );
@@ -38,7 +35,6 @@ export const applyAccountingAdjustment = async (
   clientId: string,
   type: number
 ): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
   const formData = new FormData();
   formData.append("adjustment_data", adjustmentData);
   formData.append("type", type.toString());
@@ -48,18 +44,17 @@ export const applyAccountingAdjustment = async (
     });
   }
 
-  const response: AxiosResponse<any> = await axios.post(
-    `${config.API_HOST}/invoice/adjusment/project/${projectId}/client/${clientId}`,
+  const response: AxiosResponse<any> = await API.post(
+    `/invoice/adjusment/project/${projectId}/client/${clientId}`,
     formData,
     {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
       }
     }
   );
-  return response.data;
+  return response;
 };
 
 export const changeStatusInvoice = async (
@@ -75,7 +70,6 @@ export const changeStatusInvoice = async (
     data: any;
   }>
 > => {
-  const token = await getIdToken();
   const formData = new FormData();
   formData.append("status_name", statusName);
   formData.append("invoice_ids", JSON.stringify(invoiceIds));
@@ -89,14 +83,13 @@ export const changeStatusInvoice = async (
   const response: AxiosResponse<{
     message: string;
     data: any;
-  }> = await axios.post(
-    `${config.API_HOST}/invoice/project/${projectId}/client/${clientId}/update_status`,
+  }> = await API.post(
+    `/invoice/project/${projectId}/client/${clientId}/update_status`,
     formData,
     {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
       }
     }
   );
@@ -110,7 +103,6 @@ export const reportInvoiceIncident = async (
   files: File[] | null,
   clientId: string
 ): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
 
   const formData = new FormData();
   formData.append("invoices_id", JSON.stringify(invoicesId));
@@ -123,18 +115,17 @@ export const reportInvoiceIncident = async (
     });
   }
 
-  const response: AxiosResponse<any> = await axios.post(
-    `${config.API_HOST}/invoice/incident/client/${clientId}`,
+  const response: AxiosResponse<any> = await API.post(
+    `/invoice/incident/client/${clientId}`,
     formData,
     {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
       }
     }
   );
-  return response.data;
+  return response;
 };
 
 export const radicateInvoice = async (
@@ -142,7 +133,6 @@ export const radicateInvoice = async (
   files: File[],
   clientId: number
 ): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
 
   const formData = new FormData();
   formData.append("invoices_id", JSON.stringify(radicationData.invoices_id));
@@ -154,17 +144,16 @@ export const radicateInvoice = async (
     formData.append("files", file);
   });
 
-  const response: AxiosResponse<any> = await axios.post(
-    `${config.API_HOST}/invoice/radication/client/${clientId}`,
+  const response: AxiosResponse<any> = await API.post(
+    `/invoice/radication/client/${clientId}`,
     formData,
     {
       headers: {
         Accept: "application/json, text/plain, */*",
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
       }
     }
   );
 
-  return response.data;
+  return response;
 };

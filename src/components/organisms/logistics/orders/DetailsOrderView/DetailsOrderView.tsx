@@ -100,8 +100,8 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
     try {
       setLoading(true);
       const result = await getTransferOrderById(idOrder);
-      if (result?.data?.data?.length > 0) {
-        const to: ITransferOrder = result.data.data[0];
+      if (result?.data?.length > 0) {
+        const to: ITransferOrder = result.data[0];
         setTransferOrder(to);
         setTripType(to.service_type_desc);
         to.transfer_order_material?.forEach(async (mat) => {
@@ -220,13 +220,11 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
               {transferOrder?.transfer_order_vehicles &&
                 transferOrder?.transfer_order_vehicles?.length > 0 && (
                   <ChipsRow
-                    chips={transferOrder?.transfer_order_vehicles?.map(
-                      ((vehicle) => ({
-                        name: vehicle.vehicle_type_desc,
-                        quantity: vehicle.quantity,
-                        id: vehicle.id
-                      })) || []
-                    )}
+                    chips={transferOrder?.transfer_order_vehicles?.map((vehicle) => ({
+                      name: vehicle.vehicle_type_desc,
+                      quantity: vehicle.quantity,
+                      id: vehicle.id
+                    }))}
                   />
                 )}
             </Flex>

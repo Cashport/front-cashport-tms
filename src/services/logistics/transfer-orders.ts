@@ -1,14 +1,13 @@
-import axios, { AxiosResponse } from "axios";
-import { getIdToken } from "@/utils/api/api";
+import { API, getIdToken } from "@/utils/api/api";
 import config from "@/config";
-import { IDocumentCompleted, IListData, ITransferOrder } from "@/types/logistics/schema";
+import { IDocumentCompleted, ITransferOrder } from "@/types/logistics/schema";
+import { GenericResponse } from "@/types/global/IGlobal";
 
 export const addTransferOrder = async (
   data: ITransferOrder,
   files: IDocumentCompleted[]
 ): Promise<any> => {
   try {
-    const token = await getIdToken();
     const form = new FormData();
     const body: any = data;
     body.files = files;
@@ -16,15 +15,13 @@ export const addTransferOrder = async (
       if (file.file) form.append(`file-for-${file.id_document_type}`, file.file);
     });
     form.append("body", JSON.stringify({ ...body }));
-    const response = await axios.post(`${config.API_HOST}/transfer-order/create`, form, {
+    const response = await API.post(`/transfer-order/create`, form, {
       headers: {
         "content-type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
+        Accept: "application/json, text/plain, */*"
       }
     });
-    console.log("RESOIBS", response);
-    if (response?.data?.data) return response.data.data;
+    if (response?.data) return response.data;
   } catch (error: any) {
     console.log("Error post transfer-order/: ", error);
     let msg = "";
@@ -36,16 +33,9 @@ export const addTransferOrder = async (
   }
 };
 
-export const getAllTransferOrderList = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllTransferOrderList = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/transfer-order/list`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/transfer-order/list`);
     return response;
   } catch (error) {
     console.log("Error get all getAllTransferOrderList: ", error);
@@ -53,18 +43,12 @@ export const getAllTransferOrderList = async (): Promise<IListData> => {
   }
 };
 
-export const getTransferOrderById = async (id: string): Promise<IListData> => {
-  const token = await getIdToken();
+export const getTransferOrderById = async (id: string): Promise<GenericResponse> => {
   try {
     const form = new FormData();
     form.append("id", id);
 
-    const response: IListData = await axios.post(`${config.API_HOST}/transfer-order/id`, form, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.post(`/transfer-order/id`, form);
 
     return response;
   } catch (error) {
@@ -73,22 +57,16 @@ export const getTransferOrderById = async (id: string): Promise<IListData> => {
   }
 };
 
-export const getAllUserSearch = async (term: string): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllUserSearch = async (term: string): Promise<GenericResponse> => {
   try {
     const form = new FormData();
     form.append("term", term);
-    const response: IListData = await axios.post(
-      `${config.API_HOST}/transfer-order/all/users/search`,
-      form,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
-        }
+    const response: GenericResponse = await API.post(`/transfer-order/all/users/search`, form, {
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "multipart/form-data"
       }
-    );
+    });
     return response;
   } catch (error) {
     console.log("Error get all getAllUserSearch: ", error);
@@ -96,16 +74,9 @@ export const getAllUserSearch = async (term: string): Promise<IListData> => {
   }
 };
 
-export const getAllUsers = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllUsers = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/transfer-order/all/users`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/transfer-order/all/users`);
     return response;
   } catch (error) {
     console.log("Error get all getAllUsers: ", error);

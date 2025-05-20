@@ -1,8 +1,7 @@
-import config from "@/config";
-import { API, getIdToken } from "@/utils/api/api";
+import { API } from "@/utils/api/api";
 import { CREATED, SUCCESS } from "@/utils/constants/globalConstants";
 import { MessageInstance } from "antd/es/message/interface";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 
 export const addHolding = async ({
   name,
@@ -43,17 +42,9 @@ export const removeHoldingById = async ({
   idHolding: string;
   messageApi: MessageInstance;
 }): Promise<AxiosResponse<any>> => {
-  const token = await getIdToken();
   try {
-    const response: AxiosResponse<any> = await axios.delete(
-      `${config.API_HOST}/holding/${idHolding}`,
-      {
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`
-        }
-      }
+    const response: AxiosResponse<any> = await API.delete(
+      `/holding/${idHolding}`,
     );
     if (response.status === SUCCESS) {
       messageApi.open({

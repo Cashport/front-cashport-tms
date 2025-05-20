@@ -1,28 +1,17 @@
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { API, getIdToken } from "@/utils/api/api";
+import { API } from "@/utils/api/api";
 import {
   CustomFile,
-  IListData,
   IMaterial,
   IMaterialTransportType,
   IMaterialType
 } from "@/types/logistics/schema";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { GenericResponse } from "@/types/global/IGlobal";
 
-export const getSearchMaterials = async (term: string): Promise<IListData> => {
-  const token = await getIdToken();
+export const getSearchMaterials = async (term: string): Promise<GenericResponse> => {
   try {
     const formData = new FormData();
     formData.append("term", term);
-    const response: IListData = await axios.post(`${config.API_HOST}/material/search`, formData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.post(`/material/search`, formData);
     return response;
   } catch (error) {
     console.log("Error creating new location: ", error);
@@ -30,16 +19,9 @@ export const getSearchMaterials = async (term: string): Promise<IListData> => {
   }
 };
 
-export const getAllMaterials = async (): Promise<IListData> => {
-  const token = await getIdToken();
+export const getAllMaterials = async (): Promise<GenericResponse> => {
   try {
-    const response: IListData = await axios.get(`${config.API_HOST}/material/all`, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response: GenericResponse = await API.get(`/material/all`);
     return response;
   } catch (error) {
     console.log("Error get all materials: ", error);
@@ -48,12 +30,7 @@ export const getAllMaterials = async (): Promise<IListData> => {
 };
 
 export const getAllMaterialType = async (): Promise<IMaterialType[]> => {
-  const token = await getIdToken();
-  const response: GenericResponse<IMaterialType[]> = await API.get(`/material/all/type`,{
-    headers: {
-        Authorization: `Bearer ${token}`
-    }
-    });
+  const response: GenericResponse<IMaterialType[]> = await API.get(`/material/all/type`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener listado de materiales");
 };
@@ -66,7 +43,7 @@ export const getAllMaterialTransportType = async (): Promise<IMaterialTransportT
 };
 
 export const getMaterialById = async (id: string): Promise<IMaterial[]> => {
-  const response: GenericResponse<IMaterial[]> = await API.get(`${config.API_HOST}/material/` + id);
+  const response: GenericResponse<IMaterial[]> = await API.get(`/material/` + id);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener el material por id");
 };
@@ -101,15 +78,13 @@ export const createMaterialForm = (data: IMaterial, formImages: CustomFile[]) =>
 export const addMaterial = async (
   data: IMaterial,
   formImages: CustomFile[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<GenericResponse> => {
   try {
-    const token = await getIdToken();
     const form = createMaterialForm(data, formImages);
-    const response = await axios.post(`${config.API_HOST}/material/create`, form, {
+    const response: GenericResponse = await API.post(`/material/create`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
+        Accept: "application/json, text/plain, */*"
       }
     });
     return response;
@@ -121,15 +96,13 @@ export const addMaterial = async (
 export const updateMaterial = async (
   data: IMaterial,
   formImages: CustomFile[]
-): Promise<AxiosResponse<any, any>> => {
+): Promise<GenericResponse> => {
   try {
     const form = createMaterialForm(data, formImages);
-    const token = await getIdToken();
-    const response = await axios.put(`${config.API_HOST}/material/update`, form, {
+    const response: GenericResponse = await API.put(`/material/update`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
+        Accept: "application/json, text/plain, */*"
       }
     });
     return response;
@@ -142,17 +115,15 @@ export const updateMaterial = async (
 export const updateMaterialStatus = async (
   location_id: string,
   active: string
-): Promise<AxiosResponse<any, any>> => {
+): Promise<GenericResponse> => {
   try {
     const form = new FormData();
-    const token = await getIdToken();
     const body: any = { material_id: location_id, active: active };
     form.append("body", JSON.stringify(body));
-    const response = await axios.put(`${config.API_HOST}/material/updatestatus`, form, {
+    const response: GenericResponse = await API.put(`/material/updatestatus`, form, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${token}`
+        Accept: "application/json, text/plain, */*"
       }
     });
     return response;

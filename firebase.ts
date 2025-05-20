@@ -8,10 +8,12 @@ import {
   FIREBASE_STORAGE_BUCKET
 } from "@/utils/constants/globalConstants";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, ParsedToken, signInWithCustomToken } from "firebase/auth";
 import "firebase/auth";
 import "firebase/functions";
 import "firebase/firestore";
+import { IUserPermissions } from "@/types/userPermissions/IUserPermissions";
+import zlib from "react-zlib-js";
 
 // https://firebase.google.com/docs/web/setup#available-libraries
 // Your web app's Firebase configuration
@@ -30,4 +32,33 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
+
+export async function customGetAuth(token: string) {
+  const customToken = await signInWithCustomToken(auth, token);
+  customToken.user.getIdTokenResult();
+  return customToken;
+}
+
+interface Claims extends ParsedToken {
+  permissions: IUserPermissions["data"];
+}
+
+export const decodedClaims = async (token: string) => {
+  const decoded = await signInWithCustomToken(auth, token);
+  const decodedIdToken = await decoded.user.getIdTokenResult();
+  const claims = decodedIdToken.claims;
+  const permissionsEncoded = claims.permissions as string;
+  const buffer = Buffer.from(permissionsEncoded, "base64") as any;
+  const decompressedClaims = await new Promise<any>((resolve, reject) => {
+    zlib.unzip(buffer, (err: any, data: any) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+  claims.permissions = JSON.parse(decompressedClaims);
+  return claims as Claims;
+};
+
 export default app;
