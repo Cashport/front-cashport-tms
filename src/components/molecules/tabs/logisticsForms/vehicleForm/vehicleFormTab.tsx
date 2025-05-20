@@ -32,6 +32,7 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
+import ModalUploadRequirements from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
 
 const { Title, Text } = Typography;
 
@@ -60,6 +61,9 @@ export const VehicleFormTab = ({
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
@@ -574,11 +578,11 @@ export const VehicleFormTab = ({
               {(statusForm === "create" || statusForm === "edit") && (
                 <LoadDocumentsButton
                   text="Cargar documentos"
-                  onClick={() => setIsOpenModalDocuments(true)}
+                  onClick={() => setIsModalOpen({ selected: 3 })}
                 />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
+            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
@@ -622,6 +626,10 @@ export const VehicleFormTab = ({
         onClose={() => setIsOpenModal(false)}
         onActive={onActiveVehicle}
         onDesactivate={onDesactivateVehicle}
+      />
+      <ModalUploadRequirements
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
       />
     </>
   );
