@@ -20,7 +20,7 @@ import "./modalUploadRequirements.scss";
 export interface IUploadRequirementstTableRow {
   fileName: string;
   file?: File;
-  requirementType?: string;
+  requirementType?: number;
   state?: string;
   expirationDate?: string;
 }
@@ -43,8 +43,16 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const height = useScreenHeight();
 
-  const { control, handleSubmit, reset, watch, setValue } = useForm<IAuditFormValues>({
-    defaultValues: { rows: [] }
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { isValid }
+  } = useForm<IAuditFormValues>({
+    defaultValues: { rows: [] },
+    mode: "onChange"
   });
 
   const rowsPerFile = watch("rows");
@@ -236,7 +244,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
                     title: "Estado",
                     dataIndex: "statusId",
                     key: "statusId",
-                    render: (statusId: string) => {
+                    render: () => {
                       return (
                         // Pending status  hardcoded
                         <BadgeDocumentStatus statusId={"c02b3475-f59a-4222-bb28-9dbb51cf02c1"} />
@@ -244,27 +252,41 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
                     },
                     width: 150
                   },
-
                   {
                     title: "Fecha de vencimiento",
                     dataIndex: "expirationDate",
-                    render: (_: any, __: any, index: number) => (
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.expirationDate`}
-                        render={({ field }) => (
-                          <DatePicker
-                            {...field}
-                            style={{ height: "40px" }}
-                            placeholder="Inserte fecha"
-                            value={field.value ? dayjs(field.value) : null}
-                            onChange={(date) => field.onChange(date?.toISOString())}
-                          />
-                        )}
-                      />
-                    ),
+                    render: (_: any, __: any, index: number) => {
+                      const currentRequirementId = rowsPerFile[index]?.requirementType;
+
+                      const requirementTypeMeta = documentsTypesList.find(
+                        (item) => item.id === currentRequirementId
+                      );
+
+                      const isOptional = requirementTypeMeta?.validity?.expiry === true;
+
+                      return (
+                        <Controller
+                          control={control}
+                          name={`rows.${index}.expirationDate`}
+                          rules={{
+                            required: !isOptional || undefined
+                          }}
+                          render={({ field }) => (
+                            <DatePicker
+                              {...field}
+                              disabled={isOptional}
+                              style={{ height: "40px" }}
+                              placeholder={isOptional ? "No requerido" : "Inserte fecha"}
+                              value={field.value ? dayjs(field.value) : null}
+                              onChange={(date) => field.onChange(date?.toISOString())}
+                            />
+                          )}
+                        />
+                      );
+                    },
                     width: 190
                   },
+
                   {
                     title: "Tipo de requerimiento",
                     dataIndex: "requirementType",
@@ -272,6 +294,9 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
                       <Controller
                         control={control}
                         name={`rows.${index}.requirementType`}
+                        rules={{
+                          required: true
+                        }}
                         render={({ field }) => (
                           <Select
                             style={{ height: "40px", width: 230 }}
@@ -279,7 +304,8 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
                             placeholder="Tipo de requerimiento"
                             options={documentsTypesList.map((item) => ({
                               label: item.name,
-                              value: item.id
+                              value: item.id,
+                              isExpirationDateMandatory: item.validity.expiry
                             }))}
                             showSearch
                             filterOption={(input, option) =>
@@ -326,6 +352,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
                   setValue("rows", []);
                 }}
                 handleOk={handleSubmit(onSubmit)}
+                isConfirmDisabled={!isValid}
                 titleConfirm="Guardar"
               />
             </form>
