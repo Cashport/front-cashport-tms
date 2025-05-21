@@ -2,14 +2,15 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, DatePicker, Flex, message, Modal, Select, Spin, Table, UploadProps } from "antd";
-import { File, Trash, Upload, X } from "phosphor-react";
 import Dragger from "antd/es/upload/Dragger";
+import { File, Sparkle, Trash, Upload, X } from "phosphor-react";
 import dayjs from "dayjs";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
+import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
 
 import "./modalUploadRequirements.scss";
 
@@ -36,13 +37,14 @@ interface Props {
 const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
   const [selectedView, setSelectedView] = useState<IAvailableViews>("UPLOAD");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [documentList, setDocumentList] = useState<any[]>();
   const height = useScreenHeight();
 
   const { control, handleSubmit, reset, watch, setValue } = useForm<IAuditFormValues>({
     defaultValues: { rows: [] }
   });
 
-  const auditValues = watch("rows");
+  const rowsPerFile = watch("rows");
 
   useEffect(() => {
     return () => {
@@ -60,7 +62,7 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
     multiple: true,
     // before upload to check is under 5MB
     beforeUpload: (file) => {
-      const isUnder5MB = file.size / 1024 / 1024 < 1;
+      const isUnder5MB = file.size / 1024 / 1024 < 5;
       if (!isUnder5MB) {
         message.error("El archivo debe ser menor a 5MB");
         return false;
@@ -74,7 +76,7 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
           const newFile = info.file.originFileObj as File;
           setUploadedFiles((prev) => [...prev, newFile]);
           setValue("rows", [
-            ...auditValues,
+            ...rowsPerFile,
             {
               fileName: newFile.name,
               file: newFile,
@@ -97,7 +99,17 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
           <Flex className="fileInfo" vertical align="flex-start">
             <File className="fileIcon" size={20} />
             <span>{name}</span>
-            <p>{(size ?? 0 / 1024 / 1024).toFixed(2)}MB</p>
+            <p>
+              {(() => {
+                const fileSize = size ?? 0;
+                const fileSizeMB = fileSize / (1024 * 1024);
+                if (fileSizeMB < 1) {
+                  return `${(fileSize / 1024).toFixed(2)} KB`;
+                } else {
+                  return `${fileSizeMB.toFixed(2)} MB`;
+                }
+              })()}
+            </p>
           </Flex>
           {status === "done" && (
             <Button className="fileIcon" onClick={remove}>
@@ -118,7 +130,7 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
       setUploadedFiles(updatedFiles);
       setValue(
         "rows",
-        auditValues.filter((row) => row.fileName !== file.name)
+        rowsPerFile.filter((row) => row.fileName !== file.name)
       );
     }
   };
@@ -128,25 +140,46 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
       case "UPLOAD":
         return (
           <>
-            <p className="modalUploadRequirements__description">Sube tus documentos aquí</p>
+            <span className="modalUploadRequirements__description">
+              Sube los documentos y
+              <span>
+                <span className="cashportIATextGradient"> CashportAI </span>
+              </span>
+              los clasificará y analizará según su tipo
+            </span>
 
             <Dragger {...props}>
               <Upload size={30} className="draggerIcon" />
               <p className="draggerText">
-                Arrastra y suelta tu archivo aquí o haz clic para subirlo.
+                Arrastra y suelta tu archivo aquí o haz clic para subirlo
               </p>
               <p className="draggerText -small">Tamaño máximo 5MB</p>
             </Dragger>
 
             <div className="modalUploadRequirements__footer">
-              <FooterButtons
-                titleCancel="Volver"
-                onCancel={() => onClose(true)}
-                handleOk={() => {
+              <Button className="cancelButton" onClick={() => onClose(true)}>
+                Cancelar
+              </Button>
+              <Button
+                className="iaButton"
+                disabled={uploadedFiles.length === 0}
+                onClick={() => {
                   setSelectedView("TABLE");
                 }}
-                titleConfirm="Aceptar"
-              />
+              >
+                <Sparkle size={14} color="#5b21b6" weight="fill" />
+                <span className="textNormal">
+                  Analizar con{" "}
+                  <span
+                    className="cashportIATextGradient"
+                    style={{
+                      fontWeight: 500
+                    }}
+                  >
+                    Cashport IA
+                  </span>
+                </span>
+              </Button>
             </div>
           </>
         );
@@ -160,28 +193,18 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
                     title: "Nombre del documento",
                     dataIndex: "fileName",
                     render: (_: any, __: any, index: number) => (
-                      <span>{auditValues[index]?.fileName}</span>
+                      <span>{rowsPerFile[index]?.fileName}</span>
                     )
                   },
                   {
                     title: "Estado",
-                    dataIndex: "state",
-                    render: (_: any, __: any, index: number) => (
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.state`}
-                        render={({ field }) => (
-                          <Select
-                            {...field}
-                            placeholder="Acción"
-                            options={[
-                              { value: "Aprobar", label: "Aprobar" },
-                              { value: "Rechazar", label: "Rechazar" }
-                            ]}
-                          />
-                        )}
-                      />
-                    )
+                    dataIndex: "statusId",
+                    key: "statusId",
+                    render: (statusId: string) => {
+                      return (
+                        <BadgeDocumentStatus statusId={"c02b3475-f59a-4222-bb28-9dbb51cf02c1"} />
+                      );
+                    }
                   },
                   {
                     title: "Tipo de requerimiento",
@@ -234,17 +257,19 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
                           icon={<Trash size={12} className="icon" />}
                           // className="iconDocument"
                           onClick={() => {
-                            const updated = [...auditValues];
-                            updated[index].fileName = uploadedFiles[index]?.name || "";
-                            setValue("rows", updated);
+                            const updatedRows = rowsPerFile.filter((_, i) => i !== index);
+                            const updatedFiles = uploadedFiles.filter((_, i) => i !== index);
+
+                            setValue("rows", updatedRows);
+                            setUploadedFiles(updatedFiles);
                           }}
                         />
                       </Flex>
                     )
                   }
                 ]}
-                dataSource={auditValues.map((row, idx) => ({ ...row, key: idx }))}
                 pagination={false}
+                dataSource={rowsPerFile.map((row, idx) => ({ ...row, key: idx }))}
                 // scroll={{ y: height - 400 }}
               />
 
@@ -269,13 +294,26 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
   return (
     <Modal
       className="modalUploadRequirements"
-      width="790px"
+      width={selectedView === "UPLOAD" ? 686 : 1000}
       footer={null}
       open={isOpen}
       onCancel={() => onClose()}
       destroyOnClose
     >
-      <h2 className="modalUploadRequirements__title">Subir requerimientos</h2>
+      <span className="modalUploadRequirements__title">
+        Subir requerimientos con
+        <span>
+          <span
+            className="cashportIATextGradient"
+            style={{
+              fontWeight: 600
+            }}
+          >
+            {" "}
+            CashportAI
+          </span>
+        </span>
+      </span>
       {renderView()}
     </Modal>
   );
