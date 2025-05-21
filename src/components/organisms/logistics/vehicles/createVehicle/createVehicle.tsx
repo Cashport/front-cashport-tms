@@ -1,13 +1,19 @@
 "use client";
-import { message, Skeleton } from "antd";
-import { useRouter } from "next/navigation";
-import "../../../../../styles/_variables_logistics.css";
-import "./createVehicle.scss";
-import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
-import { addVehicle, getFeaturesVehicle, getVehicleType } from "@/services/logistics/vehicle";
 import { useState } from "react";
-import { getDocumentsByEntityType } from "@/services/logistics/certificates";
+import { message, Skeleton } from "antd";
 import useSWR from "swr";
+import { useRouter } from "next/navigation";
+
+import { getDocumentsByEntityType } from "@/services/logistics/certificates";
+import { addVehicle, getFeaturesVehicle, getVehicleType } from "@/services/logistics/vehicle";
+
+import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
+import { IUploadRequirementstTableRow } from "../../providers/ModalUploadRequirements/ModalUploadRequirements";
+
+import { IFormGeneralVehicle } from "@/types/logistics/schema";
+
+import "./createVehicle.scss";
+import "../../../../../styles/_variables_logistics.css";
 
 type Props = {
   params: {
@@ -16,15 +22,18 @@ type Props = {
   };
 };
 
+export interface ICreateVehicleForm extends IFormGeneralVehicle {
+  uploadedFiles?: IUploadRequirementstTableRow[];
+}
+
 export const CreateVehicleView = ({ params }: Props) => {
   const { push } = useRouter();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  const handleSubmit = async (data: any) => {
-    console.log("data", data);
+  const handleSubmit = async (data: ICreateVehicleForm) => {
     setIsLoadingSubmit(true);
     try {
-      const response = await addVehicle({ ...data }, data.files, data.images);
+      const response = await addVehicle({ ...data });
 
       message.success("Vehículo creado", 3, () =>
         push(`/logistics/providers/${params.id}/vehicle`)

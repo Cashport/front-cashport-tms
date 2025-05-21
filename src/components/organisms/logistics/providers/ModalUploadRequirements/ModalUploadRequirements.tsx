@@ -25,7 +25,7 @@ export interface IUploadRequirementstTableRow {
   expirationDate?: string;
 }
 
-interface IAuditFormValues {
+interface IModalRequirementsTableForm {
   rows: IUploadRequirementstTableRow[];
 }
 
@@ -36,9 +36,11 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
   documentsTypesList: IGetCertificate[];
+  // eslint-disable-next-line no-unused-vars
+  onUpload?: (data: IModalRequirementsTableForm) => void;
 }
 
-const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props) => {
+const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload }: Props) => {
   const [selectedView, setSelectedView] = useState<IAvailableViews>("UPLOAD");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const height = useScreenHeight();
@@ -50,7 +52,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
     watch,
     setValue,
     formState: { isValid }
-  } = useForm<IAuditFormValues>({
+  } = useForm<IModalRequirementsTableForm>({
     defaultValues: { rows: [] },
     mode: "onChange"
   });
@@ -63,8 +65,8 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props)
     };
   }, [isOpen]);
 
-  const onSubmit = async (data: IAuditFormValues) => {
-    console.info("data", data);
+  const onSubmit = async (data: IModalRequirementsTableForm) => {
+    onUpload?.(data);
   };
 
   const props: UploadProps = {

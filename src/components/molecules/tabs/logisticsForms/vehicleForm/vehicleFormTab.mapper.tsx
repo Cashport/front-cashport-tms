@@ -1,22 +1,16 @@
-import {
-  IVehicle,
-  VihicleDetail,
-  IFormVehicle,
-  ICertificates,
-  IListDataVehiche,
-  VehicleType
-} from "@/types/logistics/schema";
-import { MessageInstance } from "antd/es/message/interface";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
-import { UseFormReset, UseFormSetValue } from "react-hook-form";
-import {
-  CertificateType,
-  DocumentCompleteType,
-  ICertificateAndDocuments,
-  IGetCertificate
-} from "@/types/logistics/certificate/certificate";
+
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
+
+import { IGetCertificate } from "@/types/logistics/certificate/certificate";
 import { IFeature } from "@/types/features/feature";
+import {
+  IVehicle,
+  ICertificates,
+  VehicleType,
+  IFormGeneralVehicle
+} from "@/types/logistics/schema";
 
 export type StatusForm = "review" | "create" | "edit";
 
@@ -57,12 +51,13 @@ export interface FileObject {
 }
 
 export const normalizeVehicleData = (data: IVehicle): any => {
+  console.log("dataVehicle", data);
   if (!data) return {};
 
-  const documents = data.documents.map((doc: any) => ({
+  const documents = data.documents.map((doc) => ({
     file: {
-      name: doc.url_archive.split("/").pop(),
-      url: doc.url_archive
+      name: doc.name,
+      url: doc.templateUrl
     }
   }));
 
@@ -99,15 +94,35 @@ export const normalizeVehicleData = (data: IVehicle): any => {
 };
 
 export const _onSubmitVehicle = (
-  data: any,
-  selectedFiles: ICertificateAndDocuments[],
-  imageFiles: { docReference: string; file: File }[],
+  data: IFormGeneralVehicle,
+  uploadedFiles: IUploadRequirementstTableRow[],
+  imageFiles: { docReference: string; file: File }[], // ya no se usa
+  // eslint-disable-next-line no-unused-vars
   setImageError: (value: SetStateAction<boolean>) => void,
+  // eslint-disable-next-line no-unused-vars
   onSubmitForm: (data: any) => void
 ) => {
   try {
     setImageError(false);
-    onSubmitForm({ ...data, images: imageFiles, files: selectedFiles });
+
+    const documents = uploadedFiles.map((doc, index) => {
+      const document: {
+        documentTypeId: number;
+        fieldName: string;
+        expiryDate?: string;
+      } = {
+        documentTypeId: doc.requirementType!,
+        fieldName: doc.fileName || `documento-${index + 1}`
+      };
+
+      if (doc.expirationDate) {
+        document.expiryDate = doc.expirationDate;
+      }
+
+      return document;
+    });
+
+    onSubmitForm({ ...data, documents });
   } catch (error) {
     console.warn({ error });
   }

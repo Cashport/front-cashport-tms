@@ -1,5 +1,5 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-import { DocumentCompleteType } from "./certificate/certificate";
+import { DocumentCompleteType, IGetCertificate } from "./certificate/certificate";
 import { ApiVehicleType } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
 import { IRequirement } from "../transferJourney/ITransferJourney";
 
@@ -1286,8 +1286,8 @@ export interface IVehicle {
     backgroundColor: string;
   };
   subject_id: number | null;
-  documents: any[];
-  features: any[];
+  documents: IGetCertificate[];
+  features?: { id: number }[];
 }
 /**
  * Exposes all fields present in carrier as a typescript
