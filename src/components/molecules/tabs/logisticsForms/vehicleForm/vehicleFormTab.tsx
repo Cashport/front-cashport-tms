@@ -169,7 +169,6 @@ export const VehicleFormTab = ({
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
 
-  console.log("documentsTypesList", documentsTypesList);
   useEffect(() => {
     if (Array.isArray(documentsTypesList)) {
       const isFirstLoad = data?.documents?.length && selectedFiles.length === 0;
@@ -191,7 +190,6 @@ export const VehicleFormTab = ({
         const documentsFiltered = documentsTypesList?.filter(
           (f) => f?.isMandatory || selectedFiles?.find((f2) => f2.id === f.id)
         );
-        console.log("documentsFiltered", documentsFiltered);
         const docsWithFile = documentsFiltered.map((f) => {
           const prevFile = selectedFiles.find((f2) => f2.id === f.id);
           return {
@@ -630,6 +628,7 @@ export const VehicleFormTab = ({
       <ModalUploadRequirements
         isOpen={isModalOpen.selected === 3}
         onClose={() => setIsModalOpen({ selected: 0 })}
+        documentsTypesList={documentsTypesList}
       />
     </>
   );

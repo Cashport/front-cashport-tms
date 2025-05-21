@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, DatePicker, Flex, message, Modal, Select, Spin, Table, UploadProps } from "antd";
 import Dragger from "antd/es/upload/Dragger";
-import { File, Sparkle, Trash, Upload, X } from "phosphor-react";
+import { DownloadSimple, File, Sparkle, Trash, Upload, X } from "phosphor-react";
 import dayjs from "dayjs";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -11,6 +11,9 @@ import useScreenHeight from "@/components/hooks/useScreenHeight";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
+
+import { IGetCertificate } from "@/types/logistics/certificate/certificate";
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
 import "./modalUploadRequirements.scss";
 
@@ -32,12 +35,12 @@ interface Props {
   isOpen: boolean;
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
+  documentsTypesList: IGetCertificate[];
 }
 
-const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
+const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList }: Props) => {
   const [selectedView, setSelectedView] = useState<IAvailableViews>("UPLOAD");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [documentList, setDocumentList] = useState<any[]>();
   const height = useScreenHeight();
 
   const { control, handleSubmit, reset, watch, setValue } = useForm<IAuditFormValues>({
@@ -53,7 +56,7 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
   }, [isOpen]);
 
   const onSubmit = async (data: IAuditFormValues) => {
-    console.log("data", data);
+    console.info("data", data);
   };
 
   const props: UploadProps = {
@@ -98,7 +101,7 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
         <Flex className="draggerFileCard" align="center" justify="space-between">
           <Flex className="fileInfo" vertical align="flex-start">
             <File className="fileIcon" size={20} />
-            <span>{name}</span>
+            <p>{name}</p>
             <p>
               {(() => {
                 const fileSize = size ?? 0;
@@ -132,7 +135,8 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
         "rows",
         rowsPerFile.filter((row) => row.fileName !== file.name)
       );
-    }
+    },
+    accept: FILE_EXTENSIONS.join(",")
   };
 
   const renderView = () => {
@@ -140,6 +144,20 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
       case "UPLOAD":
         return (
           <>
+            <span className="modalUploadRequirements__title">
+              Subir requerimientos con
+              <span>
+                <span
+                  className="cashportIATextGradient"
+                  style={{
+                    fontWeight: 600
+                  }}
+                >
+                  {" "}
+                  CashportAI
+                </span>
+              </span>
+            </span>
             <span className="modalUploadRequirements__description">
               Sube los documentos y
               <span>
@@ -186,8 +204,26 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
       case "TABLE":
         return (
           <>
+            <span className="modalUploadRequirements__title">
+              Resultados subida masiva de requerimientos con
+              <span>
+                <span
+                  className="cashportIATextGradient"
+                  style={{
+                    fontWeight: 600
+                  }}
+                >
+                  {" "}
+                  CashportAI
+                </span>
+              </span>
+            </span>
+            <span className="modalUploadRequirements__description">
+              Se detectaron los siguientes requerimientos
+            </span>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Table
+                className="modalUploadRequirements__table"
                 columns={[
                   {
                     title: "Nombre del documento",
@@ -202,30 +238,13 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
                     key: "statusId",
                     render: (statusId: string) => {
                       return (
+                        // Pending status  hardcoded
                         <BadgeDocumentStatus statusId={"c02b3475-f59a-4222-bb28-9dbb51cf02c1"} />
                       );
-                    }
+                    },
+                    width: 150
                   },
-                  {
-                    title: "Tipo de requerimiento",
-                    dataIndex: "requirementType",
-                    render: (_: any, __: any, index: number) => (
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.requirementType`}
-                        render={({ field }) => (
-                          <Select
-                            {...field}
-                            placeholder="Tipo de requerimiento"
-                            options={[
-                              { value: "GPS", label: "GPS" },
-                              { value: "Licencia", label: "Licencia" }
-                            ]}
-                          />
-                        )}
-                      />
-                    )
-                  },
+
                   {
                     title: "Fecha de vencimiento",
                     dataIndex: "expirationDate",
@@ -236,26 +255,50 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
                         render={({ field }) => (
                           <DatePicker
                             {...field}
-                            placeholder="Fecha de vencimiento"
+                            style={{ height: "40px" }}
+                            placeholder="Inserte fecha"
                             value={field.value ? dayjs(field.value) : null}
                             onChange={(date) => field.onChange(date?.toISOString())}
                           />
                         )}
                       />
-                    )
+                    ),
+                    width: 190
+                  },
+                  {
+                    title: "Tipo de requerimiento",
+                    dataIndex: "requirementType",
+                    render: (_: any, __: any, index: number) => (
+                      <Controller
+                        control={control}
+                        name={`rows.${index}.requirementType`}
+                        render={({ field }) => (
+                          <Select
+                            style={{ height: "40px", width: 230 }}
+                            {...field}
+                            placeholder="Tipo de requerimiento"
+                            options={documentsTypesList.map((item) => ({
+                              label: item.name,
+                              value: item.id
+                            }))}
+                            showSearch
+                            filterOption={(input, option) =>
+                              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                            }
+                          />
+                        )}
+                      />
+                    ),
+                    width: 250
                   },
                   {
                     title: "",
                     dataIndex: "actions",
                     render: (_: any, __: any, index: number) => (
-                      <Flex>
+                      <Flex gap={8} align="center">
+                        <IconButton icon={<DownloadSimple size={20} className="iconRow" />} />
                         <IconButton
-                          icon={<Upload size={12} className="icon" />}
-                          // className="iconDocument"
-                        />
-                        <IconButton
-                          icon={<Trash size={12} className="icon" />}
-                          // className="iconDocument"
+                          icon={<Trash size={20} className="iconRow" />}
                           onClick={() => {
                             const updatedRows = rowsPerFile.filter((_, i) => i !== index);
                             const updatedFiles = uploadedFiles.filter((_, i) => i !== index);
@@ -265,26 +308,26 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
                           }}
                         />
                       </Flex>
-                    )
+                    ),
+                    width: 90
                   }
                 ]}
                 pagination={false}
                 dataSource={rowsPerFile.map((row, idx) => ({ ...row, key: idx }))}
-                // scroll={{ y: height - 400 }}
+                scroll={{ y: height - 400 }}
               />
 
-              <div className="modalUploadRequirements__footer">
-                <FooterButtons
-                  titleCancel="Volver"
-                  onCancel={() => {
-                    setSelectedView("UPLOAD");
-                    setUploadedFiles([]);
-                    setValue("rows", []);
-                  }}
-                  handleOk={handleSubmit(onSubmit)}
-                  titleConfirm="Guardar"
-                />
-              </div>
+              <FooterButtons
+                stylesContainer={{ marginTop: "24px" }}
+                titleCancel="Volver"
+                onCancel={() => {
+                  setSelectedView("UPLOAD");
+                  setUploadedFiles([]);
+                  setValue("rows", []);
+                }}
+                handleOk={handleSubmit(onSubmit)}
+                titleConfirm="Guardar"
+              />
             </form>
           </>
         );
@@ -297,23 +340,14 @@ const ModalUploadRequirements = ({ isOpen, onClose }: Props) => {
       width={selectedView === "UPLOAD" ? 686 : 1000}
       footer={null}
       open={isOpen}
-      onCancel={() => onClose()}
+      onCancel={() => {
+        onClose();
+        setUploadedFiles([]);
+        setValue("rows", []);
+        setSelectedView("UPLOAD");
+      }}
       destroyOnClose
     >
-      <span className="modalUploadRequirements__title">
-        Subir requerimientos con
-        <span>
-          <span
-            className="cashportIATextGradient"
-            style={{
-              fontWeight: 600
-            }}
-          >
-            {" "}
-            CashportAI
-          </span>
-        </span>
-      </span>
       {renderView()}
     </Modal>
   );

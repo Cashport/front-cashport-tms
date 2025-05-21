@@ -63,6 +63,14 @@
         .fileIcon {
             color: $darker-gray;
         }
+        .fileInfo {
+            p {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 530px;
+            }
+        }
 
         .fileIcon {
             border: none;
@@ -78,6 +86,13 @@
             &:hover {
                 background-color: $background !important;
             }
+        }
+    }
+
+    &__table {
+        .iconRow {
+            color: $darker-gray;
+            aspect-ratio: 1;
         }
     }
 

@@ -39,7 +39,6 @@ export const CreateVehicleView = ({ params }: Props) => {
     () => getDocumentsByEntityType("1"),
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  console.log("documentsType", documentsType);
   const { data: vehiclesTypesData, isLoading: isLoadingVehicles } = useSWR(
     "/vehicle/type",
     getVehicleType,
