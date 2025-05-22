@@ -14,11 +14,13 @@ import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocume
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
 import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
-import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
 import Link from "next/link";
 //types
 import { IFormDriver, VehicleType } from "@/types/logistics/schema";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  DocumentCompleteType,
+  ICertificateAndDocuments
+} from "@/types/logistics/certificate/certificate";
 //icons
 import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
 //utils
@@ -70,10 +72,10 @@ export const DriverFormTab = ({
   const [resetTrigger, setResetTrigger] = useState<boolean>(false);
   const [imageError, setImageError] = useState(false);
 
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<ICertificateAndDocuments[]>([]);
 
   const defaultValues =
-    statusForm === "create" ? {} : dataToProjectFormData(data, vehiclesTypesList || []);
+    statusForm === "create" ? {} : data && dataToProjectFormData(data, vehiclesTypesList || []);
   const {
     watch,
     getValues,
@@ -125,7 +127,7 @@ export const DriverFormTab = ({
         setSelectedFiles(docsWithLink);
       } else {
         const documentsFiltered = documentsTypesList?.filter(
-          (f) => !f?.optional || selectedFiles?.find((f2) => f2.id === f.id)
+          (f) => f?.isMandatory || selectedFiles?.find((f2) => f2.id === f.id)
         );
         const docsWithFile = documentsFiltered.map((f) => {
           const prevFile = selectedFiles.find((f2) => f2.id === f.id);
@@ -635,7 +637,7 @@ export const DriverFormTab = ({
                 />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
+            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
@@ -683,17 +685,6 @@ export const DriverFormTab = ({
           "Confirmo que está autorizado para manejar"
         ]}
         tags={trip_type}
-      />
-      <ModalDocuments
-        isOpen={isOpenModalDocuments}
-        mockFiles={selectedFiles}
-        setFiles={setFiles}
-        documentsType={documentsTypesList}
-        isLoadingDocuments={false}
-        onClose={() => setIsOpenModalDocuments(false)}
-        handleChange={handleChange}
-        handleChangeExpirationDate={handleChangeExpirationDate}
-        setSelectedFiles={setSelectedFiles}
       />
     </>
   );

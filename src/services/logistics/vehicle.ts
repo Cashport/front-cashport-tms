@@ -1,11 +1,12 @@
-import axios, { AxiosResponse } from "axios";
-import config from "@/config";
-import { IVehicle, CustomFile, VehicleType } from "@/types/logistics/schema";
+import { AxiosResponse } from "axios";
+import { IVehicle, CustomFile, VehicleType, IFormGeneralVehicle } from "@/types/logistics/schema";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import { VehicleData } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
+import { ICertificateAndDocuments } from "@/types/logistics/certificate/certificate";
+
 import { IFeature } from "@/types/features/feature";
+import { ICreateVehicleForm } from "@/components/organisms/logistics/vehicles/createVehicle/createVehicle";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
 
 export const getAllVehicles = async ({ id }: { id: string }): Promise<any[]> => {
   const response: GenericResponse<any[]> = await API.get(`/vehicle/provider/${id}`);
@@ -25,71 +26,37 @@ export const getFeaturesVehicle = async (): Promise<IFeature[]> => {
   throw new Error(response?.message || "Error");
 };
 
-export const getVehicleById = async (id: string): Promise<VehicleData> => {
-  const response: GenericResponse<VehicleData> = await API.get(`/vehicle/${id}`);
+export const getVehicleById = async (id: string): Promise<IVehicle> => {
+  console.log("id", id);
+  const response: GenericResponse<IVehicle> = await API.get(`/vehicle/${id}`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
 };
 
-export const createVehicleForm = (
-  data: IVehicle,
-  files: DocumentCompleteType[],
-  formImages: CustomFile[]
-) => {
+export const createVehicleForm = (data: ICreateVehicleForm) => {
   const form = new FormData();
-  const body: any = { ...data };
-  const hasImage = formImages.length > 0;
-  if (!hasImage) {
-    throw new Error("At least one image file is required.");
-  }
+  const body: IFormGeneralVehicle = { ...data };
+  const files: IUploadRequirementstTableRow[] = data.uploadedFiles || [];
 
-  body.images = formImages?.map((file: any, index) => ({
-    docReference: file.docReference || `image${index + 1}`,
-    uid: file?.uid,
-    url_archive: file?.url_archive
-  }));
-
-  const expiration = files.find((f) => !f.expirationDate && f.expiry);
-  if (expiration) {
-    throw new Error(`El documento ${expiration.description} debe tener una fecha de vencimiento`);
-  }
-
-  body.files = files;
+  // for each file add it to the formData
+  files.forEach((file) => {
+    if (file && file.file) {
+      form.append(file.fileName, file.file);
+    }
+  });
 
   form.append("body", JSON.stringify(body));
-
-  formImages.forEach((file: CustomFile, index: number) => {
-    if (file?.uid) {
-      form.append(`image${index + 1}`, file);
-    } else {
-      console.warn(`Image ${index + 1} is undefined.`);
-    }
-  });
-
-  files.forEach((file) => {
-    if (file.file) {
-      form.append(`file-for-${file.id}`, file.file);
-    } else {
-      console.warn(`File with id ${file.id} is undefined.`);
-    }
-  });
 
   return form;
 };
 
-export const addVehicle = async (
-  data: IVehicle,
-  files: DocumentCompleteType[],
-  formImages: CustomFile[]
-): Promise<AxiosResponse<any, any>> => {
+export const addVehicle = async (data: ICreateVehicleForm) => {
   try {
-    const form = createVehicleForm(data, files, formImages);
-    const response = await API.post(`/vehicle/create`, form, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*"
-      }
+    const form = createVehicleForm(data);
+    Array.from(form.entries()).forEach((pair) => {
+      console.log(pair[0], pair[1]);
     });
+    const response = await API.post(`/vehicle/create`, form);
     return response;
   } catch (error) {
     console.log("Error creating vehicle: ", error);
@@ -98,17 +65,12 @@ export const addVehicle = async (
 };
 export const updateVehicle = async (
   data: IVehicle,
-  files: DocumentCompleteType[],
+  files: ICertificateAndDocuments[],
   formImages: CustomFile[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
-    const form = createVehicleForm(data, files, formImages);
-    const response = await API.put(`/vehicle/update`, form, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json, text/plain, */*",
-      }
-    });
+    const form = createVehicleForm(data);
+    const response = await API.put(`/vehicle/update`, form);
     return response;
   } catch (error) {
     console.log("Error updating vehicle: ", error);

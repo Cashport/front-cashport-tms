@@ -28,17 +28,21 @@ import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  DocumentCompleteType,
+  ICertificateAndDocuments
+} from "@/types/logistics/certificate/certificate";
 import { IFormCarrier } from "@/types/logistics/schema";
 
 import "./carrierformtab.scss";
+import { ICarrierById } from "@/services/logistics/carrier";
 
 const { Title, Text } = Typography;
 
 export const CarrierFormTab = ({
   onSubmitForm = () => {},
   statusForm = "review",
-  data = [],
+  data = {} as ICarrierById,
   handleFormState = () => {},
   tripTypes,
   onActiveProvider = () => {},
@@ -50,13 +54,13 @@ export const CarrierFormTab = ({
   const { data: documentsType, isLoading: isLoadingDocuments } = useSWR("documents/type/0", () =>
     getDocumentsByEntityType("0")
   );
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<ICertificateAndDocuments[]>([]);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [loading, setloading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data[0]);
+  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data);
   const {
     watch,
     control,
@@ -68,8 +72,8 @@ export const CarrierFormTab = ({
     defaultValues,
     disabled: statusForm === "review"
   });
-  const trip_type = watch("general.trip_type");
-  const providerStatus = watch("general.status");
+  const trip_type = watch("trip_type");
+  const providerStatus = watch("status");
   /*archivos*/
   interface FileObject {
     docReference: string;
@@ -78,18 +82,19 @@ export const CarrierFormTab = ({
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
   useEffect(() => {
     if (Array.isArray(documentsType)) {
-      if (data[0]?.documents?.length) {
+      if (data?.documents?.length) {
         const fileSelected =
           documentsType
-            ?.filter((f) => data[0].documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data[0].documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data[0].documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
+            ?.filter((f) => data.documents?.find((d) => d.id_document_type === f.id))
+            .map((f) => {
+              const doc = data.documents?.find((d) => d.id_document_type === f.id);
+              return {
+                ...f,
+                file: undefined,
+                link: doc?.url_archive,
+                expirationDate: doc?.expiration_date
+              };
+            }) || [];
         setSelectedFiles(fileSelected);
       }
     }
@@ -99,21 +104,23 @@ export const CarrierFormTab = ({
     console.log(files);
   }, [files]);
 
-  const onSubmit = (data: any) => {
-    data.general.license_categorie = licences.data.find(
-      (item) => item.id === data.general.license_category
-    )?.value;
-    data.general.rh = bloodTypes.data.find((item) => item.id === data.general.rh)?.value;
-    _onSubmit(
-      data,
-      setloading,
-      setImageError,
-      imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
-      files,
-      onSubmitForm,
-      reset,
-      statusForm === "create"
-    );
+  const onSubmit = (data: IFormCarrier) => {
+    if (statusForm === "edit") {
+      _onSubmit(
+        data,
+        setloading,
+        setImageError,
+        imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
+        files,
+        onSubmitForm,
+        reset,
+        false
+      );
+    }
+
+    if (statusForm === "create") {
+      console.info("crear con data", data);
+    }
   };
   const items: MenuProps["items"] = [
     {
@@ -177,9 +184,11 @@ export const CarrierFormTab = ({
             </Button>
           </Link>
           <Flex gap={"0.5rem"} align="center">
-            <Flex>
-              <CustomTag text={providerStatus.description} color={providerStatus.color} />
-            </Flex>
+            {providerStatus && (
+              <Flex>
+                <CustomTag text={providerStatus.description} color={providerStatus.color} />
+              </Flex>
+            )}
             <Dropdown
               menu={{ items }}
               trigger={["click"]}
@@ -214,7 +223,7 @@ export const CarrierFormTab = ({
               <UploadImg
                 disabled={statusForm !== "create"}
                 imgDefault={
-                  watch("general.photo") ??
+                  watch("photo") ??
                   "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"
                 }
                 setImgFile={setImageFile}
@@ -234,7 +243,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Nit"
-                    nameInput="general.nit"
+                    nameInput="nit"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -243,7 +252,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Nombre"
-                    nameInput="general.description"
+                    nameInput="description"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -252,7 +261,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Tipo de proveedor"
-                    nameInput="general.carrier_type"
+                    nameInput="carrier_type"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -261,7 +270,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Razon social"
-                    nameInput="general.description"
+                    nameInput="description"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -270,7 +279,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Correo de facturacion"
-                    nameInput="general.description"
+                    nameInput="email"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -279,7 +288,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Correo de comunicacion"
-                    nameInput="general.carrier_type"
+                    nameInput="carrier_type"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -295,9 +304,9 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Nombres y apellidos"
-                    nameInput="general.description"
+                    nameInput="description"
                     control={control}
-                    error={errors?.general?.description}
+                    error={errors?.description}
                     disabled={statusForm !== "create"}
                   />
                 </Col>
@@ -305,9 +314,9 @@ export const CarrierFormTab = ({
                   <InputForm
                     typeInput="tel"
                     titleInput="Teléfono"
-                    nameInput="general.description"
+                    nameInput="phone"
                     control={control}
-                    error={errors?.general?.description}
+                    error={errors?.phone}
                     validationRules={{
                       pattern: {
                         value: /^\+?\d+$/,
@@ -326,7 +335,7 @@ export const CarrierFormTab = ({
               Tipos de viaje
             </Title>
             <Controller
-              name="general.trip_type"
+              name="trip_type"
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
@@ -334,14 +343,11 @@ export const CarrierFormTab = ({
                   field={field}
                   placeholder="Seleccione"
                   title="Tipos de viaje que esta autorizado"
-                  errors={errors?.general?.trip_type}
-                  options={tripTypes?.map(
-                    (tripType) =>
-                      ({
-                        label: tripType.description,
-                        value: tripType.id
-                      }) ?? []
-                  )}
+                  errors={errors?.trip_type}
+                  options={tripTypes?.map((tripType) => ({
+                    label: tripType.description,
+                    value: tripType.id
+                  }))}
                   disabled={statusForm === "review"}
                 />
               )}
@@ -360,7 +366,7 @@ export const CarrierFormTab = ({
                 <LoadDocumentsButton text="Cargar documentos" onClick={() => {}} />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
+            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>

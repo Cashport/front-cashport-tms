@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { API } from "@/utils/api/api";
-import { CreateDriver, IFormGeneralDriver, IListData } from "@/types/logistics/schema";
+import { CreateDriver, IAPIDriver, IFormGeneralDriver, IListData } from "@/types/logistics/schema";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
@@ -11,8 +11,8 @@ export const getAllDrivers = async ({ providerId }: { providerId: number }): Pro
   throw response;
 };
 
-export const getDriverById = async (id: string): Promise<any> => {
-  const response: GenericResponse = await API.get(`/driver/${id}`);
+export const getDriverById = async (id: string): Promise<IAPIDriver> => {
+  const response: GenericResponse<IAPIDriver> = await API.get(`/driver/${id}`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
 };

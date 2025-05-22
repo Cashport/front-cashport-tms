@@ -18,9 +18,13 @@ import {
   VehicleFormTabProps
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
-import { IFormVehicle, VehicleType } from "@/types/logistics/schema";
-import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  IFormGeneralVehicle,
+  IFormVehicle,
+  IProviderDocument,
+  VehicleType
+} from "@/types/logistics/schema";
+
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
@@ -33,6 +37,9 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
+import ModalUploadRequirements, {
+  IUploadRequirementstTableRow
+} from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
 
 const { Title, Text } = Typography;
 
@@ -58,19 +65,20 @@ export const VehicleFormTab = ({
   // eslint-disable-next-line no-unused-vars
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
-  console.log("dataGENERAL", data);
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
-  const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
   );
-  const defaultValues = statusForm === "create" ? {} : normalizeVehicleData(data as any);
+  const defaultValues = statusForm === "create" ? {} : data && normalizeVehicleData(data);
   const {
     watch,
     control,
@@ -85,6 +93,12 @@ export const VehicleFormTab = ({
     disabled: statusForm === "review",
     mode: "onChange"
   });
+
+  useEffect(() => {
+    if (data) {
+      setCurrentDocuments(data.documents);
+    }
+  }, [data]);
 
   const formImages = watch("images");
 
@@ -159,111 +173,25 @@ export const VehicleFormTab = ({
   }, [errors]);
 
   /*archivos*/
-  interface FileObject {
-    docReference: string;
-    file: File | undefined;
-  }
 
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
 
-  useEffect(() => {
-    if (Array.isArray(documentsTypesList)) {
-      const isFirstLoad = data?.documents?.length && selectedFiles.length === 0;
-      if (isFirstLoad) {
-        const docsWithLink =
-          documentsTypesList
-            ?.filter((f) => data.documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
-        setSelectedFiles(docsWithLink);
-      } else {
-        const documentsFiltered = documentsTypesList?.filter(
-          (f) => !f?.optional || selectedFiles?.find((f2) => f2.id === f.id)
-        );
-        const docsWithFile = documentsFiltered.map((f) => {
-          const prevFile = selectedFiles.find((f2) => f2.id === f.id);
-          return {
-            ...f,
-            link: prevFile?.link || undefined,
-            file: prevFile?.link ? undefined : files.find((f2) => f2.aditionalData === f.id)?.file,
-            expirationDate: prevFile?.expirationDate
-          };
-        });
-        if (docsWithFile?.length) {
-          setSelectedFiles([...docsWithFile]);
-        } else {
-          setSelectedFiles([]);
-        }
-      }
-    }
-  }, [files, documentsTypesList]);
-
-  useEffect(() => {
-    if (statusForm === "review") {
-      if (Array.isArray(documentsTypesList)) {
-        const documentsFromData = documentsTypesList?.filter((f) =>
-          data?.documents?.find((d) => d.id_document_type === f.id)
-        );
-        const nonOptionalDocuments = documentsTypesList.filter((f) => !f?.optional);
-        const documentsUniqueSet = new Set([...documentsFromData, ...nonOptionalDocuments]);
-        const documentsUniqueArray = Array.from(documentsUniqueSet);
-        const docsWithLink =
-          documentsUniqueArray.map((f) => ({
-            ...f,
-            file: undefined,
-            link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-            expirationDate: dayjs(
-              data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-            )
-          })) || [];
-        setSelectedFiles(docsWithLink);
-      }
-    }
-  }, [statusForm]);
-
-  const handleChangeExpirationDate = (index: number, value: any) => {
-    setSelectedFiles((prevState: any[]) => {
-      const updatedFiles = [...prevState];
-      updatedFiles[index].expirationDate = value;
-      return updatedFiles;
-    });
-  };
-
-  const handleChange = (value: string[]) => {
-    const sf = documentsTypesList?.filter((file) => value.includes(file.id.toString()));
-    if (sf) {
-      setSelectedFiles((prevState) => {
-        return sf.map((file) => {
-          const prevFile = prevState.find((f) => f.id === file.id);
-          return {
-            ...file,
-            file: prevFile?.link ? undefined : prevFile?.file,
-            link: prevFile?.link || undefined,
-            expirationDate: prevFile?.expirationDate
-          };
-        });
-      });
-    }
-  };
-
-  const onSubmit = async (data: any) => {
-    const vehicleData: any = {
+  const onSubmit = async (data: IFormVehicle) => {
+    const vehicleData: IFormGeneralVehicle = {
       ...data.general,
       has_gps: hasGPS,
       id_carrier: Number(params.id) || 14,
-      features: data.general.trip_type.map((tripType: any) => ({
+      features: data?.general?.trip_type?.map((tripType) => ({
         id: tripType.value
       }))
     };
-    const formImages = [...data.images];
-    _onSubmitVehicle(vehicleData, selectedFiles, formImages, setImageError, onSubmitForm);
+    const formImages = data.images.map((file) => ({
+      file,
+      docReference: file.name
+    }));
+
+    _onSubmitVehicle(vehicleData, uploadedFiles, formImages, setImageError, onSubmitForm);
     setImages(Array(5).fill({ file: undefined }));
   };
 
@@ -299,8 +227,8 @@ export const VehicleFormTab = ({
           {statusForm !== "create" && (
             <Flex gap={"0.5rem"} align="center">
               <Flex>
-                {!!driverStatus?.description && (
-                  <CustomTag text={driverStatus.description} color={driverStatus.color} />
+                {!!driverStatus?.name && (
+                  <CustomTag text={driverStatus.name} color={driverStatus.color} />
                 )}
               </Flex>
               <Dropdown
@@ -564,26 +492,47 @@ export const VehicleFormTab = ({
           <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             {" "}
             {/* Fila Documentos */}
-            <Col span={8}>
-              <Title className="title" level={4}>
-                Documentos
-              </Title>
+            <Col span={24}>
+              <Flex justify="space-between" align="center">
+                <Title className="title" level={4}>
+                  Documentos
+                </Title>
+
+                {(statusForm === "create" || statusForm === "edit") && (
+                  <LoadDocumentsButton
+                    text="Cargar documentos"
+                    onClick={() => setIsModalOpen({ selected: 3 })}
+                  />
+                )}
+              </Flex>
             </Col>
-            <Col span={8} offset={8} style={{ display: "flex", justifyContent: "flex-end" }}>
-              {(statusForm === "create" || statusForm === "edit") && (
-                <LoadDocumentsButton
-                  text="Cargar documentos"
-                  onClick={() => setIsOpenModalDocuments(true)}
+            <Col span={24}>
+              {statusForm === "review" && <DocumentsTable selectedFiles={currentDocuments} />}
+              {statusForm === "create" && (
+                <DocumentsTable
+                  selectedFiles={uploadedFiles.map(
+                    (doc) =>
+                      ({
+                        name: doc.fileName,
+                        description: doc.requirementTypeName,
+                        createdAt: undefined,
+                        expiryDate: doc.expirationDate
+                          ? dayjs(doc.expirationDate).format("YYYY-MM-DD")
+                          : undefined,
+                        isMandatory: undefined,
+                        statusId: "c02b3475-f59a-4222-bb28-9dbb51cf02c1"
+                      }) as any
+                  )}
+                  disableEyeButton
                 />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
               <SubmitFormButton
                 loading={isLoading}
-                disabled={isLoading} // Solo lo deshabilitas mientras está cargando
+                disabled={isLoading}
                 text={validationButtonText(statusForm)}
                 onClick={async () => {
                   console.log("isvalid", isValid);
@@ -622,16 +571,13 @@ export const VehicleFormTab = ({
         onActive={onActiveVehicle}
         onDesactivate={onDesactivateVehicle}
       />
-      <ModalDocuments
-        isOpen={isOpenModalDocuments}
-        mockFiles={selectedFiles}
-        setFiles={setFiles}
-        documentsType={documentsTypesList}
-        isLoadingDocuments={false}
-        onClose={() => setIsOpenModalDocuments(false)}
-        handleChange={handleChange}
-        handleChangeExpirationDate={handleChangeExpirationDate}
-        setSelectedFiles={setSelectedFiles}
+      <ModalUploadRequirements
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        documentsTypesList={documentsTypesList}
+        onUpload={(data) => {
+          setUploadedFiles(data.rows);
+        }}
       />
     </>
   );

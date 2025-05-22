@@ -1,85 +1,120 @@
-import { Button, Flex, Table, Tag, Typography } from "antd";
-import type { TableProps } from "antd";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { mutate } from "swr";
+import { Table } from "antd";
+import { ColumnsType } from "antd/es/table";
 import { Eye } from "phosphor-react";
 
-import dayjs from "dayjs";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { extractSingleParam, formatDate } from "@/utils/utils";
 
-const { Text } = Typography;
+import IconButton from "@/components/atoms/IconButton/IconButton";
+import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
+import DrawerComponent from "@/components/organisms/logistics/proveedores/DrawerComponent/DrawerComponent";
+
+import { IProviderDocument } from "@/types/logistics/schema";
 
 type DocumentsTableProps = {
-  selectedFiles: DocumentCompleteType[];
+  selectedFiles: IProviderDocument[];
+  disableEyeButton?: boolean;
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
-  const { selectedFiles } = props;
+  const params = useParams();
+  const vehicleId = extractSingleParam(params.vehicleId) || "";
+  const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const { selectedFiles, disableEyeButton } = props;
 
-  const documentsTableColumns: TableProps<DocumentCompleteType>["columns"] = [
+  const handleMutateSupplierInfo = () => {
+    mutate(vehicleId);
+  };
+
+  const handleOpenDrawer = () => {
+    setDrawerVisible(true);
+  };
+
+  const tableColumns: ColumnsType<IProviderDocument> = [
+    {
+      title: "Nombre",
+      dataIndex: "name",
+      key: "name",
+      ellipsis: {
+        showTitle: false
+      }
+    },
     {
       title: "Descripción",
       dataIndex: "description",
       key: "description",
-      render: (text) => <Text>{text}</Text>
-    },
-    {
-      title: "Fecha de Cargue",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (date) => {
-        return <Text>{dayjs.utc(date).format("DD/MM/YYYY")}</Text>;
+      ellipsis: {
+        showTitle: false
       }
     },
     {
-      title: "Vencimiento",
-      dataIndex: "expirationDate",
-      key: "expirationDate",
-      render: (date) => (
-        <Text>
-          {dayjs.utc(date).format("DD/MM/YYYY") === "30/11/1899"
-            ? "-"
-            : dayjs.utc(date).format("DD/MM/YYYY")}
-        </Text>
-      )
+      title: "Fecha cargue",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (_: string, record: any) => (record.createdAt ? formatDate(record.createdAt) : "-"),
+      width: 130
     },
     {
-      title: "Tipo",
-      dataIndex: "optional",
-      key: "optional",
-      render: (optional) => (
-        <Flex>
-          <Tag
-            color={optional ? "blue" : "red"}
-            bordered={false}
-            style={{ fontSize: "0.875rem", padding: "4px 8px" }}
-          >
-            {optional ? "Opcional" : "Obligatorio"}
-          </Tag>
-        </Flex>
-      )
+      title: "Vencimiento",
+      dataIndex: "expiryDate",
+      key: "expiryDate",
+      render: (expiryDate) => (expiryDate ? formatDate(expiryDate) : "-"),
+      width: 125
+    },
+    {
+      title: "Obligatorio",
+      dataIndex: "isMandatory",
+      key: "isMandatory",
+      render: (isMandatory?: boolean) => {
+        if (isMandatory === undefined) return "-";
+        return <p>{isMandatory ? "Sí" : "No"}</p>;
+      },
+      width: 113
+    },
+    {
+      title: "Estado",
+      dataIndex: "statusId",
+      key: "statusId",
+      render: (statusId: string) => <BadgeDocumentStatus statusId={statusId} />
     },
     {
       title: "",
-      key: "link",
-      dataIndex: "link",
-      render: (link?: string) => (
-        <Button
-          disabled={!link}
+      dataIndex: "seeMore",
+      key: "seeMore",
+      render: (_: any, record: any) => (
+        <IconButton
+          disabled={disableEyeButton}
+          onClick={() => {
+            setSelectedDocument(record);
+            handleOpenDrawer();
+          }}
           icon={<Eye size={"1.3rem"} />}
-          href={link}
-          target="_blank"
-          rel="noopener"
+          style={{ backgroundColor: "#F4F4F4" }}
         />
       ),
-      width: 70
+      align: "right",
+      width: 50
     }
   ];
 
   return (
-    <Table
-      style={{ width: "100%" }}
-      columns={documentsTableColumns}
-      pagination={false}
-      dataSource={selectedFiles.map((data) => ({ ...data, key: data.id }))}
-    />
+    <>
+      <Table
+        scroll={{ x: "max-content" }}
+        columns={tableColumns}
+        pagination={false}
+        dataSource={selectedFiles.map((data) => ({ ...data, key: data.id }))}
+      />
+      <DrawerComponent
+        visible={drawerVisible}
+        subjectId={vehicleId}
+        documentId={selectedDocument?.id || 0}
+        onClose={() => setDrawerVisible(false)}
+        mutateSupplierInfo={handleMutateSupplierInfo}
+      />
+    </>
   );
 };

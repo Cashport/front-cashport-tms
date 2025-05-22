@@ -1,5 +1,5 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-import { DocumentCompleteType } from "./certificate/certificate";
+import { DocumentCompleteType, IGetCertificate } from "./certificate/certificate";
 import { ApiVehicleType } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
 import { IRequirement } from "../transferJourney/ITransferJourney";
 
@@ -1191,33 +1191,38 @@ export interface ITripType {
  */
 export interface IAPIDriver {
   id: number;
-  phone: number;
-  email: string;
-  document_type: number;
-  vehicle_type: ApiVehicleType[];
-  document: string;
-  license: string;
-  license_category: string;
-  licence_category?: string;
-  license_expiration: Date;
   name: string;
   last_name: string;
-  emergency_number: number;
-  emergency_contact: string;
-  firebaseguid?: string;
-  active: any;
-  status?: any;
-  created_at: Date;
-  created_by: string;
-  modified_at?: Date | null;
-  modified_by?: string | null;
-  company: string;
+  document: string;
+  document_type: number;
+  licence: string;
+  licence_category: string;
+  licence_expiration: string;
+  birth_date: string;
+  email: string;
+  phone: string;
   rh: string;
-  glasses: any;
-  birth_date: Date;
-  photo?: string;
-  company_id?: string;
-  features: Ifeature[];
+  glasses: boolean; // originalmente 0 o 1
+  emergency_contact: string;
+  emergency_number: number;
+  photo: string | null;
+  firebaseguid: string;
+  firebase_push_token: string | null;
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  active: boolean; // originalmente 0 o 1
+  subject_id: number | null;
+  documents: any[]; // se puede tipar si se conoce estructura
+  features: Ifeature[]; // igual que arriba
+  vehicle_type: ApiVehicleType[]; // idem
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
 }
 export interface IFormGeneralDriver {
   id: number;
@@ -1249,15 +1254,18 @@ export interface IFormGeneralDriver {
   status: IStatus;
   trip_type: { label: string; value: number }[];
 }
+
+export interface IProviderDocument extends IGetCertificate {
+  expiryDate: string;
+}
 /**
  * Exposes all fields present in vehicle as a typescript
  * interface.
  */
 export interface IVehicle {
-  id: string;
-  id_carrier: string;
-  id_vehicle_type: string;
-  vehicle_type: string;
+  id: number;
+  id_carrier: number;
+  id_vehicle_type: number;
   plate_number: string;
   brand: string;
   line: string;
@@ -1269,17 +1277,21 @@ export interface IVehicle {
   gps_link: string;
   gps_user: string;
   gps_password: string;
-  active: any;
-  created_at: Date;
-  created_by: string;
-  modified_at: Date;
-  modified_by: string;
-  company: string;
-  images: CustomFile[];
-  IS_ACTIVE: boolean;
   has_gps: boolean;
-  status: IStatus;
-  trip_type: { label: string; value: number }[];
+  active: boolean; // originalmente 0 o 1
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
+  subject_id: number | null;
+  documents: IProviderDocument[];
+  features?: { id: number }[];
 }
 /**
  * Exposes all fields present in carrier as a typescript
@@ -3262,14 +3274,23 @@ export interface CustomFile extends File {
   url_archive: string;
   uid?: string;
 }
+export interface IFormGeneralVehicle extends IVehicle {
+  // Aquí puedes agregar campos específicos para el formulario de vehículo
+  trip_type?: {
+    label: string;
+    value: number;
+  }[];
+}
 export interface IFormVehicle {
-  general: IVehicle;
+  general: IFormGeneralVehicle;
   files?: DocumentCompleteType[];
   images: CustomFile[];
   IS_ACTIVE: boolean;
 }
-export interface IFormCarrier {
-  general: ICarrier;
+export interface IFormCarrier extends ICarrier {
+  // TEMPORARY - MADE UP:`
+  phone?: string;
+  email?: string;
 }
 export interface Ifeature {
   description: string;

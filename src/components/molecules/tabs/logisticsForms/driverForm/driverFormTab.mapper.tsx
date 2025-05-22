@@ -1,6 +1,10 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
-import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  DocumentCompleteType,
+  ICertificateAndDocuments,
+  IGetCertificate
+} from "@/types/logistics/certificate/certificate";
 import {
   IAPIDriver,
   ICertificates,
@@ -19,7 +23,7 @@ dayjs.extend(utc);
 export type StatusForm = "review" | "create" | "edit";
 export interface DriverFormTabProps {
   idProjectForm?: string;
-  data?: DriverData;
+  data?: IAPIDriver;
   disabled?: boolean;
   onEditProject?: () => void;
   onSubmitForm?: (data: any) => void;
@@ -32,7 +36,7 @@ export interface DriverFormTabProps {
     driverId: string;
   };
   handleFormState?: (newFormState: StatusForm) => void;
-  documentsTypesList: CertificateType[];
+  documentsTypesList: IGetCertificate[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
   tripTypes: ITripType[];
@@ -43,7 +47,7 @@ export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICert
 export type ApiVehicleType = { id_vehicle_type: number };
 
 export const dataToProjectFormData = (
-  data: any,
+  data: IAPIDriver,
   vehiclesTypesData: VehicleType[] | undefined
 ): IFormDriver => {
   function createVehicleTypeArray(
@@ -65,27 +69,30 @@ export const dataToProjectFormData = (
     images: [],
     general: {
       id: data.id,
-      phone: data.phone,
+      phone: Number(data.phone),
       email: data.email,
       document_type: data.document_type,
       document: data.document,
-      license: data?.licence || data.license,
+      license: data?.licence,
       license_category: data.licence_category || "",
-      license_expiration: dayjs.utc(data.license_expiration || data.licence_expiration) as any,
+      license_expiration: dayjs.utc(data.licence_expiration) as any,
       name: data.name,
       last_name: data.last_name,
       emergency_number: data.emergency_number,
       emergency_contact: data.emergency_contact,
       active: data.active,
-      created_at: data.created_at,
+      created_at: new Date(data.created_at),
       created_by: data.created_by,
-      company: data.company,
+      company: "",
       rh: data.rh,
       glasses: data.glasses,
       birth_date: dayjs(data?.birth_date) as any,
-      photo: data.photo,
+      photo: data.photo || undefined,
       vehicle_type: vehicleTypeArray,
-      status: data.status,
+      status: {
+        description: data.status.name,
+        color: data.status.color
+      },
       trip_type:
         data.features?.map((feature: any) => ({
           label: feature.description,
@@ -97,7 +104,7 @@ export const dataToProjectFormData = (
 
 export const _onSubmit = (
   data: any,
-  files: DocumentCompleteType[],
+  files: ICertificateAndDocuments[],
   imageFile: FileObject[] | undefined,
   onSubmitForm: (data: any) => void
 ) => {
