@@ -1702,7 +1702,7 @@ export const CreateOrderView = () => {
                       setIsFixedRate(event);
                     }}
                   />
-                  <Text>Es una disponibilidad o renta renta fija</Text>
+                  <Text>Es una disponibilidad o renta fija</Text>
                 </Flex>
               </Col>
             </Row>
