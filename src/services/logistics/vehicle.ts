@@ -27,6 +27,7 @@ export const getFeaturesVehicle = async (): Promise<IFeature[]> => {
 };
 
 export const getVehicleById = async (id: string): Promise<IVehicle> => {
+  console.log("id", id);
   const response: GenericResponse<IVehicle> = await API.get(`/vehicle/${id}`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");

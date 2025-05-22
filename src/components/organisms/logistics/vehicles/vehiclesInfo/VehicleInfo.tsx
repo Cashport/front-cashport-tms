@@ -30,15 +30,16 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const [revalidate, setRevalidate] = useState("1");
   const { push } = useRouter();
 
-  const fetcher = async ({ id }: { id: string }) => {
+  const fetcher = async (id: string) => {
     return getVehicleById(id);
   };
 
   const handleFormState = useCallback((newFormState: StatusForm) => {
     setStatusForm(newFormState);
   }, []);
+  console.log("idParam", idParam);
 
-  const { data, isLoading, isValidating } = useSWR({ id: idParam, key: revalidate }, fetcher, {
+  const { data, isLoading, isValidating, mutate } = useSWR(idParam, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -52,7 +53,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Vehículo editado", 2, () => setStatusForm("review"));
-        setRevalidate(String(Math.random()));
+        mutate();
       }
     } catch (error) {
       setIsLoadingSubmit(false);
