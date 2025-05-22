@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { mutate } from "swr";
 import { Table } from "antd";
@@ -15,6 +15,7 @@ import { IProviderDocument } from "@/types/logistics/schema";
 
 type DocumentsTableProps = {
   selectedFiles: IProviderDocument[];
+  disableEyeButton?: boolean;
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
@@ -22,7 +23,7 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
   const vehicleId = extractSingleParam(params.vehicleId) || "";
   const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const { selectedFiles } = props;
+  const { selectedFiles, disableEyeButton } = props;
 
   const handleMutateSupplierInfo = () => {
     mutate(vehicleId);
@@ -85,6 +86,7 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
       key: "seeMore",
       render: (_: any, record: any) => (
         <IconButton
+          disabled={disableEyeButton}
           onClick={() => {
             setSelectedDocument(record);
             handleOpenDrawer();
@@ -97,6 +99,7 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
       width: 50
     }
   ];
+
   return (
     <>
       <Table

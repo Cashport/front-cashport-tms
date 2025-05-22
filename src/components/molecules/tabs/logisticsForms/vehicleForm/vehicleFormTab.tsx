@@ -523,6 +523,7 @@ export const VehicleFormTab = ({
                         statusId: "c02b3475-f59a-4222-bb28-9dbb51cf02c1"
                       }) as any
                   )}
+                  disableEyeButton
                 />
               )}
             </Col>
