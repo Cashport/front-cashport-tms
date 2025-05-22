@@ -1254,6 +1254,10 @@ export interface IFormGeneralDriver {
   status: IStatus;
   trip_type: { label: string; value: number }[];
 }
+
+export interface IProviderDocument extends IGetCertificate {
+  expiryDate: string;
+}
 /**
  * Exposes all fields present in vehicle as a typescript
  * interface.
@@ -1286,7 +1290,7 @@ export interface IVehicle {
     backgroundColor: string;
   };
   subject_id: number | null;
-  documents: IGetCertificate[];
+  documents: IProviderDocument[];
   features?: { id: number }[];
 }
 /**

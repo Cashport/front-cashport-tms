@@ -366,7 +366,7 @@ export const CarrierFormTab = ({
                 <LoadDocumentsButton text="Cargar documentos" onClick={() => {}} />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
+            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>

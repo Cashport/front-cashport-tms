@@ -637,7 +637,7 @@ export const DriverFormTab = ({
                 />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
+            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>

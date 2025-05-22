@@ -21,6 +21,7 @@ export interface IUploadRequirementstTableRow {
   fileName: string;
   file?: File;
   requirementType?: number;
+  requirementTypeName?: string;
   state?: string;
   expirationDate?: string;
 }
@@ -59,6 +60,13 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
 
   const rowsPerFile = watch("rows");
 
+  const closeModal = () => {
+    onClose();
+    setUploadedFiles([]);
+    setValue("rows", []);
+    setSelectedView("UPLOAD");
+  };
+
   useEffect(() => {
     return () => {
       reset();
@@ -67,6 +75,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
 
   const onSubmit = async (data: IModalRequirementsTableForm) => {
     onUpload?.(data);
+    closeModal();
   };
 
   const props: UploadProps = {
@@ -313,6 +322,12 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                             filterOption={(input, option) =>
                               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                             }
+                            onChange={(value) => {
+                              field.onChange(value); // actualiza requirementType
+
+                              const selected = documentsTypesList.find((item) => item.id === value);
+                              setValue(`rows.${index}.requirementTypeName`, selected?.name || "");
+                            }}
                           />
                         )}
                       />
@@ -369,12 +384,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
       width={selectedView === "UPLOAD" ? 686 : 1000}
       footer={null}
       open={isOpen}
-      onCancel={() => {
-        onClose();
-        setUploadedFiles([]);
-        setValue("rows", []);
-        setSelectedView("UPLOAD");
-      }}
+      onCancel={closeModal}
       destroyOnClose
     >
       {renderView()}

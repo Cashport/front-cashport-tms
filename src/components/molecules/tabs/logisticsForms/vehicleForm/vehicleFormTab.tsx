@@ -18,8 +18,13 @@ import {
   VehicleFormTabProps
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
-import { IFormGeneralVehicle, IFormVehicle, VehicleType } from "@/types/logistics/schema";
-import { ICertificateAndDocuments } from "@/types/logistics/certificate/certificate";
+import {
+  IFormGeneralVehicle,
+  IFormVehicle,
+  IProviderDocument,
+  VehicleType
+} from "@/types/logistics/schema";
+
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
@@ -61,15 +66,13 @@ export const VehicleFormTab = ({
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
   const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
   });
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
-  const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<ICertificateAndDocuments[]>([]);
+  const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
 
   const [images, setImages] = useState<ImageState[]>(
@@ -90,6 +93,12 @@ export const VehicleFormTab = ({
     disabled: statusForm === "review",
     mode: "onChange"
   });
+
+  useEffect(() => {
+    if (data) {
+      setCurrentDocuments(data.documents);
+    }
+  }, [data]);
 
   const formImages = watch("images");
 
@@ -164,10 +173,6 @@ export const VehicleFormTab = ({
   }, [errors]);
 
   /*archivos*/
-  interface FileObject {
-    docReference: string;
-    file: File | undefined;
-  }
 
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
@@ -487,20 +492,40 @@ export const VehicleFormTab = ({
           <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             {" "}
             {/* Fila Documentos */}
-            <Col span={8}>
-              <Title className="title" level={4}>
-                Documentos
-              </Title>
+            <Col span={24}>
+              <Flex justify="space-between" align="center">
+                <Title className="title" level={4}>
+                  Documentos
+                </Title>
+
+                {(statusForm === "create" || statusForm === "edit") && (
+                  <LoadDocumentsButton
+                    text="Cargar documentos"
+                    onClick={() => setIsModalOpen({ selected: 3 })}
+                  />
+                )}
+              </Flex>
             </Col>
-            <Col span={8} offset={8} style={{ display: "flex", justifyContent: "flex-end" }}>
-              {(statusForm === "create" || statusForm === "edit") && (
-                <LoadDocumentsButton
-                  text="Cargar documentos"
-                  onClick={() => setIsModalOpen({ selected: 3 })}
+            <Col span={24}>
+              {statusForm === "review" && <DocumentsTable selectedFiles={currentDocuments} />}
+              {statusForm === "create" && (
+                <DocumentsTable
+                  selectedFiles={uploadedFiles.map(
+                    (doc) =>
+                      ({
+                        name: doc.fileName,
+                        description: doc.requirementTypeName,
+                        createdAt: undefined,
+                        expiryDate: doc.expirationDate
+                          ? dayjs(doc.expirationDate).format("YYYY-MM-DD")
+                          : undefined,
+                        isMandatory: undefined,
+                        statusId: "c02b3475-f59a-4222-bb28-9dbb51cf02c1"
+                      }) as any
+                  )}
                 />
               )}
             </Col>
-            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
