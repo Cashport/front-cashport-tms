@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { CheckCircle, Cloud, Sparkle, XCircle } from "phosphor-react";
-import { Avatar, Steps, Button, Flex } from "antd";
+import { Avatar, Steps, Button, Flex, message } from "antd";
 
 import { formatTimeAgo } from "@/utils/utils";
-import { useMessageApi } from "@/context/MessageContext";
 import { IDocumentEvent } from "@/hooks/useDocument";
 import { createDocumentComment } from "@/services/logistics/documents/documents";
 
@@ -27,7 +26,6 @@ export const EventSection: React.FC<EventSectionProps> = ({
 }) => {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showMessage } = useMessageApi();
 
   const getEventUser = (event: IDocumentEvent) => {
     return event.is_ia ? (
@@ -39,27 +37,26 @@ export const EventSection: React.FC<EventSectionProps> = ({
 
   const handleCommentSubmit = async () => {
     if (!comment.trim()) {
-      showMessage("error", "Por favor, ingrese un comentario");
+      message.error("Por favor, ingrese un comentario");
       return;
     }
 
     setIsSubmitting(true);
 
-    if (!incidentId)
-      return (
-        showMessage(
-          "error",
-          "No se ha podido agregar el comentario, no está asociado a un incidente"
-        ),
-        setIsSubmitting(false)
+    if (!incidentId) {
+      message.error(
+        "No se ha podido agregar el comentario, no está asociado a un incidente"
       );
+      setIsSubmitting(false);
+      return;
+    }
     try {
       await createDocumentComment(comment, incidentId);
-      showMessage("success", "Comentario agregado exitosamente");
+      message.success("Comentario agregado exitosamente");
       setComment("");
       mutateComments && mutateComments();
     } catch (error) {
-      showMessage("error", "Error al agregar el comentario");
+      message.error("Error al agregar el comentario");
       console.error("Error adding comment:", error);
     } finally {
       setIsSubmitting(false);

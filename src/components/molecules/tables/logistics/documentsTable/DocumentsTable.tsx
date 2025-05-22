@@ -16,6 +16,7 @@ import { IProviderDocument } from "@/types/logistics/schema";
 type DocumentsTableProps = {
   selectedFiles: IProviderDocument[];
   disableEyeButton?: boolean;
+  subjectId?: number;
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
@@ -23,7 +24,7 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
   const vehicleId = extractSingleParam(params.vehicleId) || "";
   const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const { selectedFiles, disableEyeButton } = props;
+  const { selectedFiles, disableEyeButton, subjectId } = props;
 
   const handleMutateSupplierInfo = () => {
     mutate(vehicleId);
@@ -110,7 +111,7 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
       />
       <DrawerComponent
         visible={drawerVisible}
-        subjectId={vehicleId}
+        subjectId={subjectId?.toString() || ""}
         documentId={selectedDocument?.id || 0}
         onClose={() => setDrawerVisible(false)}
         mutateSupplierInfo={handleMutateSupplierInfo}

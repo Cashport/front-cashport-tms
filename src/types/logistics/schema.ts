@@ -1289,7 +1289,7 @@ export interface IVehicle {
     color: string;
     backgroundColor: string;
   };
-  subject_id: number | null;
+  subject_id: number;
   documents: IProviderDocument[];
   features?: { id: number }[];
 }

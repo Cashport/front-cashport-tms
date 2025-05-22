@@ -45,9 +45,9 @@ const DrawerComponent: React.FC<DrawerProps> = ({
     }
   }, [visible, mutate]);
 
-  // if (isLoading || !document) {
-  //   return null;
-  // }
+  if (isLoading || !document) {
+    return null;
+  }
 
   const { color, backgroundColor } = getStatusDetails(document?.statusId || "");
 
@@ -100,7 +100,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           uploadedBy={document?.createdBy || ""}
         />
         <ValiditySection validity={document?.expiryDate || ""} date={document?.createdAt || null} />
-        {/* <ApproversSection approvers={document?.approvers} /> */}
+        <ApproversSection approvers={document?.approvers} />
         <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
         {type === "document" ? (
           <DocumentUploadSection
@@ -146,7 +146,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           expirationDate={document?.expiryDate || null}
         />
         <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
-        {/* <EventSection events={events} incidentId={documentId} mutateComments={mutateComments} /> */}
+        <EventSection events={events} incidentId={documentId} mutateComments={mutateComments} />
       </Flex>
     </Drawer>
   );

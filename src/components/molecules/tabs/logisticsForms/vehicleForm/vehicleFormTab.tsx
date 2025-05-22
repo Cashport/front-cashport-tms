@@ -507,7 +507,9 @@ export const VehicleFormTab = ({
               </Flex>
             </Col>
             <Col span={24}>
-              {statusForm === "review" && <DocumentsTable selectedFiles={currentDocuments} />}
+              {statusForm === "review" && (
+                <DocumentsTable selectedFiles={currentDocuments} subjectId={data?.subject_id} />
+              )}
               {statusForm === "create" && (
                 <DocumentsTable
                   selectedFiles={uploadedFiles.map(
