@@ -19,7 +19,9 @@ export interface VehicleFormTabProps {
   data?: IVehicle;
   disabled?: boolean;
   onEditVehicle?: () => void;
+  // eslint-disable-next-line no-unused-vars
   onSubmitForm?: (data: any) => void;
+  // eslint-disable-next-line no-unused-vars
   handleFormState?: (newFormState: StatusForm) => void;
   onActiveVehicle?: () => void;
   onDesactivateVehicle?: () => void;

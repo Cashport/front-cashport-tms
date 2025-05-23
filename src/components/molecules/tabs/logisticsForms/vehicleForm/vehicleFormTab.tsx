@@ -3,6 +3,7 @@ import { Button, Col, Flex, Form, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft, Sparkle } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
+import { mutate } from "swr";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -39,6 +40,7 @@ import ModalUploadRequirements, {
   IUploadRequirementstTableRow
 } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
+import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
 
 const { Title, Text } = Typography;
 
@@ -163,6 +165,11 @@ export const VehicleFormTab = ({
   const handleOpenModal = (modalNumber: number) =>
     setIsModalOpen({
       selected: modalNumber
+    });
+
+  const handleCloseModal = () =>
+    setIsModalOpen({
+      selected: 0
     });
 
   return (
@@ -510,16 +517,24 @@ export const VehicleFormTab = ({
       </Form>
       <ModalGenerateActionProviders
         isOpen={isModalOpen.selected === 1}
-        onClose={() => setIsModalOpen({ selected: 0 })}
+        onClose={handleCloseModal}
         handleOpenModal={handleOpenModal}
         statusForm={statusForm}
         handleFormState={handleFormState}
         resetForm={reset}
       />
 
+      <ModalChangeStatus
+        isActiveStatus={true}
+        isOpen={isModalOpen.selected === 2}
+        onClose={handleCloseModal}
+        onActive={onActiveVehicle}
+        onDesactivate={onDesactivateVehicle}
+      />
+
       <ModalConfirmAudit
         isOpen={isModalOpen.selected === 3}
-        onClose={() => setIsModalOpen({ selected: 0 })}
+        onClose={handleCloseModal}
         onConfirm={onAuditVehicle}
         title="Auditar vehículo"
         description={[
@@ -530,16 +545,22 @@ export const VehicleFormTab = ({
           label: features?.find((f) => f.id === tt.value)?.description || ""
         }))}
       />
-      <ModalChangeStatus
-        isActiveStatus={true}
-        isOpen={isModalOpen.selected === 2}
-        onClose={() => setIsModalOpen({ selected: 0 })}
-        onActive={onActiveVehicle}
-        onDesactivate={onDesactivateVehicle}
+
+      <ModalAddRequirement
+        isOpen={isModalOpen.selected === 4}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.vehicleId);
+        }}
+        subjectId={data?.subject_id || 0}
       />
+
       <ModalUploadRequirements
         isOpen={isModalOpen.selected === -1}
-        onClose={() => setIsModalOpen({ selected: 0 })}
+        onClose={handleCloseModal}
         documentsTypesList={documentsTypesList}
         onUpload={(data) => {
           setUploadedFiles((prev) => [...prev, ...data.rows]);
