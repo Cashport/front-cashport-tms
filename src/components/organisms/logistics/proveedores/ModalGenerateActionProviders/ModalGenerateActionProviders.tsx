@@ -104,7 +104,7 @@ const ModalGenerateActionProviders: React.FC<ModalGenerateActionProps> = ({
         <ButtonGenerateAction icon={<User size={20} />} disabled={true} title="Crear cliente" />
         <ButtonGenerateAction
           icon={<Trash size={20} />}
-          title="Eliminar"
+          title="Eliminar requerimientos"
           onClick={() => {
             if (!selectedDocumentRows || selectedDocumentRows.length === 0) {
               return message.error("No hay documentos seleccionados para eliminar.");

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Flex, Form, Row, Switch, Typography } from "antd";
+import { Button, Col, Flex, Form, message, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { CaretLeft, Sparkle } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
@@ -42,6 +42,8 @@ import ModalUploadRequirements, {
 import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
 import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
 import ModalAuditRequirements from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
+import { deleteDocumentById } from "@/services/logistics/providers/providers";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 const { Title, Text } = Typography;
 
@@ -75,6 +77,7 @@ export const VehicleFormTab = ({
   const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
   const [selectedDocumentRows, setSelectedDocumentRows] = useState<IProviderDocument[]>([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
@@ -173,6 +176,23 @@ export const VehicleFormTab = ({
     setIsModalOpen({
       selected: 0
     });
+
+  const handleDeleteDocument = async () => {
+    setLoadingRequest(true);
+    if (selectedDocumentRows?.length) {
+      const ids = selectedDocumentRows.map((row) => row.id);
+      try {
+        await Promise.all(ids.map((id) => deleteDocumentById(data?.subject_id ?? 0, id)));
+        message.success("Documentos eliminados correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedDocumentRows([]);
+        mutate(params.vehicleId);
+      } catch (error) {
+        message.error("Error al eliminar documentos");
+      }
+    }
+    setLoadingRequest(false);
+  };
 
   return (
     <>
@@ -578,6 +598,17 @@ export const VehicleFormTab = ({
           setSelectedDocumentRows([]);
         }}
         selectedRows={selectedDocumentRows}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 6}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteDocument}
+        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
       />
 
       <ModalUploadRequirements

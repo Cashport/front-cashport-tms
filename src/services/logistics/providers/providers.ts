@@ -52,7 +52,7 @@ export const createDocumentBySubjectId = async (subjectId: any, documentTypeId: 
   }
 };
 
-export const deleteDocumentById = async (subjectId: string, documentTypeId: number) => {
+export const deleteDocumentById = async (subjectId: number, documentTypeId: number) => {
   try {
     const response: GenericResponse<any> = await API.delete(
       `/subject/${subjectId}/documents-type/${documentTypeId}`
