@@ -41,6 +41,7 @@ import ModalUploadRequirements, {
 } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
 import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
+import ModalAuditRequirements from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
 
 const { Title, Text } = Typography;
 
@@ -528,6 +529,7 @@ export const VehicleFormTab = ({
         statusForm={statusForm}
         handleFormState={handleFormState}
         resetForm={reset}
+        selectedDocumentRows={selectedDocumentRows}
       />
 
       <ModalChangeStatus
@@ -562,6 +564,20 @@ export const VehicleFormTab = ({
           mutate(params.vehicleId);
         }}
         subjectId={data?.subject_id || 0}
+      />
+
+      <ModalAuditRequirements
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.vehicleId);
+
+          setSelectedDocumentRows([]);
+        }}
+        selectedRows={selectedDocumentRows}
       />
 
       <ModalUploadRequirements

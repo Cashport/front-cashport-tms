@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Modal, Select, Table, TableProps, Typography } from "antd";
+import { Button, Input, Modal, Select, Table, TableProps, Typography, message } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
 
-import { useMessageApi } from "@/context/MessageContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -40,8 +39,6 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localSelectedRows, setLocalSelectedRows] = useState<IProviderDocument[]>([]);
   const height = useScreenHeight();
-
-  const { showMessage } = useMessageApi();
 
   const { control, handleSubmit, reset, watch } = useForm<IAuditFormValues>();
 
@@ -81,10 +78,10 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
 
     try {
       await auditRequirements(data.rows);
-      showMessage("success", "Requerimientos auditados correctamente");
+      message.success("Requerimientos auditados correctamente");
       onClose();
     } catch (error) {
-      showMessage("error", "Error al auditar requerimientos");
+      message.error("Error al auditar requerimientos");
     }
     setIsSubmitting(false);
   };
