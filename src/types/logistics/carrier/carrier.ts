@@ -115,6 +115,7 @@ export interface IAceptCarrierAPI {
   id_end_location: number;
   end_location: string;
   status: string;
+  client_desc: string;
   created_at: string;
   created_by: string;
   statusdesc: string;
