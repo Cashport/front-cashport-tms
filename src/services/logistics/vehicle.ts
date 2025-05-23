@@ -6,7 +6,7 @@ import { ICertificateAndDocuments } from "@/types/logistics/certificate/certific
 
 import { IFeature } from "@/types/features/feature";
 import { ICreateVehicleForm } from "@/components/organisms/logistics/vehicles/createVehicle/createVehicle";
-import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
 export const getAllVehicles = async ({ id }: { id: string }): Promise<any[]> => {
   const response: GenericResponse<any[]> = await API.get(`/vehicle/provider/${id}`);

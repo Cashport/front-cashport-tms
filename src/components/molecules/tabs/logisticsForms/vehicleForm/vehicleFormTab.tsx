@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
+import { Button, Col, Flex, Form, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil, Sparkle } from "phosphor-react";
+import { CaretLeft, Sparkle } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
 
 // components
@@ -28,10 +28,8 @@ import {
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
-import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import ModalConfirmAudit from "../driverForm/components/ModalConfirmAudit";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
@@ -39,7 +37,8 @@ import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 import ModalUploadRequirements, {
   IUploadRequirementstTableRow
-} from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
+} from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
+import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
 
 const { Title, Text } = Typography;
 
@@ -65,8 +64,6 @@ export const VehicleFormTab = ({
   // eslint-disable-next-line no-unused-vars
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
   });
@@ -102,53 +99,6 @@ export const VehicleFormTab = ({
 
   const formImages = watch("images");
 
-  const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <ButtonGenerateAction
-          icon={<Pencil size={"1.5rem"} />}
-          title={statusForm === "review" ? "Editar" : "Cancelar edición"}
-          hideArrow
-          onClick={() => {
-            if (statusForm === "review") {
-              handleFormState("edit");
-            } else {
-              handleFormState("review");
-              reset();
-            }
-          }}
-        />
-      )
-    },
-    {
-      key: "2",
-      label: (
-        <ButtonGenerateAction
-          icon={<ArrowsClockwise size={"1.5rem"} />}
-          title="Cambiar estado"
-          onClick={() => setIsOpenModal(true)}
-          hideArrow
-        />
-      )
-    },
-    {
-      key: "3",
-      label: (
-        <ButtonGenerateAction
-          icon={<CheckCircle size={"1.5rem"} />}
-          title="Auditar"
-          disabled={statusForm !== "review"}
-          hideArrow
-          onClick={() => setIsModalConfirmAuditOpen(true)}
-        />
-      )
-    }
-  ];
-  const menuStyle: React.CSSProperties = {
-    backgroundColor: "white",
-    boxShadow: "none"
-  };
   const hasImages = () => {
     return images.some((img) => img.file) || (formImages && formImages.length > 0);
   };
@@ -210,6 +160,11 @@ export const VehicleFormTab = ({
     }
   }, [data, setValue]);
 
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
+
   return (
     <>
       <Form className="vehiclesFormTab">
@@ -231,22 +186,12 @@ export const VehicleFormTab = ({
                   <CustomTag text={driverStatus.name} color={driverStatus.color} />
                 )}
               </Flex>
-              <Dropdown
-                menu={{ items }}
-                trigger={["click"]}
-                dropdownRender={(menu) => (
-                  <div>
-                    {React.cloneElement(
-                      menu as React.ReactElement<{
-                        style: React.CSSProperties;
-                      }>,
-                      { style: menuStyle }
-                    )}
-                  </div>
-                )}
-              >
-                <GenerateActionButton onClick={() => {}} />
-              </Dropdown>
+
+              <GenerateActionButton
+                onClick={() => {
+                  setIsModalOpen({ selected: 1 });
+                }}
+              />
             </Flex>
           )}
         </Flex>
@@ -499,7 +444,7 @@ export const VehicleFormTab = ({
                 </Title>
 
                 {statusForm === "create" && (
-                  <Button className="iaButton" onClick={() => setIsModalOpen({ selected: 3 })}>
+                  <Button className="iaButton" onClick={() => setIsModalOpen({ selected: -1 })}>
                     <Sparkle size={14} color="#5b21b6" weight="fill" />
                     <span className="textNormal">
                       Carga documentos con{" "}
@@ -563,9 +508,18 @@ export const VehicleFormTab = ({
           )}
         </Flex>
       </Form>
+      <ModalGenerateActionProviders
+        isOpen={isModalOpen.selected === 1}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        handleOpenModal={handleOpenModal}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        resetForm={reset}
+      />
+
       <ModalConfirmAudit
-        isOpen={isModalConfirmAuditOpen}
-        onClose={() => setIsModalConfirmAuditOpen(false)}
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
         onConfirm={onAuditVehicle}
         title="Auditar vehículo"
         description={[
@@ -578,13 +532,13 @@ export const VehicleFormTab = ({
       />
       <ModalChangeStatus
         isActiveStatus={true}
-        isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
+        isOpen={isModalOpen.selected === 2}
+        onClose={() => setIsModalOpen({ selected: 0 })}
         onActive={onActiveVehicle}
         onDesactivate={onDesactivateVehicle}
       />
       <ModalUploadRequirements
-        isOpen={isModalOpen.selected === 3}
+        isOpen={isModalOpen.selected === -1}
         onClose={() => setIsModalOpen({ selected: 0 })}
         documentsTypesList={documentsTypesList}
         onUpload={(data) => {

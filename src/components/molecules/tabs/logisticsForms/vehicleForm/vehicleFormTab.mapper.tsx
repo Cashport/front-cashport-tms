@@ -1,7 +1,7 @@
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
 
-import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
 import { IGetCertificate } from "@/types/logistics/certificate/certificate";
 import { IFeature } from "@/types/features/feature";

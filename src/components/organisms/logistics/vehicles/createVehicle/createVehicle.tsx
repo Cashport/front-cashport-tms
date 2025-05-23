@@ -8,7 +8,7 @@ import { getDocumentsByEntityType } from "@/services/logistics/certificates";
 import { addVehicle, getFeaturesVehicle, getVehicleType } from "@/services/logistics/vehicle";
 
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
-import { IUploadRequirementstTableRow } from "../../providers/ModalUploadRequirements/ModalUploadRequirements";
+import { IUploadRequirementstTableRow } from "../../proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
 import { IFormGeneralVehicle } from "@/types/logistics/schema";
 
@@ -33,7 +33,7 @@ export const CreateVehicleView = ({ params }: Props) => {
   const handleSubmit = async (data: ICreateVehicleForm) => {
     setIsLoadingSubmit(true);
     try {
-      const response = await addVehicle({ ...data });
+      await addVehicle({ ...data });
 
       message.success("Vehículo creado", 3, () =>
         push(`/logistics/providers/${params.id}/vehicle`)

@@ -37,7 +37,6 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const handleFormState = useCallback((newFormState: StatusForm) => {
     setStatusForm(newFormState);
   }, []);
-  console.log("idParam", idParam);
 
   const { data, isLoading, isValidating, mutate } = useSWR(idParam, fetcher, {
     revalidateIfStale: false,
