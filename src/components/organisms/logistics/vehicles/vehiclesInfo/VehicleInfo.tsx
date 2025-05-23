@@ -10,7 +10,7 @@ import {
   updateVehicle,
   updateVehicleStatus
 } from "@/services/logistics/vehicle";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { useCallback, useState } from "react";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
@@ -37,7 +37,6 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const handleFormState = useCallback((newFormState: StatusForm) => {
     setStatusForm(newFormState);
   }, []);
-  console.log("idParam", idParam);
 
   const { data, isLoading, isValidating, mutate } = useSWR(idParam, fetcher, {
     revalidateIfStale: false,

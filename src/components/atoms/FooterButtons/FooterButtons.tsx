@@ -10,7 +10,8 @@ const FooterButtons = ({
   handleOk,
   showLeftButton = true,
   isConfirmLoading = false,
-  stylesContainer
+  stylesContainer,
+  className
 }: {
   titleConfirm?: string;
   titleCancel?: string;
@@ -20,6 +21,7 @@ const FooterButtons = ({
   showLeftButton?: boolean;
   isConfirmLoading?: boolean;
   stylesContainer?: React.CSSProperties;
+  className?: string;
 }) => {
   if (!showLeftButton)
     return (
@@ -41,6 +43,7 @@ const FooterButtons = ({
         height: "48px",
         ...stylesContainer
       }}
+      className={className}
     >
       <SecondaryButton fullWidth onClick={onCancel} disabled={isConfirmLoading}>
         {titleCancel ?? "Cancelar"}

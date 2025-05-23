@@ -1,7 +1,7 @@
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
 
-import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/providers/ModalUploadRequirements/ModalUploadRequirements";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
 import { IGetCertificate } from "@/types/logistics/certificate/certificate";
 import { IFeature } from "@/types/features/feature";
@@ -19,7 +19,9 @@ export interface VehicleFormTabProps {
   data?: IVehicle;
   disabled?: boolean;
   onEditVehicle?: () => void;
+  // eslint-disable-next-line no-unused-vars
   onSubmitForm?: (data: any) => void;
+  // eslint-disable-next-line no-unused-vars
   handleFormState?: (newFormState: StatusForm) => void;
   onActiveVehicle?: () => void;
   onDesactivateVehicle?: () => void;
