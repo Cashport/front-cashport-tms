@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useState } from "react";
 import { useParams } from "next/navigation";
 import { mutate } from "swr";
 import { Table } from "antd";
@@ -14,9 +14,12 @@ import DrawerComponent from "@/components/organisms/logistics/proveedores/Drawer
 import { IProviderDocument } from "@/types/logistics/schema";
 
 type DocumentsTableProps = {
-  selectedFiles: IProviderDocument[];
+  currentFiles: IProviderDocument[];
   disableEyeButton?: boolean;
   subjectId?: number;
+  // eslint-disable-next-line no-unused-vars
+  setSelectedDocumentRows?: (value: SetStateAction<IProviderDocument[]>) => void;
+  selectedDocumentRows?: IProviderDocument[];
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
@@ -24,7 +27,13 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
   const vehicleId = extractSingleParam(params.vehicleId) || "";
   const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const { selectedFiles, disableEyeButton, subjectId } = props;
+  const {
+    currentFiles,
+    disableEyeButton,
+    subjectId,
+    setSelectedDocumentRows,
+    selectedDocumentRows
+  } = props;
 
   const handleMutateSupplierInfo = () => {
     mutate(vehicleId);
@@ -32,6 +41,16 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
 
   const handleOpenDrawer = () => {
     setDrawerVisible(true);
+  };
+
+  const onSelectChange = (_newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
+    setSelectedDocumentRows && setSelectedDocumentRows(newSelectedRow);
+  };
+
+  const rowSelection = {
+    columnWidth: 40,
+    selectedRowKeys: selectedDocumentRows?.map((row) => row.id) || [],
+    onChange: onSelectChange
   };
 
   const tableColumns: ColumnsType<IProviderDocument> = [
@@ -107,7 +126,8 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
         scroll={{ x: "max-content" }}
         columns={tableColumns}
         pagination={false}
-        dataSource={selectedFiles.map((data) => ({ ...data, key: data.id }))}
+        dataSource={currentFiles?.map((data) => ({ ...data, key: data.id }))}
+        rowSelection={rowSelection}
       />
       <DrawerComponent
         visible={drawerVisible}

@@ -73,6 +73,7 @@ export const VehicleFormTab = ({
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
   const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<IProviderDocument[]>([]);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
@@ -470,11 +471,16 @@ export const VehicleFormTab = ({
             </Col>
             <Col span={24} style={{ marginTop: "1.5rem" }}>
               {statusForm === "review" && (
-                <DocumentsTable selectedFiles={currentDocuments} subjectId={data?.subject_id} />
+                <DocumentsTable
+                  currentFiles={currentDocuments}
+                  subjectId={data?.subject_id}
+                  selectedDocumentRows={selectedDocumentRows}
+                  setSelectedDocumentRows={setSelectedDocumentRows}
+                />
               )}
               {statusForm === "create" && (
                 <DocumentsTable
-                  selectedFiles={uploadedFiles.map(
+                  currentFiles={uploadedFiles.map(
                     (doc) =>
                       ({
                         name: doc.fileName,
