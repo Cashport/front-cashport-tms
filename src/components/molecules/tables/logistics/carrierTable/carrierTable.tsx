@@ -5,7 +5,7 @@ import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
 import "./carrierTable.scss";
 import UiSearchInput from "@/components/ui/search-input";
 import { ICarrier } from "@/types/logistics/schema";
-import { getAllCarriers } from "@/services/logistics/carrier";
+import { getAllCarriers, IProvider } from "@/services/logistics/carrier";
 import useSWR from "swr";
 import CustomTag from "@/components/atoms/CustomTag";
 import Link from "next/link";
@@ -56,7 +56,7 @@ export const CarrierTable = () => {
     setDatasource(data);
   }, [carriers, search]);
 
-  const columns: TableProps<ICarrier>["columns"] = [
+  const columns: TableProps<IProvider>["columns"] = [
     {
       title: "NIT",
       dataIndex: "nit",
@@ -90,7 +90,7 @@ export const CarrierTable = () => {
       render: (_, { status }) => {
         return (
           <Flex>
-            <CustomTag text={status.description} color={status.color} />
+            <CustomTag text={status.name} color={status.color} />
           </Flex>
         );
       }

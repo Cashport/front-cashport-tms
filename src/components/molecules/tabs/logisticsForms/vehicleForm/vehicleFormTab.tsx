@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil, Sparkle } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
 
 // components
@@ -498,16 +498,28 @@ export const VehicleFormTab = ({
                   Documentos
                 </Title>
 
-                {(statusForm === "create" || statusForm === "edit") && (
-                  <LoadDocumentsButton
-                    text="Cargar documentos"
-                    onClick={() => setIsModalOpen({ selected: 3 })}
-                  />
+                {statusForm === "create" && (
+                  <Button className="iaButton" onClick={() => setIsModalOpen({ selected: 3 })}>
+                    <Sparkle size={14} color="#5b21b6" weight="fill" />
+                    <span className="textNormal">
+                      Carga documentos con{" "}
+                      <span
+                        className="cashportIATextGradient"
+                        style={{
+                          fontWeight: 500
+                        }}
+                      >
+                        CashportAI
+                      </span>
+                    </span>
+                  </Button>
                 )}
               </Flex>
             </Col>
-            <Col span={24}>
-              {statusForm === "review" && <DocumentsTable selectedFiles={currentDocuments} />}
+            <Col span={24} style={{ marginTop: "1.5rem" }}>
+              {statusForm === "review" && (
+                <DocumentsTable selectedFiles={currentDocuments} subjectId={data?.subject_id} />
+              )}
               {statusForm === "create" && (
                 <DocumentsTable
                   selectedFiles={uploadedFiles.map(
@@ -576,7 +588,7 @@ export const VehicleFormTab = ({
         onClose={() => setIsModalOpen({ selected: 0 })}
         documentsTypesList={documentsTypesList}
         onUpload={(data) => {
-          setUploadedFiles(data.rows);
+          setUploadedFiles((prev) => [...prev, ...data.rows]);
         }}
       />
     </>

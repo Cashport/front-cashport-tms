@@ -122,11 +122,6 @@
         background: #f7f7f7;
     }
 
-
-
-
-
-
     .buttonAction {
         color: #141414;
         display: flex;
@@ -148,8 +143,6 @@
 
         h2,
         h3,
-
-
         h5 {
             color: $gray;
         }
@@ -235,6 +228,31 @@
             border-radius: 0.25rem;
         }
     }
+
+    .iaButton {
+        border-radius: 42px;
+        height: 42px;
+        background-color: $light-blue;
+        border-color: #f0e7ff !important;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        &:hover {
+            background-color: $light-blue !important;
+            border-color: #af90e0 !important;
+        }
+
+        .textNormal {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #5b21b6;
+            line-height: 16px;
+            pointer-events: none;
+        }
+    }
 }
 
 .btnagregarpsl {
@@ -253,6 +271,6 @@
         font-weight: 600;
         font-style: normal;
         line-height: normal;
-        color:#909090
+        color: #909090;
     }
 }

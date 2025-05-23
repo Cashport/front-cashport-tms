@@ -7,6 +7,7 @@ import useSWR from "swr";
 import dayjs from "dayjs";
 
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
+import { ICarrierById } from "@/services/logistics/carrier";
 
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
@@ -35,7 +36,6 @@ import {
 import { IFormCarrier } from "@/types/logistics/schema";
 
 import "./carrierformtab.scss";
-import { ICarrierById } from "@/services/logistics/carrier";
 
 const { Title, Text } = Typography;
 

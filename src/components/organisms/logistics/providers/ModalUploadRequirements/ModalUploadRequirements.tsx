@@ -213,7 +213,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                       fontWeight: 500
                     }}
                   >
-                    Cashport IA
+                    CashportAI
                   </span>
                 </span>
               </Button>
