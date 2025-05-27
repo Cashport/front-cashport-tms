@@ -81,4 +81,6 @@ export interface ITransferRequestResponse {
   transferType: string;
   items: ITransferRequest[];
   page: IPagination;
+  total_value: number;
+  total_count: number;
 }
