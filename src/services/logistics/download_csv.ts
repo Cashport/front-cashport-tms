@@ -2,14 +2,14 @@ import { API } from "@/utils/api/api";
 
 export async function downloadCSVFromEndpoint(endpoint: string, filename: string): Promise<void> {
   try {
-    const response = await API.get(`${endpoint}`, {
+    const response: any = await API.get(`${endpoint}`, {
       responseType: "blob",
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       }
     });
 
-    const blob = new Blob([response.data], {
+    const blob = new Blob([response], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
 
