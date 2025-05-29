@@ -5,8 +5,12 @@ import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocume
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
-export const getAllDrivers = async ({ providerId }: { providerId: number }): Promise<any[]> => {
-  const response: GenericResponse<any[]> = await API.get(`/driver/provider/${providerId}`);
+export const getAllDrivers = async ({
+  providerId
+}: {
+  providerId: number;
+}): Promise<IAPIDriver[]> => {
+  const response: GenericResponse<IAPIDriver[]> = await API.get(`/driver/provider/${providerId}`);
   if (response.success) return response.data;
   throw response;
 };

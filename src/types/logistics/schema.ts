@@ -1221,7 +1221,6 @@ export interface IAPIDriver {
   status: {
     id: number;
     name: string;
-    description: string;
     color: string;
     backgroundColor: string;
   };
