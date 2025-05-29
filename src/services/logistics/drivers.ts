@@ -1,12 +1,16 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { API } from "@/utils/api/api";
-import { CreateDriver, IAPIDriver, IFormGeneralDriver, IListData } from "@/types/logistics/schema";
+import { CreateDriver, IAPIDriver, IGeneralDriverSubmit } from "@/types/logistics/schema";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
-export const getAllDrivers = async ({ providerId }: { providerId: number }): Promise<any[]> => {
-  const response: GenericResponse<any[]> = await API.get(`/driver/provider/${providerId}`);
+export const getAllDrivers = async ({
+  providerId
+}: {
+  providerId: number;
+}): Promise<IAPIDriver[]> => {
+  const response: GenericResponse<IAPIDriver[]> = await API.get(`/driver/provider/${providerId}`);
   if (response.success) return response.data;
   throw response;
 };
@@ -18,9 +22,9 @@ export const getDriverById = async (id: string): Promise<IAPIDriver> => {
 };
 
 export const createDriverForm = (
-  generalData: IFormGeneralDriver,
-  logo: FileObject[],
-  files: DocumentCompleteType[]
+  generalData: IGeneralDriverSubmit,
+  logo?: FileObject[],
+  files?: IUploadRequirementstTableRow[]
 ) => {
   const form = new FormData();
   const body: any = generalData;
@@ -36,30 +40,21 @@ export const createDriverForm = (
       }))
     : undefined;
 
-  const expiration = files.find((f) => !f.expirationDate && f.expiry);
-
-  if (expiration) {
-    throw new Error(`El documento ${expiration.description} debe tener una fecha de vencimiento`);
-  }
-
-  body.files = files;
   form.append("body", JSON.stringify({ ...body, rh: body.rhval as any }));
   logo && form.append("logo", logo[0].file as unknown as File);
 
-  files.forEach((file) => {
-    if (file.file) {
-      form.append(`file-for-${file.id}`, file.file);
-    } else {
-      console.warn(`File with id ${file.id} is undefined.`);
+  files?.forEach((file) => {
+    if (file && file.file) {
+      form.append(file.fileName, file.file);
     }
   });
   return form;
 };
 
 export const updateDriver = async (
-  generalData: IFormGeneralDriver,
+  generalData: IGeneralDriverSubmit,
   logo: FileObject[],
-  files: DocumentCompleteType[]
+  files?: IUploadRequirementstTableRow[]
 ): Promise<CreateDriver> => {
   try {
     const form = createDriverForm(generalData, logo, files);
@@ -77,10 +72,14 @@ export const updateDriver = async (
   }
 };
 
+interface IGeneralData extends IGeneralDriverSubmit {
+  company_id: string;
+}
+
 export const addDriver = async (
-  generalData: IFormGeneralDriver,
-  logo: FileObject[],
-  files: DocumentCompleteType[]
+  generalData: IGeneralData,
+  logo?: FileObject[],
+  files?: IUploadRequirementstTableRow[]
 ): Promise<CreateDriver> => {
   try {
     const form = createDriverForm(generalData, logo, files);

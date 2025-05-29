@@ -1,11 +1,10 @@
 import { SetStateAction, useState } from "react";
-import { useParams } from "next/navigation";
 import { mutate } from "swr";
 import { Table } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Eye } from "phosphor-react";
 
-import { extractSingleParam, formatDate } from "@/utils/utils";
+import { formatDate } from "@/utils/utils";
 
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
@@ -20,11 +19,10 @@ type DocumentsTableProps = {
   // eslint-disable-next-line no-unused-vars
   setSelectedDocumentRows?: (value: SetStateAction<IProviderDocument[]>) => void;
   selectedDocumentRows?: IProviderDocument[];
+  mutateId?: string;
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
-  const params = useParams();
-  const vehicleId = extractSingleParam(params.vehicleId) || "";
   const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const {
@@ -32,11 +30,12 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
     disableEyeButton,
     subjectId,
     setSelectedDocumentRows,
-    selectedDocumentRows
+    selectedDocumentRows,
+    mutateId
   } = props;
 
   const handleMutateSupplierInfo = () => {
-    mutate(vehicleId);
+    mutate(mutateId);
   };
 
   const handleOpenDrawer = () => {
