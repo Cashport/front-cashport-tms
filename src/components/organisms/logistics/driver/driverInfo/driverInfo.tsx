@@ -10,13 +10,14 @@ import {
   updateDriver,
   updateDriverStatus
 } from "@/services/logistics/drivers";
-import { IFormDriver } from "@/types/logistics/schema";
+import { IFormDriver, ISubmitDriver } from "@/types/logistics/schema";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
 import { useRouter } from "next/navigation";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import useSWR from "swr";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
 import { getVehicleType } from "@/services/logistics/vehicle";
+import { ICreateVehicleForm } from "../../vehicles/createVehicle/createVehicle";
 
 interface Props {
   params: {
@@ -44,15 +45,19 @@ export const DriverInfoView = ({ params }: Props) => {
     revalidateOnReconnect: false,
     revalidateOnMount: true
   });
-  console.log("data", data);
-  const handleSubmitForm = async (data: IFormDriver) => {
-    data.general.company_id = params.id;
+
+  const handleSubmitForm = async (data: ISubmitDriver) => {
+    const generalData = {
+      ...data.general,
+      company_id: params.id
+    };
+
     try {
       setIsLoadingSubmit(true);
       const response = await updateDriver(
-        data.general,
+        generalData,
         data.logo as any,
-        data?.files as DocumentCompleteType[]
+        data?.uploadedFiles as ICreateVehicleForm["uploadedFiles"]
       );
       message.success("Conductor editado", 2).then(() => {
         push(`/logistics/providers/${params.id}/driver/${response.id}`);

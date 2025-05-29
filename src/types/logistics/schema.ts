@@ -2,6 +2,7 @@ import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocume
 import { DocumentCompleteType, IGetCertificate } from "./certificate/certificate";
 import { ApiVehicleType } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
 import { IRequirement } from "../transferJourney/ITransferJourney";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
 export interface IListData {
   id: any;
@@ -1214,7 +1215,7 @@ export interface IAPIDriver {
   modified_by: string;
   active: boolean; // originalmente 0 o 1
   subject_id: number | null;
-  documents: any[]; // se puede tipar si se conoce estructura
+  documents: IProviderDocument[];
   features: Ifeature[]; // igual que arriba
   vehicle_type: ApiVehicleType[]; // idem
   status: {
@@ -1225,34 +1226,29 @@ export interface IAPIDriver {
   };
 }
 export interface IFormGeneralDriver {
-  id: number;
-  phone: number;
+  phone: string;
   email: string;
   document_type: number;
   vehicle_type: { label: string; value: number }[];
   document: string;
   license: string;
-  license_category: string;
-  licence_category?: string;
+  license_category: number;
   license_expiration: Date;
   name: string;
   last_name: string;
-  emergency_number: number;
+  emergency_number: string;
   emergency_contact: string;
-  firebaseguid?: string;
-  active: any;
-  created_at: Date;
-  created_by: string;
-  modified_at?: Date | null;
-  modified_by?: string | null;
-  company: string;
-  rh: string;
+  rh: number;
   glasses: any;
   birth_date: Date;
-  photo?: string;
-  company_id?: string;
-  status: IStatus;
   trip_type: { label: string; value: number }[];
+}
+
+export interface IGeneralDriverSubmit extends Omit<IFormGeneralDriver, "vehicle_type"> {
+  license_categorie: string;
+  rhval: string;
+  vehicle_type: number[];
+  documents: IProviderDocument[];
 }
 
 export interface IProviderDocument extends IGetCertificate {
@@ -3264,11 +3260,13 @@ export interface IVehiclesWithDefaults {
   gps_password?: string | null;
 }
 
-export interface IFormDriver {
-  general: IFormGeneralDriver;
+export interface IFormDriver<TGeneral = IFormGeneralDriver> {
+  general: TGeneral;
   logo?: FileObject[];
-  files?: DocumentCompleteType[];
-  images: CustomFile[]; //JCBGRemover
+}
+
+export interface ISubmitDriver extends IFormDriver<IGeneralDriverSubmit> {
+  uploadedFiles?: IUploadRequirementstTableRow[];
 }
 export interface CustomFile extends File {
   url_archive: string;

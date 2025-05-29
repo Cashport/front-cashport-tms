@@ -27,7 +27,6 @@ interface Props {
 export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const [statusForm, setStatusForm] = useState<StatusForm>("review");
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [revalidate, setRevalidate] = useState("1");
   const { push } = useRouter();
 
   const fetcher = async (id: string) => {

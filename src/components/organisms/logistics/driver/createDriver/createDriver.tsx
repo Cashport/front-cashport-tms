@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import "./createDriver.scss";
 import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
 import { addDriver, getTripTypes } from "@/services/logistics/drivers";
-import { IFormDriver } from "@/types/logistics/schema";
+import { IFormDriver, IGeneralDriverSubmit, ISubmitDriver } from "@/types/logistics/schema";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { useState } from "react";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
@@ -25,15 +25,16 @@ export const CreateDriverView = ({ params }: Props) => {
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  const onCreateDriver = async (data: IFormDriver) => {
-    data.general.company_id = params.id;
+  const onCreateDriver = async (data: ISubmitDriver) => {
+    const generalData = {
+      ...data.general,
+      company_id: params.id
+    };
+
     try {
       setIsLoadingSubmit(true);
-      const response = await addDriver(
-        data.general,
-        data.logo as any,
-        data?.files as DocumentCompleteType[]
-      );
+
+      const response = await addDriver(generalData, data.logo, data.uploadedFiles);
       if (response) {
         message.success("Conductor creado", 2).then(() => {
           push(`/logistics/providers/${params.id}/driver`);
