@@ -1214,13 +1214,14 @@ export interface IAPIDriver {
   modified_at: string;
   modified_by: string;
   active: boolean; // originalmente 0 o 1
-  subject_id: number | null;
+  subject_id?: number;
   documents: IProviderDocument[];
   features: Ifeature[]; // igual que arriba
   vehicle_type: ApiVehicleType[]; // idem
   status: {
     id: number;
     name: string;
+    description: string;
     color: string;
     backgroundColor: string;
   };

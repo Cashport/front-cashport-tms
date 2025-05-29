@@ -1,29 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { mutate } from "swr";
 import dayjs from "dayjs";
-// components
-import { Button, Col, Flex, Form, Row, Typography } from "antd";
-import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
-import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
-import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
-import InputPhone from "@/components/atoms/inputs/InputPhone/InputPhone";
-import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
-
-import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
-import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import Link from "next/link";
-//types
-import {
-  IFormDriver,
-  IGeneralDriverSubmit,
-  IProviderDocument,
-  VehicleType
-} from "@/types/logistics/schema";
-import { ICertificateAndDocuments } from "@/types/logistics/certificate/certificate";
-//icons
+import runes from "runes2";
 import { CaretLeft, Sparkle } from "phosphor-react";
+
 //utils
+import { deleteDocumentById } from "@/services/logistics/providers/providers";
 import {
   _onSubmit,
   dataToProjectFormData,
@@ -36,14 +20,36 @@ import {
   glassesOptions,
   licencesOptions
 } from "../formSelectOptions";
-import runes from "runes2";
+
+// components
+import { Button, Col, Flex, Form, message, Row, Typography } from "antd";
+import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
+import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
+import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
+import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
+import InputPhone from "@/components/atoms/inputs/InputPhone/InputPhone";
+import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
+import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
+import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 import ModalUploadRequirements, {
   IUploadRequirementstTableRow
 } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
-
 import ModalConfirmAudit from "./components/ModalConfirmAudit";
+import CustomTag from "@/components/atoms/CustomTag";
+import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
+import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
+import ModalAuditRequirements from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+
+//types
+import {
+  IFormDriver,
+  IGeneralDriverSubmit,
+  IProviderDocument,
+  VehicleType
+} from "@/types/logistics/schema";
 
 //styles
 import "./driverformtab.scss";
@@ -68,14 +74,14 @@ export const DriverFormTab = ({
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
   });
-  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
-
   const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<IProviderDocument[]>([]);
 
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [resetTrigger, setResetTrigger] = useState<boolean>(false);
   const [imageError, setImageError] = useState(false);
+  const [loadingRequest, setLoadingRequest] = useState(false);
 
   const defaultValues =
     statusForm === "create" ? {} : data && dataToProjectFormData(data, vehiclesTypesList || []);
@@ -83,6 +89,7 @@ export const DriverFormTab = ({
     watch,
     control,
     handleSubmit,
+    reset,
     formState: { errors },
     trigger
   } = useForm<IFormDriver>({
@@ -179,6 +186,28 @@ export const DriverFormTab = ({
       selected: 0
     });
 
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
+
+  const handleDeleteDocument = async () => {
+    setLoadingRequest(true);
+    if (selectedDocumentRows?.length) {
+      const ids = selectedDocumentRows.map((row) => row.id);
+      try {
+        await Promise.all(ids.map((id) => deleteDocumentById(data?.subject_id ?? 0, id)));
+        message.success("Documentos eliminados correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedDocumentRows([]);
+        mutate(params.driverId);
+      } catch (error) {
+        message.error("Error al eliminar documentos");
+      }
+    }
+    setLoadingRequest(false);
+  };
+
   return (
     <>
       <Form className="driverForm">
@@ -195,10 +224,12 @@ export const DriverFormTab = ({
           </Link>
           {statusForm !== "create" && (
             <Flex gap={"0.5rem"} align="center">
-              {/* TO DO: Utilizar status de la data  */}
-              {/* <Flex>
-                <CustomTag text={data.driverStatus.description} color={data.driverStatus.color} />
-              </Flex> */}
+              <Flex>
+                <CustomTag
+                  text={data?.status.name || "Sin estado"}
+                  color={data?.status.color || "defaultColor"}
+                />
+              </Flex>
 
               <GenerateActionButton
                 onClick={() => {
@@ -541,14 +572,14 @@ export const DriverFormTab = ({
               </Flex>
             </Col>
             <Col span={24} style={{ marginTop: "1.5rem" }}>
-              {/* {statusForm === "review" && (
+              {statusForm === "review" && (
                 <DocumentsTable
                   currentFiles={currentDocuments}
                   subjectId={data?.subject_id}
                   selectedDocumentRows={selectedDocumentRows}
                   setSelectedDocumentRows={setSelectedDocumentRows}
                 />
-              )} */}
+              )}
               {statusForm === "create" && (
                 <DocumentsTable
                   currentFiles={uploadedFiles.map(
@@ -568,7 +599,6 @@ export const DriverFormTab = ({
                 />
               )}
             </Col>
-            {/* <DocumentsTable selectedFiles={selectedFiles} /> */}
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
@@ -591,8 +621,19 @@ export const DriverFormTab = ({
           )}
         </Flex>
       </Form>
+
+      <ModalGenerateActionProviders
+        isOpen={isModalOpen.selected === 1}
+        onClose={handleCloseModal}
+        handleOpenModal={handleOpenModal}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        resetForm={reset}
+        selectedDocumentRows={selectedDocumentRows}
+      />
+
       <ModalChangeStatus
-        // TO DO: active status from data
+        // TO DO: active status from data, not arriving from backend
         isActiveStatus={true}
         isOpen={isModalOpen.selected === 2}
         onClose={handleCloseModal}
@@ -608,8 +649,8 @@ export const DriverFormTab = ({
         }}
       />
       <ModalConfirmAudit
-        isOpen={isModalConfirmAuditOpen}
-        onClose={() => setIsModalConfirmAuditOpen(false)}
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
         onConfirm={onAuditDriver}
         title="Auditar conductor"
         description={[
@@ -617,6 +658,43 @@ export const DriverFormTab = ({
           "Confirmo que está autorizado para manejar"
         ]}
         tags={trip_type}
+      />
+
+      <ModalAddRequirement
+        isOpen={isModalOpen.selected === 4}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.driverId);
+        }}
+        subjectId={data?.subject_id || 0}
+      />
+
+      <ModalAuditRequirements
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.driverId);
+
+          setSelectedDocumentRows([]);
+        }}
+        selectedRows={selectedDocumentRows}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 6}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteDocument}
+        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
       />
 
       <ModalUploadRequirements

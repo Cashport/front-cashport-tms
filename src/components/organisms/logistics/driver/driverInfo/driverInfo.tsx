@@ -1,23 +1,27 @@
 "use client";
-import { message, Skeleton } from "antd";
 import React, { useCallback, useState } from "react";
-import "../../../../../styles/_variables_logistics.css";
-import "./driverInfo.scss";
-import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
+import { useRouter } from "next/navigation";
+import useSWR from "swr";
+
+import { message, Skeleton } from "antd";
+
+import { ICreateVehicleForm } from "../../vehicles/createVehicle/createVehicle";
+import { getDocumentsByEntityType } from "@/services/logistics/certificates";
+import { getVehicleType } from "@/services/logistics/vehicle";
 import {
   getDriverById,
   getTripTypes,
   updateDriver,
   updateDriverStatus
 } from "@/services/logistics/drivers";
-import { IFormDriver, ISubmitDriver } from "@/types/logistics/schema";
+
+import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
-import { useRouter } from "next/navigation";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-import useSWR from "swr";
-import { getDocumentsByEntityType } from "@/services/logistics/certificates";
-import { getVehicleType } from "@/services/logistics/vehicle";
-import { ICreateVehicleForm } from "../../vehicles/createVehicle/createVehicle";
+
+import { ISubmitDriver } from "@/types/logistics/schema";
+
+import "../../../../../styles/_variables_logistics.css";
+import "./driverInfo.scss";
 
 interface Props {
   params: {
@@ -39,7 +43,7 @@ export const DriverInfoView = ({ params }: Props) => {
     return getDriverById(params.driverId);
   };
 
-  const { data, isLoading, isValidating } = useSWR({ id: params, key: "1" }, fetcher, {
+  const { data, isLoading, isValidating } = useSWR(params.driverId, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
