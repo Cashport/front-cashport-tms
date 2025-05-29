@@ -497,6 +497,7 @@ export const VehicleFormTab = ({
                   subjectId={data?.subject_id}
                   selectedDocumentRows={selectedDocumentRows}
                   setSelectedDocumentRows={setSelectedDocumentRows}
+                  mutateId={params.vehicleId}
                 />
               )}
               {statusForm === "create" && (

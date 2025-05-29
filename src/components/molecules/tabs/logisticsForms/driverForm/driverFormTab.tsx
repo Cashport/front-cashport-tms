@@ -578,6 +578,7 @@ export const DriverFormTab = ({
                   subjectId={data?.subject_id}
                   selectedDocumentRows={selectedDocumentRows}
                   setSelectedDocumentRows={setSelectedDocumentRows}
+                  mutateId={params.driverId}
                 />
               )}
               {statusForm === "create" && (
