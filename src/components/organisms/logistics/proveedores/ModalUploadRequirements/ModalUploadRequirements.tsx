@@ -326,7 +326,15 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                               field.onChange(value); // actualiza requirementType
 
                               const selected = documentsTypesList.find((item) => item.id === value);
+                              const isOptional = selected?.validity?.expiry === true;
+
+                              // Actualiza el nombre del tipo
                               setValue(`rows.${index}.requirementTypeName`, selected?.name || "");
+
+                              // Si el requerimiento es opcional, seteamos expirationDate a undefined
+                              if (isOptional) {
+                                setValue(`rows.${index}.expirationDate`, undefined);
+                              }
                             }}
                           />
                         )}

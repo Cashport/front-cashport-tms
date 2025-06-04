@@ -1232,7 +1232,7 @@ export interface IFormGeneralDriver {
   vehicle_type: { label: string; value: number }[];
   document: string;
   license: string;
-  license_category: number;
+  license_category: number | string;
   license_expiration: Date;
   name: string;
   last_name: string;
