@@ -73,7 +73,7 @@ export const dataToProjectFormData = (
       document_type: data.document_type,
       document: data.document,
       license: data?.licence,
-      license_category: data.licence_category ? Number(data.licence_category) : 0,
+      license_category: data.licence_category ? data.licence_category : "-",
       license_expiration: dayjs.utc(data.licence_expiration) as any,
       name: data.name,
       last_name: data.last_name,
