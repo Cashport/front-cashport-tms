@@ -1238,7 +1238,7 @@ export interface IFormGeneralDriver {
   last_name: string;
   emergency_number: string;
   emergency_contact: string;
-  rh: number;
+  rh: string;
   glasses: any;
   birth_date: Date;
   trip_type: { label: string; value: number }[];

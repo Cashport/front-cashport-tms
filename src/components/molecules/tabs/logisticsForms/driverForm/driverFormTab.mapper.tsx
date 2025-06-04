@@ -80,7 +80,7 @@ export const dataToProjectFormData = (
       emergency_number: data.emergency_number ? String(data.emergency_number) : "",
       emergency_contact: data.emergency_contact,
 
-      rh: Number(data.rh),
+      rh: data.rh ? data.rh : "-",
       glasses: data.glasses,
       birth_date: dayjs(data?.birth_date) as any,
       vehicle_type: vehicleTypeArray,
