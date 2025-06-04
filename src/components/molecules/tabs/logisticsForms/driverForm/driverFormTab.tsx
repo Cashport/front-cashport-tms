@@ -572,7 +572,7 @@ export const DriverFormTab = ({
               </Flex>
             </Col>
             <Col span={24} style={{ marginTop: "1.5rem" }}>
-              {statusForm === "review" && (
+              {(statusForm === "review" || statusForm === "edit") && (
                 <DocumentsTable
                   currentFiles={currentDocuments}
                   subjectId={data?.subject_id}
