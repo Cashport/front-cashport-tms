@@ -10,6 +10,7 @@ interface PropsLabelCollapseInvoice {
   color?: string;
   removeIcons?: boolean;
   quantityText?: string;
+  customQuantityIcon?: React.ReactNode;
 }
 
 const randomColors = [
@@ -29,7 +30,8 @@ const LabelCollapse = ({
   quantity,
   color,
   removeIcons,
-  quantityText
+  quantityText,
+  customQuantityIcon
 }: PropsLabelCollapseInvoice) => {
   const randomColor = randomColors[Math.floor(Math.random() * randomColors.length)];
 
@@ -49,9 +51,11 @@ const LabelCollapse = ({
       )}
       {!!quantity && (
         <Flex className={styles.labelCollapse__quantity}>
-          {removeIcons ? null : (
-            <Files size={16} className={styles.labelCollapse__quantity__icon} />
-          )}
+          {removeIcons
+            ? null
+            : customQuantityIcon ?? (
+                <Files size={16} className={styles.labelCollapse__quantity__icon} />
+              )}
           {!quantityText ? null : <Flex>{quantityText}</Flex>}
           <h5 className={styles.labelCollapse__quantity__title}>{quantity}</h5>
         </Flex>

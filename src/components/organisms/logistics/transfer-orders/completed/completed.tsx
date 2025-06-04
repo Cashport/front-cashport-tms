@@ -10,6 +10,7 @@ import { ITransferRequestResponse } from "@/types/transferRequest/ITransferReque
 import { getFinishedTransferRequest } from "@/services/logistics/transfer-request";
 import CustomCollapse from "@/components/ui/custom-collapse/CustomCollapse";
 import { useSearchContext } from "@/context/SearchContext";
+import LabelCollapse from "@/components/ui/label-collapse";
 
 interface ICompletedProps {
   handleCheckAll: (row: DataTypeForTransferOrderTable, isChecked: boolean) => void;
@@ -23,20 +24,16 @@ export const Completed: FC<ICompletedProps> = ({ allSelectedRows, handleCheckAll
   const [isLoadingPagination, setIsLoadingPagination] = useState<boolean>(false);
   const [transferRequest, setTransferRequest] = useState<ITransferRequestResponse[]>([]);
 
-  const getTitile = (stateId: string, number: number) => {
+  const getTitile = (stateId: string, number: number, item: ITransferRequestResponse) => {
     const getState = TransferOrdersState.find((f) => f.id === stateId);
     return (
-      <div className={styles.mainTitle}>
-        <div className={styles.titleContainer}>
-          <div className={styles.textContainer} style={{ backgroundColor: getState?.bgColor }}>
-            {getState?.name}
-          </div>
-          <div className={`${styles.textContainer} ${styles.subTextContainer}`}>
-            <span>TR</span>
-            <span className={styles.number}>{number}</span>
-          </div>
-        </div>
-      </div>
+      <LabelCollapse
+        status={getState?.name ?? ""}
+        color={getState?.bgColor}
+        total={item.total_value}
+        quantity={item.total_count}
+        customQuantityIcon={<p className={styles.labelText}>TR</p>}
+      />
     );
   };
 
@@ -105,7 +102,7 @@ export const Completed: FC<ICompletedProps> = ({ allSelectedRows, handleCheckAll
       };
       return {
         key: item.statusId,
-        label: getTitile(item.statusId, item.page.totalRows),
+        label: getTitile(item.statusId, item.page.totalRows, item),
         children: (
           <TransferOrdersTable
             showColumn={false}
