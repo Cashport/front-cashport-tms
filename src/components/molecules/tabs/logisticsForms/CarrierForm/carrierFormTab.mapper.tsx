@@ -1,21 +1,16 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
-import {
-  IAPICarrier,
-  ICarrier,
-  ICertificates,
-  IFormCarrier,
-  ITripType
-} from "@/types/logistics/schema";
+import { IAPICarrier, ICertificates, IFormCarrier, ITripType } from "@/types/logistics/schema";
 import { IFormProject } from "@/types/projects/IFormProject";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
 import { UseFormReset, UseFormSetValue } from "react-hook-form";
 import { StatusForm } from "../driverForm/driverFormTab.mapper";
+import { ICarrierById } from "@/services/logistics/carrier";
 
 export interface CarrierFormTabProps {
   idProjectForm?: string;
-  data?: IAPICarrier[];
+  data?: ICarrierById;
   disabled?: boolean;
   onEditProject?: () => void;
   onSubmitForm?: (data: any) => void;
@@ -30,34 +25,36 @@ export interface CarrierFormTabProps {
   isLoadingSubmit: boolean;
 }
 
-export type CarrierData = ICarrier & { documents?: ICertificates[] };
+export type CarrierData = IFormCarrier & { documents?: ICertificates[] };
 
-export const dataToProjectFormData = (data: IAPICarrier): IFormCarrier => {
+export const dataToProjectFormData = (data: ICarrierById): IFormCarrier => {
+  console.log("data dataToProjectFormData ", data);
   return {
-    general: {
-      id: data.id,
-      description: data.description,
-      nit: data.nit,
-      icon: data.icon,
-      active: data.active,
-      vehicles: data.vehicles,
-      drivers: data.drivers,
-      carrier_type: data.carrier_type,
-      created_at: data.created_at,
-      created_by: data.created_by,
-      photo: data.photo,
-      trip_type:
-        data.features?.map((feature) => ({
-          label: feature.description,
-          value: feature.id
-        })) ?? [],
-      status: data.status
+    id: data.id,
+    description: data.description,
+    nit: data.nit,
+    icon: data.icon,
+    active: data.active,
+    vehicles: "",
+    drivers: "",
+    carrier_type: "",
+    created_at: new Date(data.created_at),
+    created_by: data.created_by,
+    photo: "",
+    trip_type:
+      data.features?.map((feature) => ({
+        label: feature.description,
+        value: feature.id
+      })) ?? [],
+    status: {
+      description: data.status.name,
+      color: data.status.color
     }
   };
 };
 
 export const _onSubmit = (
-  data: any,
+  data: IFormCarrier,
   setloading: (value: SetStateAction<boolean>) => void,
   setImageError: (value: SetStateAction<boolean>) => void,
   imageFile: FileObject[] | undefined,

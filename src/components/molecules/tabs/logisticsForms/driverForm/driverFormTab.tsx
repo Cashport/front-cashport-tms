@@ -1,27 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { mutate } from "swr";
 import dayjs from "dayjs";
-// components
-import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Typography } from "antd";
-import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
-import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
-import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
-import InputPhone from "@/components/atoms/inputs/InputPhone/InputPhone";
-import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
-import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
-
-import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
-import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
-import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
-import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
 import Link from "next/link";
-//types
-import { IFormDriver, VehicleType } from "@/types/logistics/schema";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
-//icons
-import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import runes from "runes2";
+import { CaretLeft, Sparkle } from "phosphor-react";
+
 //utils
+import { deleteDocumentById } from "@/services/logistics/providers/providers";
 import {
   _onSubmit,
   dataToProjectFormData,
@@ -34,16 +20,39 @@ import {
   glassesOptions,
   licencesOptions
 } from "../formSelectOptions";
-import runes from "runes2";
-import CustomTag from "@/components/atoms/CustomTag";
-import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
+// components
+import { Button, Col, Flex, Form, message, Row, Typography } from "antd";
+import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
+import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
+import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
+import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
+import InputPhone from "@/components/atoms/inputs/InputPhone/InputPhone";
+import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
+import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
+import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
+import ModalUploadRequirements, {
+  IUploadRequirementstTableRow
+} from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 import ModalConfirmAudit from "./components/ModalConfirmAudit";
+import CustomTag from "@/components/atoms/CustomTag";
+import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
+import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
+import ModalAuditRequirements from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+
+//types
+import {
+  IFormDriver,
+  IGeneralDriverSubmit,
+  IProviderDocument,
+  VehicleType
+} from "@/types/logistics/schema";
 
 //styles
 import "./driverformtab.scss";
-import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 
 const { Title, Text } = Typography;
 
@@ -62,21 +71,22 @@ export const DriverFormTab = ({
   tripTypes,
   onAuditDriver = async () => {}
 }: DriverFormTabProps) => {
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
-  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
+  const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<IProviderDocument[]>([]);
 
   const [imageFile, setImageFile] = useState<any | undefined>(undefined);
   const [resetTrigger, setResetTrigger] = useState<boolean>(false);
   const [imageError, setImageError] = useState(false);
-
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
 
   const defaultValues =
-    statusForm === "create" ? {} : dataToProjectFormData(data, vehiclesTypesList || []);
+    statusForm === "create" ? {} : data && dataToProjectFormData(data, vehiclesTypesList || []);
   const {
     watch,
-    getValues,
     control,
     handleSubmit,
     reset,
@@ -89,10 +99,14 @@ export const DriverFormTab = ({
   });
 
   const phoneValue = watch("general.phone");
-  const driverStatus = watch("general.status");
   const trip_type = watch("general.trip_type");
 
-  console.log("form general", getValues("general"));
+  useEffect(() => {
+    if (data) {
+      setCurrentDocuments(data.documents);
+    }
+  }, [data]);
+
   const emergencyContactNumberValue = watch("general.emergency_number");
 
   /*archivos*/
@@ -105,65 +119,6 @@ export const DriverFormTab = ({
     }
   }, [phoneValue, emergencyContactNumberValue]);
 
-  const [files, setFiles] = useState<(FileObject & { aditionalData?: any })[]>([]);
-
-  useEffect(() => {
-    if (Array.isArray(documentsTypesList)) {
-      const isFirstLoad = data?.documents?.length && selectedFiles.length === 0;
-      if (isFirstLoad) {
-        const docsWithLink =
-          documentsTypesList
-            ?.filter((f) => data.documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
-        setSelectedFiles(docsWithLink);
-      } else {
-        const documentsFiltered = documentsTypesList?.filter(
-          (f) => !f?.optional || selectedFiles?.find((f2) => f2.id === f.id)
-        );
-        const docsWithFile = documentsFiltered.map((f) => {
-          const prevFile = selectedFiles.find((f2) => f2.id === f.id);
-          return {
-            ...f,
-            link: prevFile?.link || undefined,
-            file: prevFile?.link ? undefined : files.find((f2) => f2.aditionalData === f.id)?.file,
-            expirationDate: prevFile?.expirationDate
-          };
-        });
-        if (docsWithFile?.length) {
-          setSelectedFiles([...docsWithFile]);
-        } else {
-          setSelectedFiles([]);
-        }
-      }
-    }
-  }, [files, documentsTypesList]);
-
-  useEffect(() => {
-    if (statusForm === "review") {
-      if (Array.isArray(documentsTypesList)) {
-        const docsWithLink =
-          documentsTypesList
-            ?.filter((f) => data?.documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
-        setSelectedFiles(docsWithLink);
-      }
-    }
-  }, [statusForm]);
-
   const convertToSelectOptions = (vehicleTypes: VehicleType[]) => {
     if (!Array.isArray(vehicleTypes)) return [];
     return vehicleTypes?.map((vehicleType) => ({
@@ -172,96 +127,52 @@ export const DriverFormTab = ({
     }));
   };
 
-  const handleChangeExpirationDate = (index: number, value: any) => {
-    setSelectedFiles((prevState: any[]) => {
-      const updatedFiles = [...prevState];
-      updatedFiles[index].expirationDate = value;
-      return updatedFiles;
-    });
-  };
-
-  const handleChange = (value: string[]) => {
-    const sf = documentsTypesList?.filter((file) => value.includes(file.id.toString()));
-    if (sf) {
-      setSelectedFiles((prevState) => {
-        return sf.map((file) => {
-          const prevFile = prevState.find((f) => f.id === file.id);
-          return {
-            ...file,
-            file: prevFile?.link ? undefined : prevFile?.file,
-            link: prevFile?.link || undefined,
-            expirationDate: prevFile?.expirationDate
-          };
-        });
-      });
-    }
-  };
-
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: IFormDriver) => {
     setResetTrigger(false);
-    data.general.license_categorie = licencesOptions.find(
-      (item) =>
-        item.id === data.general.license_category || item.value === data.general.license_category
-    )?.value;
-    data.general.rhval = bloodTypesOptions.find(
-      (item) => item.id === data.general.rh || item.value === data.general.rh
-    )?.value;
-    data.general.vehicle_type = data.general.vehicle_type.map((v: any) => v.value);
+    const documents = uploadedFiles.map((doc, index) => {
+      const document: {
+        documentTypeId: number;
+        fieldName: string;
+        expiryDate?: string;
+      } = {
+        documentTypeId: doc.requirementType!,
+        fieldName: doc.fileName || `documento-${index + 1}`
+      };
+
+      if (doc.expirationDate) {
+        document.expiryDate = doc.expirationDate;
+      }
+
+      return document;
+    });
+
+    const dataToSubmit: IFormDriver<IGeneralDriverSubmit> = {
+      ...data,
+      general: {
+        ...data.general,
+        license_categorie:
+          licencesOptions.find(
+            (item) =>
+              item.id === data.general.license_category ||
+              String(item.value) === String(data.general.license_category)
+          )?.value ?? "",
+        rhval:
+          bloodTypesOptions.find(
+            (item) =>
+              String(item.id) === String(data.general.rh) ||
+              String(item.value) === String(data.general.rh)
+          )?.value ?? "",
+        vehicle_type: data.general.vehicle_type.map((v: any) => v.value),
+        documents: documents as unknown as IProviderDocument[]
+      }
+    };
+
     _onSubmit(
-      data,
-      selectedFiles,
+      dataToSubmit,
+      uploadedFiles,
       imageFile ? [{ docReference: "imagen", file: imageFile }] : undefined,
       onSubmitForm
     );
-  };
-  const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <ButtonGenerateAction
-          icon={<Pencil size={"1.5rem"} />}
-          title={statusForm === "review" ? "Editar" : "Cancelar edición"}
-          hideArrow
-          onClick={() => {
-            if (statusForm === "review") {
-              handleFormState("edit");
-            } else {
-              handleFormState("review");
-              setResetTrigger(true);
-              setImageFile(undefined);
-              reset();
-            }
-          }}
-        />
-      )
-    },
-    {
-      key: "2",
-      label: (
-        <ButtonGenerateAction
-          icon={<ArrowsClockwise size={"1.5rem"} />}
-          title="Cambiar estado"
-          onClick={() => setIsOpenModal(true)}
-          hideArrow
-        />
-      )
-    },
-    {
-      key: "3",
-      label: (
-        <ButtonGenerateAction
-          icon={<CheckCircle size={"1.5rem"} />}
-          title="Auditar"
-          disabled={statusForm !== "review"}
-          hideArrow
-          onClick={() => setIsModalConfirmAuditOpen(true)}
-        />
-      )
-    }
-  ];
-  const menuStyle: React.CSSProperties = {
-    backgroundColor: "white",
-    boxShadow: "none"
   };
 
   useEffect(() => {
@@ -269,6 +180,33 @@ export const DriverFormTab = ({
       setImageError(false); // Limpia el error si se carga una imagen
     }
   }, [imageFile]);
+
+  const handleCloseModal = () =>
+    setIsModalOpen({
+      selected: 0
+    });
+
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
+
+  const handleDeleteDocument = async () => {
+    setLoadingRequest(true);
+    if (selectedDocumentRows?.length) {
+      const ids = selectedDocumentRows.map((row) => row.id);
+      try {
+        await Promise.all(ids.map((id) => deleteDocumentById(data?.subject_id ?? 0, id)));
+        message.success("Documentos eliminados correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedDocumentRows([]);
+        mutate(params.driverId);
+      } catch (error) {
+        message.error("Error al eliminar documentos");
+      }
+    }
+    setLoadingRequest(false);
+  };
 
   return (
     <>
@@ -287,29 +225,17 @@ export const DriverFormTab = ({
           {statusForm !== "create" && (
             <Flex gap={"0.5rem"} align="center">
               <Flex>
-                <CustomTag text={driverStatus.description} color={driverStatus.color} />
-              </Flex>
-              <Dropdown
-                menu={{ items }}
-                trigger={["click"]}
-                dropdownRender={(menu) => (
-                  <div>
-                    {React.cloneElement(
-                      menu as React.ReactElement<{
-                        style: React.CSSProperties;
-                      }>,
-                      { style: menuStyle }
-                    )}
-                  </div>
-                )}
-              >
-                <GenerateActionButton
-                  onClick={() => {
-                    console.log("click");
-                  }}
-                  disabled={statusForm === "review"}
+                <CustomTag
+                  text={data?.status.name || "Sin estado"}
+                  color={data?.status.color || "defaultColor"}
                 />
-              </Dropdown>
+              </Flex>
+
+              <GenerateActionButton
+                onClick={() => {
+                  setIsModalOpen({ selected: 1 });
+                }}
+              />
             </Flex>
           )}
         </Flex>
@@ -324,7 +250,6 @@ export const DriverFormTab = ({
               <UploadImg
                 disabled={statusForm === "review"}
                 imgDefault={
-                  watch("general.photo") ??
                   "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"
                 }
                 setImgFile={setImageFile}
@@ -622,20 +547,59 @@ export const DriverFormTab = ({
           <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             {" "}
             {/* Fila Documentos */}
-            <Col span={8}>
-              <Title className="title" level={4}>
-                Documentos
-              </Title>
+            <Col span={24}>
+              <Flex justify="space-between" align="center">
+                <Title className="title" level={4}>
+                  Documentos
+                </Title>
+
+                {statusForm === "create" && (
+                  <Button className="iaButton" onClick={() => setIsModalOpen({ selected: -1 })}>
+                    <Sparkle size={14} color="#5b21b6" weight="fill" />
+                    <span className="textNormal">
+                      Carga documentos con{" "}
+                      <span
+                        className="cashportIATextGradient"
+                        style={{
+                          fontWeight: 500
+                        }}
+                      >
+                        CashportAI
+                      </span>
+                    </span>
+                  </Button>
+                )}
+              </Flex>
             </Col>
-            <Col span={8} offset={8} style={{ display: "flex", justifyContent: "flex-end" }}>
-              {(statusForm === "create" || statusForm === "edit") && (
-                <LoadDocumentsButton
-                  text="Cargar documentos"
-                  onClick={() => setIsOpenModalDocuments(true)}
+            <Col span={24} style={{ marginTop: "1.5rem" }}>
+              {statusForm === "review" && (
+                <DocumentsTable
+                  currentFiles={currentDocuments}
+                  subjectId={data?.subject_id}
+                  selectedDocumentRows={selectedDocumentRows}
+                  setSelectedDocumentRows={setSelectedDocumentRows}
+                  mutateId={params.driverId}
+                />
+              )}
+              {statusForm === "create" && (
+                <DocumentsTable
+                  currentFiles={uploadedFiles.map(
+                    (doc) =>
+                      ({
+                        name: doc.fileName,
+                        description: doc.requirementTypeName,
+                        createdAt: undefined,
+                        expiryDate: doc.expirationDate
+                          ? dayjs(doc.expirationDate).format("YYYY-MM-DD")
+                          : undefined,
+                        isMandatory: undefined,
+                        statusId: "c02b3475-f59a-4222-bb28-9dbb51cf02c1"
+                      }) as any
+                  )}
+                  disableEyeButton
                 />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
@@ -644,7 +608,7 @@ export const DriverFormTab = ({
                 disabled={isLoadingSubmit}
                 text={validationButtonText(statusForm)}
                 onClick={async () => {
-                  const hasPhoto = !!imageFile || !!getValues("general.photo");
+                  const hasPhoto = !!imageFile;
                   if (!hasPhoto) {
                     setImageError(true);
                   }
@@ -658,24 +622,36 @@ export const DriverFormTab = ({
           )}
         </Flex>
       </Form>
+
+      <ModalGenerateActionProviders
+        isOpen={isModalOpen.selected === 1}
+        onClose={handleCloseModal}
+        handleOpenModal={handleOpenModal}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        resetForm={reset}
+        selectedDocumentRows={selectedDocumentRows}
+      />
+
       <ModalChangeStatus
-        isActiveStatus={watch("general.active")}
-        isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
+        // TO DO: active status from data, not arriving from backend
+        isActiveStatus={true}
+        isOpen={isModalOpen.selected === 2}
+        onClose={handleCloseModal}
         onActive={async () => {
           await onActiveProject();
-          setIsOpenModal(false);
+          setIsModalOpen({ selected: 0 });
           handleFormState("review");
         }}
         onDesactivate={async () => {
           await onDesactivateProject();
-          setIsOpenModal(false);
+          setIsModalOpen({ selected: 0 });
           handleFormState("review");
         }}
       />
       <ModalConfirmAudit
-        isOpen={isModalConfirmAuditOpen}
-        onClose={() => setIsModalConfirmAuditOpen(false)}
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
         onConfirm={onAuditDriver}
         title="Auditar conductor"
         description={[
@@ -684,16 +660,51 @@ export const DriverFormTab = ({
         ]}
         tags={trip_type}
       />
-      <ModalDocuments
-        isOpen={isOpenModalDocuments}
-        mockFiles={selectedFiles}
-        setFiles={setFiles}
-        documentsType={documentsTypesList}
-        isLoadingDocuments={false}
-        onClose={() => setIsOpenModalDocuments(false)}
-        handleChange={handleChange}
-        handleChangeExpirationDate={handleChangeExpirationDate}
-        setSelectedFiles={setSelectedFiles}
+
+      <ModalAddRequirement
+        isOpen={isModalOpen.selected === 4}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.driverId);
+        }}
+        subjectId={data?.subject_id || 0}
+      />
+
+      <ModalAuditRequirements
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.driverId);
+
+          setSelectedDocumentRows([]);
+        }}
+        selectedRows={selectedDocumentRows}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 6}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteDocument}
+        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
+      />
+
+      <ModalUploadRequirements
+        isOpen={isModalOpen.selected === -1}
+        onClose={handleCloseModal}
+        documentsTypesList={documentsTypesList}
+        onUpload={(data) => {
+          setUploadedFiles((prev) => [...prev, ...data.rows]);
+        }}
       />
     </>
   );

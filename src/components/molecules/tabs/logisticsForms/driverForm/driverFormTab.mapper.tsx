@@ -1,10 +1,12 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
-import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import { IGetCertificate } from "@/types/logistics/certificate/certificate";
 import {
   IAPIDriver,
   ICertificates,
   IFormDriver,
+  IGeneralDriverSubmit,
+  ISubmitDriver,
   ITripType,
   VehicleType
 } from "@/types/logistics/schema";
@@ -13,15 +15,17 @@ import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { UseFormSetValue } from "react-hook-form";
 import utc from "dayjs/plugin/utc";
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
 dayjs.extend(utc);
 
 export type StatusForm = "review" | "create" | "edit";
 export interface DriverFormTabProps {
   idProjectForm?: string;
-  data?: DriverData;
+  data?: IAPIDriver;
   disabled?: boolean;
   onEditProject?: () => void;
+  // eslint-disable-next-line no-unused-vars
   onSubmitForm?: (data: any) => void;
   onActiveProject?: () => Promise<void>;
   onDesactivateProject?: () => Promise<void>;
@@ -31,8 +35,9 @@ export interface DriverFormTabProps {
     id: string;
     driverId: string;
   };
+  // eslint-disable-next-line no-unused-vars
   handleFormState?: (newFormState: StatusForm) => void;
-  documentsTypesList: CertificateType[];
+  documentsTypesList: IGetCertificate[];
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
   tripTypes: ITripType[];
@@ -43,7 +48,7 @@ export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICert
 export type ApiVehicleType = { id_vehicle_type: number };
 
 export const dataToProjectFormData = (
-  data: any,
+  data: IAPIDriver,
   vehiclesTypesData: VehicleType[] | undefined
 ): IFormDriver => {
   function createVehicleTypeArray(
@@ -62,30 +67,23 @@ export const dataToProjectFormData = (
 
   const vehicleTypeArray = createVehicleTypeArray(data.vehicle_type, vehiclesTypesData);
   return {
-    images: [],
     general: {
-      id: data.id,
       phone: data.phone,
       email: data.email,
       document_type: data.document_type,
       document: data.document,
-      license: data?.licence || data.license,
-      license_category: data.licence_category || "",
-      license_expiration: dayjs.utc(data.license_expiration || data.licence_expiration) as any,
+      license: data?.licence,
+      license_category: data.licence_category ? Number(data.licence_category) : 0,
+      license_expiration: dayjs.utc(data.licence_expiration) as any,
       name: data.name,
       last_name: data.last_name,
-      emergency_number: data.emergency_number,
+      emergency_number: data.emergency_number ? String(data.emergency_number) : "",
       emergency_contact: data.emergency_contact,
-      active: data.active,
-      created_at: data.created_at,
-      created_by: data.created_by,
-      company: data.company,
-      rh: data.rh,
+
+      rh: Number(data.rh),
       glasses: data.glasses,
       birth_date: dayjs(data?.birth_date) as any,
-      photo: data.photo,
       vehicle_type: vehicleTypeArray,
-      status: data.status,
       trip_type:
         data.features?.map((feature: any) => ({
           label: feature.description,
@@ -96,13 +94,14 @@ export const dataToProjectFormData = (
 };
 
 export const _onSubmit = (
-  data: any,
-  files: DocumentCompleteType[],
+  data: IFormDriver<IGeneralDriverSubmit>,
+  uploadedFiles: IUploadRequirementstTableRow[],
   imageFile: FileObject[] | undefined,
-  onSubmitForm: (data: any) => void
+  // eslint-disable-next-line no-unused-vars
+  onSubmitForm: (data: ISubmitDriver) => void
 ) => {
   try {
-    onSubmitForm({ ...data, logo: imageFile, files });
+    onSubmitForm({ ...data, logo: imageFile, uploadedFiles });
   } catch (error) {
     console.warn({ error });
   }

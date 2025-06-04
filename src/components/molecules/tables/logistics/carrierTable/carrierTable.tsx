@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Button, Flex, message, Table } from "antd";
 import type { TableProps } from "antd";
-import { DotsThree, Eye, Triangle } from "phosphor-react";
+import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
 import "./carrierTable.scss";
 import UiSearchInput from "@/components/ui/search-input";
 import { ICarrier } from "@/types/logistics/schema";
-import { getAllCarriers } from "@/services/logistics/carrier";
+import { getAllCarriers, IProvider } from "@/services/logistics/carrier";
 import useSWR from "swr";
 import CustomTag from "@/components/atoms/CustomTag";
 import Link from "next/link";
-
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
 export const CarrierTable = () => {
   const [page, setPage] = useState(1);
@@ -56,7 +56,7 @@ export const CarrierTable = () => {
     setDatasource(data);
   }, [carriers, search]);
 
-  const columns: TableProps<ICarrier>["columns"] = [
+  const columns: TableProps<IProvider>["columns"] = [
     {
       title: "NIT",
       dataIndex: "nit",
@@ -90,7 +90,7 @@ export const CarrierTable = () => {
       render: (_, { status }) => {
         return (
           <Flex>
-            <CustomTag text={status.description} color={status.color} />
+            <CustomTag text={status.name} color={status.color} />
           </Flex>
         );
       }
@@ -101,11 +101,8 @@ export const CarrierTable = () => {
       width: "54px",
       dataIndex: "",
       render: (_, { id }) => (
-        <Link href={`/logistics/providers/${id}`} >
-          <Button
-            className="icon-detail"
-            icon={<Eye size={20} />}
-          />
+        <Link href={`/logistics/providers/${id}`}>
+          <Button className="icon-detail" icon={<Eye size={20} />} />
         </Link>
       )
     }
@@ -128,6 +125,13 @@ export const CarrierTable = () => {
             icon={<DotsThree size={"1.5rem"} />}
           />
         </Flex>
+        <div style={{ height: "48px" }}>
+          <Link href="/logistics/providers/provider">
+            <PrincipalButton customStyles={{ height: "100%" }}>
+              Nuevo Proveedor <Plus size={16} />
+            </PrincipalButton>
+          </Link>
+        </div>
       </Flex>
       <Table
         scroll={{ y: "61dvh", x: undefined }}

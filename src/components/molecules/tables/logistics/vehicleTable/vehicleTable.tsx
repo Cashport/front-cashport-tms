@@ -78,10 +78,10 @@ export const VehicleTable = ({ params: { id } }: Props) => {
       key: "status",
       dataIndex: "status",
       width: "200px",
-      render: (_, { status }) => {
+      render: (status) => {
         return (
           <Flex>
-            <CustomTag text={status.description} color={status.color} />
+            <CustomTag text={status.name} color={status.color} />
           </Flex>
         );
       }

@@ -1,12 +1,12 @@
 import { GenericResponse } from "@/types/global/IGlobal";
-import { CertificateType } from "@/types/logistics/certificate/certificate";
+import { IGetCertificate } from "@/types/logistics/certificate/certificate";
 import { API } from "@/utils/api/api";
 
 export const getDocumentsByEntityType = async (
   entityType: string = "1"
-): Promise<CertificateType[]> => {
+): Promise<IGetCertificate[]> => {
   try {
-    const response: GenericResponse<CertificateType[]> = await API.get(
+    const response: GenericResponse<IGetCertificate[]> = await API.get(
       `/certificate/documentsentity/${entityType}`
     );
     return response.data;

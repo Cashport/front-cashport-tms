@@ -13,7 +13,6 @@
         font-style: normal;
         line-height: normal;
     }
-   
 
     .textError {
         color: red;
@@ -51,7 +50,8 @@
                 font-weight: 600;
                 font-style: normal;
                 line-height: normal;
-            }}
+            }
+        }
         .buttonGoBack {
             justify-content: flex-start;
             color: #141414;
@@ -72,7 +72,7 @@
         border-radius: 8px;
         background: #f7f7f7;
     }
-    
+
     .buttonAction {
         color: #141414;
         display: flex;
@@ -91,8 +91,6 @@
         }
         h2,
         h3,
-
-
         h5 {
             color: $gray;
         }
@@ -132,8 +130,8 @@
             .ant-color-picker-trigger-text {
                 color: #141414;
             }
-            .Controller{
-                .selectDocument{
+            .Controller {
+                .selectDocument {
                     padding: 0.7rem;
                 }
             }
@@ -171,9 +169,35 @@
             border-radius: 0.25rem;
         }
     }
+
+    .iaButton {
+        border-radius: 42px;
+        height: 42px;
+        background-color: $light-blue;
+        border-color: #f0e7ff !important;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: none;
+
+        &:hover {
+            background-color: $light-blue !important;
+            border-color: #af90e0 !important;
+        }
+
+        .textNormal {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #5b21b6;
+            line-height: 16px;
+            pointer-events: none;
+        }
+    }
 }
 
-.btnagregarpsl{
+.btnagregarpsl {
     padding: 8px;
     border: none;
     border-radius: 5px;
@@ -189,7 +213,7 @@
         font-weight: 600;
         font-style: normal;
         line-height: normal;
-        color:#909090
+        color: #909090;
     }
 }
 
@@ -205,4 +229,3 @@
         color: $secondary-gray;
     }
 }
-
