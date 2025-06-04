@@ -12,6 +12,8 @@ import DrawerComponent from "@/components/organisms/logistics/proveedores/Drawer
 
 import { IProviderDocument } from "@/types/logistics/schema";
 
+import "./documentsTable.scss";
+
 type DocumentsTableProps = {
   currentFiles: IProviderDocument[];
   disableEyeButton?: boolean;
@@ -91,13 +93,15 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
         if (isMandatory === undefined) return "-";
         return <p>{isMandatory ? "Sí" : "No"}</p>;
       },
-      width: 113
+      width: 113,
+      align: "center"
     },
     {
       title: "Estado",
       dataIndex: "statusId",
       key: "statusId",
-      render: (statusId: string) => <BadgeDocumentStatus statusId={statusId} />
+      render: (statusId: string) => <BadgeDocumentStatus statusId={statusId} />,
+      className: "status-column"
     },
     {
       title: "",
@@ -122,6 +126,7 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
   return (
     <>
       <Table
+        className="documentsTable"
         scroll={{ x: "max-content" }}
         columns={tableColumns}
         pagination={false}
