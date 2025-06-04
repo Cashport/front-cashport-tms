@@ -69,6 +69,15 @@ export const STATUS = {
     PENDIENTE: "5bffe76c-2707-4088-bdff-1ae66701874b",
     ACEPTADA: "81600787-0837-4d61-ae85-730642c52be0",
     RECHAZADA: "2ff3d7bd-73c5-4d62-bce9-6fb163098f8f"
+  },
+  DOCUMENTS: {
+    NO_CLASIFICADA: "a88b6d87-42f2-45f1-b45b-562ef43a3d19",
+    EN_REVISION: "532d6b7f-03da-4d22-9c28-2ef69590608f",
+    RECHAZADO: "5081de05-745d-449c-aff5-086e0d8b47a0",
+    APROBADO_IA: "ca007d5c-6102-4de2-87b1-7150fb5d31a7",
+    RECHAZADO_IA: "cdc3af46-5ba3-416b-bc76-0aa825efb1aa",
+    PENDIENTE: "c02b3475-f59a-4222-bb28-9dbb51cf02c1",
+    APROBADO: "dcf4e68b-11cb-4352-8ea7-f6356fa98db9"
   }
 };
 

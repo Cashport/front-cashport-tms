@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/es"; // Importar el idioma español
 
 import { updateTripTrackingStatus } from "@/services/logistics/tracking";
-import { TransferOrdersState } from "@/utils/constants/transferOrdersState";
+import { TransferOrdersTripState } from "@/utils/constants/transferOrdersState";
 import { fetcher } from "@/utils/api/api";
 import { formatMoney } from "@/utils/utils";
 
@@ -34,6 +34,7 @@ interface InvoiceDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   idTR: number;
+  refetchNovelty: () => void;
 }
 export const TrackingStepState = [
   {
@@ -56,7 +57,12 @@ export const TrackingStepState = [
   }
 ];
 
-const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idTR }) => {
+const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({
+  isOpen,
+  onClose,
+  idTR,
+  refetchNovelty
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeKey, setActiveKey] = useState<string>("1");
   const [isModalChangeStatus, setisModalChangeStatus] = useState(false);
@@ -102,11 +108,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
     };
     setIsLoadingChangeStatus(true);
     try {
-      const response = await updateTripTrackingStatus(finalData);
-      if (response) {
-        message.success(`Cambio de estado realizado correctamente`, 3);
-        await mutate(undefined, { revalidate: true });
-      }
+      await updateTripTrackingStatus(finalData);
+
+      message.success(`Cambio de estado realizado correctamente`, 3);
+      await mutate(undefined, { revalidate: true });
+      refetchNovelty();
     } catch (error: any) {
       message.error(error?.response?.data?.message || "Cambio de estado no realizado", 3);
     } finally {
@@ -116,9 +122,11 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
   };
 
   const getStateDropdown = (stateId: string) => {
-    let getState = TransferOrdersState.find((f) => f.id === stateId);
+    let getState = TransferOrdersTripState.find((f) => f.id === stateId);
     if (!getState) {
-      getState = TransferOrdersState.find((f) => f.id === "d33e062f-51a5-457e-946e-a45cbbffbf95");
+      getState = TransferOrdersTripState.find(
+        (f) => f.id === "d33e062f-51a5-457e-946e-a45cbbffbf95"
+      );
     }
 
     return (
@@ -252,11 +260,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
             </div>
           )}
         >
-          <GenerateActionButton
-            onClick={() => {
-              console.log("click");
-            }}
-          />
+          <GenerateActionButton onClick={() => {}} />
         </Dropdown>
       </div>
       <Skeleton loading={isLoading} active>
@@ -265,7 +269,7 @@ const ModalResumeTracking: FC<InvoiceDetailModalProps> = ({ isOpen, onClose, idT
             <UiTab tabs={items} sticky onChange={onChange} />
             <ModalHeader
               vehicle={currentVehicle}
-              transferOrderStates={TransferOrdersState}
+              transferOrderStates={TransferOrdersTripState}
               defaultStateId={STATUS.TR.SIN_INICIAR}
               showState={true}
             />

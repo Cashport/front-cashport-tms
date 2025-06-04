@@ -151,16 +151,24 @@ a {
 }
 
 .mapboxgl-popup-content {
-    background-color: #1F2228 !important;
+    background-color: #1f2228 !important;
     border-radius: 10px !important;
     padding: 25px !important;
 }
 
 .mapboxgl-popup-tip {
-    border-bottom-color: #1F2228 !important;
-    border-top-color: #1F2228 !important;
+    border-bottom-color: #1f2228 !important;
+    border-top-color: #1f2228 !important;
 }
 
 .custom-timeline .ant-timeline-item-tail {
-    border-left: 2px dotted #CBE71E !important;
+    border-left: 2px dotted #cbe71e !important;
+}
+
+.cashportIATextGradient {
+    background-image: linear-gradient(to right, #5b21b6 0%, #e63ab5 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 500;
 }

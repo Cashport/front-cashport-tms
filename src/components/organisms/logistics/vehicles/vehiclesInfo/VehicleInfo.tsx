@@ -10,7 +10,7 @@ import {
   updateVehicle,
   updateVehicleStatus
 } from "@/services/logistics/vehicle";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { useCallback, useState } from "react";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
@@ -27,10 +27,9 @@ interface Props {
 export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const [statusForm, setStatusForm] = useState<StatusForm>("review");
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [revalidate, setRevalidate] = useState("1");
   const { push } = useRouter();
 
-  const fetcher = async ({ id }: { id: string }) => {
+  const fetcher = async (id: string) => {
     return getVehicleById(id);
   };
 
@@ -38,7 +37,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
     setStatusForm(newFormState);
   }, []);
 
-  const { data, isLoading, isValidating } = useSWR({ id: idParam, key: revalidate }, fetcher, {
+  const { data, isLoading, isValidating, mutate } = useSWR(idParam, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -52,7 +51,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Vehículo editado", 2, () => setStatusForm("review"));
-        setRevalidate(String(Math.random()));
+        mutate();
       }
     } catch (error) {
       setIsLoadingSubmit(false);

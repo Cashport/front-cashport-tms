@@ -1,14 +1,52 @@
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 
-export const getAllCarriers = async (): Promise<any> => {
-  const response: GenericResponse = await API.get(`/carrier/all`);
+export interface IProvider {
+  id: number;
+  id_vendor: number;
+  business_name: string;
+  description: string;
+  nit: string;
+  phone_number: number;
+  billing_email: string;
+  communication_email: string;
+  contact_name: string;
+  active: number | boolean;
+  icon: string;
+  drivers: number;
+  vehicles: number;
+  carrier_type: string | null;
+  id_carrier_type: number | null;
+  subject_id: number | null;
+  created_at: string;
+  modified_at: string;
+  created_by: string;
+  modified_by: string;
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
+}
+
+export const getAllCarriers = async (): Promise<IProvider[]> => {
+  const response: GenericResponse<IProvider[]> = await API.get(`/carrier/all`);
   if (response.success) return response.data;
   else throw response;
 };
 
-export const getCarrierById = async (id: string): Promise<any> => {
-  const response: GenericResponse = await API.get(`/carrier/${id}`);
+export interface ICarrierById extends Omit<IProvider, "drivers" | "vehicles" | "carrier_type"> {
+  documents: any[];
+  features: {
+    id: number;
+    description: string;
+    idEntityType: number;
+    idFeatureEntity: number;
+  }[];
+}
+export const getCarrierById = async (id: string): Promise<ICarrierById> => {
+  const response: GenericResponse<ICarrierById> = await API.get(`/carrier/${id}`);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");
 };

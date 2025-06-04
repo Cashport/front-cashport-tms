@@ -97,3 +97,37 @@ export const TransferOrdersState = [
     bgColor: "#969696"
   }
 ];
+
+export const TransferOrdersTripState = [
+  {
+    id: STATUS.TRIP.SIN_INICIAR,
+    name: "Sin iniciar",
+    bgColor: "#969696"
+  },
+
+  {
+    id: STATUS.TRIP.CARGANDO,
+    name: "Cargando",
+    bgColor: "#0085FF"
+  },
+  {
+    id: STATUS.TRIP.EN_CURSO,
+    name: "En curso",
+    bgColor: "#A9BA43"
+  },
+  {
+    id: STATUS.TRIP.DESCARGANDO,
+    name: "Descargando",
+    bgColor: "#FF6B00"
+  },
+  {
+    id: STATUS.TRIP.DETENIDO,
+    name: "Detenido",
+    bgColor: "#ED171F"
+  },
+  {
+    id: STATUS.TRIP.STAND_BY,
+    name: "Stand by",
+    bgColor: "#3D3D3D"
+  }
+];
