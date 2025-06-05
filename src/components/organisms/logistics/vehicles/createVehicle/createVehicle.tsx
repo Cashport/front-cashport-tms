@@ -10,7 +10,7 @@ import { addVehicle, getFeaturesVehicle, getVehicleType } from "@/services/logis
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
 import { IUploadRequirementstTableRow } from "../../proveedores/ModalUploadRequirements/ModalUploadRequirements";
 
-import { IFormGeneralVehicle } from "@/types/logistics/schema";
+import { CustomFile, IFormGeneralVehicle } from "@/types/logistics/schema";
 
 import "./createVehicle.scss";
 import "../../../../../styles/_variables_logistics.css";
@@ -30,10 +30,10 @@ export const CreateVehicleView = ({ params }: Props) => {
   const { push } = useRouter();
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
-  const handleSubmit = async (data: ICreateVehicleForm) => {
+  const handleSubmit = async (data: ICreateVehicleForm, imageFiles: CustomFile[]) => {
     setIsLoadingSubmit(true);
     try {
-      await addVehicle({ ...data });
+      await addVehicle({ ...data }, imageFiles);
 
       message.success("Vehículo creado", 3, () =>
         push(`/logistics/providers/${params.id}/vehicle`)

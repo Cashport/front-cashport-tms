@@ -104,7 +104,7 @@ export const VehicleFormTab = ({
     }
   }, [data]);
 
-  const formImages = watch("images");
+  const formImages = watch("general.images");
 
   const hasImages = () => {
     return images.some((img) => img.file) || (formImages && formImages.length > 0);
@@ -532,6 +532,7 @@ export const VehicleFormTab = ({
 
                   if (!hasImages()) {
                     setImageError(true);
+                    return;
                   }
                   const isValidForm = await trigger(); // Valida todos los campos manualmente
                   if (isValidForm) {
