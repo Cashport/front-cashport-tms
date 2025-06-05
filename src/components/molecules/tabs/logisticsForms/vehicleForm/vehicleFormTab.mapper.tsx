@@ -9,7 +9,8 @@ import {
   IVehicle,
   ICertificates,
   VehicleType,
-  IFormGeneralVehicle
+  IFormGeneralVehicle,
+  CustomFile
 } from "@/types/logistics/schema";
 
 export type StatusForm = "review" | "create" | "edit";
@@ -20,7 +21,7 @@ export interface VehicleFormTabProps {
   disabled?: boolean;
   onEditVehicle?: () => void;
   // eslint-disable-next-line no-unused-vars
-  onSubmitForm?: (data: any) => void;
+  onSubmitForm?: (data: any, imageFiles: CustomFile[]) => void;
   // eslint-disable-next-line no-unused-vars
   handleFormState?: (newFormState: StatusForm) => void;
   onActiveVehicle?: () => void;
@@ -88,7 +89,8 @@ export const normalizeVehicleData = (data: IVehicle): any => {
       company: "", // Add logic to fetch company name if necessary
       IS_ACTIVE: data.active,
       status: data.status,
-      trip_type: data.features?.map((f: any) => ({ value: f.id }))
+      trip_type: data.features?.map((f: any) => ({ value: f.id })),
+      images: data.images
     },
     files: documents,
     IS_ACTIVE: data.active
@@ -98,11 +100,11 @@ export const normalizeVehicleData = (data: IVehicle): any => {
 export const _onSubmitVehicle = (
   data: IFormGeneralVehicle,
   uploadedFiles: IUploadRequirementstTableRow[],
-  imageFiles: { docReference: string; file: File }[], // ya no se usa
+  imageFiles: { docReference: string; file: File }[],
   // eslint-disable-next-line no-unused-vars
   setImageError: (value: SetStateAction<boolean>) => void,
   // eslint-disable-next-line no-unused-vars
-  onSubmitForm: (data: any) => void
+  onSubmitForm: (data: any, imageFiles: any) => void
 ) => {
   try {
     setImageError(false);
@@ -124,7 +126,7 @@ export const _onSubmitVehicle = (
       return document;
     });
 
-    onSubmitForm({ ...data, documents });
+    onSubmitForm({ ...data, documents }, imageFiles);
   } catch (error) {
     console.warn({ error });
   }

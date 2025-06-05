@@ -33,10 +33,18 @@ export const getVehicleById = async (id: string): Promise<IVehicle> => {
   throw new Error(response?.message || "Error");
 };
 
-export const createVehicleForm = (data: ICreateVehicleForm) => {
+export const createVehicleForm = (data: ICreateVehicleForm, formImages?: any[]) => {
   const form = new FormData();
   const body: IFormGeneralVehicle = { ...data };
   const files: IUploadRequirementstTableRow[] = data.uploadedFiles || [];
+
+  formImages?.forEach((file: any, index: number) => {
+    if (file && file.file) {
+      form.append(`image${index + 1}`, file.file);
+    } else {
+      console.warn(`Image ${index + 1} is undefined.`);
+    }
+  });
 
   // for each file add it to the formData
   files.forEach((file) => {
@@ -50,9 +58,9 @@ export const createVehicleForm = (data: ICreateVehicleForm) => {
   return form;
 };
 
-export const addVehicle = async (data: ICreateVehicleForm) => {
+export const addVehicle = async (data: ICreateVehicleForm, imageFiles: CustomFile[]) => {
   try {
-    const form = createVehicleForm(data);
+    const form = createVehicleForm(data, imageFiles);
     Array.from(form.entries()).forEach((pair) => {
       console.log(pair[0], pair[1]);
     });
@@ -69,7 +77,7 @@ export const updateVehicle = async (
   formImages: CustomFile[]
 ): Promise<AxiosResponse<any, any>> => {
   try {
-    const form = createVehicleForm(data);
+    const form = createVehicleForm(data, formImages);
     const response = await API.put(`/vehicle/update`, form);
     return response;
   } catch (error) {

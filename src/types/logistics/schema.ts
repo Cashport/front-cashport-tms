@@ -1226,6 +1226,7 @@ export interface IAPIDriver {
   };
 }
 export interface IFormGeneralDriver {
+  id: number;
   phone: string;
   email: string;
   document_type: number;
@@ -1238,6 +1239,7 @@ export interface IFormGeneralDriver {
   last_name: string;
   emergency_number: string;
   emergency_contact: string;
+  photo?: string;
   rh: string;
   glasses: any;
   birth_date: Date;
@@ -1288,6 +1290,7 @@ export interface IVehicle {
   subject_id: number;
   documents: IProviderDocument[];
   features?: { id: number }[];
+  images?: { url_archive: string }[];
 }
 /**
  * Exposes all fields present in carrier as a typescript

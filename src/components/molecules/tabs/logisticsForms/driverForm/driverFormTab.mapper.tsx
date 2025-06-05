@@ -68,6 +68,7 @@ export const dataToProjectFormData = (
   const vehicleTypeArray = createVehicleTypeArray(data.vehicle_type, vehiclesTypesData);
   return {
     general: {
+      id: data.id,
       phone: data.phone,
       email: data.email,
       document_type: data.document_type,
@@ -79,7 +80,7 @@ export const dataToProjectFormData = (
       last_name: data.last_name,
       emergency_number: data.emergency_number ? String(data.emergency_number) : "",
       emergency_contact: data.emergency_contact,
-
+      photo: data.photo ?? undefined,
       rh: data.rh ? data.rh : "-",
       glasses: data.glasses,
       birth_date: dayjs(data?.birth_date) as any,
