@@ -46,6 +46,7 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 //types
 import {
   IFormDriver,
+  IFormGeneralDriver,
   IGeneralDriverSubmit,
   IProviderDocument,
   VehicleType
@@ -250,13 +251,14 @@ export const DriverFormTab = ({
               <UploadImg
                 disabled={statusForm === "review"}
                 imgDefault={
+                  watch("general.photo") ||
                   "https://cdn.icon-icons.com/icons2/1622/PNG/512/3741756-bussiness-ecommerce-marketplace-onlinestore-store-user_108907.png"
                 }
                 setImgFile={setImageFile}
                 uploadInstructionsText="*Sube la foto del conductor"
                 resetTrigger={resetTrigger}
               />
-              {imageError && (
+              {imageError && !watch("general.photo") && (
                 <Text className="textError">{"foto del conductor es obligatorio *"}</Text>
               )}
             </Col>

@@ -104,7 +104,7 @@ export const VehicleFormTab = ({
     }
   }, [data]);
 
-  const formImages = watch("images");
+  const formImages = watch("general.images");
 
   const hasImages = () => {
     return images.some((img) => img.file) || (formImages && formImages.length > 0);
@@ -143,10 +143,10 @@ export const VehicleFormTab = ({
         id: tripType.value
       }))
     };
-    const formImages = data.images.map((file) => ({
+    const formImages = data.images?.map((file) => ({
       file,
       docReference: file.name
-    }));
+    })) || [];
 
     _onSubmitVehicle(vehicleData, uploadedFiles, formImages, setImageError, onSubmitForm);
     setImages(Array(5).fill({ file: undefined }));
@@ -532,6 +532,7 @@ export const VehicleFormTab = ({
 
                   if (!hasImages()) {
                     setImageError(true);
+                    return;
                   }
                   const isValidForm = await trigger(); // Valida todos los campos manualmente
                   if (isValidForm) {
