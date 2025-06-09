@@ -143,10 +143,10 @@ export const VehicleFormTab = ({
         id: tripType.value
       }))
     };
-    const formImages = data.images.map((file) => ({
+    const formImages = data.images?.map((file) => ({
       file,
       docReference: file.name
-    }));
+    })) || [];
 
     _onSubmitVehicle(vehicleData, uploadedFiles, formImages, setImageError, onSubmitForm);
     setImages(Array(5).fill({ file: undefined }));
