@@ -1,44 +1,44 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { Modal } from "antd";
-import { FooterButtons } from "../ModalCreateJourney/components/FooterButtons/FooterButtons";
 
-interface ConfirmModalProps {
-  open: boolean;
+import "./modalConfirmAction.scss";
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onOk?: () => void;
   title: string;
-  bodyText: ReactNode | string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  confirmButtonText?: string;
-  cancelButtonText?: string;
+  content?: React.ReactNode;
+  okText?: string;
+  cancelText?: string;
+  okLoading?: boolean;
 }
-
-const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  open,
+export const ModalConfirmAction = ({
+  isOpen,
+  onClose,
+  onOk,
   title,
-  bodyText,
-  onConfirm,
-  onCancel,
-  confirmButtonText = "Confirmar",
-  cancelButtonText = "Cancelar"
-}) => {
+  content,
+  okText = "Aceptar",
+  cancelText = "Cancelar",
+  okLoading
+}: Props) => {
   return (
     <Modal
+      className="ModalConfirmAction"
+      width={"50%"}
+      open={isOpen}
+      onCancel={onClose}
+      okButtonProps={{ className: "acceptButton", loading: okLoading }}
+      okText={okText}
+      cancelButtonProps={{
+        className: "cancelButton"
+      }}
+      cancelText={cancelText}
       title={title}
-      open={open}
-      onCancel={onCancel}
-      footer={
-        <FooterButtons
-          backTitle={cancelButtonText}
-          nextTitle={confirmButtonText}
-          handleBack={onCancel}
-          handleNext={onConfirm}
-          nextDisabled={false}
-        />
-      }
+      onOk={onOk}
     >
-      {typeof bodyText === "string" ? <p>{bodyText}</p> : bodyText}
+      {content}
     </Modal>
   );
 };
-
-export default ConfirmModal;

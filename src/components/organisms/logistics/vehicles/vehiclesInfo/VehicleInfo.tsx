@@ -10,11 +10,12 @@ import {
   updateVehicle,
   updateVehicleStatus
 } from "@/services/logistics/vehicle";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { useCallback, useState } from "react";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab.mapper";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
 import { useRouter } from "next/navigation";
+import { CustomFile } from "@/types/logistics/schema";
 
 interface Props {
   idParam: string;
@@ -27,10 +28,9 @@ interface Props {
 export const VehicleInfoView = ({ idParam = "", params }: Props) => {
   const [statusForm, setStatusForm] = useState<StatusForm>("review");
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [revalidate, setRevalidate] = useState("1");
   const { push } = useRouter();
 
-  const fetcher = async ({ id }: { id: string }) => {
+  const fetcher = async (id: string) => {
     return getVehicleById(id);
   };
 
@@ -38,21 +38,21 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
     setStatusForm(newFormState);
   }, []);
 
-  const { data, isLoading, isValidating } = useSWR({ id: idParam, key: revalidate }, fetcher, {
+  const { data, isLoading, isValidating, mutate } = useSWR(idParam, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateOnMount: true
   });
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: any, imageFiles: CustomFile[]) => {
     setIsLoadingSubmit(true);
     try {
-      const response = await updateVehicle({ ...data }, data.files, data.images);
+      const response = await updateVehicle({ ...data }, data.files, imageFiles);
       if (response && response.status === 200) {
         setIsLoadingSubmit(false);
         message.success("Vehículo editado", 2, () => setStatusForm("review"));
-        setRevalidate(String(Math.random()));
+        mutate();
       }
     } catch (error) {
       setIsLoadingSubmit(false);

@@ -1,26 +1,28 @@
-import {
-  IVehicle,
-  VihicleDetail,
-  IFormVehicle,
-  ICertificates,
-  IListDataVehiche,
-  VehicleType
-} from "@/types/logistics/schema";
-import { MessageInstance } from "antd/es/message/interface";
 import Title from "antd/es/typography/Title";
 import { SetStateAction } from "react";
-import { UseFormReset, UseFormSetValue } from "react-hook-form";
-import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+
+import { IUploadRequirementstTableRow } from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
+
+import { IGetCertificate } from "@/types/logistics/certificate/certificate";
 import { IFeature } from "@/types/features/feature";
+import {
+  IVehicle,
+  ICertificates,
+  VehicleType,
+  IFormGeneralVehicle,
+  CustomFile
+} from "@/types/logistics/schema";
 
 export type StatusForm = "review" | "create" | "edit";
 
 export interface VehicleFormTabProps {
   idVehicleForm?: string;
-  data?: VehicleData;
+  data?: IVehicle;
   disabled?: boolean;
   onEditVehicle?: () => void;
-  onSubmitForm?: (data: any) => void;
+  // eslint-disable-next-line no-unused-vars
+  onSubmitForm?: (data: any, imageFiles: CustomFile[]) => void;
+  // eslint-disable-next-line no-unused-vars
   handleFormState?: (newFormState: StatusForm) => void;
   onActiveVehicle?: () => void;
   onDesactivateVehicle?: () => void;
@@ -30,7 +32,7 @@ export interface VehicleFormTabProps {
     id: string;
     vehicleId: string;
   };
-  documentsTypesList: CertificateType[];
+  documentsTypesList: IGetCertificate[];
   vehiclesTypesList: VehicleType[];
   features: IFeature[];
   isLoading: boolean;
@@ -51,23 +53,16 @@ export interface FileObject {
   docReference?: string;
 }
 
-export const normalizeVehicleData = (data: any): any => {
+export const normalizeVehicleData = (data: IVehicle): any => {
+  console.log("dataVehicle", data);
   if (!data) return {};
 
-  const documents = data.documents.map((doc: any) => ({
+  const documents = data.documents.map((doc) => ({
     file: {
-      name: doc.url_archive.split("/").pop(),
-      url: doc.url_archive
+      name: doc.name,
+      url: doc.templateUrl
     }
   }));
-
-  const images = data.images.map((image: any) => {
-    const fileData = image.data;
-    const fileName = image.url_archive.split("/").pop();
-    const file = new File([fileData], fileName);
-    (file as any).url_archive = image.url_archive;
-    return file;
-  });
 
   return {
     general: {
@@ -94,24 +89,44 @@ export const normalizeVehicleData = (data: any): any => {
       company: "", // Add logic to fetch company name if necessary
       IS_ACTIVE: data.active,
       status: data.status,
-      trip_type: data.features?.map((f:any) => ({value: f.id}))
+      trip_type: data.features?.map((f: any) => ({ value: f.id })),
+      images: data.images
     },
-    images: images,
     files: documents,
     IS_ACTIVE: data.active
   };
 };
 
 export const _onSubmitVehicle = (
-  data: any,
-  selectedFiles: DocumentCompleteType[],
+  data: IFormGeneralVehicle,
+  uploadedFiles: IUploadRequirementstTableRow[],
   imageFiles: { docReference: string; file: File }[],
+  // eslint-disable-next-line no-unused-vars
   setImageError: (value: SetStateAction<boolean>) => void,
-  onSubmitForm: (data: any) => void
+  // eslint-disable-next-line no-unused-vars
+  onSubmitForm: (data: any, imageFiles: any) => void
 ) => {
   try {
     setImageError(false);
-    onSubmitForm({ ...data, images: imageFiles, files: selectedFiles });
+
+    const documents = uploadedFiles.map((doc, index) => {
+      const document: {
+        documentTypeId: number;
+        fieldName: string;
+        expiryDate?: string;
+      } = {
+        documentTypeId: doc.requirementType!,
+        fieldName: doc.fileName || `documento-${index + 1}`
+      };
+
+      if (doc.expirationDate) {
+        document.expiryDate = doc.expirationDate;
+      }
+
+      return document;
+    });
+
+    onSubmitForm({ ...data, documents }, imageFiles);
   } catch (error) {
     console.warn({ error });
   }

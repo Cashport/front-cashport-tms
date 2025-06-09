@@ -420,3 +420,25 @@ export const checkUserComponentPermissions = (
   }
   return checkFunction(componentPermission);
 };
+
+export function formatTimeAgo(utcDateString: string): string {
+  const now = new Date();
+  const inputDate = new Date(utcDateString);
+  const diffMs = now.getTime() - inputDate.getTime();
+
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (minutes === 1) return "1 minuto";
+  if (minutes < 60) return `${minutes} minutos`;
+  if (hours < 24) return `${hours} horas`;
+  if (days === 1) return `1 día`;
+  if (days < 30) return `${days} días`;
+  if (months === 1) return `1 mes`;
+  if (months < 12) return `${months} meses`;
+  if (years === 1) return `1 año`;
+  return `${years} años`;
+}

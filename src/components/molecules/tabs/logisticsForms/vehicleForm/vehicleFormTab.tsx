@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Dropdown, Flex, Form, MenuProps, Row, Switch, Typography } from "antd";
+import { Button, Col, Flex, Form, message, Row, Switch, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, CheckCircle, Pencil } from "phosphor-react";
+import { CaretLeft, Sparkle } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
+import { mutate } from "swr";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
@@ -18,21 +19,31 @@ import {
   VehicleFormTabProps
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
-import { IFormVehicle, VehicleType } from "@/types/logistics/schema";
-import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
-import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
+import {
+  IFormGeneralVehicle,
+  IFormVehicle,
+  IProviderDocument,
+  VehicleType
+} from "@/types/logistics/schema";
+
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
-import LoadDocumentsButton from "@/components/atoms/LoadDocumentsButton/LoadDocumentsButton";
 import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import ModalConfirmAudit from "../driverForm/components/ModalConfirmAudit";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
 import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
+import ModalUploadRequirements, {
+  IUploadRequirementstTableRow
+} from "@/components/organisms/logistics/proveedores/ModalUploadRequirements/ModalUploadRequirements";
+import ModalGenerateActionProviders from "@/components/organisms/logistics/proveedores/ModalGenerateActionProviders/ModalGenerateActionProviders";
+import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
+import ModalAuditRequirements from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
+import { deleteDocumentById } from "@/services/logistics/providers/providers";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 const { Title, Text } = Typography;
 
@@ -58,19 +69,20 @@ export const VehicleFormTab = ({
   // eslint-disable-next-line no-unused-vars
   onAuditVehicle = () => {}
 }: VehicleFormTabProps) => {
-  console.log("dataGENERAL", data);
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
-  const [isModalConfirmAuditOpen, setIsModalConfirmAuditOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
   const [imageError, setImageError] = useState(false);
   const [hasGPS, setHasGPS] = useState(data?.has_gps || false);
-  const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
+  const [currentDocuments, setCurrentDocuments] = useState<IProviderDocument[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<IUploadRequirementstTableRow[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<IProviderDocument[]>([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
 
   const [images, setImages] = useState<ImageState[]>(
     Array(5).fill({ file: undefined, error: false })
   );
-  const defaultValues = statusForm === "create" ? {} : normalizeVehicleData(data as any);
+  const defaultValues = statusForm === "create" ? {} : data && normalizeVehicleData(data);
   const {
     watch,
     control,
@@ -86,55 +98,14 @@ export const VehicleFormTab = ({
     mode: "onChange"
   });
 
-  const formImages = watch("images");
-
-  const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <ButtonGenerateAction
-          icon={<Pencil size={"1.5rem"} />}
-          title={statusForm === "review" ? "Editar" : "Cancelar edición"}
-          hideArrow
-          onClick={() => {
-            if (statusForm === "review") {
-              handleFormState("edit");
-            } else {
-              handleFormState("review");
-              reset();
-            }
-          }}
-        />
-      )
-    },
-    {
-      key: "2",
-      label: (
-        <ButtonGenerateAction
-          icon={<ArrowsClockwise size={"1.5rem"} />}
-          title="Cambiar estado"
-          onClick={() => setIsOpenModal(true)}
-          hideArrow
-        />
-      )
-    },
-    {
-      key: "3",
-      label: (
-        <ButtonGenerateAction
-          icon={<CheckCircle size={"1.5rem"} />}
-          title="Auditar"
-          disabled={statusForm !== "review"}
-          hideArrow
-          onClick={() => setIsModalConfirmAuditOpen(true)}
-        />
-      )
+  useEffect(() => {
+    if (data) {
+      setCurrentDocuments(data.documents);
     }
-  ];
-  const menuStyle: React.CSSProperties = {
-    backgroundColor: "white",
-    boxShadow: "none"
-  };
+  }, [data]);
+
+  const formImages = watch("general.images");
+
   const hasImages = () => {
     return images.some((img) => img.file) || (formImages && formImages.length > 0);
   };
@@ -159,111 +130,25 @@ export const VehicleFormTab = ({
   }, [errors]);
 
   /*archivos*/
-  interface FileObject {
-    docReference: string;
-    file: File | undefined;
-  }
 
   const trip_type = watch("general.trip_type");
   const driverStatus = watch("general.status");
 
-  useEffect(() => {
-    if (Array.isArray(documentsTypesList)) {
-      const isFirstLoad = data?.documents?.length && selectedFiles.length === 0;
-      if (isFirstLoad) {
-        const docsWithLink =
-          documentsTypesList
-            ?.filter((f) => data.documents?.find((d) => d.id_document_type === f.id))
-            .map((f) => ({
-              ...f,
-              file: undefined,
-              link: data.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-              expirationDate: dayjs(
-                data.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-              )
-            })) || [];
-        setSelectedFiles(docsWithLink);
-      } else {
-        const documentsFiltered = documentsTypesList?.filter(
-          (f) => !f?.optional || selectedFiles?.find((f2) => f2.id === f.id)
-        );
-        const docsWithFile = documentsFiltered.map((f) => {
-          const prevFile = selectedFiles.find((f2) => f2.id === f.id);
-          return {
-            ...f,
-            link: prevFile?.link || undefined,
-            file: prevFile?.link ? undefined : files.find((f2) => f2.aditionalData === f.id)?.file,
-            expirationDate: prevFile?.expirationDate
-          };
-        });
-        if (docsWithFile?.length) {
-          setSelectedFiles([...docsWithFile]);
-        } else {
-          setSelectedFiles([]);
-        }
-      }
-    }
-  }, [files, documentsTypesList]);
-
-  useEffect(() => {
-    if (statusForm === "review") {
-      if (Array.isArray(documentsTypesList)) {
-        const documentsFromData = documentsTypesList?.filter((f) =>
-          data?.documents?.find((d) => d.id_document_type === f.id)
-        );
-        const nonOptionalDocuments = documentsTypesList.filter((f) => !f?.optional);
-        const documentsUniqueSet = new Set([...documentsFromData, ...nonOptionalDocuments]);
-        const documentsUniqueArray = Array.from(documentsUniqueSet);
-        const docsWithLink =
-          documentsUniqueArray.map((f) => ({
-            ...f,
-            file: undefined,
-            link: data?.documents?.find((d) => d.id_document_type === f.id)?.url_archive,
-            expirationDate: dayjs(
-              data?.documents?.find((d) => d.id_document_type === f.id)?.expiration_date
-            )
-          })) || [];
-        setSelectedFiles(docsWithLink);
-      }
-    }
-  }, [statusForm]);
-
-  const handleChangeExpirationDate = (index: number, value: any) => {
-    setSelectedFiles((prevState: any[]) => {
-      const updatedFiles = [...prevState];
-      updatedFiles[index].expirationDate = value;
-      return updatedFiles;
-    });
-  };
-
-  const handleChange = (value: string[]) => {
-    const sf = documentsTypesList?.filter((file) => value.includes(file.id.toString()));
-    if (sf) {
-      setSelectedFiles((prevState) => {
-        return sf.map((file) => {
-          const prevFile = prevState.find((f) => f.id === file.id);
-          return {
-            ...file,
-            file: prevFile?.link ? undefined : prevFile?.file,
-            link: prevFile?.link || undefined,
-            expirationDate: prevFile?.expirationDate
-          };
-        });
-      });
-    }
-  };
-
-  const onSubmit = async (data: any) => {
-    const vehicleData: any = {
+  const onSubmit = async (data: IFormVehicle) => {
+    const vehicleData: IFormGeneralVehicle = {
       ...data.general,
       has_gps: hasGPS,
       id_carrier: Number(params.id) || 14,
-      features: data.general.trip_type.map((tripType: any) => ({
+      features: data?.general?.trip_type?.map((tripType) => ({
         id: tripType.value
       }))
     };
-    const formImages = [...data.images];
-    _onSubmitVehicle(vehicleData, selectedFiles, formImages, setImageError, onSubmitForm);
+    const formImages = data.images?.map((file) => ({
+      file,
+      docReference: file.name
+    })) || [];
+
+    _onSubmitVehicle(vehicleData, uploadedFiles, formImages, setImageError, onSubmitForm);
     setImages(Array(5).fill({ file: undefined }));
   };
 
@@ -282,6 +167,33 @@ export const VehicleFormTab = ({
     }
   }, [data, setValue]);
 
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
+
+  const handleCloseModal = () =>
+    setIsModalOpen({
+      selected: 0
+    });
+
+  const handleDeleteDocument = async () => {
+    setLoadingRequest(true);
+    if (selectedDocumentRows?.length) {
+      const ids = selectedDocumentRows.map((row) => row.id);
+      try {
+        await Promise.all(ids.map((id) => deleteDocumentById(data?.subject_id ?? 0, id)));
+        message.success("Documentos eliminados correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedDocumentRows([]);
+        mutate(params.vehicleId);
+      } catch (error) {
+        message.error("Error al eliminar documentos");
+      }
+    }
+    setLoadingRequest(false);
+  };
+
   return (
     <>
       <Form className="vehiclesFormTab">
@@ -299,26 +211,16 @@ export const VehicleFormTab = ({
           {statusForm !== "create" && (
             <Flex gap={"0.5rem"} align="center">
               <Flex>
-                {!!driverStatus?.description && (
-                  <CustomTag text={driverStatus.description} color={driverStatus.color} />
+                {!!driverStatus?.name && (
+                  <CustomTag text={driverStatus.name} color={driverStatus.color} />
                 )}
               </Flex>
-              <Dropdown
-                menu={{ items }}
-                trigger={["click"]}
-                dropdownRender={(menu) => (
-                  <div>
-                    {React.cloneElement(
-                      menu as React.ReactElement<{
-                        style: React.CSSProperties;
-                      }>,
-                      { style: menuStyle }
-                    )}
-                  </div>
-                )}
-              >
-                <GenerateActionButton onClick={() => {}} />
-              </Dropdown>
+
+              <GenerateActionButton
+                onClick={() => {
+                  setIsModalOpen({ selected: 1 });
+                }}
+              />
             </Flex>
           )}
         </Flex>
@@ -564,26 +466,65 @@ export const VehicleFormTab = ({
           <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             {" "}
             {/* Fila Documentos */}
-            <Col span={8}>
-              <Title className="title" level={4}>
-                Documentos
-              </Title>
+            <Col span={24}>
+              <Flex justify="space-between" align="center">
+                <Title className="title" level={4}>
+                  Documentos
+                </Title>
+
+                {statusForm === "create" && (
+                  <Button className="iaButton" onClick={() => setIsModalOpen({ selected: -1 })}>
+                    <Sparkle size={14} color="#5b21b6" weight="fill" />
+                    <span className="textNormal">
+                      Carga documentos con{" "}
+                      <span
+                        className="cashportIATextGradient"
+                        style={{
+                          fontWeight: 500
+                        }}
+                      >
+                        CashportAI
+                      </span>
+                    </span>
+                  </Button>
+                )}
+              </Flex>
             </Col>
-            <Col span={8} offset={8} style={{ display: "flex", justifyContent: "flex-end" }}>
-              {(statusForm === "create" || statusForm === "edit") && (
-                <LoadDocumentsButton
-                  text="Cargar documentos"
-                  onClick={() => setIsOpenModalDocuments(true)}
+            <Col span={24} style={{ marginTop: "1.5rem" }}>
+              {(statusForm === "review" || statusForm === "edit") && (
+                <DocumentsTable
+                  currentFiles={currentDocuments}
+                  subjectId={data?.subject_id}
+                  selectedDocumentRows={selectedDocumentRows}
+                  setSelectedDocumentRows={setSelectedDocumentRows}
+                  mutateId={params.vehicleId}
+                />
+              )}
+              {statusForm === "create" && (
+                <DocumentsTable
+                  currentFiles={uploadedFiles.map(
+                    (doc) =>
+                      ({
+                        name: doc.fileName,
+                        description: doc.requirementTypeName,
+                        createdAt: undefined,
+                        expiryDate: doc.expirationDate
+                          ? dayjs(doc.expirationDate).format("YYYY-MM-DD")
+                          : undefined,
+                        isMandatory: undefined,
+                        statusId: "c02b3475-f59a-4222-bb28-9dbb51cf02c1"
+                      }) as any
+                  )}
+                  disableEyeButton
                 />
               )}
             </Col>
-            <DocumentsTable selectedFiles={selectedFiles} />
           </Row>
           {["edit", "create"].includes(statusForm) && (
             <Row justify={"end"}>
               <SubmitFormButton
                 loading={isLoading}
-                disabled={isLoading} // Solo lo deshabilitas mientras está cargando
+                disabled={isLoading}
                 text={validationButtonText(statusForm)}
                 onClick={async () => {
                   console.log("isvalid", isValid);
@@ -591,6 +532,7 @@ export const VehicleFormTab = ({
 
                   if (!hasImages()) {
                     setImageError(true);
+                    return;
                   }
                   const isValidForm = await trigger(); // Valida todos los campos manualmente
                   if (isValidForm) {
@@ -602,9 +544,27 @@ export const VehicleFormTab = ({
           )}
         </Flex>
       </Form>
+      <ModalGenerateActionProviders
+        isOpen={isModalOpen.selected === 1}
+        onClose={handleCloseModal}
+        handleOpenModal={handleOpenModal}
+        statusForm={statusForm}
+        handleFormState={handleFormState}
+        resetForm={reset}
+        selectedDocumentRows={selectedDocumentRows}
+      />
+
+      <ModalChangeStatus
+        isActiveStatus={true}
+        isOpen={isModalOpen.selected === 2}
+        onClose={handleCloseModal}
+        onActive={onActiveVehicle}
+        onDesactivate={onDesactivateVehicle}
+      />
+
       <ModalConfirmAudit
-        isOpen={isModalConfirmAuditOpen}
-        onClose={() => setIsModalConfirmAuditOpen(false)}
+        isOpen={isModalOpen.selected === 3}
+        onClose={handleCloseModal}
         onConfirm={onAuditVehicle}
         title="Auditar vehículo"
         description={[
@@ -615,23 +575,51 @@ export const VehicleFormTab = ({
           label: features?.find((f) => f.id === tt.value)?.description || ""
         }))}
       />
-      <ModalChangeStatus
-        isActiveStatus={true}
-        isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
-        onActive={onActiveVehicle}
-        onDesactivate={onDesactivateVehicle}
+
+      <ModalAddRequirement
+        isOpen={isModalOpen.selected === 4}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.vehicleId);
+        }}
+        subjectId={data?.subject_id || 0}
       />
-      <ModalDocuments
-        isOpen={isOpenModalDocuments}
-        mockFiles={selectedFiles}
-        setFiles={setFiles}
-        documentsType={documentsTypesList}
-        isLoadingDocuments={false}
-        onClose={() => setIsOpenModalDocuments(false)}
-        handleChange={handleChange}
-        handleChangeExpirationDate={handleChangeExpirationDate}
-        setSelectedFiles={setSelectedFiles}
+
+      <ModalAuditRequirements
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate(params.vehicleId);
+
+          setSelectedDocumentRows([]);
+        }}
+        selectedRows={selectedDocumentRows}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 6}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteDocument}
+        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
+      />
+
+      <ModalUploadRequirements
+        isOpen={isModalOpen.selected === -1}
+        onClose={handleCloseModal}
+        documentsTypesList={documentsTypesList}
+        onUpload={(data) => {
+          setUploadedFiles((prev) => [...prev, ...data.rows]);
+        }}
       />
     </>
   );
