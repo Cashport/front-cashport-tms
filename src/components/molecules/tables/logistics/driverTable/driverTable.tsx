@@ -64,12 +64,14 @@ export const DriverTable = ({ params: { id } }: Props) => {
     {
       title: "Documento",
       dataIndex: "document",
-      key: "document"
+      key: "document",
+      width: 120
     },
     {
       title: "Teléfono",
       dataIndex: "phone",
-      key: "phone"
+      key: "phone",
+      width: 120
     },
     {
       title: "Correo Electronico",
@@ -80,7 +82,6 @@ export const DriverTable = ({ params: { id } }: Props) => {
       title: "Status",
       key: "status",
       dataIndex: "status",
-      width: "200px",
       render: (status) => {
         return (
           <Flex>

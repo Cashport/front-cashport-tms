@@ -4,7 +4,6 @@ import type { TableProps } from "antd";
 import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
 import "./carrierTable.scss";
 import UiSearchInput from "@/components/ui/search-input";
-import { ICarrier } from "@/types/logistics/schema";
 import { getAllCarriers, IProvider } from "@/services/logistics/carrier";
 import useSWR from "swr";
 import CustomTag from "@/components/atoms/CustomTag";
@@ -70,23 +69,25 @@ export const CarrierTable = () => {
     {
       title: "Tipo",
       dataIndex: "type",
-      key: "type"
+      key: "type",
+      width: 125
     },
     {
       title: "Vehículos",
       dataIndex: "vehicle",
-      key: "vehicle"
+      key: "vehicle",
+      width: 105
     },
     {
       title: "Conductores",
       dataIndex: "drivers",
-      key: "drivers"
+      key: "drivers",
+      width: 125
     },
     {
       title: "Status",
       key: "status",
       dataIndex: "status",
-      width: "200px",
       render: (_, { status }) => {
         return (
           <Flex>

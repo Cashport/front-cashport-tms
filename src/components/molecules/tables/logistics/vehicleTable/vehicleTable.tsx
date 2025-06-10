@@ -56,7 +56,8 @@ export const VehicleTable = ({ params: { id } }: Props) => {
     {
       title: "Tipo de Vehículo",
       dataIndex: "type",
-      key: "type"
+      key: "type",
+      width: 150
     },
     {
       title: "Marca",
@@ -66,18 +67,19 @@ export const VehicleTable = ({ params: { id } }: Props) => {
     {
       title: "Placa",
       dataIndex: "plate",
-      key: "plate"
+      key: "plate",
+      width: 120
     },
     {
       title: "Modelo",
       dataIndex: "model",
-      key: "model"
+      key: "model",
+      width: 90
     },
     {
       title: "Status",
       key: "status",
       dataIndex: "status",
-      width: "200px",
       render: (status) => {
         return (
           <Flex>
