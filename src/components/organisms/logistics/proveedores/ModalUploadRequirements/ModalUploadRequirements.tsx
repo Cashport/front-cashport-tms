@@ -337,7 +337,6 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                               }
                             }}
                             popupMatchSelectWidth={false}
-                            open={true}
                             dropdownRender={(menu) => {
                               return <div className="selectRequirementType__dropdown">{menu}</div>;
                             }}
