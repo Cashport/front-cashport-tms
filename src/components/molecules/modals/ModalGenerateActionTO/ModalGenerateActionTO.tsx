@@ -35,6 +35,7 @@ type PropsModalGenerateActionTO = {
   handleChangeStatus?: (statusId: string) => Promise<void>;
   setNav: Dispatch<SetStateAction<NavEnum>>;
   transferRequest: ITransferRequestDetail | null;
+  handleMarkAsFixedIncome: () => void;
 };
 
 export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerateActionTO>) {
@@ -49,7 +50,8 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
     canChangeStatusToPorLegalizar,
     handleChangeStatus,
     setNav,
-    transferRequest
+    transferRequest,
+    handleMarkAsFixedIncome
   } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT_ACTION);
   const [selectedCarrier, setSelectedCarrier] = useState<number | null>(null);
@@ -118,10 +120,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
               onClose={() => setSelectedView(ViewEnum.SELECT_ACTION)}
               title="Confirmar renta fija"
               content="¿Estás seguro de que deseas marcar este pedido como renta fija?"
-              onOk={async () => {
-                // TO DO: Implementar la lógica para marcar como renta fija
-                setSelectedView(ViewEnum.SELECT_ACTION);
-              }}
+              onOk={handleMarkAsFixedIncome}
               noModal
             />
           </>
