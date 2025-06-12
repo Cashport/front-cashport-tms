@@ -10,6 +10,7 @@ import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/b
 import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
 import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 import { ModalCancelTR } from "../ModalCancelTR/ModalCancelTR";
+import { ModalConfirmAction } from "../ModalConfirmAction/ModalConfirmAction";
 import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
 
 export enum ViewEnum {
@@ -19,7 +20,8 @@ export enum ViewEnum {
   "CHANGE_CARRIER_VEHICLE" = "CHANGE_CARRIER_VEHICLE",
   "CANCEL_TR" = "CANCEL_TR",
   "MODIFY_REQUEST" = "MODIFY_REQUEST",
-  "PREAUTHORIZE_TRIP" = "PREAUTHORIZE_TRIP"
+  "PREAUTHORIZE_TRIP" = "PREAUTHORIZE_TRIP",
+  "MARK_AS_FIXED_INCOME" = "MARK_AS_FIXED_INCOME"
 }
 type PropsModalGenerateActionTO = {
   idTR: string;
@@ -107,6 +109,22 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             toIDs={transferRequest?.transfer_orders}
             trStatus={transferRequest?.status_id}
           />
+        );
+      case ViewEnum.MARK_AS_FIXED_INCOME:
+        return (
+          <>
+            <ModalConfirmAction
+              isOpen={selectedView === ViewEnum.MARK_AS_FIXED_INCOME}
+              onClose={() => setSelectedView(ViewEnum.SELECT_ACTION)}
+              title="Confirmar renta fija"
+              content="¿Estás seguro de que deseas marcar este pedido como renta fija?"
+              onOk={async () => {
+                // TO DO: Implementar la lógica para marcar como renta fija
+                setSelectedView(ViewEnum.SELECT_ACTION);
+              }}
+              noModal
+            />
+          </>
         );
       default:
         return (
