@@ -8,6 +8,7 @@ import { ILocation } from "@/types/logistics/schema";
 import { getAllLocations } from "@/services/logistics/locations";
 import useSWR from "swr";
 import Link from "next/link";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 const { Text } = Typography;
 
@@ -15,6 +16,8 @@ export const LocationsTable = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [datasource, setDatasource] = useState<any[]>([]);
+
+  const height = useScreenHeight();
 
   const { data: locations, isLoading } = useSWR(
     {
@@ -130,7 +133,7 @@ export const LocationsTable = () => {
         </Flex>
       </Flex>
       <Table
-        scroll={{ y: "61dvh", x: undefined }}
+        scroll={{ y: height ? height - 400 : undefined }}
         columns={columns as TableProps<any>["columns"]}
         loading={isLoading}
         pagination={{
