@@ -1,15 +1,21 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import useSWR from "swr";
 import { Button, Flex, Table, Typography } from "antd";
 import type { TableProps } from "antd";
 import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
-import "./driverTable.scss";
-import UiSearchInput from "@/components/ui/search-input";
-import { IDrivers } from "@/types/logistics/schema";
+
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { getAllDrivers } from "@/services/logistics/drivers";
-import Link from "next/link";
-import useSWR from "swr";
+
+import UiSearchInput from "@/components/ui/search-input";
 import CustomTag from "@/components/atoms/CustomTag";
+
+import { IDrivers } from "@/types/logistics/schema";
+
+import "./driverTable.scss";
 
 interface Props {
   params: {
@@ -18,6 +24,9 @@ interface Props {
 }
 
 export const DriverTable = ({ params: { id } }: Props) => {
+  const height = useScreenHeight();
+  const width = useScreenWidth();
+
   const { data: drivers, isLoading } = useSWR({ providerId: id }, getAllDrivers, {
     onError: (error: any) => {
       console.error(error);
@@ -88,7 +97,8 @@ export const DriverTable = ({ params: { id } }: Props) => {
             <CustomTag text={status.name} color={status.color} />
           </Flex>
         );
-      }
+      },
+      width: width && width > 1400 ? 250 : undefined
     },
     {
       title: "",
@@ -105,7 +115,7 @@ export const DriverTable = ({ params: { id } }: Props) => {
 
   return (
     <div className="driversTable">
-      <Flex justify="space-between" className="mainProjectsTable_header">
+      <Flex justify="space-between" className="driversTable__header">
         <Flex gap={"10px"}>
           <UiSearchInput
             className="search"
@@ -117,16 +127,16 @@ export const DriverTable = ({ params: { id } }: Props) => {
             }}
           />
           <Button className="options" icon={<DotsThree size={"1.5rem"} />} />
-          <Link href={`/logistics/providers/${id}/driver/new`}>
-            <Button type="primary" className="buttonNewProject" size="large">
-              Nuevo Conductor
-              {<Plus weight="bold" size={14} />}
-            </Button>
-          </Link>
         </Flex>
+        <Link href={`/logistics/providers/${id}/driver/new`}>
+          <Button type="primary" className="buttonNewProject" size="large">
+            Nuevo Conductor
+            {<Plus weight="bold" size={14} />}
+          </Button>
+        </Link>
       </Flex>
       <Table
-        scroll={{ y: "61dvh", x: undefined }}
+        scroll={{ y: height ? height - 400 : undefined }}
         columns={columns as TableProps<any>["columns"]}
         loading={isLoading}
         pagination={{
