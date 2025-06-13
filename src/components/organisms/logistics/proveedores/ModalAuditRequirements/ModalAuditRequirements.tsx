@@ -199,7 +199,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
         rowSelection={rowSelection}
         pagination={false}
-        scroll={{ y: height - 400 }}
+        scroll={{ y: height && height - 400 }}
       />
 
       <div className="modalAuditRequirements__footer">
