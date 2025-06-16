@@ -1953,7 +1953,7 @@ export interface ITransferRequestMaterialStepOne {
  * interface.
  */
 export interface ITransferRequestCreation {
-  general?: ITransferRequestVehiclesSugest;
+  general?: ITransferRequestGeneral;
   stepOne: {
     transferOrders: ITransferOrderRequest[];
     transferRequest?: ITransferRequestStepOne[];
@@ -1971,8 +1971,18 @@ export interface ITransferRequestCreation {
  * Exposes all fields present in transfer_request_vehicles_sugest as a typescript
  * interface.
  */
-export interface ITransferRequestVehiclesSugest {
-  transferRequestVehiclesSugest: any[];
+export interface ITransferRequestGeneral {
+  transferRequestVehiclesSugest: ITransferRequestVehicleSugest[];
+  was_completed: boolean;
+}
+
+interface ITransferRequestVehicleSugest {
+  id: number;
+  id_transfer_order: number;
+  id_transfer_request: number;
+  id_vehicle_type: number;
+  units: number;
+  vehicle_type_desc: string;
 }
 /**
  * Exposes all fields present in transfer_request_journey_info as a typescript
