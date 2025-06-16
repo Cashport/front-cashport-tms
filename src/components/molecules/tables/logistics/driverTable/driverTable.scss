@@ -27,11 +27,7 @@
         transform: rotate(-90deg);
     }
 
-    .ant-table-pagination {
-        margin-top: 80px !important;
-    }
-
-    .mainProjectsTable_header {
+    &__header {
         margin: 1rem 0;
         align-items: center;
         .search {
@@ -39,7 +35,7 @@
             height: 48px;
         }
         .options {
-            width: 48px;
+            width: 48px !important;
             height: 48px;
         }
     }

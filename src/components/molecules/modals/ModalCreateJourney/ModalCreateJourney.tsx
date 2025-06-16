@@ -77,7 +77,7 @@ const ModalCreateJourney = ({
     control,
     setValue,
     watch,
-    formState: { errors, isValid },
+    formState: { isValid },
     reset
   } = useForm<JourneyFormValues>({
     resolver: yupResolver(journeySchema) as any,

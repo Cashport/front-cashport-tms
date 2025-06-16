@@ -273,21 +273,21 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                         (item) => item.id === currentRequirementId
                       );
 
-                      const isOptional = requirementTypeMeta?.validity?.expiry === true;
+                      const isMandatory = requirementTypeMeta?.validity?.expiry === true;
 
                       return (
                         <Controller
                           control={control}
                           name={`rows.${index}.expirationDate`}
                           rules={{
-                            required: !isOptional || undefined
+                            required: isMandatory || undefined
                           }}
                           render={({ field }) => (
                             <DatePicker
                               {...field}
-                              disabled={isOptional}
+                              disabled={!isMandatory}
                               style={{ height: "40px" }}
-                              placeholder={isOptional ? "No requerido" : "Inserte fecha"}
+                              placeholder={!isMandatory ? "No requerido" : "Inserte fecha"}
                               value={field.value ? dayjs(field.value) : null}
                               onChange={(date) => field.onChange(date?.toISOString())}
                             />
@@ -336,6 +336,10 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                                 setValue(`rows.${index}.expirationDate`, undefined);
                               }
                             }}
+                            popupMatchSelectWidth={false}
+                            dropdownRender={(menu) => {
+                              return <div className="selectRequirementType__dropdown">{menu}</div>;
+                            }}
                           />
                         )}
                       />
@@ -365,7 +369,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                 ]}
                 pagination={false}
                 dataSource={rowsPerFile.map((row, idx) => ({ ...row, key: idx }))}
-                scroll={{ y: height - 400 }}
+                scroll={{ y: height && height - 400 }}
               />
 
               <FooterButtons

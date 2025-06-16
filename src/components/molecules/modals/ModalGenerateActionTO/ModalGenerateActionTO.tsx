@@ -10,6 +10,7 @@ import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/b
 import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
 import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 import { ModalCancelTR } from "../ModalCancelTR/ModalCancelTR";
+import { ModalConfirmAction } from "../ModalConfirmAction/ModalConfirmAction";
 import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
 
 export enum ViewEnum {
@@ -19,7 +20,8 @@ export enum ViewEnum {
   "CHANGE_CARRIER_VEHICLE" = "CHANGE_CARRIER_VEHICLE",
   "CANCEL_TR" = "CANCEL_TR",
   "MODIFY_REQUEST" = "MODIFY_REQUEST",
-  "PREAUTHORIZE_TRIP" = "PREAUTHORIZE_TRIP"
+  "PREAUTHORIZE_TRIP" = "PREAUTHORIZE_TRIP",
+  "MARK_AS_FIXED_INCOME" = "MARK_AS_FIXED_INCOME"
 }
 type PropsModalGenerateActionTO = {
   idTR: string;
@@ -33,6 +35,7 @@ type PropsModalGenerateActionTO = {
   handleChangeStatus?: (statusId: string) => Promise<void>;
   setNav: Dispatch<SetStateAction<NavEnum>>;
   transferRequest: ITransferRequestDetail | null;
+  handleMarkAsFixedIncome: () => void;
 };
 
 export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerateActionTO>) {
@@ -47,7 +50,8 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
     canChangeStatusToPorLegalizar,
     handleChangeStatus,
     setNav,
-    transferRequest
+    transferRequest,
+    handleMarkAsFixedIncome
   } = props;
   const [selectedView, setSelectedView] = useState<ViewEnum>(ViewEnum.SELECT_ACTION);
   const [selectedCarrier, setSelectedCarrier] = useState<number | null>(null);
@@ -107,6 +111,19 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             toIDs={transferRequest?.transfer_orders}
             trStatus={transferRequest?.status_id}
           />
+        );
+      case ViewEnum.MARK_AS_FIXED_INCOME:
+        return (
+          <>
+            <ModalConfirmAction
+              isOpen={selectedView === ViewEnum.MARK_AS_FIXED_INCOME}
+              onClose={() => setSelectedView(ViewEnum.SELECT_ACTION)}
+              title="Confirmar renta fija"
+              content="¿Estás seguro de que deseas marcar este pedido como renta fija?"
+              onOk={handleMarkAsFixedIncome}
+              noModal
+            />
+          </>
         );
       default:
         return (
