@@ -25,7 +25,6 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
     }
   );
 
-  console.log("data TrPricingSteperFetcher", data);
   if (isLoading || !data || isValidating) return <Spin />;
   const mutateStepthree = (journey: ITransferRequestJourneyReview[]) => {
     mutate({ ...data, stepThree: { journey } }, { revalidate: false });

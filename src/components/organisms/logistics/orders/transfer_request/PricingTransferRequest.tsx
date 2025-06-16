@@ -1094,6 +1094,7 @@ export default function PricingTransferRequest({
         messageApi={messageApi}
         isDeleteAction={isDeleteAction}
         handleRevalidate={handleRevalidate}
+        data={transferRequest}
       />
     </>
   );
