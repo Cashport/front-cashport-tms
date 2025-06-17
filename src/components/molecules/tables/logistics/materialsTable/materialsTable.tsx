@@ -37,7 +37,7 @@ export const MaterialsTable = () => {
 
   useEffect(() => {
     const data =
-      materials?.data?.data
+      materials?.data
         ?.filter((element: any) => {
           if (!search) return true;
           return element.description.toLowerCase().includes(search.toLowerCase());
