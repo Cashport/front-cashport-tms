@@ -383,3 +383,20 @@ export const postponeTR = async (
     throw error as any;
   }
 };
+
+interface IModifyOption {
+  id: number;
+  description: string;
+}
+
+export const getModifyOptions = async (): Promise<IModifyOption[]> => {
+  try {
+    const response: GenericResponse<IModifyOption[]> = await API.get(
+      `/transfer-request/modify-option`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error get all getModifyOptions: ", error);
+    return error as any;
+  }
+};

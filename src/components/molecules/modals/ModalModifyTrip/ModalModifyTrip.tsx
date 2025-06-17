@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Flex, Select } from "antd";
+import { useEffect, useState } from "react";
+import { Flex, message, Select } from "antd";
 import { CaretLeft } from "phosphor-react";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 import "./modalModifyTrip.scss";
 import { Controller, useForm } from "react-hook-form";
+import { getModifyOptions } from "@/services/logistics/transfer-request";
 
 interface Props {
   onCancel: () => void;
@@ -18,8 +19,25 @@ interface IFormValues {
 
 export const ModalModifyTrip = ({ onCancel }: Props) => {
   const [loading, setLoading] = useState(false);
-  // react hook form used below
+  const [options, setOptions] = useState<{ value: number; label: string }[]>([]);
+
   const { handleSubmit, control, register } = useForm<IFormValues>();
+
+  useEffect(() => {
+    const fetchModifyOptions = async () => {
+      try {
+        const response = await getModifyOptions();
+        const formattedOptions = response.map((option) => ({
+          value: option.id,
+          label: option.description
+        }));
+        setOptions(formattedOptions);
+      } catch (error) {
+        message.error("Error al cargar los motivos de modificación");
+      }
+    };
+    fetchModifyOptions();
+  }, []);
 
   const onSubmit = async (data: IFormValues) => {
     console.log("Form data submitted:", data);
@@ -54,10 +72,7 @@ export const ModalModifyTrip = ({ onCancel }: Props) => {
             <Select
               {...field}
               placeholder=" - "
-              options={[
-                { value: "Aprobar", label: "Aprobar" },
-                { value: "Rechazar", label: "Rechazar" }
-              ]}
+              options={options}
               className="modalModifyTrip__select"
             />
           )}
