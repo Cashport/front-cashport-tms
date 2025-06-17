@@ -11,6 +11,7 @@ import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
 import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 import { ModalCancelTR } from "../ModalCancelTR/ModalCancelTR";
 import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
+import { ModalModifyTrip } from "../ModalModifyTrip/ModalModifyTrip";
 
 export enum ViewEnum {
   "SELECT_ACTION" = "SELECT_ACTION",
@@ -18,7 +19,7 @@ export enum ViewEnum {
   "FINALIZE_TRIP" = "FINALIZE_TRIP",
   "CHANGE_CARRIER_VEHICLE" = "CHANGE_CARRIER_VEHICLE",
   "CANCEL_TR" = "CANCEL_TR",
-  "MODIFY_REQUEST" = "MODIFY_REQUEST",
+  "MODIFY_TRIP" = "MODIFY_TRIP",
   "PREAUTHORIZE_TRIP" = "PREAUTHORIZE_TRIP"
 }
 type PropsModalGenerateActionTO = {
@@ -108,6 +109,8 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             trStatus={transferRequest?.status_id}
           />
         );
+      case ViewEnum.MODIFY_TRIP:
+        return <ModalModifyTrip onCancel={() => setSelectedView(ViewEnum.SELECT_ACTION)} />;
       default:
         return (
           <ActionList

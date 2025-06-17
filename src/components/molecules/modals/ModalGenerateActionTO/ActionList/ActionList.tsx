@@ -51,10 +51,9 @@ const ActionList = ({
         onClick={() => setSelectedView(ViewEnum.CANCEL_TR)}
       />
       <ButtonGenerateAction
-        disabled={true}
         icon={<ArrowsClockwise size={20} />}
-        title="Modificar solicitud"
-        onClick={() => setSelectedView(ViewEnum.MODIFY_REQUEST)}
+        title="Modificar viaje"
+        onClick={() => setSelectedView(ViewEnum.MODIFY_TRIP)}
       />
       <ButtonGenerateAction
         disabled={!canPreauthorize}
