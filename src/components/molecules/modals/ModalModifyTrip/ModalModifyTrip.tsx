@@ -1,27 +1,42 @@
+"use client";
 import { useEffect, useState } from "react";
-import { Flex, message, Select } from "antd";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { Flex, message, Modal, Select } from "antd";
 import { CaretLeft } from "phosphor-react";
 
+import { finishTransferRequest, getModifyOptions } from "@/services/logistics/transfer-request";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
+import { TransferRequestFinish } from "@/types/logistics/transferRequest/transferRequest";
+
 import "./modalModifyTrip.scss";
-import { Controller, useForm } from "react-hook-form";
-import { getModifyOptions } from "@/services/logistics/transfer-request";
 
 interface Props {
   onCancel: () => void;
+  isOpen?: boolean;
+  TRData?: TransferRequestFinish;
 }
 
 interface IFormValues {
-  motive: string;
-  comment: string;
+  optionId: number;
+  observations: string;
 }
 
-export const ModalModifyTrip = ({ onCancel }: Props) => {
+// All fields optional
+type IFormValuesOptional = {
+  [K in keyof IFormValues]?: IFormValues[K];
+};
+
+export const ModalModifyTrip = ({ onCancel, isOpen, TRData }: Props) => {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<{ value: number; label: string }[]>([]);
 
-  const { handleSubmit, control, register } = useForm<IFormValues>();
+  const { handleSubmit, control, reset } = useForm<IFormValues>({
+    defaultValues
+  });
 
   useEffect(() => {
     const fetchModifyOptions = async () => {
@@ -39,63 +54,92 @@ export const ModalModifyTrip = ({ onCancel }: Props) => {
     fetchModifyOptions();
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) {
+      reset(defaultValues);
+    }
+  }, [isOpen]);
+
   const onSubmit = async (data: IFormValues) => {
-    console.log("Form data submitted:", data);
+    setLoading(true);
+
     try {
-      // Handle form submission
+      if (TRData) {
+        await finishTransferRequest(TRData, data);
+        message.success(`TR No. ${TRData.id} asignada`);
+        router.push("/logistics/transfer-orders");
+      } else {
+        message.error("No se encontró la información de la TR.");
+      }
     } catch (error) {
-      // Handle error
+      message.error("Error al finalizar la TR. Por favor, inténtelo de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="modalModifyTrip">
-      <button onClick={onCancel} className="modalModifyTrip__header">
-        <CaretLeft size="1.25rem" />
-        <span>Modificación de TR</span>
-      </button>
+    <Modal centered width={686} open={isOpen} footer={null} closable={false}>
+      <div className="modalModifyTrip">
+        <button onClick={onCancel} className="modalModifyTrip__header">
+          <CaretLeft size="1.25rem" />
+          <span>Modificación de TR</span>
+        </button>
 
-      <p className="modalModifyTrip__description">
-        Debes informar el motivo del cambio del precio de la TR{" "}
-      </p>
+        <p className="modalModifyTrip__description">
+          Debes informar el motivo del cambio del precio de la TR{" "}
+        </p>
 
-      <div className="modalModifyTrip__content">
-        <Flex vertical>
-          <h4>Motivo del cambio</h4>
-          <p>*Obligatorio</p>
-        </Flex>
-        <Controller
-          control={control}
-          name="motive"
-          rules={{ required: true }}
-          render={({ field }) => (
-            <Select
-              {...field}
-              placeholder=" - "
-              options={options}
-              className="modalModifyTrip__select"
-            />
-          )}
-        />
+        <div className="modalModifyTrip__content">
+          <Flex vertical>
+            <h4>Motivo del cambio</h4>
+            <p>*Obligatorio</p>
+          </Flex>
+          <Controller
+            control={control}
+            name="optionId"
+            rules={{ required: true }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                placeholder=" - "
+                options={options}
+                className="modalModifyTrip__select"
+              />
+            )}
+          />
 
-        <Flex vertical>
-          <h4>Comentarios</h4>
-          <p>*Obligatorio</p>
-        </Flex>
+          <Flex vertical>
+            <h4>Comentarios</h4>
+            <p>*Obligatorio</p>
+          </Flex>
 
-        <textarea
-          className="modalModifyTrip__textarea"
-          placeholder="Ingresar comentario"
-          {...register("comment", { required: "Comentario es obligatorio" })}
+          <Controller
+            control={control}
+            name="observations"
+            rules={{ required: "Comentario es obligatorio" }}
+            render={({ field }) => (
+              <textarea
+                {...field}
+                className="modalModifyTrip__textarea"
+                placeholder="Ingresar comentario"
+              />
+            )}
+          />
+        </div>
+
+        <FooterButtons
+          titleConfirm="Confirmar cambio"
+          handleOk={handleSubmit(onSubmit)}
+          onCancel={onCancel}
+          isConfirmLoading={loading}
         />
       </div>
-
-      <FooterButtons
-        titleConfirm="Confirmar cambio"
-        handleOk={handleSubmit(onSubmit)}
-        onCancel={onCancel}
-        isConfirmLoading={loading}
-      />
-    </div>
+    </Modal>
   );
+};
+
+const defaultValues: IFormValuesOptional = {
+  optionId: undefined,
+  observations: ""
 };

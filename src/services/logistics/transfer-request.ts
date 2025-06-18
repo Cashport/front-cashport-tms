@@ -155,8 +155,18 @@ export const getTransferRequestPricing = async ({
   );
 };
 
-export const finishTransferRequest = async (data: TransferRequestFinish) => {
-  const response: GenericResponse<boolean> = await API.post(`/transfer-request/finish`, data);
+export const finishTransferRequest = async (
+  data: TransferRequestFinish,
+  change?: {
+    optionId: number;
+    observations: string;
+  }
+) => {
+  const body = {
+    ...data,
+    ...(change && { change })
+  };
+  const response: GenericResponse<boolean> = await API.post(`/transfer-request/finish`, body);
   if (response.success) return response.data;
   throw new Error(
     response?.message || "Error obteniendo los pasos de la solicitud de transferencia"
