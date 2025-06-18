@@ -1,17 +1,21 @@
-import { Flex, Modal } from "antd";
-import { CaretLeft, X } from "phosphor-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import styles from "./ModalGenerateActionTO.module.scss";
+import { useRouter } from "next/navigation";
+import { Flex, Modal } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
+import { CaretLeft, X } from "phosphor-react";
+
+import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
 import ActionList from "./ActionList/ActionList";
 import CarrierList from "./CarrierList/CarrierList";
 import PreauthorizeTrip from "./PreauthorizeTrip/PreauthorizeTrip";
-import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/billing";
-import FinalizeTrip from "./FinalizeTrip/FinalizeTrip";
 import { NavEnum } from "@/components/organisms/logistics/transfer-orders/details/Details";
 import { ModalCancelTR } from "../ModalCancelTR/ModalCancelTR";
-import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
 import { ModalModifyTrip } from "../ModalModifyTrip/ModalModifyTrip";
+
+import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
+import { BillingByCarrier, BillingStatusEnum } from "@/types/logistics/billing/billing";
+
+import styles from "./ModalGenerateActionTO.module.scss";
 
 export enum ViewEnum {
   "SELECT_ACTION" = "SELECT_ACTION",
@@ -19,7 +23,6 @@ export enum ViewEnum {
   "FINALIZE_TRIP" = "FINALIZE_TRIP",
   "CHANGE_CARRIER_VEHICLE" = "CHANGE_CARRIER_VEHICLE",
   "CANCEL_TR" = "CANCEL_TR",
-  "MODIFY_TRIP" = "MODIFY_TRIP",
   "PREAUTHORIZE_TRIP" = "PREAUTHORIZE_TRIP"
 }
 type PropsModalGenerateActionTO = {
@@ -56,6 +59,8 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
     (billing) => billing.statusDesc === BillingStatusEnum.Aceptadas
   );
 
+  const router = useRouter();
+
   const renderView = () => {
     switch (selectedView) {
       case ViewEnum.SELECT_ACTION:
@@ -67,6 +72,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
             handleChangeStatus={handleChangeStatus}
             onClose={onClose}
+            handleModifyTrip={() => router.push(`/logistics/transfer-request/${idTR}`)}
           />
         );
       case ViewEnum.SELECT_CARRIER:
@@ -109,8 +115,6 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             trStatus={transferRequest?.status_id}
           />
         );
-      case ViewEnum.MODIFY_TRIP:
-        return <ModalModifyTrip onCancel={() => setSelectedView(ViewEnum.SELECT_ACTION)} />;
       default:
         return (
           <ActionList
@@ -120,6 +124,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             canChangeStatusToPorLegalizar={false}
             handleChangeStatus={handleChangeStatus}
             onClose={onClose}
+            handleModifyTrip={() => router.push(`/logistics/transfer-request/${idTR}`)}
           />
         );
     }
