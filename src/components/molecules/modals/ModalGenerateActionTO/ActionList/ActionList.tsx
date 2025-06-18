@@ -3,7 +3,7 @@ import { Flex } from "antd";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ArrowsClockwise, MapPinLine, MinusCircle } from "phosphor-react";
 import { ViewEnum } from "../ModalGenerateActionTO";
-import { Gavel } from "@phosphor-icons/react";
+import { CalendarDots, Gavel } from "@phosphor-icons/react";
 import { STATUS } from "@/utils/constants/globalConstants";
 
 const ActionList = ({
@@ -26,6 +26,12 @@ const ActionList = ({
 }) => {
   return (
     <Flex style={{ width: "100%", height: "100%" }} gap={12} vertical>
+      <ButtonGenerateAction
+        disabled={!canChangeStatusToPorLegalizar}
+        icon={<CalendarDots size={20} />}
+        title="Es Renta fija - Disponibilidad"
+        onClick={() => setSelectedView(ViewEnum.MARK_AS_FIXED_INCOME)}
+      />
       <ButtonGenerateAction
         disabled={!canChangeStatusToPorLegalizar}
         icon={<MapPinLine size={20} />}

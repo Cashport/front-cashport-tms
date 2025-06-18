@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Novelty } from "./novelty/Novelty";
 import {
   getTransferRequestDetail,
+  toggleFixedRate,
   updateTransferRequestStatus
 } from "@/services/logistics/transfer-request";
 import { useParams, useRouter } from "next/navigation";
@@ -297,6 +298,17 @@ export const TransferOrderDetails = () => {
     setIsCreateNovelty(true);
   };
 
+  const handleMarkAsFixedIncome = async () => {
+    setIsModalVisible(false);
+    try {
+      await toggleFixedRate(transferRequest?.id || 0);
+      message.success("Renta fija marcada exitosamente");
+      findDetails();
+    } catch (error) {
+      message.error("Error al marcar como renta fija");
+    }
+  };
+
   useEffect(() => {
     if (!isModalVisible && !isModalBillingVisible) {
       findDetails();
@@ -413,6 +425,7 @@ export const TransferOrderDetails = () => {
         handleChangeStatus={handleChangeStatus}
         setNav={setNav}
         transferRequest={transferRequest}
+        handleMarkAsFixedIncome={handleMarkAsFixedIncome}
       />
       <ModalBillingMT
         mode="edit"

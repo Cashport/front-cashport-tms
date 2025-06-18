@@ -195,7 +195,7 @@ const DocumentList = ({ onClose, subjectId, listType, addNewDocument }: Props) =
         pagination={false}
         rowKey="key"
         size="small"
-        scroll={{ y: height - 300 }}
+        scroll={{ y: height && height - 300 }}
         summary={() => (
           <Table.Summary.Row>
             <Table.Summary.Cell colSpan={columns.length} index={0}>

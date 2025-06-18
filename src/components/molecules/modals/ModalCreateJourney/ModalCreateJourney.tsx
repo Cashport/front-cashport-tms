@@ -11,7 +11,11 @@ import { defaultJourneyValues } from "./utils/defaultTripFormValues";
 import Booking from "./Booking/Booking";
 import { createJourney, deleteJourney, updateJourney } from "./services/createJourney";
 import { MODE_PRICING } from "@/components/organisms/logistics/orders/transfer_request/constant/constants";
-import { ITrackingResponse, ITransferOrdersRequest } from "@/types/logistics/schema";
+import {
+  ITrackingResponse,
+  ITransferOrdersRequest,
+  ITransferRequestCreation
+} from "@/types/logistics/schema";
 import { FooterButtons } from "./components/FooterButtons/FooterButtons";
 import {
   combineDateTimeDayjs,
@@ -46,6 +50,7 @@ type ModalCreateJourneyProps = {
   messageApi: MessageInstance;
   isDeleteAction: boolean;
   handleRevalidate?: () => void;
+  data: ITransferRequestCreation;
 };
 
 const ModalCreateJourney = ({
@@ -58,7 +63,8 @@ const ModalCreateJourney = ({
   setOrders,
   messageApi,
   isDeleteAction,
-  handleRevalidate
+  handleRevalidate,
+  data: transferRequestData
 }: ModalCreateJourneyProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formMode, setFormMode] = useState<FormMode>(FormMode.CREATION);
@@ -71,7 +77,7 @@ const ModalCreateJourney = ({
     control,
     setValue,
     watch,
-    formState: { errors, isValid },
+    formState: { isValid },
     reset
   } = useForm<JourneyFormValues>({
     resolver: yupResolver(journeySchema) as any,
@@ -295,6 +301,7 @@ const ModalCreateJourney = ({
           isValid={isValid}
           formMode={formMode}
           isLoadingSubmit={isLoadingSubmit}
+          isTRCompleted={transferRequestData?.general?.was_completed}
         />
       ),
       footer: <></>

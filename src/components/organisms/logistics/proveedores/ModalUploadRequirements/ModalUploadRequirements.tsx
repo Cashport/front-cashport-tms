@@ -369,7 +369,7 @@ const ModalUploadRequirements = ({ isOpen, onClose, documentsTypesList, onUpload
                 ]}
                 pagination={false}
                 dataSource={rowsPerFile.map((row, idx) => ({ ...row, key: idx }))}
-                scroll={{ y: height - 400 }}
+                scroll={{ y: height && height - 400 }}
               />
 
               <FooterButtons

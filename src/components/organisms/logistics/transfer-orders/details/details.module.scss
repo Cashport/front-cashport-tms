@@ -1,84 +1,80 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    row-gap: 2rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
 
-    .card {
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      row-gap: 2rem;
-      background-color: #FFFFFF;
-      border-radius: 15px;
-      border: 1px solid #DDD;
-      box-shadow: -6px 6px 32px 0px rgba(0, 0, 0, 0.2);
-
-      .navContainer {
+    .navContainer {
         display: flex;
         column-gap: 2rem;
-        border-bottom: 1px solid #DDD;
+        border-bottom: 1px solid #ddd;
 
         .nav {
-          padding-bottom: 4px;
-          color: #DDD;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
+            padding-bottom: 4px;
+            color: #ddd;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
 
-          &.active {
-            color: #141414;
-            font-weight: 700;
-            border-bottom: 1px solid #141414;
-          }
+            &.active {
+                color: #141414;
+                font-weight: 700;
+                border-bottom: 1px solid #141414;
+            }
         }
-      }
+    }
 
-      .titleContainer {
+    .titleContainer {
         display: flex;
         justify-content: space-between;
         align-items: center;
 
         .backContainer {
-          display: flex;
-          column-gap: 10px;
-          align-items: center;
-          cursor: pointer;
+            display: flex;
+            column-gap: 10px;
+            align-items: center;
+            cursor: pointer;
 
-          .title {
-            color: #141414;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.12px;
-          }
+            .title {
+                color: #141414;
+                font-size: 24px;
+                font-weight: 700;
+                letter-spacing: -0.12px;
+            }
         }
 
         .btnContainer {
-          display: flex;
-          column-gap: 8px;
+            display: flex;
+            column-gap: 8px;
 
-          .actionBtn {
-            background-color: #F7F7F7;
-          }
+            .actionBtn {
+                background-color: #f7f7f7;
+            }
 
-          .tranckingBtn {
-            background-color: #CBE71E;
-          }
+            .tranckingBtn {
+                background-color: #cbe71e;
+            }
 
-          .text {
-            color: var(--Black, #141414);
-            font-size: 16px;
-            font-weight: 600;
-          }
+            .text {
+                color: var(--Black, #141414);
+                font-size: 16px;
+                font-weight: 600;
+            }
         }
-      }
+    }
 
-      .dot {
+    .dot {
         width: 28px;
         height: 28px;
         border-radius: 50%;
-        background-color: #CBE71E;
+        background-color: #cbe71e;
         color: #141414;
         text-align: center;
         font-size: 16px;
         font-weight: 400;
         padding-top: 2px;
         letter-spacing: -0.08px;
-      }
     }
-  
+}
