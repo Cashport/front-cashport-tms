@@ -12,7 +12,8 @@ const ActionList = ({
   canFinalizeTrip = true,
   canChangeStatusToPorLegalizar,
   handleChangeStatus,
-  onClose
+  onClose,
+  handleModifyTrip
 }: {
   setSelectedView: Dispatch<SetStateAction<ViewEnum>>;
   canPreauthorize: boolean;
@@ -21,6 +22,7 @@ const ActionList = ({
   // eslint-disable-next-line no-unused-vars
   handleChangeStatus?: (statusId: string) => Promise<void>;
   onClose: () => void;
+  handleModifyTrip: () => void;
 }) => {
   return (
     <Flex style={{ width: "100%", height: "100%" }} gap={12} vertical>
@@ -57,10 +59,9 @@ const ActionList = ({
         onClick={() => setSelectedView(ViewEnum.CANCEL_TR)}
       />
       <ButtonGenerateAction
-        disabled={true}
         icon={<ArrowsClockwise size={20} />}
-        title="Modificar solicitud"
-        onClick={() => setSelectedView(ViewEnum.MODIFY_REQUEST)}
+        title="Modificar viaje"
+        onClick={handleModifyTrip}
       />
       <ButtonGenerateAction
         disabled={!canPreauthorize}
