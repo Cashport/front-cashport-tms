@@ -64,6 +64,7 @@ import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
 import { CalendarX } from "phosphor-react";
 import ChipsRow from "../DetailsOrderView/components/ChipsRow";
+import { ModalModifyTrip } from "@/components/molecules/modals/ModalModifyTrip/ModalModifyTrip";
 
 const { Title, Text } = Typography;
 
@@ -119,6 +120,12 @@ export default function PricingTransferRequest({
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
   const [modalCarrier, setModalCarrier] = useState(false);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
+  const [isModalModifyTripOpen, setIsModalModifyTripOpen] = useState<{
+    open: boolean;
+    data?: TransferRequestFinish;
+  }>({
+    open: false
+  });
 
   const [selectedTrip, setSelectedTrip] = useState<any>(null);
   const [isDeleteAction, setIsDeleteAction] = useState<boolean>(false);
@@ -461,6 +468,14 @@ export default function PricingTransferRequest({
   };
 
   const handleFinish = async (data: TransferRequestFinish) => {
+    if (transferRequest?.general?.was_completed) {
+      // open modal to modify trip
+      return setIsModalModifyTripOpen({
+        open: true,
+        data
+      });
+    }
+
     try {
       await finishTransferRequest(data);
       message.success(`TR No. ${id} asignada`);
@@ -1094,6 +1109,17 @@ export default function PricingTransferRequest({
         messageApi={messageApi}
         isDeleteAction={isDeleteAction}
         handleRevalidate={handleRevalidate}
+        data={transferRequest}
+      />
+      <ModalModifyTrip
+        isOpen={isModalModifyTripOpen.open}
+        onCancel={() =>
+          setIsModalModifyTripOpen({
+            open: false,
+            data: undefined
+          })
+        }
+        TRData={isModalModifyTripOpen.data}
       />
     </>
   );

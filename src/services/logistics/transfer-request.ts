@@ -155,8 +155,18 @@ export const getTransferRequestPricing = async ({
   );
 };
 
-export const finishTransferRequest = async (data: TransferRequestFinish) => {
-  const response: GenericResponse<boolean> = await API.post(`/transfer-request/finish`, data);
+export const finishTransferRequest = async (
+  data: TransferRequestFinish,
+  change?: {
+    optionId: number;
+    observations: string;
+  }
+) => {
+  const body = {
+    ...data,
+    ...(change && { change })
+  };
+  const response: GenericResponse<boolean> = await API.post(`/transfer-request/finish`, body);
   if (response.success) return response.data;
   throw new Error(
     response?.message || "Error obteniendo los pasos de la solicitud de transferencia"
@@ -381,5 +391,35 @@ export const postponeTR = async (
   } catch (error) {
     console.error("Error aplazando la(s) TR: ", error);
     throw error as any;
+  }
+};
+
+export const toggleFixedRate = async (transferRequestId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(`/transfer-request/toggle-fixed-rate`, {
+      transferRequestId
+    });
+    if (response.success) return response.data;
+    throw new Error(response?.message || "Error al cambiar la tarifa fija");
+  } catch (error) {
+    console.error("Error toggleFixedRate: ", error);
+    throw error as any;
+  }
+};
+
+interface IModifyOption {
+  id: number;
+  description: string;
+}
+
+export const getModifyOptions = async (): Promise<IModifyOption[]> => {
+  try {
+    const response: GenericResponse<IModifyOption[]> = await API.get(
+      `/transfer-request/modify-option`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error get all getModifyOptions: ", error);
+    return error as any;
   }
 };

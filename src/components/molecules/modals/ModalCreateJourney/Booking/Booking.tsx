@@ -1,5 +1,5 @@
 import { DatePicker, Flex, Select, Switch, TimePicker, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import styles from "./Booking.module.scss";
 import { FooterButtons } from "../components/FooterButtons/FooterButtons";
 import { FormMode, Journey, JourneyFormValues, OPTIONS_FLEXBILE, typeOfTrip } from "../utils/types";
@@ -16,7 +16,7 @@ import MapInfoContainer from "../components/MapInfoContainer/MapInfoContainer";
 import CustomTimeSelector from "@/components/molecules/logistics/HourPicker/HourPicker";
 
 // dayjs locale
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import tz from "dayjs/plugin/timezone";
@@ -40,6 +40,7 @@ type TypeOfTripProps = {
   isValid: boolean;
   formMode: FormMode;
   isLoadingSubmit: boolean;
+  isTRCompleted?: boolean;
 };
 
 const Booking = ({
@@ -53,7 +54,8 @@ const Booking = ({
   watch,
   isValid,
   formMode,
-  isLoadingSubmit
+  isLoadingSubmit,
+  isTRCompleted
 }: TypeOfTripProps) => {
   const { locations, locationOptions } = useLocations();
 
@@ -66,9 +68,6 @@ const Booking = ({
   const startDate = watch("startDate");
   const origin = watch("origin");
   const destination = watch("destination");
-
-  console.log("origin", origin);
-  console.log("destination", destination);
 
   const { distance, duration, timeTravel, route } = useMapboxDirections(
     origin?.coordinates,
@@ -137,6 +136,8 @@ const Booking = ({
 
   const now = dayjs();
   const disabledDate: RangePickerProps["disabledDate"] = (current: any) => {
+    // if TR is true, any date can be selected
+    if (isTRCompleted) return false;
     // Can not select days before today
     return current?.isBefore(now, "day");
   };
@@ -249,6 +250,10 @@ const Booking = ({
                       className={styles.select}
                     />
                   )}
+
+                  //
+                  //
+                  //
                 />
               </Flex>
               <Flex gap={24}>

@@ -20,10 +20,9 @@ const TypeOfTrip = ({
   handleNext,
   disabled
 }: TypeOfTripProps) => {
-  console.log("typeActive", typeActive);
   return (
     <Flex vertical gap={24}>
-      <Flex gap={32}>
+      <div className={styles.tripTypesContainer}>
         <button
           type="button"
           id={"CARGA"}
@@ -87,7 +86,7 @@ const TypeOfTrip = ({
             <div className="text">Personal</div>
           </div>
         </button>
-      </Flex>
+      </div>
       <FooterButtons
         backTitle="Cancelar"
         nextTitle="Siguiente"

@@ -8,6 +8,7 @@ import { IUser } from "@/types/logistics/schema";
 import { getAllUsers } from "@/services/logistics/users";
 import useSWR from "swr";
 import Link from "next/link";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 const { Text } = Typography;
 
@@ -15,6 +16,8 @@ export const UsersTable = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [datasource, setDatasource] = useState<any[]>([]);
+
+  const height = useScreenHeight();
 
   const { data: users, isLoading } = useSWR(
     {
@@ -114,10 +117,7 @@ export const UsersTable = () => {
       dataIndex: "",
       render: (_, { id }) => (
         <Link href={`/logistics/configuration/users/${id}`} type="text">
-          <Button
-            className="icon-detail"
-            icon={<Eye size={20} />}
-          />
+          <Button className="icon-detail" icon={<Eye size={20} />} />
         </Link>
       )
     }
@@ -146,7 +146,7 @@ export const UsersTable = () => {
       </Flex>
       {!isLoading ? (
         <Table
-          scroll={{ y: "61dvh", x: undefined }}
+          scroll={{ y: height ? height - 400 : undefined }}
           columns={columns as TableProps<any>["columns"]}
           loading={isLoading}
           pagination={{
