@@ -204,5 +204,5 @@ export const Request: FC<IRequestProps> = ({
       </div>
     );
 
-  return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
+  return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} stickyLabel />;
 };

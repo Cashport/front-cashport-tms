@@ -1,0 +1,16 @@
+@import "@/styles/variables.scss";
+
+.genericCollapse {
+    &.sticky {
+        .ant-collapse-item {
+            position: relative; // Create positioning context
+        }
+
+        .ant-collapse-header {
+            position: sticky !important;
+            top: var(--sticky-offset) !important;
+            z-index: 2 !important;
+            background-color: $white;
+        }
+    }
+}
