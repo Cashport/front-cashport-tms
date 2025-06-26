@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import styles from "./details.module.scss";
 import { CaretDoubleRight, CaretLeft, DotsThree } from "phosphor-react";
+import { AxiosError } from "axios";
 import { Button, Drawer, Flex, message, Modal, Typography } from "antd";
 import { MainDescription } from "./main-description/MainDescription";
 import { Step } from "./step/Step";
@@ -266,9 +267,19 @@ export const TransferOrderDetails = () => {
 
   const handleChangeStatus = async (statusId: string) => {
     if (transferRequest) {
-      const updateStatus = await updateTransferRequestStatus(transferRequest?.id, statusId);
-      if (updateStatus) {
-        findDetails();
+      try {
+        const updateStatus = await updateTransferRequestStatus(transferRequest?.id, statusId);
+        if (updateStatus) {
+          findDetails();
+        }
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        console.error(axiosError.message);
+        if (axiosError.message) {
+          message.error(axiosError.message);
+        } else {
+          message.error("Error al actualizar el estado del viaje");
+        }
       }
     }
   };
