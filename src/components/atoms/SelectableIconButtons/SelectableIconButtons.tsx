@@ -24,7 +24,7 @@ const SelectableIconButtons: React.FC<SelectableIconButtonsProps> = ({
   className
 }) => {
   return (
-    <Flex gap="1rem" className={className}>
+    <Flex gap="1rem" className={className} style={{ flexWrap: "wrap" }}>
       {options.map((option) => (
         <button
           key={option.id}

@@ -67,6 +67,10 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
           activeId={typeActive}
           onChange={setTypeActive}
         />
+
+        {/* TO DO: Add the locationsComponent  */}
+
+        {/* TO DO: Add the order Summary card  */}
       </Flex>
 
       {/* MAP */}
