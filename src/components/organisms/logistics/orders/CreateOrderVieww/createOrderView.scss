@@ -1,0 +1,10 @@
+@import "@/styles/variables.scss";
+
+.createOrderView {
+    .separator {
+        border: none;
+        height: 1px;
+        background-color: $dark-gray;
+        margin: 0 -32px;
+    }
+}
