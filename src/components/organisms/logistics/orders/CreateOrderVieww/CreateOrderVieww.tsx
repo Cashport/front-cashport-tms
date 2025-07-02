@@ -1,21 +1,23 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
-
 import { Flex } from "antd";
+
 import Container from "@/components/atoms/Container/Container";
+import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
+import SchedulingView from "./components/SchedulingView/SchedulingView";
 
 import "./createOrderView.scss";
-import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
+
+export type IViewOption = "scheduling" | "load" | "responsibles";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<"scheduling" | "load" | "responsibles">("scheduling");
+  const [view, setView] = useState<IViewOption>("scheduling");
 
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
-  const renderView = (currentView: "scheduling" | "load" | "responsibles") => {
+  const renderView = (currentView: IViewOption) => {
     switch (currentView) {
       case "scheduling":
-        return <div>Scheduling View</div>;
+        return <SchedulingView setView={setView} />;
       case "load":
         return <div>Load View</div>;
       case "responsibles":
@@ -26,7 +28,7 @@ export const CreateOrderVieww: React.FC = () => {
   };
 
   return (
-    <Container>
+    <Container customStyles={{ height: "auto" }}>
       <Flex vertical className="createOrderView">
         {/* ------------Main Info Order-------------- */}
         <CustomStepper steps={steps} currentStepIndex={currentStepIndex} />
