@@ -65,7 +65,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
   return (
     <div className="schedulingView">
       {/* Form */}
-      <Flex vertical gap={"1.5rem"}>
+      <Flex vertical gap={"1.5rem"} style={{ paddingLeft: "1rem" }}>
         <SelectableIconButtons
           options={tripTypeOptions}
           activeId={typeActive}
@@ -73,7 +73,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
         />
 
         {/* TO DO: Add the locationsComponent  */}
-        <SelectLocationAndTime />
+        <SelectLocationAndTime selectedType={typeActive} />
 
         {/* TO DO: Add the order Summary card  */}
       </Flex>

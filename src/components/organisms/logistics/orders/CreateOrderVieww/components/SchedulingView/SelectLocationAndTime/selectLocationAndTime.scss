@@ -13,6 +13,8 @@
         align-items: center;
         padding-left: 5px;
         width: 100%;
+        // lets make a margin left according to stepLine and gap
+        margin-left: -23px;
 
         &:last-child {
             min-height: auto;
@@ -35,9 +37,10 @@
 
             .stepLine {
                 position: absolute;
-                width: 2px;
+                width: 1px;
                 height: 100%;
                 border-left: 1px dashed $black;
+                margin-left: 1px;
 
                 &.first {
                     top: 50%;
@@ -62,16 +65,45 @@
         width: 100%;
         border-left: 1px dashed $black;
         margin: 1px 0;
-        margin-left: 9px;
+        margin-left: -13px;
 
         &.noShow {
             display: none;
         }
     }
+
     .timeAndLocationCard {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
         width: 100%;
+        max-width: 660px;
         background-color: $background;
         padding: 1rem;
         border-radius: 4px;
+
+        .check {
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            grid-column: 8 / 11;
+            white-space: nowrap;
+        }
+
+        .inputNumber {
+            grid-column: 11 / -1;
+            min-width: 10px;
+        }
+
+        .inputDate {
+            grid-column: 1 / 7;
+        }
+        .inputTime {
+            grid-column: 7 / -1;
+        }
     }
+}
+
+.ant-input-number {
+    width: auto !important;
 }

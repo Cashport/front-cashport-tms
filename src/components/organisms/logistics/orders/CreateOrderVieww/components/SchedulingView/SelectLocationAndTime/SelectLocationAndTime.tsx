@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Select } from "antd";
+import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
+import { DotOutline } from "@phosphor-icons/react";
 
 import { getAllLocations } from "@/services/logistics/locations";
 
 import "./selectLocationAndTime.scss";
-import { DotOutline } from "@phosphor-icons/react";
 
 interface ISelectOption {
   label: string;
   value: number;
 }
 
-interface SelectLocationAndTimeProps {}
+interface SelectLocationAndTimeProps {
+  selectedType: string;
+}
 
-const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = () => {
+const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedType }) => {
   const [locationOptions, setLocationOptions] = useState<ISelectOption[]>([]);
 
   useEffect(() => {
@@ -31,6 +34,8 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = () => {
     loadLocations();
   }, []);
 
+  const showRaising = selectedType === "1";
+
   const mockSteps = [
     {
       content: (
@@ -38,11 +43,36 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = () => {
           <Select
             showSearch
             placeholder="Origen"
-            style={{ width: "100%" }}
+            style={{ gridColumn: showRaising ? "1 / 8" : "1 / -1" }}
             filterOption={(input: string, option?: { label: string; value: number }) => {
               return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
             }}
             options={locationOptions}
+          />
+
+          {showRaising && (
+            <>
+              <Checkbox className="check">{"Requiere izaje"}</Checkbox>
+
+              <InputNumber
+                className="inputNumber"
+                style={{ gridColumn: "11 / -1" }}
+                placeholder="0"
+                min={0}
+              />
+            </>
+          )}
+
+          <DatePicker placeholder="aaaa-mm-dd" className="inputDate" />
+
+          <TimePicker
+            className="inputTime"
+            placeholder="00:00"
+            format={"HH:mm"}
+            minuteStep={15}
+            hourStep={1}
+            needConfirm={false}
+            type={"time"}
           />
         </div>
       ),
@@ -52,13 +82,39 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = () => {
       content: (
         <div className="timeAndLocationCard">
           <Select
+            className="selectPlace"
             showSearch
-            placeholder="Origen"
-            style={{ width: "100%" }}
+            placeholder="Destino"
+            style={{ width: "100%", gridColumn: showRaising ? "1 / 8" : "1 / -1" }}
             filterOption={(input: string, option?: { label: string; value: number }) => {
               return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
             }}
             options={locationOptions}
+          />
+
+          {showRaising && (
+            <>
+              <Checkbox className="check">{"Requiere izaje"}</Checkbox>
+
+              <InputNumber
+                className="inputNumber"
+                style={{ gridColumn: "11 / -1" }}
+                placeholder="0"
+                min={0}
+              />
+            </>
+          )}
+
+          <DatePicker placeholder="aaaa-mm-dd" className="inputDate" />
+
+          <TimePicker
+            className="inputTime"
+            placeholder="00:00"
+            format={"HH:mm"}
+            minuteStep={15}
+            hourStep={1}
+            needConfirm={false}
+            type={"time"}
           />
         </div>
       ),
