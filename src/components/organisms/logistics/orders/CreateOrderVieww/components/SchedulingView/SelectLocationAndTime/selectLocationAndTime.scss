@@ -1,0 +1,77 @@
+@import "@/styles/variables.scss";
+
+.selectLocationAndTime {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .stepItem {
+        display: flex;
+        column-gap: 10px;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        padding-left: 5px;
+        width: 100%;
+
+        &:last-child {
+            min-height: auto;
+            padding-bottom: 0;
+        }
+
+        .stepCircleContainer {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+
+            .stepCircle {
+                z-index: 2;
+                height: fit-content;
+                margin: -10px;
+                background-color: $white;
+            }
+
+            .stepLine {
+                position: absolute;
+                width: 2px;
+                height: 100%;
+                border-left: 1px dashed $black;
+
+                &.first {
+                    top: 50%;
+                    height: 50%;
+                }
+                &.last {
+                    height: 50%;
+                    bottom: 50%;
+                }
+            }
+        }
+
+        .stepLabel {
+            display: flex;
+            margin-top: -7px;
+            width: 100%;
+        }
+    }
+
+    .divider {
+        height: 1.5rem;
+        width: 100%;
+        border-left: 1px dashed $black;
+        margin: 1px 0;
+        margin-left: 9px;
+
+        &.noShow {
+            display: none;
+        }
+    }
+    .timeAndLocationCard {
+        width: 100%;
+        background-color: $background;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+}

@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useRef, useState } from "react";
-import { IViewOption } from "../../CreateOrderVieww";
+import { Flex } from "antd";
+import { Calendar, Crane, Truck, User } from "@phosphor-icons/react";
 
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 
@@ -8,12 +9,15 @@ import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-import "./schedulingView.scss";
+// Components
+import SelectLocationAndTime from "./SelectLocationAndTime/SelectLocationAndTime";
 import SelectableIconButtons, {
   TripTypeOption
 } from "@/components/atoms/SelectableIconButtons/SelectableIconButtons";
-import { Flex } from "antd";
-import { Calendar, Crane, Truck, User } from "@phosphor-icons/react";
+
+import { IViewOption } from "../../CreateOrderVieww";
+
+import "./schedulingView.scss";
 
 interface SchedulingViewProps {
   setView: React.Dispatch<React.SetStateAction<IViewOption>>;
@@ -61,7 +65,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
   return (
     <div className="schedulingView">
       {/* Form */}
-      <Flex vertical>
+      <Flex vertical gap={"1.5rem"}>
         <SelectableIconButtons
           options={tripTypeOptions}
           activeId={typeActive}
@@ -69,6 +73,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
         />
 
         {/* TO DO: Add the locationsComponent  */}
+        <SelectLocationAndTime />
 
         {/* TO DO: Add the order Summary card  */}
       </Flex>

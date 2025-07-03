@@ -3725,3 +3725,15 @@ export interface ITripSummaryAPI {
   //psls y ccs asociados
   transfer_order_psl?: ITransferOrderPsls[] | null;
 }
+
+export interface ISelectLocation {
+  id: number;
+  description: string;
+  citydesc: string;
+  statedesc: string;
+  postal_code: string;
+  latitude: number;
+  longitude: number;
+  location_type: string;
+  active: boolean;
+}
