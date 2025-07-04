@@ -18,6 +18,7 @@ import SelectLocationAndTime from "./SelectLocationAndTime/SelectLocationAndTime
 import SelectableIconButtons, {
   TripTypeOption
 } from "@/components/atoms/SelectableIconButtons/SelectableIconButtons";
+import SummaryCard from "./SummaryCard/SummaryCard";
 
 import { IDirectionsMapboxResponse, IGeometry, ISelectLocation } from "@/types/logistics/schema";
 
@@ -253,7 +254,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView, control, setVa
           onChangeDestination={onChangeDestination}
         />
 
-        {/* TO DO: Add the order Summary card  */}
+        <SummaryCard distance={tripInfoMap?.distance} duration={tripInfoMap?.duration} />
       </Flex>
 
       {/* MAP */}
