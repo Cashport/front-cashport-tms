@@ -3737,3 +3737,65 @@ export interface ISelectLocation {
   location_type: string;
   active: boolean;
 }
+
+export interface IIntersection {
+  entry: boolean[];
+  bearings: number[];
+  duration?: number;
+  mapbox_streets_v8?: any;
+  is_urban?: boolean;
+  admin_index: number;
+  out?: number;
+  weight?: number;
+  geometry_index: number;
+  railway_crossing?: boolean;
+  location: [number, number];
+}
+
+export interface IStep {
+  intersections: IIntersection[];
+  maneuver?: any;
+  name: string;
+  duration: number;
+  distance: number;
+  driving_side?: string;
+  weight: number;
+  mode?: string;
+  geometry: IGeometry[];
+}
+
+export interface IRouteLeg {
+  via_waypoints: any[];
+  admins: any[];
+  weight: number;
+  duration: number;
+  steps: IStep[];
+  distance: number;
+  summary?: string;
+}
+
+export interface IGeometry {
+  coordinates: [number, number][]; // Array of coordinates in [longitude, latitude] format
+  type: string;
+}
+export interface IRoute {
+  weight_name: string;
+  weight: number;
+  duration: number;
+  distance: number;
+  legs: IRouteLeg[];
+  geometry: IGeometry;
+}
+
+export interface IWaypoint {
+  name: string;
+  location: [number, number]; // [longitude, latitude]
+  distance?: number;
+}
+
+export interface IDirectionsMapboxResponse {
+  routes: IRoute[];
+  waypoints: IWaypoint[];
+  code: string;
+  uuid: string;
+}

@@ -1,47 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Control, Controller, useFieldArray } from "react-hook-form";
 import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
 import { DotOutline, Plus, Trash } from "@phosphor-icons/react";
 
-import { getAllLocations } from "@/services/logistics/locations";
-
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
+import { ISelectOption } from "../SchedulingView";
 
 import "./selectLocationAndTime.scss";
-
-interface ISelectOption {
-  label: string;
-  value: number;
-}
 
 interface SelectLocationAndTimeProps {
   selectedType: string;
   control: Control<IFormCreateOrder, any>;
+  locationOptions?: ISelectOption[];
+  // eslint-disable-next-line no-unused-vars
+  onChangeOrigin: (value: number) => void;
+  // eslint-disable-next-line no-unused-vars
+  onChangeDestination: (value: number) => void;
 }
 
-const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedType, control }) => {
-  const [locationOptions, setLocationOptions] = useState<ISelectOption[]>([]);
-
+const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
+  selectedType,
+  control,
+  locationOptions,
+  onChangeOrigin,
+  onChangeDestination
+}) => {
   const { fields, remove, insert } = useFieldArray({
     control,
     name: "TripDetails"
   });
-
-  useEffect(() => {
-    const loadLocations = async () => {
-      if (locationOptions.length) return;
-      const result = await getAllLocations();
-      if (result?.data?.length) {
-        const locationOptions = result.data.map((item) => ({
-          label: item.description,
-          value: item.id
-        }));
-        setLocationOptions(locationOptions);
-      }
-    };
-    loadLocations();
-  }, []);
 
   const showRaising = selectedType === "1";
 
@@ -82,7 +70,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedT
             </div>
 
             <div className="stepLabel">
-              <Flex gap="0.5rem" align="center">
+              <Flex gap="0.5rem" align="center" style={{ width: "100%" }}>
                 <div className="timeAndLocationCard">
                   {/* Place/Location select */}
                   <Controller
@@ -102,6 +90,17 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedT
                           return (
                             option?.label?.toLowerCase().includes(input.toLowerCase()) ?? false
                           );
+                        }}
+                        onChange={(value) => {
+                          field.onChange(value);
+
+                          if (i === 0) {
+                            onChangeOrigin(value);
+                          }
+
+                          if (i === fields.length - 1) {
+                            onChangeDestination(value);
+                          }
                         }}
                       />
                     )}

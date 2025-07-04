@@ -8,6 +8,8 @@ import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
+import { IRoute } from "@/types/logistics/schema";
+
 import "./createOrderView.scss";
 
 type ITripForm = {
@@ -20,6 +22,7 @@ type ITripForm = {
 
 export interface IFormCreateOrder {
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
+  geometry: IRoute[]; // en el submit se manda  todo esto
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";
@@ -27,7 +30,7 @@ export type IViewOption = "scheduling" | "load" | "responsibles";
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
 
-  const { control, handleSubmit } = useForm<IFormCreateOrder>({
+  const { control, handleSubmit, setValue } = useForm<IFormCreateOrder>({
     defaultValues: {
       TripDetails: [
         {
@@ -53,7 +56,7 @@ export const CreateOrderVieww: React.FC = () => {
   const renderView = (currentView: IViewOption) => {
     switch (currentView) {
       case "scheduling":
-        return <SchedulingView setView={setView} control={control} />;
+        return <SchedulingView setView={setView} control={control} setValue={setValue} />;
       case "load":
         return <div>Load View</div>;
       case "responsibles":
