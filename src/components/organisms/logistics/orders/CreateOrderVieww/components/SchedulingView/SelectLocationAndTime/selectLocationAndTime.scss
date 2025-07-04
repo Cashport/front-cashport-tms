@@ -82,6 +82,10 @@
         padding: 1rem;
         border-radius: 4px;
 
+        .selectPlace {
+            height: 40px;
+        }
+
         .check {
             display: flex;
             align-items: center;
@@ -93,17 +97,43 @@
         .inputNumber {
             grid-column: 11 / -1;
             min-width: 10px;
+            height: 40px;
         }
 
         .inputDate {
             grid-column: 1 / 7;
+            height: 40px;
         }
         .inputTime {
             grid-column: 7 / -1;
+            height: 40px;
+        }
+    }
+
+    .addStopButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        transition: all 0.3s ease-in-out;
+        width: fit-content;
+        font-family: inherit;
+        font-size: 1rem;
+        margin-top: 0.75rem;
+
+        &:hover {
+            opacity: 0.8;
         }
     }
 }
 
 .ant-input-number {
     width: auto !important;
+}
+
+.ant-input-number-input {
+    height: 40px !important;
 }

@@ -1,11 +1,21 @@
 @import "@/styles/variables.scss";
 
 .createOrderView {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
     .separator {
         border: none;
         height: 1px;
         background-color: $dark-gray;
         margin: 0 -32px;
         margin-bottom: 32px;
+    }
+
+    .nextButton {
+        height: 45px;
+        align-self: flex-end;
+        background-color: yellow;
     }
 }

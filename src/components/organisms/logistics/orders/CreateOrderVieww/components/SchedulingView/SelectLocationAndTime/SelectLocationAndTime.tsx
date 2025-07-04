@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Select } from "antd";
+import { Control, Controller, useFieldArray } from "react-hook-form";
+import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
-import { DotOutline } from "@phosphor-icons/react";
+import { DotOutline, Plus, Trash } from "@phosphor-icons/react";
 
 import { getAllLocations } from "@/services/logistics/locations";
+
+import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
 import "./selectLocationAndTime.scss";
 
@@ -14,10 +17,16 @@ interface ISelectOption {
 
 interface SelectLocationAndTimeProps {
   selectedType: string;
+  control: Control<IFormCreateOrder, any>;
 }
 
-const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedType }) => {
+const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedType, control }) => {
   const [locationOptions, setLocationOptions] = useState<ISelectOption[]>([]);
+
+  const { fields, remove, insert } = useFieldArray({
+    control,
+    name: "TripDetails"
+  });
 
   useEffect(() => {
     const loadLocations = async () => {
@@ -36,115 +45,158 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({ selectedT
 
   const showRaising = selectedType === "1";
 
-  const mockSteps = [
-    {
-      content: (
-        <div className="timeAndLocationCard">
-          <Select
-            showSearch
-            placeholder="Origen"
-            style={{ gridColumn: showRaising ? "1 / 8" : "1 / -1" }}
-            filterOption={(input: string, option?: { label: string; value: number }) => {
-              return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
-            }}
-            options={locationOptions}
-          />
+  // Lógica: agrega una parada justo antes del último (Destino)
+  const handleAddStop = () => {
+    insert(fields.length - 1, {
+      placeId: undefined,
+      date: undefined,
+      time: undefined,
+      requiresRaising: false,
+      raisingNum: 0
+    });
+  };
 
-          {showRaising && (
-            <>
-              <Checkbox className="check">{"Requiere izaje"}</Checkbox>
-
-              <InputNumber
-                className="inputNumber"
-                style={{ gridColumn: "11 / -1" }}
-                placeholder="0"
-                min={0}
-              />
-            </>
-          )}
-
-          <DatePicker placeholder="aaaa-mm-dd" className="inputDate" />
-
-          <TimePicker
-            className="inputTime"
-            placeholder="00:00"
-            format={"HH:mm"}
-            minuteStep={15}
-            hourStep={1}
-            needConfirm={false}
-            type={"time"}
-          />
-        </div>
-      ),
-      key: "select-location"
-    },
-    {
-      content: (
-        <div className="timeAndLocationCard">
-          <Select
-            className="selectPlace"
-            showSearch
-            placeholder="Destino"
-            style={{ width: "100%", gridColumn: showRaising ? "1 / 8" : "1 / -1" }}
-            filterOption={(input: string, option?: { label: string; value: number }) => {
-              return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
-            }}
-            options={locationOptions}
-          />
-
-          {showRaising && (
-            <>
-              <Checkbox className="check">{"Requiere izaje"}</Checkbox>
-
-              <InputNumber
-                className="inputNumber"
-                style={{ gridColumn: "11 / -1" }}
-                placeholder="0"
-                min={0}
-              />
-            </>
-          )}
-
-          <DatePicker placeholder="aaaa-mm-dd" className="inputDate" />
-
-          <TimePicker
-            className="inputTime"
-            placeholder="00:00"
-            format={"HH:mm"}
-            minuteStep={15}
-            hourStep={1}
-            needConfirm={false}
-            type={"time"}
-          />
-        </div>
-      ),
-      key: "select-time"
+  const handleRemoveStop = (index: number) => {
+    // Sólo puedes borrar si no es origen (0) ni destino (last)
+    if (index > 0 && index < fields.length - 1) {
+      remove(index);
     }
-  ];
+  };
 
   return (
     <div className="selectLocationAndTime">
-      {mockSteps?.map((step, index) => (
-        <>
-          <div key={step.key} className="stepItem">
+      {fields.map((field, i) => (
+        <React.Fragment key={field.id}>
+          <div className="stepItem">
             <div className="stepCircleContainer">
               <div
-                className={`stepLine ${index === 0 && "first"} ${index === mockSteps.length - 1 && "last"}`}
+                className={`stepLine ${i === 0 ? "first" : ""} ${
+                  i === fields.length - 1 ? "last" : ""
+                }`}
               />
               <DotOutline
-                className={`stepCircle `}
+                className={`stepCircle`}
                 size={30}
-                weight={index === 0 ? "regular" : "fill"}
+                weight={i === fields.length - 1 ? "fill" : "regular"}
               />
             </div>
 
-            <div className="stepLabel">{step.content}</div>
+            <div className="stepLabel">
+              <Flex gap="0.5rem" align="center">
+                <div className="timeAndLocationCard">
+                  {/* Place/Location select */}
+                  <Controller
+                    control={control}
+                    name={`TripDetails.${i}.placeId`}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        className="selectPlace"
+                        showSearch
+                        placeholder={LABELS(i, fields.length)}
+                        options={locationOptions}
+                        style={{
+                          gridColumn: showRaising ? "1 / 8" : "1 / -1"
+                        }}
+                        filterOption={(input: string, option?: any) => {
+                          return (
+                            option?.label?.toLowerCase().includes(input.toLowerCase()) ?? false
+                          );
+                        }}
+                      />
+                    )}
+                  />
+
+                  {/* Raising checkbox/hours */}
+                  {showRaising && (
+                    <>
+                      <Controller
+                        control={control}
+                        name={`TripDetails.${i}.requiresRaising`}
+                        render={({ field }) => (
+                          <Checkbox {...field} checked={!!field.value} className="check">
+                            {"Requiere izaje"}
+                          </Checkbox>
+                        )}
+                      />
+                      <Controller
+                        control={control}
+                        name={`TripDetails.${i}.raisingNum`}
+                        render={({ field }) => (
+                          <InputNumber
+                            {...field}
+                            className="inputNumber"
+                            placeholder="0"
+                            min={0}
+                            style={{ gridColumn: "11 / -1" }}
+                          />
+                        )}
+                      />
+                    </>
+                  )}
+
+                  {/* Date */}
+                  <Controller
+                    control={control}
+                    name={`TripDetails.${i}.date`}
+                    render={({ field }) => (
+                      <DatePicker
+                        {...field}
+                        placeholder="aaaa-mm-dd"
+                        className="inputDate"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+
+                  {/* Time */}
+                  <Controller
+                    control={control}
+                    name={`TripDetails.${i}.time`}
+                    render={({ field }) => (
+                      <TimePicker
+                        {...field}
+                        className="inputTime"
+                        placeholder="00:00"
+                        format={"HH:mm"}
+                        minuteStep={15}
+                        hourStep={1}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Borrar parada (solo si es una parada, no origen/destino) */}
+                {i > 0 && i < fields.length - 1 && (
+                  <Trash
+                    onClick={() => handleRemoveStop(i)}
+                    size={24}
+                    style={{ cursor: "pointer" }}
+                  />
+                )}
+              </Flex>
+            </div>
           </div>
-          <div className={`divider ${index === mockSteps.length - 1 ? "noShow" : ""}`} />
-        </>
+          <div className={`divider ${i === fields.length - 1 ? "noShow" : ""}`} />
+        </React.Fragment>
       ))}
+
+      <button
+        onClick={handleAddStop}
+        className="addStopButton"
+        type="button"
+        style={{ marginTop: 14 }}
+      >
+        Agregar parada <Plus size="1rem" />
+      </button>
     </div>
   );
 };
 
 export default SelectLocationAndTime;
+
+const LABELS = (i: number, n: number) =>
+  i === 0 ? "Origen" : i === n - 1 ? "Destino" : `Parada ${i}`;

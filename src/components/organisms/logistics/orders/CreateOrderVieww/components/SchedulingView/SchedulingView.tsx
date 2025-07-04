@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useRef, useState } from "react";
+import { Control } from "react-hook-form";
 import { Flex } from "antd";
 import { Calendar, Crane, Truck, User } from "@phosphor-icons/react";
 
@@ -15,15 +16,16 @@ import SelectableIconButtons, {
   TripTypeOption
 } from "@/components/atoms/SelectableIconButtons/SelectableIconButtons";
 
-import { IViewOption } from "../../CreateOrderVieww";
+import { IFormCreateOrder, IViewOption } from "../../CreateOrderVieww";
 
 import "./schedulingView.scss";
 
 interface SchedulingViewProps {
   setView: React.Dispatch<React.SetStateAction<IViewOption>>;
+  control: Control<IFormCreateOrder, any>;
 }
 
-const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
+const SchedulingView: React.FC<SchedulingViewProps> = ({ setView, control }) => {
   const [typeActive, setTypeActive] = useState("1");
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -73,7 +75,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ setView }) => {
         />
 
         {/* TO DO: Add the locationsComponent  */}
-        <SelectLocationAndTime selectedType={typeActive} />
+        <SelectLocationAndTime selectedType={typeActive} control={control} />
 
         {/* TO DO: Add the order Summary card  */}
       </Flex>
