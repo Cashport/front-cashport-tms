@@ -3,6 +3,6 @@
 import { ChangePass } from "@/components/organisms/auth/changePass/ChangePass";
 
 function ChangePassPage() {
-  return <ChangePass />;
+  return <ChangePass mode="change" />;
 }
 export default ChangePassPage;

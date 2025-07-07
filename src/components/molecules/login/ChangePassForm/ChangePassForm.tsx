@@ -25,7 +25,7 @@ const schema = yup.object().shape({
     .required()
 });
 
-export const ChangePassForm = () => {
+export const ChangePassForm = ({ mode }: { mode: "accept" | "change" }) => {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const oobCode = searchParams.get("oobCode");
@@ -57,8 +57,11 @@ export const ChangePassForm = () => {
       openNotification({
         api: api,
         type: "success",
-        title: "Contraseña restablecida",
-        message: "Tu contraseña ha sido restablecida"
+        title: mode === "change" ? "Contraseña restablecida" : "Invitación aceptada",
+        message:
+          mode === "change"
+            ? "Tu contraseña ha sido restablecida"
+            : "Tu invitación ha sido aceptada"
       });
       setTimeout(() => {
         router.push("/auth/login");
@@ -73,13 +76,24 @@ export const ChangePassForm = () => {
     }
     setIsLoading(false);
   };
+
+  const texts =
+    mode !== "accept"
+      ? {
+          title: "Restablece tu contraseña",
+          description: "Ingresa tu nueva contraseña"
+        }
+      : {
+          title: "Aceptar invitación",
+          description: "Crea una nueva contraseña"
+        };
   if (!oobCode) return;
   return (
     <form className="changePassForm" onSubmit={handleSubmit(onSubmitHandler)}>
       {contextHolder}
       <Flex vertical gap={"0.5rem"}>
-        <h4 className="changePassForm__title">Restablece tu contraseña</h4>
-        <p>Ingresa tu nueva contraseña</p>
+        <h4 className="changePassForm__title">{texts.title}</h4>
+        <p>{texts.description}</p>
       </Flex>
 
       <Flex vertical gap={"1.5rem"} className="changePassForm__content">
