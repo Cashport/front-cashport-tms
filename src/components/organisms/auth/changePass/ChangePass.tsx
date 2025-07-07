@@ -1,3 +1,4 @@
+"use client";
 import { Flex } from "antd";
 
 import { InfoCardLogin } from "@/components/molecules/login/InfoCardLogin/InfoCardLogin";
@@ -9,7 +10,7 @@ import { LogoCashport } from "@/components/atoms/logoCashport/LogoCashport";
 import { Suspense } from "react";
 import Loader from "@/components/atoms/loaders/loader";
 
-export const ChangePass = () => {
+export const ChangePass = ({ mode }: { mode: 'accept' | 'change' }) => {
   return (
     <main className={styles.containerChangePass}>
       <InfoCardLogin />
@@ -19,7 +20,7 @@ export const ChangePass = () => {
             <LogoCashport width={370} height={100} />
           </div>
           <Suspense fallback={<Loader />}>
-            <ChangePassForm />
+            <ChangePassForm mode={mode} />
           </Suspense>
           <ContactUsButton />
         </Flex>
