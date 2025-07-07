@@ -1,15 +1,21 @@
 "use client";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
+import Link from "next/link";
 import { Button, Flex, message, Table } from "antd";
 import type { TableProps } from "antd";
 import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
-import Link from "next/link";
-import "./vehicleTable.scss";
-import UiSearchInput from "@/components/ui/search-input";
-import { IVehicle } from "@/types/logistics/schema";
+
+import useScreenWidth from "@/components/hooks/useScreenWidth";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { getAllVehicles } from "@/services/logistics/vehicle";
-import useSWR from "swr";
+
+import UiSearchInput from "@/components/ui/search-input";
 import CustomTag from "@/components/atoms/CustomTag";
+
+import { IVehicle } from "@/types/logistics/schema";
+
+import "./vehicleTable.scss";
 
 type Props = {
   params: {
@@ -21,7 +27,10 @@ export const VehicleTable = ({ params: { id } }: Props) => {
   const [search, setSearch] = useState("");
   const [datasource, setDatasource] = useState<any[]>([]);
 
-  const { data: vehicles, error } = useSWR({ id }, ({ id }) => getAllVehicles({ id }), {
+  const height = useScreenHeight();
+  const width = useScreenWidth();
+
+  const { data: vehicles } = useSWR({ id }, ({ id }) => getAllVehicles({ id }), {
     onError: (error) => {
       message.error(error?.message);
     }
@@ -66,25 +75,27 @@ export const VehicleTable = ({ params: { id } }: Props) => {
     {
       title: "Placa",
       dataIndex: "plate",
-      key: "plate"
+      key: "plate",
+      width: 120
     },
     {
       title: "Modelo",
       dataIndex: "model",
-      key: "model"
+      key: "model",
+      width: 90
     },
     {
       title: "Status",
       key: "status",
       dataIndex: "status",
-      width: "200px",
       render: (status) => {
         return (
           <Flex>
             <CustomTag text={status.name} color={status.color} />
           </Flex>
         );
-      }
+      },
+      width: width && width > 1400 ? 250 : undefined
     },
     {
       title: "",
@@ -100,7 +111,7 @@ export const VehicleTable = ({ params: { id } }: Props) => {
   ];
   return (
     <div className="vehiclesTable">
-      <Flex justify="space-between" className="mainProjectsTable_header">
+      <Flex justify="space-between" className="vehiclesTable__header">
         <Flex gap={"10px"}>
           <UiSearchInput
             className="search"
@@ -112,16 +123,16 @@ export const VehicleTable = ({ params: { id } }: Props) => {
             }}
           />
           <Button className="options" icon={<DotsThree size={"1.5rem"} />} />
-          <Link href={`/logistics/providers/${id}/vehicle/new`}>
-            <Button type="primary" className="buttonNewProject" size="large">
-              Nuevo Vehículo
-              {<Plus weight="bold" size={14} />}
-            </Button>
-          </Link>
         </Flex>
+        <Link href={`/logistics/providers/${id}/vehicle/new`}>
+          <Button type="primary" className="buttonNewProject" size="large">
+            Nuevo Vehículo
+            {<Plus weight="bold" size={14} />}
+          </Button>
+        </Link>
       </Flex>
       <Table
-        scroll={{ y: "61dvh", x: undefined }}
+        scroll={{ y: height ? height - 400 : undefined }}
         columns={columns as TableProps<any>["columns"]}
         pagination={{
           pageSize: 25,

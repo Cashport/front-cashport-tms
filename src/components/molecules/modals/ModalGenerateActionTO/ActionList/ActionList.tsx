@@ -3,7 +3,7 @@ import { Flex } from "antd";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ArrowsClockwise, MapPinLine, MinusCircle } from "phosphor-react";
 import { ViewEnum } from "../ModalGenerateActionTO";
-import { Gavel } from "@phosphor-icons/react";
+import { CalendarDots, Gavel } from "@phosphor-icons/react";
 import { STATUS } from "@/utils/constants/globalConstants";
 
 const ActionList = ({
@@ -12,7 +12,8 @@ const ActionList = ({
   canFinalizeTrip = true,
   canChangeStatusToPorLegalizar,
   handleChangeStatus,
-  onClose
+  onClose,
+  handleModifyTrip
 }: {
   setSelectedView: Dispatch<SetStateAction<ViewEnum>>;
   canPreauthorize: boolean;
@@ -21,9 +22,16 @@ const ActionList = ({
   // eslint-disable-next-line no-unused-vars
   handleChangeStatus?: (statusId: string) => Promise<void>;
   onClose: () => void;
+  handleModifyTrip: () => void;
 }) => {
   return (
     <Flex style={{ width: "100%", height: "100%" }} gap={12} vertical>
+      <ButtonGenerateAction
+        disabled={!canChangeStatusToPorLegalizar}
+        icon={<CalendarDots size={20} />}
+        title="Es Renta fija - Disponibilidad"
+        onClick={() => setSelectedView(ViewEnum.MARK_AS_FIXED_INCOME)}
+      />
       <ButtonGenerateAction
         disabled={!canChangeStatusToPorLegalizar}
         icon={<MapPinLine size={20} />}
@@ -51,10 +59,9 @@ const ActionList = ({
         onClick={() => setSelectedView(ViewEnum.CANCEL_TR)}
       />
       <ButtonGenerateAction
-        disabled={true}
         icon={<ArrowsClockwise size={20} />}
-        title="Modificar solicitud"
-        onClick={() => setSelectedView(ViewEnum.MODIFY_REQUEST)}
+        title="Modificar viaje"
+        onClick={handleModifyTrip}
       />
       <ButtonGenerateAction
         disabled={!canPreauthorize}

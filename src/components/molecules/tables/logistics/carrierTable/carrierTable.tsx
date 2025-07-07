@@ -1,20 +1,28 @@
+// "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import useSWR from "swr";
 import { Button, Flex, message, Table } from "antd";
 import type { TableProps } from "antd";
 import { DotsThree, Eye, Plus, Triangle } from "phosphor-react";
-import "./carrierTable.scss";
-import UiSearchInput from "@/components/ui/search-input";
-import { ICarrier } from "@/types/logistics/schema";
+
 import { getAllCarriers, IProvider } from "@/services/logistics/carrier";
-import useSWR from "swr";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
+
+import UiSearchInput from "@/components/ui/search-input";
 import CustomTag from "@/components/atoms/CustomTag";
-import Link from "next/link";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+
+import "./carrierTable.scss";
 
 export const CarrierTable = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [datasource, setDatasource] = useState<any[]>([]);
+
+  const height = useScreenHeight();
+  const width = useScreenWidth();
 
   const { data: carriers, isLoading } = useSWR(
     {
@@ -70,30 +78,33 @@ export const CarrierTable = () => {
     {
       title: "Tipo",
       dataIndex: "type",
-      key: "type"
+      key: "type",
+      width: 125
     },
     {
       title: "Vehículos",
       dataIndex: "vehicle",
-      key: "vehicle"
+      key: "vehicle",
+      width: 105
     },
     {
       title: "Conductores",
       dataIndex: "drivers",
-      key: "drivers"
+      key: "drivers",
+      width: 125
     },
     {
       title: "Status",
       key: "status",
       dataIndex: "status",
-      width: "200px",
       render: (_, { status }) => {
         return (
           <Flex>
             <CustomTag text={status.name} color={status.color} />
           </Flex>
         );
-      }
+      },
+      width: width && width > 1400 ? 250 : undefined
     },
     {
       title: "",
@@ -134,7 +145,7 @@ export const CarrierTable = () => {
         </div>
       </Flex>
       <Table
-        scroll={{ y: "61dvh", x: undefined }}
+        scroll={{ y: height ? height - 400 : undefined }}
         columns={columns as TableProps<any>["columns"]}
         loading={isLoading}
         pagination={{
