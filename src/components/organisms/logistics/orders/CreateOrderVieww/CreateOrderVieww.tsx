@@ -7,8 +7,9 @@ import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import LoadView from "./components/LoadView/LoadView";
 
-import { IRoute } from "@/types/logistics/schema";
+import { IMaterialStepOne, IRoute } from "@/types/logistics/schema";
 
 import "./createOrderView.scss";
 
@@ -20,15 +21,22 @@ type ITripForm = {
   raisingNum?: number;
 };
 
+type IMaterialForm = {
+  [K in keyof IMaterialStepOne]?: IMaterialStepOne[K];
+} & {
+  quantity: number;
+};
+
 export interface IFormCreateOrder {
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
+  material: IMaterialForm[];
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("scheduling");
+  const [view, setView] = useState<IViewOption>("load");
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
@@ -59,9 +67,9 @@ export const CreateOrderVieww: React.FC = () => {
   const renderView = (currentView: IViewOption) => {
     switch (currentView) {
       case "scheduling":
-        return <SchedulingView setView={setView} control={control} setValue={setValue} />;
+        return <SchedulingView control={control} setValue={setValue} />;
       case "load":
-        return <div>Load View</div>;
+        return <LoadView control={control} />;
       case "responsibles":
         return <div>Responsibles View</div>;
       default:
@@ -78,7 +86,8 @@ export const CreateOrderVieww: React.FC = () => {
         break;
       case "load":
         console.log("Load view data:", data);
-        setView("responsibles");
+        // setView("responsibles");
+
         break;
       case "responsibles":
         console.log("Responsibles view data:", data);

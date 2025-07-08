@@ -2,6 +2,7 @@ import { API } from "@/utils/api/api";
 import {
   CustomFile,
   IMaterial,
+  IMaterialStepOne,
   IMaterialTransportType,
   IMaterialType
 } from "@/types/logistics/schema";
@@ -19,9 +20,9 @@ export const getSearchMaterials = async (term: string): Promise<GenericResponse>
   }
 };
 
-export const getAllMaterials = async (): Promise<GenericResponse> => {
+export const getAllMaterials = async (): Promise<GenericResponse<IMaterialStepOne[]>> => {
   try {
-    const response: GenericResponse = await API.get(`/material/all`);
+    const response: GenericResponse<IMaterialStepOne[]> = await API.get(`/material/all`);
     return response;
   } catch (error) {
     console.log("Error get all materials: ", error);

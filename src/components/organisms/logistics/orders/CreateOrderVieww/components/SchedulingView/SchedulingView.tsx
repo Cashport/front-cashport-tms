@@ -22,7 +22,7 @@ import SummaryCard from "./SummaryCard/SummaryCard";
 
 import { IDirectionsMapboxResponse, IGeometry, ISelectLocation } from "@/types/logistics/schema";
 
-import { IFormCreateOrder, IViewOption } from "../../CreateOrderVieww";
+import { IFormCreateOrder } from "../../CreateOrderVieww";
 
 import "./schedulingView.scss";
 
@@ -38,12 +38,11 @@ export interface ISelectOption {
 }
 
 interface SchedulingViewProps {
-  setView: React.Dispatch<React.SetStateAction<IViewOption>>;
   control: Control<IFormCreateOrder, any>;
   setValue: UseFormSetValue<IFormCreateOrder>;
 }
 
-const SchedulingView: React.FC<SchedulingViewProps> = ({ setView, control, setValue }) => {
+const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) => {
   const [typeActive, setTypeActive] = useState("1");
   const [locationOptions, setLocationOptions] = useState<ISelectLocation[]>([]);
 

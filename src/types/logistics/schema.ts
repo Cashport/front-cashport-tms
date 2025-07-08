@@ -1909,6 +1909,7 @@ export interface IMaterialStepOne {
   modified_by: string | null;
   icon: string;
   restriction: boolean;
+  code_sku: string | null;
 }
 /**
  * Exposes all fields present in transfer_request_journey_step_one as a typescript
