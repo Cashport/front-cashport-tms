@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Flex } from "antd";
 import { Dayjs } from "dayjs";
@@ -30,7 +30,7 @@ export type IViewOption = "scheduling" | "load" | "responsibles";
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
 
-  const { control, handleSubmit, setValue } = useForm<IFormCreateOrder>({
+  const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
       TripDetails: [
         {
@@ -51,6 +51,9 @@ export const CreateOrderVieww: React.FC = () => {
     }
   });
 
+  // Watch the TripDetails to see if any changes are made
+  const tripDetails = watch("TripDetails");
+
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
   const renderView = (currentView: IViewOption) => {
@@ -68,8 +71,40 @@ export const CreateOrderVieww: React.FC = () => {
 
   const onSubmit = (data: IFormCreateOrder) => {
     console.log("Form submitted with data:", data);
-    // Aquí puedes manejar el envío del formulario, como llamar a una API o actualizar el estado global
+    switch (view) {
+      case "scheduling":
+        console.log("Scheduling view data:", data);
+        setView("load");
+        break;
+      case "load":
+        console.log("Load view data:", data);
+        setView("responsibles");
+        break;
+      case "responsibles":
+        console.log("Responsibles view data:", data);
+
+        break;
+      default:
+        console.error("Unknown view:", view);
+    }
   };
+
+  const isNextButtonDisabled = useMemo(() => {
+    // for every view we check if the next button should be disabled
+    switch (view) {
+      case "scheduling":
+        const isValid = tripDetails.every((detail) => detail.placeId && detail.date && detail.time);
+        return !isValid;
+      case "load":
+        return false;
+      case "responsibles":
+        return false;
+      default:
+        return false;
+    }
+
+    // Forces React to recalculate useMemo whenever tripDetails changes, even if the reference doesn't.
+  }, [JSON.stringify(tripDetails), view]);
 
   return (
     <div className="createOrderView">
@@ -83,7 +118,7 @@ export const CreateOrderVieww: React.FC = () => {
       </Container>
 
       <div className="nextButton">
-        <PrincipalButton onClick={handleSubmit(onSubmit)}>
+        <PrincipalButton disabled={isNextButtonDisabled} onClick={handleSubmit(onSubmit)}>
           {view !== "responsibles" ? "Siguiente" : "Confirmar"}
         </PrincipalButton>
       </div>
