@@ -48,7 +48,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
           control={control}
           name={`material.${index}.quantity`}
           render={({ field }) => (
-            <Flex align="center">
+            <Flex align="center" justify="center">
               <CaretLeft
                 onClick={() => field.onChange(Math.max((field.value || 1) - 1, 1))}
                 style={{ cursor: "pointer" }}
@@ -61,7 +61,9 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
             </Flex>
           )}
         />
-      )
+      ),
+      align: "center",
+      width: 100
     },
     {
       title: "Nombre",
@@ -74,7 +76,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
           render={({ field }) => (
             <Select
               {...field}
-              placeholder="Selecciona material"
+              placeholder="Seleccionar tipo de carga"
               showSearch
               filterOption={(input, option) =>
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
@@ -109,7 +111,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                   });
                 }
               }}
-              style={{ width: 220 }}
+              style={{ width: "100%" }}
             />
           )}
         />

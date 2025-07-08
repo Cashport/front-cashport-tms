@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { Select, Table, Button, Popconfirm, Flex, TableProps } from "antd";
+import { Select, Table, Button, Popconfirm, Flex, TableProps, message } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
-import { getAllMaterials } from "@/services/logistics/materials";
-
-import { IMaterialStepOne } from "@/types/logistics/schema";
+import { getSuggestedVehicles } from "@/services/logistics/vehicles";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
+
+import { ISuggestedVehicle } from "@/types/logistics/schema";
 
 interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
 }
 
 const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
-  const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
+  const [vehicles, setVehicles] = useState<ISuggestedVehicle[]>([]);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -28,14 +28,18 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   useEffect(() => {
     (async () => {
-      const res = await getAllMaterials();
-      setAllMaterials(res.data ?? []);
+      try {
+        const res = await getSuggestedVehicles();
+        setVehicles(res.data ?? []);
+      } catch (error) {
+        message.error("Error al cargar opciones de vehículos sugeridos");
+      }
     })();
   }, []);
 
-  const materialOptions = allMaterials.map((mat) => ({
-    label: mat.description,
-    value: mat.id
+  const vehiclesOptions = vehicles.map((vehicle) => ({
+    label: vehicle.description,
+    value: vehicle.id
   }));
 
   const columns: TableProps<any>["columns"] = [
@@ -48,7 +52,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
           control={control}
           name={`material.${index}.quantity`}
           render={({ field }) => (
-            <Flex align="center">
+            <Flex align="center" justify="center">
               <CaretLeft
                 onClick={() => field.onChange(Math.max((field.value || 1) - 1, 1))}
                 style={{ cursor: "pointer" }}
@@ -61,7 +65,9 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
             </Flex>
           )}
         />
-      )
+      ),
+      align: "center",
+      width: 100
     },
     {
       title: "Vehículo",
@@ -74,20 +80,20 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
           render={({ field }) => (
             <Select
               {...field}
-              placeholder="Selecciona material"
+              placeholder="Seleccionar vehículo"
               showSearch
               filterOption={(input, option) =>
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
               allowClear
-              options={materialOptions.filter(
+              options={vehiclesOptions.filter(
                 (option) =>
                   !selectedMaterials.some((row, idx) => row.id === option.value && idx !== index)
               )}
               onChange={(value) => {
                 field.onChange(value);
                 // Al seleccionar, setea automáticamente todos los datos en la fila
-                const found = allMaterials.find((mat) => mat.id === value);
+                const found = vehicles.find((vehicle) => vehicle.id === value);
                 if (found) {
                   update(index, {
                     ...fields[index],
@@ -109,7 +115,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                   });
                 }
               }}
-              style={{ width: 220 }}
+              style={{ width: 450 }}
             />
           )}
         />
@@ -118,8 +124,9 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
     {
       title: "Tasa de utilización",
       dataIndex: "used_percentage",
-      key: "used_percentage"
-      // render: (_: any, __: any, index: number) => (fields[index]?.used_percentage ?? "-") + " %"
+      key: "used_percentage",
+      align: "center",
+      render: () => <span>0%</span>
     },
     {
       title: "",

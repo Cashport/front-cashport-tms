@@ -637,7 +637,7 @@ export const CreateOrderView = () => {
     const result: any = [];
 
     if (combinedResults?.length > 0) {
-      combinedResults.forEach((item) => {
+      combinedResults.forEach((item: any) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>

@@ -3800,3 +3800,27 @@ export interface IDirectionsMapboxResponse {
   code: string;
   uuid: string;
 }
+
+export interface ISuggestedVehicle {
+  id: number;
+  description: string;
+  vehicle_subtype: number;
+  id_service_type: number;
+  kg_capacity: number;
+  m3_volume: number;
+  width: number;
+  height: number;
+  aditional_info: string;
+  length: number;
+  passenger_capacity: number;
+  speed_multiple: number;
+  active: boolean;
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  icon: string;
+  image: string;
+  available: number;
+  price: number;
+}
