@@ -9,7 +9,7 @@ import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
 
-import { IMaterialStepOne, IRoute } from "@/types/logistics/schema";
+import { IMaterialStepOne, IRoute, ISuggestedVehicle } from "@/types/logistics/schema";
 
 import "./createOrderView.scss";
 
@@ -27,10 +27,18 @@ type IMaterialForm = {
   quantity: number;
 };
 
+type ISuggestedVehicleForm = {
+  [K in keyof ISuggestedVehicle]?: ISuggestedVehicle[K];
+} & {
+  quantity: number;
+  usedPercentage?: number;
+};
+
 export interface IFormCreateOrder {
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material: IMaterialForm[];
+  suggestedVehicle: ISuggestedVehicleForm[];
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";

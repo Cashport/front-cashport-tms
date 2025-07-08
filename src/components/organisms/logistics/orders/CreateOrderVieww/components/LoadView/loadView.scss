@@ -7,6 +7,10 @@
         margin-bottom: -0.5rem;
     }
 
+    .inputSelect {
+        height: 40px;
+    }
+
     .addButton {
         margin: 12px 0;
         margin-right: 1rem;
@@ -26,5 +30,36 @@
     .divider {
         border: none;
         border-top: 1px solid $dark-gray;
+    }
+
+    // suggested vehicle styles section
+    .usedPercentage {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: $secondary;
+        width: fit-content;
+        margin: 0 auto;
+    }
+}
+
+// more vehicle styles section
+.vehicleOption {
+    display: grid;
+    grid-template-columns: 6fr 4fr;
+
+    .vehicleDetails {
+        background-color: $background;
+        border: 1px solid $white;
+        padding: 8px 16px;
+
+        &.left {
+            padding-right: 1rem;
+            border-radius: 8px 0px 0px 8px;
+        }
+        &.right {
+            border-radius: 0px 8px 8px 0px;
+        }
     }
 }

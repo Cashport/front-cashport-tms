@@ -112,6 +112,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                 }
               }}
               style={{ width: "100%" }}
+              className="inputSelect"
             />
           )}
         />

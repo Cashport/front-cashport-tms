@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 import { Select, Table, Button, Popconfirm, Flex, TableProps, message } from "antd";
-import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
 import { getSuggestedVehicles } from "@/services/logistics/vehicles";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
@@ -12,18 +12,22 @@ interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
 }
 
+interface ISuggestedVehicleOptions extends ISuggestedVehicle {
+  usedPercentage?: number;
+}
+
 const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
-  const [vehicles, setVehicles] = useState<ISuggestedVehicle[]>([]);
+  const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: "material"
+    name: "suggestedVehicle"
   });
 
-  const selectedMaterials =
+  const selectedVehicles =
     useWatch({
       control,
-      name: "material"
+      name: "suggestedVehicle"
     }) || [];
 
   useEffect(() => {
@@ -37,11 +41,6 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
     })();
   }, []);
 
-  const vehiclesOptions = vehicles.map((vehicle) => ({
-    label: vehicle.description,
-    value: vehicle.id
-  }));
-
   const columns: TableProps<any>["columns"] = [
     {
       title: "Cantidad",
@@ -50,7 +49,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       render: (_: any, __: any, index: number) => (
         <Controller
           control={control}
-          name={`material.${index}.quantity`}
+          name={`suggestedVehicle.${index}.quantity`}
           render={({ field }) => (
             <Flex align="center" justify="center">
               <CaretLeft
@@ -76,48 +75,83 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       render: (_: any, __: any, index: number) => (
         <Controller
           control={control}
-          name={`material.${index}.id`}
-          render={({ field }) => (
-            <Select
-              {...field}
-              placeholder="Seleccionar vehículo"
-              showSearch
-              filterOption={(input, option) =>
-                option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
-              }
-              allowClear
-              options={vehiclesOptions.filter(
-                (option) =>
-                  !selectedMaterials.some((row, idx) => row.id === option.value && idx !== index)
-              )}
-              onChange={(value) => {
-                field.onChange(value);
-                // Al seleccionar, setea automáticamente todos los datos en la fila
-                const found = vehicles.find((vehicle) => vehicle.id === value);
-                if (found) {
-                  update(index, {
-                    ...fields[index],
-                    ...found,
-                    id: found.id
-                  });
-                } else {
-                  // Limpia la fila si se deselecciona
-                  update(index, {
-                    ...fields[index],
-                    id: undefined,
-                    code_sku: undefined,
-                    description: undefined,
-                    m3_volume: undefined,
-                    mt_height: undefined,
-                    mt_width: undefined,
-                    mt_length: undefined,
-                    kg_weight: undefined
-                  });
+          name={`suggestedVehicle.${index}.id`}
+          render={({ field }) => {
+            const selectedId = field.value;
+            const selectedVehicle = vehicles.find((v) => v.id === selectedId);
+
+            return (
+              <Select
+                {...field}
+                labelInValue
+                placeholder="Seleccionar vehículo"
+                showSearch
+                style={{ width: 500 }}
+                allowClear
+                className="inputSelect"
+                value={
+                  selectedVehicle
+                    ? {
+                        value: selectedVehicle.id,
+                        label: selectedVehicle.description
+                      }
+                    : undefined
                 }
-              }}
-              style={{ width: 450 }}
-            />
-          )}
+                onChange={(option) => {
+                  const found = vehicles.find((v) => v.id === option.value);
+                  field.onChange(option.value);
+                  if (found) {
+                    update(index, {
+                      ...fields[index],
+                      ...found,
+                      id: found.id
+                    });
+                  } else {
+                    update(index, {
+                      ...fields[index],
+                      id: undefined,
+                      description: undefined
+                    });
+                  }
+                }}
+                options={vehicles
+                  .filter(
+                    (v) => !selectedVehicles.some((row, idx) => row.id === v.id && idx !== index)
+                  )
+                  .map((vehicle) => ({
+                    value: vehicle.id,
+                    label: (
+                      <div className="vehicleOption">
+                        <Flex vertical gap="0.5rem" className="vehicleDetails left">
+                          <strong>{vehicle.description}</strong>
+                          <span>
+                            Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
+                            {vehicle.height}m
+                          </span>
+                        </Flex>
+
+                        <Flex vertical gap="0.5rem" className="vehicleDetails right">
+                          <Flex>
+                            <span>
+                              <Truck size={16} />
+                              Utilización
+                            </span>
+
+                            <strong>90%</strong>
+                          </Flex>
+                          <p>Aca va el sliderrrrr</p>
+                        </Flex>
+                      </div>
+                    ),
+                    title: vehicle.description
+                  }))}
+                optionRender={(option) => option.label}
+                filterOption={(input, option) =>
+                  (option?.title || "").toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            );
+          }}
         />
       )
     },
@@ -126,7 +160,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       dataIndex: "used_percentage",
       key: "used_percentage",
       align: "center",
-      render: () => <span>0%</span>
+      render: () => <p className="usedPercentage">0%</p>
     },
     {
       title: "",
