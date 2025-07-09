@@ -79,6 +79,11 @@ export const CreateOrderVieww: React.FC = () => {
   // Watch the TripDetails to see if any changes are made
   const tripDetails = watch("TripDetails");
 
+  // watch Load form values
+  const materialDetails = watch("material");
+  const suggestedVehicles = watch("suggestedVehicle");
+  const otherServices = watch("otherServices");
+
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
   const renderView = (currentView: IViewOption) => {
@@ -122,7 +127,18 @@ export const CreateOrderVieww: React.FC = () => {
         const isValid = tripDetails.every((detail) => detail.placeId && detail.date && detail.time);
         return !isValid;
       case "load":
-        return false;
+        // at least one material and vehicle must be selected
+        // if there is a row should have something selected, an id
+        const validMaterial =
+          materialDetails.length > 0 && materialDetails.every((detail) => detail.id !== undefined);
+
+        const validVehicles =
+          suggestedVehicles.length > 0 &&
+          suggestedVehicles?.every((vehicle) => vehicle.id !== undefined);
+
+        const validOtherServices = otherServices?.every((service) => service.id !== undefined);
+
+        return !validMaterial || !validVehicles || !validOtherServices;
       case "responsibles":
         return false;
       default:
@@ -130,7 +146,13 @@ export const CreateOrderVieww: React.FC = () => {
     }
 
     // Forces React to recalculate useMemo whenever tripDetails changes, even if the reference doesn't.
-  }, [JSON.stringify(tripDetails), view]);
+  }, [
+    JSON.stringify(tripDetails),
+    view,
+    JSON.stringify(materialDetails),
+    JSON.stringify(suggestedVehicles),
+    JSON.stringify(otherServices)
+  ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
     const viewsOrder: IViewOption[] = ["scheduling", "load", "responsibles"];
