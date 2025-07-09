@@ -938,7 +938,7 @@ export const CreateOrderView = () => {
     const res = await getOtherRequirements();
     const result: any = [];
     if (res?.data?.length > 0) {
-      res.data.forEach((item) => {
+      res.data.forEach((item: any) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>

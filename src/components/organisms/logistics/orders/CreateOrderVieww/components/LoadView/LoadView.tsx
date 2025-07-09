@@ -4,6 +4,7 @@ import { Flex } from "antd";
 
 import MaterialSection from "./MaterialSection/MaterialSection";
 import SuggestedVehicleSection from "./SuggestedVehicleSection/SuggestedVehicleSection";
+import OtherServicesSection from "./OtherServicesSection/OtherServicesSection";
 
 import { IFormCreateOrder } from "../../CreateOrderVieww";
 
@@ -19,6 +20,8 @@ const LoadView: React.FC<ILoadViewProps> = ({ control }) => {
       <MaterialSection control={control} />
       <hr className="divider" />
       <SuggestedVehicleSection control={control} />
+      <hr className="divider" />
+      <OtherServicesSection control={control} />
     </Flex>
   );
 };

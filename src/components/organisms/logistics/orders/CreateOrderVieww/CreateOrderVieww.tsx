@@ -10,6 +10,7 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import LoadView from "./components/LoadView/LoadView";
 
 import { IMaterialStepOne, IRoute, ISuggestedVehicle } from "@/types/logistics/schema";
+import { IOtherRequirement } from "@/services/logistics/other-requirements";
 
 import "./createOrderView.scss";
 
@@ -34,12 +35,19 @@ type ISuggestedVehicleForm = {
   usedPercentage?: number;
 };
 
+type IOtherServicesForm = {
+  [K in keyof IOtherRequirement]?: IOtherRequirement[K];
+} & {
+  quantity: number;
+};
+
 export interface IFormCreateOrder {
   typeActive?: string; // "1" | "2" | "3"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material: IMaterialForm[];
   suggestedVehicle: ISuggestedVehicleForm[];
+  otherServices?: IOtherServicesForm[];
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";

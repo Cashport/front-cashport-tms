@@ -100,14 +100,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                   // Limpia la fila si se deselecciona
                   update(index, {
                     ...fields[index],
-                    id: undefined,
-                    code_sku: undefined,
-                    description: undefined,
-                    m3_volume: undefined,
-                    mt_height: undefined,
-                    mt_width: undefined,
-                    mt_length: undefined,
-                    kg_weight: undefined
+                    id: undefined
                   });
                 }
               }}
