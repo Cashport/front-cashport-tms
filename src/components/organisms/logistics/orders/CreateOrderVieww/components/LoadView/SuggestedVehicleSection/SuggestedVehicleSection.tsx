@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { Select, Table, Button, Popconfirm, Flex, TableProps, message } from "antd";
+import {
+  Select,
+  Table,
+  Button,
+  Popconfirm,
+  Flex,
+  TableProps,
+  message,
+  Slider,
+  ConfigProvider
+} from "antd";
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
 import { getSuggestedVehicles } from "@/services/logistics/vehicles";
@@ -30,16 +40,28 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       name: "suggestedVehicle"
     }) || [];
 
+  const typeActive = useWatch({ control, name: "typeActive" });
+
   useEffect(() => {
     (async () => {
+      const contraintTypes = ["1", "2"];
       try {
-        const res = await getSuggestedVehicles();
-        setVehicles(res.data ?? []);
+        if (contraintTypes.includes(typeActive || "")) {
+          const promises = contraintTypes.map((type) => getSuggestedVehicles(type));
+          const results = await Promise.all(promises);
+          setVehicles(results.flatMap((res) => res.data ?? []));
+        } else if (typeActive === "4") {
+          const res = await getSuggestedVehicles();
+          setVehicles(res.data ?? []);
+        } else {
+          const res = await getSuggestedVehicles(typeActive);
+          setVehicles(res.data ?? []);
+        }
       } catch (error) {
         message.error("Error al cargar opciones de vehículos sugeridos");
       }
     })();
-  }, []);
+  }, [typeActive]);
 
   const columns: TableProps<any>["columns"] = [
     {
@@ -86,7 +108,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                 labelInValue
                 placeholder="Seleccionar vehículo"
                 showSearch
-                style={{ width: 500 }}
+                style={{ width: 520 }}
                 allowClear
                 className="inputSelect"
                 value={
@@ -122,8 +144,13 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                     value: vehicle.id,
                     label: (
                       <div className="vehicleOption">
-                        <Flex vertical gap="0.5rem" className="vehicleDetails left">
-                          <strong>{vehicle.description}</strong>
+                        <Flex
+                          vertical
+                          gap="0.5rem"
+                          className="vehicleDetails left"
+                          justify="space-between"
+                        >
+                          <strong style={{ fontWeight: 600 }}>{vehicle.description}</strong>
                           <span>
                             Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
                             {vehicle.height}m
@@ -131,15 +158,15 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                         </Flex>
 
                         <Flex vertical gap="0.5rem" className="vehicleDetails right">
-                          <Flex>
-                            <span>
+                          <Flex style={{ width: "100%" }} justify="space-between" align="center">
+                            <Flex align="center" gap="4px">
                               <Truck size={16} />
-                              Utilización
-                            </span>
+                              <p>Utilización</p>
+                            </Flex>
 
-                            <strong>90%</strong>
+                            <strong style={{ fontWeight: 600 }}>90%</strong>
                           </Flex>
-                          <p>Aca va el sliderrrrr</p>
+                          <Slider value={90} style={{ margin: 0 }} />
                         </Flex>
                       </div>
                     ),
@@ -175,16 +202,34 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
   ];
 
   return (
-    <Flex vertical gap={"1.5rem"} className="suggestedVehicleSection">
-      <h3 className="subTitle">Vehículo sugerido</h3>
+    <ConfigProvider
+      theme={{
+        components: {
+          Slider: {
+            railSize: 6,
+            trackBg: "#CBE71E",
+            trackHoverBg: "#CBE71E",
+            handleColor: "#FFFFFF",
+            handleActiveColor: "#CBE71E",
+            handleLineWidth: 1,
+            handleSize: 14,
+            handleLineWidthHover: 1,
+            colorBgElevated: "#CBE71E"
+          }
+        }
+      }}
+    >
+      <Flex vertical gap={"1.5rem"} className="suggestedVehicleSection">
+        <h3 className="subTitle">Vehículo sugerido</h3>
 
-      <Table columns={columns} dataSource={fields} pagination={false} rowKey={"id"} />
+        <Table columns={columns} dataSource={fields} pagination={false} rowKey={"id"} />
 
-      <Button className="addButton" onClick={() => append({ quantity: 1 })}>
-        Agregar
-        <Plus size={16} />
-      </Button>
-    </Flex>
+        <Button className="addButton" onClick={() => append({ quantity: 1 })}>
+          Agregar
+          <Plus size={16} />
+        </Button>
+      </Flex>
+    </ConfigProvider>
   );
 };
 

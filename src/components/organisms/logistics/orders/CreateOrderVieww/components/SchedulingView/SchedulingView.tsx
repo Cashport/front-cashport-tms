@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useRef, useState } from "react";
-import { Control, UseFormSetValue } from "react-hook-form";
+import { Control, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, message } from "antd";
 import { Calendar, Crane, Truck, User } from "@phosphor-icons/react";
 import axios, { AxiosResponse } from "axios";
@@ -43,8 +43,8 @@ interface SchedulingViewProps {
 }
 
 const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) => {
-  const [typeActive, setTypeActive] = useState("1");
   const [locationOptions, setLocationOptions] = useState<ISelectLocation[]>([]);
+  const typeActive = useWatch({ control, name: "typeActive" }) ?? "1";
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const originMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -58,6 +58,11 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
   const mapsAccessToken = MAPS_ACCESS_TOKEN;
   const fixedMapStyle = "mapbox://styles/mapbox/streets-v12";
   const mapContainerRef = useRef(null);
+
+  // setea valor por defecto typActive
+  useEffect(() => {
+    if (!typeActive) setValue("typeActive", "1");
+  }, []);
 
   //   get de las ubicaciones
   useEffect(() => {
@@ -239,7 +244,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
         <SelectableIconButtons
           options={tripTypeOptions}
           activeId={typeActive}
-          onChange={setTypeActive}
+          onChange={(id) => setValue("typeActive", id)}
         />
 
         <SelectLocationAndTime

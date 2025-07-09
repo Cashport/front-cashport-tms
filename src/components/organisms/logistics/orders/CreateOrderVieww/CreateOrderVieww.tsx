@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Flex } from "antd";
+import { Button, Flex } from "antd";
 import { Dayjs } from "dayjs";
 
 import Container from "@/components/atoms/Container/Container";
@@ -35,6 +35,7 @@ type ISuggestedVehicleForm = {
 };
 
 export interface IFormCreateOrder {
+  typeActive?: string; // "1" | "2" | "3"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material: IMaterialForm[];
@@ -123,6 +124,15 @@ export const CreateOrderVieww: React.FC = () => {
     // Forces React to recalculate useMemo whenever tripDetails changes, even if the reference doesn't.
   }, [JSON.stringify(tripDetails), view]);
 
+  const getPreviousView = (currentView: IViewOption): IViewOption | null => {
+    const viewsOrder: IViewOption[] = ["scheduling", "load", "responsibles"];
+    const currentIndex = viewsOrder.indexOf(currentView);
+    if (currentIndex > 0) {
+      return viewsOrder[currentIndex - 1];
+    }
+    return null; // Ya está en la primera vista
+  };
+
   return (
     <div className="createOrderView">
       <Container customStyles={{ height: "auto" }}>
@@ -134,8 +144,18 @@ export const CreateOrderVieww: React.FC = () => {
         </Flex>
       </Container>
 
-      <div className="nextButton">
-        <PrincipalButton disabled={isNextButtonDisabled} onClick={handleSubmit(onSubmit)}>
+      <div className="footerButtons">
+        {view !== "scheduling" && (
+          <Button className="backButton" onClick={() => setView(getPreviousView(view)!)}>
+            Atrás
+          </Button>
+        )}
+
+        <PrincipalButton
+          className="nextButton"
+          disabled={isNextButtonDisabled}
+          onClick={handleSubmit(onSubmit)}
+        >
           {view !== "responsibles" ? "Siguiente" : "Confirmar"}
         </PrincipalButton>
       </div>
