@@ -45,8 +45,8 @@ export interface IFormCreateOrder {
   typeActive?: string; // "1" | "2" | "3"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
-  material: IMaterialForm[];
-  suggestedVehicle: ISuggestedVehicleForm[];
+  material?: IMaterialForm[];
+  suggestedVehicle?: ISuggestedVehicleForm[];
   otherServices?: IOtherServicesForm[];
 }
 
@@ -130,10 +130,13 @@ export const CreateOrderVieww: React.FC = () => {
         // at least one material and vehicle must be selected
         // if there is a row should have something selected, an id
         const validMaterial =
-          materialDetails.length > 0 && materialDetails.every((detail) => detail.id !== undefined);
+          materialDetails &&
+          materialDetails?.length > 0 &&
+          materialDetails?.every((detail) => detail.id !== undefined);
 
         const validVehicles =
-          suggestedVehicles.length > 0 &&
+          suggestedVehicles &&
+          suggestedVehicles?.length > 0 &&
           suggestedVehicles?.every((vehicle) => vehicle.id !== undefined);
 
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);

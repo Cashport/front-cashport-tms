@@ -85,7 +85,7 @@ const OtherServicesSection: React.FC<IOtherServicesSectionProps> = ({ control })
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
               allowClear
-              style={{ width: "100%" }}
+              style={{ width: 520 }}
               className="inputSelect"
               options={requirementOptions.filter(
                 (option) =>
