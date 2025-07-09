@@ -53,7 +53,7 @@ export interface IFormCreateOrder {
 export type IViewOption = "scheduling" | "load" | "responsibles";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("load");
+  const [view, setView] = useState<IViewOption>("scheduling");
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
