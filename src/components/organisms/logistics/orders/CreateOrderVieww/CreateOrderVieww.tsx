@@ -8,6 +8,7 @@ import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
+import ResponsiblesView from "./components/ResponsiblesView/ResponsiblesView";
 
 import { IMaterialStepOne, IRoute, ISuggestedVehicle } from "@/types/logistics/schema";
 import { IOtherRequirement } from "@/services/logistics/other-requirements";
@@ -41,6 +42,18 @@ type IOtherServicesForm = {
   quantity: number;
 };
 
+interface IAdditionalInfoContact {
+  contactOriginName: string;
+  originPhone: string;
+  contactDestinationName: string;
+  destinationPhone: string;
+}
+
+interface IAdditionalInfoForm {
+  contacts: IAdditionalInfoContact[];
+  instructions?: string;
+}
+
 export interface IFormCreateOrder {
   typeActive?: string; // "1" | "2" | "3"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
@@ -48,12 +61,13 @@ export interface IFormCreateOrder {
   material?: IMaterialForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
   otherServices?: IOtherServicesForm[];
+  additionalInfo?: IAdditionalInfoForm;
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("scheduling");
+  const [view, setView] = useState<IViewOption>("responsibles");
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
@@ -93,7 +107,7 @@ export const CreateOrderVieww: React.FC = () => {
       case "load":
         return <LoadView control={control} />;
       case "responsibles":
-        return <div>Responsibles View</div>;
+        return <ResponsiblesView control={control} />;
       default:
         return null;
     }
@@ -103,12 +117,10 @@ export const CreateOrderVieww: React.FC = () => {
     console.log("Form submitted with data:", data);
     switch (view) {
       case "scheduling":
-        console.log("Scheduling view data:", data);
         setView("load");
         break;
       case "load":
-        console.log("Load view data:", data);
-        // setView("responsibles");
+        setView("responsibles");
 
         break;
       case "responsibles":
