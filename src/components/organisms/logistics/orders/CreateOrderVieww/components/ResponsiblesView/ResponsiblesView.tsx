@@ -4,6 +4,7 @@ import { Flex } from "antd";
 
 import AdditionalInfoSection from "./AdditionalInfoSection/AdditionalInfoSection";
 import BillingSection from "./BillingSection/BillingSection";
+import ProductServiceLineSection from "./ProductServiceLineSection/ProductServiceLineSection";
 
 import { IFormCreateOrder } from "../../CreateOrderVieww";
 
@@ -19,6 +20,7 @@ const ResponsiblesView: React.FC<IResponsiblesViewProps> = ({ control }) => {
       <AdditionalInfoSection control={control} />
       <hr className="divider" />
       <BillingSection control={control} />
+      <ProductServiceLineSection control={control} />
     </Flex>
   );
 };

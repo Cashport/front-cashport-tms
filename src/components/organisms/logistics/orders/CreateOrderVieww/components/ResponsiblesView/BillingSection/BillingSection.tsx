@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Control, Controller } from "react-hook-form";
 import { Flex, Select } from "antd";
 import { Info } from "@phosphor-icons/react";
-import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
-import "./billingSection.scss";
-import { IClient, ICompanyCode } from "@/types/logistics/schema";
 import { getCompanyCodes } from "@/services/logistics/company-codes";
 import { getClients } from "@/services/logistics/clients";
+
+import { IFormCreateOrder } from "../../../CreateOrderVieww";
+import { IClient, ICompanyCode } from "@/types/logistics/schema";
 
 interface BillingSectionProps {
   control: Control<IFormCreateOrder, any>;

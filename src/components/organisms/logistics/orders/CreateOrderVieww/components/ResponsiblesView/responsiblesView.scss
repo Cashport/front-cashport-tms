@@ -21,9 +21,11 @@
         box-shadow: none;
         width: fit-content;
         align-self: flex-end;
+        background-color: transparent;
 
         &:hover {
             opacity: 0.8;
+            background-color: transparent !important;
         }
     }
 
@@ -34,5 +36,12 @@
 
     .inputField {
         height: 40px;
+    }
+
+    .titleAndSelect {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
     }
 }

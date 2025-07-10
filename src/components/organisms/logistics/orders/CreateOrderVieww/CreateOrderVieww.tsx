@@ -13,6 +13,8 @@ import ResponsiblesView from "./components/ResponsiblesView/ResponsiblesView";
 import {
   IClient,
   ICompanyCode,
+  ICostCenter,
+  IGetPSL,
   IMaterialStepOne,
   IRoute,
   ISuggestedVehicle
@@ -64,6 +66,17 @@ interface IBillingForm {
   companyCode?: ICompanyCode;
   endClient?: IClient;
 }
+
+interface IPSLGeneral {
+  selectedPSL?: IGetPSL;
+  percentagePSL?: number;
+  costCenters?: ICostCenter[]; // Lista de centros de costos seleccionados
+}
+
+interface IProductServiceLineForm {
+  productServiceLine?: IPSLGeneral[];
+}
+
 export interface IFormCreateOrder {
   typeActive?: string; // "1" | "2" | "3"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
@@ -73,6 +86,7 @@ export interface IFormCreateOrder {
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;
   billing?: IBillingForm;
+  productServiceLine?: IProductServiceLineForm;
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";

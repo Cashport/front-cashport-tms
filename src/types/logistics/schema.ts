@@ -3824,3 +3824,15 @@ export interface ISuggestedVehicle {
   available: number;
   price: number;
 }
+
+export interface ICostCenter {
+  id: number;
+  description: string;
+  id_psl: number;
+}
+
+export interface IGetPSL {
+  cost_center: ICostCenter[];
+  description: string;
+  id: number;
+}
