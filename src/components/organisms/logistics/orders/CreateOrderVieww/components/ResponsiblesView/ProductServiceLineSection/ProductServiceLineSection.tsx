@@ -97,6 +97,10 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                         value: option.id,
                         label: option.description
                       }))}
+                      showSearch
+                      filterOption={(input, option) =>
+                        option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
+                      }
                     />
                   )}
                 />
@@ -146,11 +150,7 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                 const selectedPSL = watchedPSL?.[pslIndex]?.selectedPSL;
 
                 // Obtenemos las opciones de centros de costo para el PSL seleccionado
-                const costCenterOptions =
-                  selectedPSL?.cost_center?.map((cc: any) => ({
-                    value: cc.id,
-                    label: cc.description
-                  })) ?? [];
+                const costCenterDependingOnPSL = selectedPSL?.cost_center;
 
                 return (
                   <div className="PSLCostCenter" key={ccIndex}>
@@ -161,13 +161,39 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                       </Flex>
                       <Controller
                         control={control}
-                        name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}`}
+                        name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}.selectedCostCenter`}
                         render={({ field }) => (
                           <Select
                             {...field}
+                            labelInValue
                             placeholder="Selecciona centro de costos"
                             className="inputField"
-                            options={costCenterOptions}
+                            options={
+                              costCenterDependingOnPSL?.map((cc: any) => ({
+                                value: cc.id,
+                                label: cc.description
+                              })) ?? []
+                            }
+                            showSearch
+                            filterOption={(input, option) =>
+                              option
+                                ? option.label.toLowerCase().includes(input.toLowerCase())
+                                : false
+                            }
+                            value={
+                              field.value
+                                ? {
+                                    value: field.value.id,
+                                    label: field.value.description
+                                  }
+                                : undefined
+                            }
+                            onChange={(option) => {
+                              const selected = costCenterDependingOnPSL?.find(
+                                (cc) => cc.id === option.value
+                              );
+                              field.onChange(selected ?? null);
+                            }}
                           />
                         )}
                       />
@@ -249,7 +275,9 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
 
       <Button
         className="addButton"
-        onClick={() => appendPSL({ selectedPSL: undefined, costCenters: [{ id: undefined }] })}
+        onClick={() =>
+          appendPSL({ selectedPSL: undefined, costCenters: [{ selectedCostCenter: undefined }] })
+        }
       >
         Agregar PSL
         <Plus size={16} />

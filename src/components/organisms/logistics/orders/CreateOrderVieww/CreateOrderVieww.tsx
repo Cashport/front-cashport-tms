@@ -68,11 +68,9 @@ interface IBillingForm {
 }
 
 type ICostCenterForm = {
-  [K in keyof ICostCenter]?: ICostCenter[K];
-} & {
+  selectedCostCenter?: ICostCenter;
   percentage?: number;
 };
-
 interface IPSLGeneral {
   selectedPSL?: IGetPSL;
   percentagePSL?: number;
@@ -133,7 +131,7 @@ export const CreateOrderVieww: React.FC = () => {
           {
             selectedPSL: undefined,
             percentagePSL: 0,
-            costCenters: [{ id: undefined }]
+            costCenters: [{ selectedCostCenter: undefined }]
           }
         ]
       }
