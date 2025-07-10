@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, Button, Input, Select } from "antd";
-import { Info, Plus, Trash } from "@phosphor-icons/react";
+import { Info, Plus, Trash, X } from "@phosphor-icons/react";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
 import { getPsl } from "@/services/logistics/psl";
@@ -57,6 +57,13 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
 
         return (
           <div key={pslField.id} className="productServiceLineSection__container">
+            {/* Remove PSL Button */}
+            {pslIndex > 0 && (
+              <button className="removePSLButton" onClick={() => removePSL(pslIndex)}>
+                <X size={20} />
+              </button>
+            )}
+
             <div className="PSLGeneral">
               <div className="titleAndSelect">
                 <Flex justify="space-between" align="center">
@@ -101,55 +108,68 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
 
             {/* COST CENTER LIST */}
             <div className="PSLCostCenterList">
-              {costCenters.map((cc: any, ccIndex: number) => (
-                <div className="PSLCostCenter" key={ccIndex}>
-                  <div className="titleAndSelect">
-                    <Flex justify="space-between" align="center">
-                      <p>Centro de costos</p>
-                      <Info size={20} />
-                    </Flex>
-                    <Controller
-                      control={control}
-                      name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}`}
-                      render={({ field }) => (
-                        <Select
-                          {...field}
-                          placeholder="Selecciona centro de costos"
-                          className="inputField"
-                        />
-                      )}
-                    />
-                  </div>
+              {costCenters.map((cc: any, ccIndex: number) => {
+                // Obtenemos el PSL seleccionado actualmente para este índice
+                const selectedPSL = watchedPSL?.[pslIndex]?.selectedPSL;
 
-                  <div className="titleAndSelect">
-                    <p>Porcentaje CC</p>
-                    <Controller
-                      control={control}
-                      name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}.percentage`}
-                      render={({ field }) => (
-                        <Input {...field} type="number" className="inputField" />
-                      )}
-                    />
-                  </div>
+                // Obtenemos las opciones de centros de costo para el PSL seleccionado
+                const costCenterOptions =
+                  selectedPSL?.cost_center?.map((cc: any) => ({
+                    value: cc.id,
+                    label: cc.description
+                  })) ?? [];
 
-                  {ccIndex > 0 && (
-                    <Button
-                      className="removeButton"
-                      type="link"
-                      danger
-                      icon={<Trash size={24} />}
-                      onClick={() => {
-                        const updated = [...costCenters];
-                        updated.splice(ccIndex, 1);
-                        setValue(
-                          `productServiceLine.productServiceLine.${pslIndex}.costCenters`,
-                          updated
-                        );
-                      }}
-                    />
-                  )}
-                </div>
-              ))}
+                return (
+                  <div className="PSLCostCenter" key={ccIndex}>
+                    <div className="titleAndSelect">
+                      <Flex justify="space-between" align="center">
+                        <p>Centro de costos</p>
+                        <Info size={20} />
+                      </Flex>
+                      <Controller
+                        control={control}
+                        name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}`}
+                        render={({ field }) => (
+                          <Select
+                            {...field}
+                            placeholder="Selecciona centro de costos"
+                            className="inputField"
+                            options={costCenterOptions}
+                          />
+                        )}
+                      />
+                    </div>
+
+                    <div className="titleAndSelect">
+                      <p>Porcentaje CC</p>
+                      <Controller
+                        control={control}
+                        name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}.percentage`}
+                        render={({ field }) => (
+                          <Input {...field} type="number" className="inputField" />
+                        )}
+                      />
+                    </div>
+
+                    {ccIndex > 0 && (
+                      <Button
+                        className="removeButton"
+                        type="link"
+                        danger
+                        icon={<Trash size={24} />}
+                        onClick={() => {
+                          const updated = [...costCenters];
+                          updated.splice(ccIndex, 1);
+                          setValue(
+                            `productServiceLine.productServiceLine.${pslIndex}.costCenters`,
+                            updated
+                          );
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
 
               <Button
                 className="addButton"
@@ -165,15 +185,6 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                 <Plus size={16} />
               </Button>
             </div>
-
-            {/* <Button
-              type="link"
-              danger
-              onClick={() => removePSL(pslIndex)}
-              style={{ marginTop: "1rem" }}
-            >
-              Eliminar PSL
-            </Button> */}
           </div>
         );
       })}

@@ -8,6 +8,21 @@
         background-color: $background;
         border-radius: 4px;
         padding: 24px 16px;
+        position: relative;
+    }
+
+    .removePSLButton {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        z-index: 1;
+        border: none;
+        background: none;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.8;
+        }
     }
 
     .PSLGeneral {
