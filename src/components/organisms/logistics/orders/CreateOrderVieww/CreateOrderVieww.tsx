@@ -10,7 +10,13 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import LoadView from "./components/LoadView/LoadView";
 import ResponsiblesView from "./components/ResponsiblesView/ResponsiblesView";
 
-import { IMaterialStepOne, IRoute, ISuggestedVehicle } from "@/types/logistics/schema";
+import {
+  IClient,
+  ICompanyCode,
+  IMaterialStepOne,
+  IRoute,
+  ISuggestedVehicle
+} from "@/types/logistics/schema";
 import { IOtherRequirement } from "@/services/logistics/other-requirements";
 
 import "./createOrderView.scss";
@@ -54,6 +60,10 @@ interface IAdditionalInfoForm {
   instructions?: string;
 }
 
+interface IBillingForm {
+  companyCode?: ICompanyCode;
+  endClient?: IClient;
+}
 export interface IFormCreateOrder {
   typeActive?: string; // "1" | "2" | "3"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
@@ -62,6 +72,7 @@ export interface IFormCreateOrder {
   suggestedVehicle?: ISuggestedVehicleForm[];
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;
+  billing?: IBillingForm;
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";
@@ -86,7 +97,17 @@ export const CreateOrderVieww: React.FC = () => {
           requiresRaising: false,
           raisingNum: 0
         } // Destino
-      ]
+      ],
+      additionalInfo: {
+        contacts: [
+          {
+            contactOriginName: "",
+            originPhone: "",
+            contactDestinationName: "",
+            destinationPhone: ""
+          }
+        ]
+      }
     }
   });
 
