@@ -20,64 +20,31 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({ control }
     <Flex vertical gap={"1.5rem"} className="additionalInfoSection">
       <h3 className="subTitle">Información adicional</h3>
 
-      {/* <div className="additionalInfoSection__row">
-        <div className="contactInfo">
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Nombre del contacto"
-            key={"contact.key"}
-            value={"contact.name"}
-          />
-
-          <Input
-            style={{ width: "100%" }}
-            placeholder="000 000 0000"
-            count={{
-              show: true,
-              max: 10
-            }}
-          />
-        </div>
-
-        <div className="contactInfo">
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Nombre del contacto"
-            key={"contact.key"}
-            value={"contact.name"}
-          />
-
-          <Input
-            style={{ width: "100%" }}
-            placeholder="000 000 0000"
-            count={{
-              show: true,
-              max: 10
-            }}
-          />
-        </div>
-      </div> */}
       {fields.map((field, index) => (
         <div key={field.id} className="additionalInfoSection__row">
           <div className="contactInfo">
-            <Controller
-              control={control}
-              name={`additionalInfo.contacts.${index}.contactOriginName`}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  style={{ width: "100%" }}
-                  placeholder="Nombre del contacto origen"
-                />
-              )}
-            />
+            <Flex vertical style={{ width: "100%" }} gap={"0.25rem"}>
+              <p>Contacto punto origen</p>
+              <Controller
+                control={control}
+                name={`additionalInfo.contacts.${index}.contactOriginName`}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    placeholder="Nombre del contacto origen"
+                    className="inputField"
+                  />
+                )}
+              />
+            </Flex>
+
             <Controller
               control={control}
               name={`additionalInfo.contacts.${index}.originPhone`}
               render={({ field }) => (
                 <Input
                   {...field}
-                  style={{ width: "100%" }}
+                  className="inputField"
                   placeholder="000 000 0000"
                   maxLength={10}
                   count={{ show: true, max: 10 }}
@@ -87,24 +54,27 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({ control }
           </div>
 
           <div className="contactInfo">
-            <Controller
-              control={control}
-              name={`additionalInfo.contacts.${index}.contactDestinationName`}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  style={{ width: "100%" }}
-                  placeholder="Nombre del contacto destino"
-                />
-              )}
-            />
+            <Flex vertical style={{ width: "100%" }} gap={"0.25rem"}>
+              <p>Contacto punto destino</p>
+              <Controller
+                control={control}
+                name={`additionalInfo.contacts.${index}.contactDestinationName`}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    placeholder="Nombre del contacto destino"
+                    className="inputField"
+                  />
+                )}
+              />
+            </Flex>
             <Controller
               control={control}
               name={`additionalInfo.contacts.${index}.destinationPhone`}
               render={({ field }) => (
                 <Input
                   {...field}
-                  style={{ width: "100%" }}
+                  className="inputField"
                   placeholder="000 000 0000"
                   maxLength={10}
                   count={{ show: true, max: 10 }}
