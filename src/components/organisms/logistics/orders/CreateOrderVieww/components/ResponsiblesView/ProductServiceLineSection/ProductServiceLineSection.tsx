@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
-import { Flex, Button, Input, Select } from "antd";
-import { Info, Plus, Trash, X } from "@phosphor-icons/react";
-import { IFormCreateOrder } from "../../../CreateOrderVieww";
+import { Flex, Button, Select, InputNumber } from "antd";
+import { CaretLeft, CaretRight, Info, Plus, Trash, X } from "@phosphor-icons/react";
 
 import { getPsl } from "@/services/logistics/psl";
+
 import { IGetPSL } from "@/types/logistics/schema";
+import { IFormCreateOrder } from "../../../CreateOrderVieww";
+
 import "./productServiceLineSection.scss";
 
 interface ProductServiceLineSectionProps {
@@ -102,7 +104,38 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
 
               <div className="titleAndSelect">
                 <p>Porcentaje PSL</p>
-                <span className="percentage">100%</span>
+                <Controller
+                  control={control}
+                  name={`productServiceLine.productServiceLine.${pslIndex}.percentagePSL`}
+                  render={({ field }) => (
+                    <InputNumber
+                      {...field}
+                      className="inputField inputPercentage"
+                      controls={false}
+                      placeholder="0"
+                      max={100}
+                      min={0}
+                      formatter={(value) => `${value}%`}
+                      defaultValue={0}
+                      addonBefore={
+                        <button
+                          className="percentageControl decrement"
+                          onClick={() => field.onChange(Math.max((field.value || 1) - 1, 1))}
+                        >
+                          <CaretLeft size={18} style={{ cursor: "pointer" }} />
+                        </button>
+                      }
+                      addonAfter={
+                        <button
+                          className="percentageControl increment"
+                          onClick={() => field.onChange((field.value || 1) + 1)}
+                        >
+                          <CaretRight size={18} style={{ cursor: "pointer" }} />
+                        </button>
+                      }
+                    />
+                  )}
+                />
               </div>
             </div>
 
@@ -146,7 +179,32 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                         control={control}
                         name={`productServiceLine.productServiceLine.${pslIndex}.costCenters.${ccIndex}.percentage`}
                         render={({ field }) => (
-                          <Input {...field} type="number" className="inputField" />
+                          <InputNumber
+                            {...field}
+                            className="inputField inputPercentage"
+                            controls={false}
+                            placeholder="0"
+                            max={100}
+                            min={0}
+                            formatter={(value) => `${value}%`}
+                            defaultValue={0}
+                            addonBefore={
+                              <button
+                                className="percentageControl decrement"
+                                onClick={() => field.onChange(Math.max((field.value || 1) - 1, 1))}
+                              >
+                                <CaretLeft size={18} style={{ cursor: "pointer" }} />
+                              </button>
+                            }
+                            addonAfter={
+                              <button
+                                className="percentageControl increment"
+                                onClick={() => field.onChange((field.value || 1) + 1)}
+                              >
+                                <CaretRight size={18} style={{ cursor: "pointer" }} />
+                              </button>
+                            }
+                          />
                         )}
                       />
                     </div>

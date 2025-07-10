@@ -125,9 +125,10 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                           <InputNumber
                             {...field}
                             className="inputNumber"
-                            placeholder="0"
+                            placeholder="0 Hrs"
                             min={0}
                             style={{ gridColumn: "11 / -1" }}
+                            formatter={(value) => `${value} Hrs`}
                           />
                         )}
                       />

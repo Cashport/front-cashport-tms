@@ -58,4 +58,44 @@
             margin-top: 27px;
         }
     }
+
+    // Ant design specific styles
+    .inputPercentage {
+        height: 40px;
+        .ant-input-number-group-addon {
+            background-color: $white;
+            padding: 0;
+        }
+        .ant-input-number-outlined {
+            border-left: 0;
+            border-right: 0;
+        }
+
+        .ant-input-number-wrapper {
+            height: 100%;
+        }
+
+        .ant-input-number-input-wrap,
+        .ant-input-number-input {
+            height: 100%;
+            text-align: center;
+        }
+
+        .percentageControl {
+            height: 100%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &.decrement {
+                margin-left: 20px;
+            }
+
+            &.increment {
+                margin-right: 20px;
+            }
+        }
+    }
 }
