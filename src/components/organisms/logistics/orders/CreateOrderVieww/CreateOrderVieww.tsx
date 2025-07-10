@@ -67,10 +67,16 @@ interface IBillingForm {
   endClient?: IClient;
 }
 
+type ICostCenterForm = {
+  [K in keyof ICostCenter]?: ICostCenter[K];
+} & {
+  percentage?: number;
+};
+
 interface IPSLGeneral {
   selectedPSL?: IGetPSL;
   percentagePSL?: number;
-  costCenters?: ICostCenter[]; // Lista de centros de costos seleccionados
+  costCenters?: ICostCenterForm[]; // Lista de centros de costos seleccionados
 }
 
 interface IProductServiceLineForm {
@@ -121,6 +127,15 @@ export const CreateOrderVieww: React.FC = () => {
             destinationPhone: ""
           }
         ]
+      },
+      productServiceLine: {
+        productServiceLine: [
+          {
+            selectedPSL: undefined,
+            percentagePSL: 0,
+            costCenters: [{ id: undefined }]
+          }
+        ]
       }
     }
   });
@@ -142,7 +157,7 @@ export const CreateOrderVieww: React.FC = () => {
       case "load":
         return <LoadView control={control} />;
       case "responsibles":
-        return <ResponsiblesView control={control} />;
+        return <ResponsiblesView control={control} setValue={setValue} />;
       default:
         return null;
     }
