@@ -67,11 +67,11 @@ interface IBillingForm {
   endClient?: IClient;
 }
 
-type ICostCenterForm = {
+export type ICostCenterForm = {
   selectedCostCenter?: ICostCenter;
   percentage?: number;
 };
-interface IPSLGeneral {
+export interface IPSLGeneral {
   selectedPSL?: IGetPSL;
   percentagePSL?: number;
   costCenters?: ICostCenterForm[]; // Lista de centros de costos seleccionados
