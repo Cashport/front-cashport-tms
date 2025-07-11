@@ -128,12 +128,14 @@
             opacity: 0.8;
         }
     }
+
+    .ant-input-number-input-wrap,
+    .ant-input-number-input {
+        height: 100%;
+        text-align: center;
+    }
 }
 
 .ant-input-number {
     width: auto !important;
-}
-
-.ant-input-number-input {
-    height: 40px !important;
 }

@@ -8,8 +8,17 @@ import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
+import ResponsiblesView from "./components/ResponsiblesView/ResponsiblesView";
 
-import { IMaterialStepOne, IRoute, ISuggestedVehicle } from "@/types/logistics/schema";
+import {
+  IClient,
+  ICompanyCode,
+  ICostCenter,
+  IGetPSL,
+  IMaterialStepOne,
+  IRoute,
+  ISuggestedVehicle
+} from "@/types/logistics/schema";
 import { IOtherRequirement } from "@/services/logistics/other-requirements";
 
 import "./createOrderView.scss";
@@ -41,13 +50,47 @@ type IOtherServicesForm = {
   quantity: number;
 };
 
+interface IAdditionalInfoContact {
+  contactOriginName: string;
+  originPhone: string;
+  contactDestinationName: string;
+  destinationPhone: string;
+}
+
+interface IAdditionalInfoForm {
+  contacts: IAdditionalInfoContact[];
+  instructions?: string;
+}
+
+interface IBillingForm {
+  companyCode?: ICompanyCode;
+  endClient?: IClient;
+}
+
+export type ICostCenterForm = {
+  selectedCostCenter?: ICostCenter;
+  percentage?: number;
+};
+export interface IPSLGeneral {
+  selectedPSL?: IGetPSL;
+  percentagePSL?: number;
+  costCenters?: ICostCenterForm[]; // Lista de centros de costos seleccionados
+}
+
+interface IProductServiceLineForm {
+  productServiceLine?: IPSLGeneral[];
+}
+
 export interface IFormCreateOrder {
-  typeActive?: string; // "1" | "2" | "3"
+  typeActive?: string; // "1" | "2" | "3" | "4"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
   otherServices?: IOtherServicesForm[];
+  additionalInfo?: IAdditionalInfoForm;
+  billing?: IBillingForm;
+  productServiceLine?: IProductServiceLineForm;
 }
 
 export type IViewOption = "scheduling" | "load" | "responsibles";
@@ -72,7 +115,38 @@ export const CreateOrderVieww: React.FC = () => {
           requiresRaising: false,
           raisingNum: 0
         } // Destino
-      ]
+      ],
+      material: [
+        {
+          id: undefined,
+          quantity: 1
+        }
+      ],
+      suggestedVehicle: [
+        {
+          id: undefined,
+          quantity: 1
+        }
+      ],
+      additionalInfo: {
+        contacts: [
+          {
+            contactOriginName: "",
+            originPhone: "",
+            contactDestinationName: "",
+            destinationPhone: ""
+          }
+        ]
+      },
+      productServiceLine: {
+        productServiceLine: [
+          {
+            selectedPSL: undefined,
+            percentagePSL: 0,
+            costCenters: [{ selectedCostCenter: undefined }]
+          }
+        ]
+      }
     }
   });
 
@@ -83,6 +157,9 @@ export const CreateOrderVieww: React.FC = () => {
   const materialDetails = watch("material");
   const suggestedVehicles = watch("suggestedVehicle");
   const otherServices = watch("otherServices");
+  const additionalInfo = watch("additionalInfo");
+  const billing = watch("billing");
+  const productServiceLine = watch("productServiceLine");
 
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
@@ -93,7 +170,7 @@ export const CreateOrderVieww: React.FC = () => {
       case "load":
         return <LoadView control={control} />;
       case "responsibles":
-        return <div>Responsibles View</div>;
+        return <ResponsiblesView control={control} setValue={setValue} />;
       default:
         return null;
     }
@@ -103,12 +180,10 @@ export const CreateOrderVieww: React.FC = () => {
     console.log("Form submitted with data:", data);
     switch (view) {
       case "scheduling":
-        console.log("Scheduling view data:", data);
         setView("load");
         break;
       case "load":
-        console.log("Load view data:", data);
-        // setView("responsibles");
+        setView("responsibles");
 
         break;
       case "responsibles":
@@ -143,18 +218,51 @@ export const CreateOrderVieww: React.FC = () => {
 
         return !validMaterial || !validVehicles || !validOtherServices;
       case "responsibles":
-        return false;
+        const validAdditionalInfo =
+          additionalInfo &&
+          additionalInfo.contacts.length > 0 &&
+          additionalInfo.contacts.every(
+            (contact) =>
+              contact.contactOriginName &&
+              contact.originPhone &&
+              contact.contactDestinationName &&
+              contact.destinationPhone
+          );
+
+        const validBilling = billing && billing.companyCode && billing.endClient;
+
+        const validProductServiceLine =
+          productServiceLine?.productServiceLine &&
+          productServiceLine.productServiceLine.length > 0 &&
+          productServiceLine.productServiceLine.every((psl) => {
+            return (
+              psl.selectedPSL !== undefined &&
+              psl.percentagePSL &&
+              psl.percentagePSL > 0 &&
+              psl.costCenters &&
+              psl.costCenters.length > 0 &&
+              psl.costCenters.every((costCenter) => costCenter.selectedCostCenter !== undefined) &&
+              psl.costCenters.every(
+                (costCenter) => costCenter.percentage && costCenter.percentage > 0
+              )
+            );
+          });
+
+        return !validAdditionalInfo || !validBilling || !validProductServiceLine;
       default:
         return false;
     }
 
-    // Forces React to recalculate useMemo whenever tripDetails changes, even if the reference doesn't.
+    // Forces React to recalculate useMemo whenever any data changes, even if the reference doesn't.
   }, [
     JSON.stringify(tripDetails),
     view,
     JSON.stringify(materialDetails),
     JSON.stringify(suggestedVehicles),
-    JSON.stringify(otherServices)
+    JSON.stringify(otherServices),
+    JSON.stringify(additionalInfo),
+    JSON.stringify(billing),
+    JSON.stringify(productServiceLine)
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {

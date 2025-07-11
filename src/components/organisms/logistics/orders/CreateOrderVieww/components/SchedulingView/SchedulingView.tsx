@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Control, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, message } from "antd";
 import { Calendar, Crane, Truck, User } from "@phosphor-icons/react";
@@ -45,7 +45,23 @@ interface SchedulingViewProps {
 const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) => {
   const [locationOptions, setLocationOptions] = useState<ISelectLocation[]>([]);
   const typeActive = useWatch({ control, name: "typeActive" }) ?? "1";
+  const tripDetails = useWatch({ control, name: "TripDetails" }) ?? [];
 
+  const timeBasedOnSelectedDateAndTime = useMemo(() => {
+    const originDate = tripDetails[0]?.date;
+    const originTime = tripDetails[0]?.time;
+
+    const destinationDate = tripDetails[tripDetails.length - 1]?.date;
+    const destinationTime = tripDetails[tripDetails.length - 1]?.time;
+    // console.log("Origin Date:", originDate);
+    // console.log("originTime:", originTime);
+    // console.log("Destination Date:", destinationDate);
+    // console.log("Destination Time:", destinationTime);
+
+    return undefined;
+  }, [tripDetails]);
+
+  // Refs para el mapa y los marcadores
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const originMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const destinationMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -69,6 +85,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
     const loadLocations = async () => {
       if (locationOptions.length) return;
       const result = await getAllLocations();
+      console.log("Locations:", result);
       if (result?.data?.length) {
         setLocationOptions(result.data);
       }
@@ -258,7 +275,12 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
           onChangeDestination={onChangeDestination}
         />
 
-        <SummaryCard distance={tripInfoMap?.distance} duration={tripInfoMap?.duration} />
+        <SummaryCard
+          distance={tripInfoMap?.distance}
+          duration={tripInfoMap?.duration}
+          selectedTripType={typeActive}
+          durationBasedOnSelects={timeBasedOnSelectedDateAndTime}
+        />
       </Flex>
 
       {/* MAP */}
@@ -266,7 +288,8 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
         ref={mapContainerRef}
         style={{
           width: "100%",
-          height: "500px",
+          height: "100%",
+          maxHeight: "720px",
           border: "1px #F7F7F7 solid"
         }}
       />
