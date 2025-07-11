@@ -10,7 +10,10 @@ interface ISummaryCardProps {
   distance?: number; // in meters
   duration?: number; // in seconds, optional for now
   selectedTripType: string;
-  durationBasedOnSelects?: any; // in seconds, optional for now
+  durationBasedOnSelects?: {
+    days: number;
+    hours: number;
+  };
 }
 
 const SummaryCard: React.FC<ISummaryCardProps> = ({
@@ -21,6 +24,11 @@ const SummaryCard: React.FC<ISummaryCardProps> = ({
 }) => {
   const hours = getTravelDuration(duration ?? 0);
 
+  const { days, hours: rentingHours } = durationBasedOnSelects ?? {
+    days: 0,
+    hours: 0
+  };
+
   return (
     <div className="summaryCard">
       <h2>Resumen del servicio</h2>
@@ -30,7 +38,7 @@ const SummaryCard: React.FC<ISummaryCardProps> = ({
             <Path className="summaryCard__icon" size={32} />
             <Flex vertical>
               <p>{selectedTripType === "2" ? "Tiempo de izaje" : "Tiempo de renta"}</p>
-              <strong>{durationBasedOnSelects} días</strong>
+              <strong>{days > 0 ? `${days} días` : `${rentingHours} horas`}</strong>
             </Flex>
           </Flex>
         ) : (
