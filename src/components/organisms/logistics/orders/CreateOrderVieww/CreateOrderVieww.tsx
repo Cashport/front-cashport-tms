@@ -82,7 +82,7 @@ interface IProductServiceLineForm {
 }
 
 export interface IFormCreateOrder {
-  typeActive?: string; // "1" | "2" | "3"
+  typeActive?: string; // "1" | "2" | "3" | "4"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
@@ -96,7 +96,7 @@ export interface IFormCreateOrder {
 export type IViewOption = "scheduling" | "load" | "responsibles";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("responsibles");
+  const [view, setView] = useState<IViewOption>("scheduling");
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {

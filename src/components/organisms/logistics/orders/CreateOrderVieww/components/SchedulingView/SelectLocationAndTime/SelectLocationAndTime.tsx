@@ -33,6 +33,8 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
 
   const showRaising = selectedType === "1";
 
+  const destinationAvailable = selectedType == "4";
+
   // Lógica: agrega una parada justo antes del último (Destino)
   const handleAddStop = () => {
     insert(fields.length - 1, {
@@ -146,6 +148,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         className="inputDate"
                         value={field.value}
                         onChange={field.onChange}
+                        disabled={i > 0 && !destinationAvailable}
                       />
                     )}
                   />
@@ -162,8 +165,10 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         format={"HH:mm"}
                         minuteStep={15}
                         hourStep={1}
+                        needConfirm={false}
                         value={field.value}
                         onChange={field.onChange}
+                        disabled={i > 0 && !destinationAvailable}
                       />
                     )}
                   />
@@ -184,14 +189,15 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
         </React.Fragment>
       ))}
 
-      <button
+      {/* Botón para agregar una parada */}
+      {/* <button
         onClick={handleAddStop}
         className="addStopButton"
         type="button"
         style={{ marginTop: 14 }}
       >
         Agregar parada <Plus size="1rem" />
-      </button>
+      </button> */}
     </div>
   );
 };
