@@ -116,6 +116,18 @@ export const CreateOrderVieww: React.FC = () => {
           raisingNum: 0
         } // Destino
       ],
+      material: [
+        {
+          id: undefined,
+          quantity: 1
+        }
+      ],
+      suggestedVehicle: [
+        {
+          id: undefined,
+          quantity: 1
+        }
+      ],
       additionalInfo: {
         contacts: [
           {
@@ -145,6 +157,9 @@ export const CreateOrderVieww: React.FC = () => {
   const materialDetails = watch("material");
   const suggestedVehicles = watch("suggestedVehicle");
   const otherServices = watch("otherServices");
+  const additionalInfo = watch("additionalInfo");
+  const billing = watch("billing");
+  const productServiceLine = watch("productServiceLine");
 
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
@@ -203,18 +218,51 @@ export const CreateOrderVieww: React.FC = () => {
 
         return !validMaterial || !validVehicles || !validOtherServices;
       case "responsibles":
-        return false;
+        const validAdditionalInfo =
+          additionalInfo &&
+          additionalInfo.contacts.length > 0 &&
+          additionalInfo.contacts.every(
+            (contact) =>
+              contact.contactOriginName &&
+              contact.originPhone &&
+              contact.contactDestinationName &&
+              contact.destinationPhone
+          );
+
+        const validBilling = billing && billing.companyCode && billing.endClient;
+
+        const validProductServiceLine =
+          productServiceLine?.productServiceLine &&
+          productServiceLine.productServiceLine.length > 0 &&
+          productServiceLine.productServiceLine.every((psl) => {
+            return (
+              psl.selectedPSL !== undefined &&
+              psl.percentagePSL &&
+              psl.percentagePSL > 0 &&
+              psl.costCenters &&
+              psl.costCenters.length > 0 &&
+              psl.costCenters.every((costCenter) => costCenter.selectedCostCenter !== undefined) &&
+              psl.costCenters.every(
+                (costCenter) => costCenter.percentage && costCenter.percentage > 0
+              )
+            );
+          });
+
+        return !validAdditionalInfo || !validBilling || !validProductServiceLine;
       default:
         return false;
     }
 
-    // Forces React to recalculate useMemo whenever tripDetails changes, even if the reference doesn't.
+    // Forces React to recalculate useMemo whenever any data changes, even if the reference doesn't.
   }, [
     JSON.stringify(tripDetails),
     view,
     JSON.stringify(materialDetails),
     JSON.stringify(suggestedVehicles),
-    JSON.stringify(otherServices)
+    JSON.stringify(otherServices),
+    JSON.stringify(additionalInfo),
+    JSON.stringify(billing),
+    JSON.stringify(productServiceLine)
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
