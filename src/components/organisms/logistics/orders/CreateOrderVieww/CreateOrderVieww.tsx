@@ -150,6 +150,8 @@ export const CreateOrderVieww: React.FC = () => {
     }
   });
 
+  // watchTripType
+  const tripType = watch("typeActive");
   // Watch the TripDetails to see if any changes are made
   const tripDetails = watch("TripDetails");
 
@@ -199,7 +201,20 @@ export const CreateOrderVieww: React.FC = () => {
     // for every view we check if the next button should be disabled
     switch (view) {
       case "scheduling":
-        const isValid = tripDetails.every((detail) => detail.placeId && detail.date && detail.time);
+        const isDestinationDateAndTimeMandatory = tripType === "4";
+
+        if (isDestinationDateAndTimeMandatory) {
+          const isValid = tripDetails.every(
+            (detail) => detail.placeId && detail.date && detail.time
+          );
+          return !isValid;
+        }
+        // aca solo verificamos que la primera ubicación tenga todo y haya un destino
+        const isValid =
+          tripDetails[0].placeId &&
+          tripDetails[0].date &&
+          tripDetails[0].time &&
+          tripDetails[1].placeId;
         return !isValid;
       case "load":
         // at least one material and vehicle must be selected
@@ -262,7 +277,8 @@ export const CreateOrderVieww: React.FC = () => {
     JSON.stringify(otherServices),
     JSON.stringify(additionalInfo),
     JSON.stringify(billing),
-    JSON.stringify(productServiceLine)
+    JSON.stringify(productServiceLine),
+    tripType
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {

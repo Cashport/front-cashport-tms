@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Control, UseFormSetValue, useWatch } from "react-hook-form";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import { Flex, message } from "antd";
 import { Calendar, Crane, Truck, User } from "@phosphor-icons/react";
 import axios, { AxiosResponse } from "axios";
@@ -26,6 +28,8 @@ import { IFormCreateOrder } from "../../CreateOrderVieww";
 
 import "./schedulingView.scss";
 
+dayjs.extend(duration);
+
 interface ITripInfoMap {
   distance: number;
   duration: number;
@@ -50,15 +54,56 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
   const timeBasedOnSelectedDateAndTime = useMemo(() => {
     const originDate = tripDetails[0]?.date;
     const originTime = tripDetails[0]?.time;
-
     const destinationDate = tripDetails[tripDetails.length - 1]?.date;
     const destinationTime = tripDetails[tripDetails.length - 1]?.time;
-    // console.log("Origin Date:", originDate);
-    // console.log("originTime:", originTime);
-    // console.log("Destination Date:", destinationDate);
-    // console.log("Destination Time:", destinationTime);
 
-    return undefined;
+    // Verificar que todos los valores existen
+    if (!originDate || !originTime || !destinationDate || !destinationTime) {
+      return undefined;
+    }
+
+    try {
+      // Combinar fecha y hora de origen
+      // originDate ya es un objeto Dayjs con hora 00:00
+      // originTime es un objeto Dayjs con la hora pero fecha actual
+      const originDateTime = originDate
+        .hour(originTime.hour())
+        .minute(originTime.minute())
+        .second(originTime.second());
+
+      // Combinar fecha y hora de destino
+      const destinationDateTime = destinationDate
+        .hour(destinationTime.hour())
+        .minute(destinationTime.minute())
+        .second(destinationTime.second());
+
+      // Calcular la diferencia
+      const diffInMilliseconds = destinationDateTime.diff(originDateTime);
+
+      // Si la diferencia es negativa, el destino es anterior al origen
+      if (diffInMilliseconds < 0) {
+        console.warn("La fecha/hora de destino es anterior a la de origen");
+
+        return {
+          days: 0,
+          hours: 0
+        };
+      }
+
+      // Crear un objeto duration
+      const duration = dayjs.duration(diffInMilliseconds);
+
+      // Extraer días, horas y minutos
+      const days = Math.floor(duration.asDays());
+      const hours = duration.hours();
+      return {
+        days,
+        hours
+      };
+    } catch (error) {
+      console.error("Error calculando el tiempo:", error);
+      return undefined;
+    }
   }, [tripDetails]);
 
   // Refs para el mapa y los marcadores
@@ -85,7 +130,6 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
     const loadLocations = async () => {
       if (locationOptions.length) return;
       const result = await getAllLocations();
-      console.log("Locations:", result);
       if (result?.data?.length) {
         setLocationOptions(result.data);
       }
