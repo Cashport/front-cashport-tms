@@ -141,14 +141,31 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
         <Controller
           control={control}
           name={`material.${index}.kg_weight`}
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <InputNumber
               {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
               min={0}
               step={0.1}
               placeholder="1"
               className="inputNumberMaterial"
-              formatter={(value) => `${value ? value : "--"} Kg`}
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} Kg`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
               precision={2}
             />
           )}
@@ -163,14 +180,31 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
         <Controller
           control={control}
           name={`material.${index}.mt_height`}
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <InputNumber
               {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
               min={0}
               step={0.01}
               placeholder="0"
-              formatter={(value) => `${value ? value : "--"} m`}
               className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} m`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
               precision={2}
             />
           )}
@@ -185,14 +219,31 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
         <Controller
           control={control}
           name={`material.${index}.mt_width`}
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <InputNumber
               {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
               min={0}
               step={0.01}
               placeholder="0"
-              formatter={(value) => `${value ? value : "--"} m`}
               className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} m`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
               precision={2}
             />
           )}
@@ -207,14 +258,31 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
         <Controller
           control={control}
           name={`material.${index}.mt_length`}
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <InputNumber
               {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
               min={0}
               step={0.01}
               placeholder="0"
-              formatter={(value) => `${value ? value : "--"} m`}
               className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} m`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
               precision={2}
             />
           )}
