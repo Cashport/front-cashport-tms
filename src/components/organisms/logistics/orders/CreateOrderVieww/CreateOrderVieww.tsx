@@ -14,6 +14,7 @@ import {
   IClient,
   ICompanyCode,
   ICostCenter,
+  IGetAllPeople,
   IGetPSL,
   IMaterialStepOne,
   IRoute,
@@ -35,6 +36,10 @@ type IMaterialForm = {
   [K in keyof IMaterialStepOne]?: IMaterialStepOne[K];
 } & {
   quantity: number;
+};
+
+export type IPeopleForm = {
+  [K in keyof IGetAllPeople]?: IGetAllPeople[K];
 };
 
 type ISuggestedVehicleForm = {
@@ -86,6 +91,7 @@ export interface IFormCreateOrder {
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
+  people?: IPeopleForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;

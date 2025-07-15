@@ -1,6 +1,5 @@
-import { API, getIdToken } from "@/utils/api/api";
-import config from "@/config";
-import { IDocumentCompleted, ITransferOrder } from "@/types/logistics/schema";
+import { API } from "@/utils/api/api";
+import { IDocumentCompleted, IGetAllPeople, ITransferOrder } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export const addTransferOrder = async (
@@ -74,9 +73,9 @@ export const getAllUserSearch = async (term: string): Promise<GenericResponse> =
   }
 };
 
-export const getAllUsers = async (): Promise<GenericResponse> => {
+export const getAllUsers = async (): Promise<GenericResponse<IGetAllPeople[]>> => {
   try {
-    const response: GenericResponse = await API.get(`/transfer-order/all/users`);
+    const response: GenericResponse<IGetAllPeople[]> = await API.get(`/transfer-order/all/users`);
     return response;
   } catch (error) {
     console.log("Error get all getAllUsers: ", error);

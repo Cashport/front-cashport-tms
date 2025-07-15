@@ -3836,3 +3836,13 @@ export interface IGetPSL {
   description: string;
   id: number;
 }
+
+export interface IGetAllPeople {
+  id: number;
+  name: string;
+  contact_number: string;
+  id_psl: number;
+  psl_desc: string;
+  id_cost_center: number;
+  cost_center_desc: string;
+}
