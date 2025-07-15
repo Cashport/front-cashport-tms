@@ -1,6 +1,6 @@
 import { API, getIdToken } from "@/utils/api/api";
 import config from "@/config";
-import { IDocumentCompleted, ITransferOrder } from "@/types/logistics/schema";
+import { IDocumentCompleted, IGetFrequentRoutes, ITransferOrder } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export const addTransferOrder = async (
@@ -81,5 +81,20 @@ export const getAllUsers = async (): Promise<GenericResponse> => {
   } catch (error) {
     console.log("Error get all getAllUsers: ", error);
     return error as any;
+  }
+};
+
+export const getFrequentRoute = async (
+  originLocationId: number,
+  destinationLocationId: number
+): Promise<IGetFrequentRoutes> => {
+  try {
+    const response: GenericResponse<IGetFrequentRoutes> = await API.get(
+      `/logistic-location/frequent-routes/${originLocationId}/${destinationLocationId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error getFrequetRoutes: ", error);
+    throw error;
   }
 };
