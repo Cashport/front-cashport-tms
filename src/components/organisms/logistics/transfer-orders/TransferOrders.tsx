@@ -184,7 +184,11 @@ export const TransferOrders = () => {
   return (
     <SearchProvider debounceDelay={500}>
       <Container>
-        <Flex justify="space-between" style={{ marginBottom: "1rem" }}>
+        <Flex
+          justify="space-between"
+          className={styles.stickyHeader}
+          style={{ marginBottom: "1rem" }}
+        >
           <div className={styles.filterContainer}>
             <UiSearchInput className="search" placeholder="Buscar" />
             <Filter />

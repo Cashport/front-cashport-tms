@@ -1,0 +1,42 @@
+@import "@/styles/variables.scss";
+
+.createOrderView {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .separator {
+        border: none;
+        height: 1px;
+        background-color: $dark-gray;
+        margin: 0 -32px;
+        margin-bottom: 32px;
+    }
+
+    .footerButtons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        height: 45px;
+        align-self: flex-end;
+
+        .backButton {
+            height: 100%;
+            width: fit-content;
+            padding: 12px 16px;
+            background-color: $dark-gray;
+            font-size: 1rem;
+            font-weight: 600;
+
+            &:hover {
+                background-color: $dark-gray !important;
+            }
+        }
+
+        .nextButton {
+            &:disabled {
+                color: $white !important;
+            }
+        }
+    }
+}

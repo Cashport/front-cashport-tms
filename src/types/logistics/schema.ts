@@ -1909,6 +1909,7 @@ export interface IMaterialStepOne {
   modified_by: string | null;
   icon: string;
   restriction: boolean;
+  code_sku: string | null;
 }
 /**
  * Exposes all fields present in transfer_request_journey_step_one as a typescript
@@ -3724,6 +3725,116 @@ export interface ITripSummaryAPI {
   transfer_order_vehicles?: ITransferOrderVehicle[] | null;
   //psls y ccs asociados
   transfer_order_psl?: ITransferOrderPsls[] | null;
+}
+
+export interface ISelectLocation {
+  id: number;
+  description: string;
+  citydesc: string;
+  statedesc: string;
+  postal_code: string;
+  latitude: number;
+  longitude: number;
+  location_type: string;
+  active: boolean;
+}
+
+export interface IIntersection {
+  entry: boolean[];
+  bearings: number[];
+  duration?: number;
+  mapbox_streets_v8?: any;
+  is_urban?: boolean;
+  admin_index: number;
+  out?: number;
+  weight?: number;
+  geometry_index: number;
+  railway_crossing?: boolean;
+  location: [number, number];
+}
+
+export interface IStep {
+  intersections: IIntersection[];
+  maneuver?: any;
+  name: string;
+  duration: number;
+  distance: number;
+  driving_side?: string;
+  weight: number;
+  mode?: string;
+  geometry: IGeometry[];
+}
+
+export interface IRouteLeg {
+  via_waypoints: any[];
+  admins: any[];
+  weight: number;
+  duration: number;
+  steps: IStep[];
+  distance: number;
+  summary?: string;
+}
+
+export interface IGeometry {
+  coordinates: [number, number][]; // Array of coordinates in [longitude, latitude] format
+  type: string;
+}
+export interface IRoute {
+  weight_name: string;
+  weight: number;
+  duration: number;
+  distance: number;
+  legs: IRouteLeg[];
+  geometry: IGeometry;
+}
+
+export interface IWaypoint {
+  name: string;
+  location: [number, number]; // [longitude, latitude]
+  distance?: number;
+}
+
+export interface IDirectionsMapboxResponse {
+  routes: IRoute[];
+  waypoints: IWaypoint[];
+  code: string;
+  uuid: string;
+}
+
+export interface ISuggestedVehicle {
+  id: number;
+  description: string;
+  vehicle_subtype: number;
+  id_service_type: number;
+  kg_capacity: number;
+  m3_volume: number;
+  width: number;
+  height: number;
+  aditional_info: string;
+  length: number;
+  passenger_capacity: number;
+  speed_multiple: number;
+  active: boolean;
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  icon: string;
+  image: string;
+  available: number;
+  price: number;
+}
+
+export interface ICostCenter {
+  id: number;
+  description: string;
+  id_psl: number;
+}
+
+export interface IGetPSL {
+  cost_center: ICostCenter[];
+  description: string;
+  id: number;
 }
 
 export interface IGetFrequentRoutes {

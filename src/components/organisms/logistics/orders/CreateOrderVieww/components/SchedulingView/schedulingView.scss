@@ -1,0 +1,14 @@
+@import "@/styles/variables.scss";
+
+.schedulingView {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 1rem;
+    min-height: 500px;
+}
+
+@media (min-width: 1400px) {
+    .schedulingView {
+        grid-template-columns: minmax(0, 730px) minmax(0, 2fr);
+    }
+}

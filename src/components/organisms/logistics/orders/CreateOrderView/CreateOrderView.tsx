@@ -701,7 +701,7 @@ export const CreateOrderView = () => {
     const result: any = [];
 
     if (combinedResults?.length > 0) {
-      combinedResults.forEach((item) => {
+      combinedResults.forEach((item: any) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>
@@ -1002,7 +1002,7 @@ export const CreateOrderView = () => {
     const res = await getOtherRequirements();
     const result: any = [];
     if (res?.data?.length > 0) {
-      res.data.forEach((item) => {
+      res.data.forEach((item: any) => {
         const strlabel = (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Col span={20}>
