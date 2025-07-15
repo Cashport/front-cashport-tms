@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Button, Flex } from "antd";
 import { Dayjs } from "dayjs";
+import { Button, Flex, message } from "antd";
+
+import { mapFormToTransferOrder } from "./CreateOrderVieww.mapper";
+import { addTransferOrderNew } from "@/services/logistics/transfer-orders";
 
 import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
@@ -103,6 +107,9 @@ export type IViewOption = "scheduling" | "load" | "responsibles";
 
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
+  const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
+
+  const { push } = useRouter();
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
@@ -184,8 +191,7 @@ export const CreateOrderVieww: React.FC = () => {
     }
   };
 
-  const onSubmit = (data: IFormCreateOrder) => {
-    console.log("Form submitted with data:", data);
+  const onSubmit = async (data: IFormCreateOrder) => {
     switch (view) {
       case "scheduling":
         setView("load");
@@ -195,7 +201,22 @@ export const CreateOrderVieww: React.FC = () => {
 
         break;
       case "responsibles":
-        console.log("Responsibles view data:", data);
+        setLoadingRequest(true);
+        const modeledData = mapFormToTransferOrder(data);
+        console.log("Modeled data for transfer order:", modeledData);
+
+        try {
+          const res = await addTransferOrderNew(modeledData, []);
+          console.log("Response from addTransferOrderNew:", res);
+
+          message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
+            push("/logistics/orders/details/" + res.id)
+          );
+        } catch (error) {
+          message.error("Error al crear la orden de transferencia", 2);
+          console.error("Error adding transfer order:", error);
+        }
+        setLoadingRequest(false);
 
         break;
       default:
@@ -317,6 +338,7 @@ export const CreateOrderVieww: React.FC = () => {
         <PrincipalButton
           className="nextButton"
           disabled={isNextButtonDisabled}
+          loading={loadingRequest}
           onClick={handleSubmit(onSubmit)}
         >
           {view !== "responsibles" ? "Siguiente" : "Confirmar"}

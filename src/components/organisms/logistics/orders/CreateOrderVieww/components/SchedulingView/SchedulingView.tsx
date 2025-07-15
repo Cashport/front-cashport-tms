@@ -268,9 +268,9 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
 
       const routes = response.data.routes;
       //   TO DO: revisar si es necesario limpiar las rutas
-      //   if (routes != undefined && routes.length > 0) {
-      //     routes[0].legs = [];
-      //   }
+      if (routes != undefined && routes.length > 0) {
+        routes[0].legs = [];
+      }
 
       // hacemos el set pero dentro del valor geometry en el form
       setValue("geometry", routes);
