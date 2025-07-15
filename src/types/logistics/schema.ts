@@ -3725,3 +3725,23 @@ export interface ITripSummaryAPI {
   //psls y ccs asociados
   transfer_order_psl?: ITransferOrderPsls[] | null;
 }
+
+export interface IGetFrequentRoutes {
+  id: number;
+  idStartLocation: number;
+  idEndLocation: number;
+  distanceKm: number;
+  updatedAt: string;
+  version: number;
+  jsonRoute: Array<{
+    legs: any[];
+    weight: number;
+    distance: number;
+    duration: number;
+    geometry: {
+      type: string;
+      coordinates: [number, number][];
+    };
+    weight_name: string;
+  }>;
+}

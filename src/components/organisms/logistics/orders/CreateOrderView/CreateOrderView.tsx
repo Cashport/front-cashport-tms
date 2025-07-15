@@ -38,6 +38,7 @@ import {
   ICompanyCode,
   IDocumentCompleted,
   IFormTransferOrder,
+  IGetFrequentRoutes,
   ILocation,
   IOrderPsl,
   IOrderPslCostCenter,
@@ -75,7 +76,11 @@ import {
   UploadDocumentButton
 } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import TextArea from "antd/es/input/TextArea";
-import { addTransferOrder, getAllUsers } from "@/services/logistics/transfer-orders";
+import {
+  addTransferOrder,
+  getAllUsers,
+  getFrequentRoute
+} from "@/services/logistics/transfer-orders";
 import { getOtherRequirements } from "@/services/logistics/other-requirements";
 import { getPsl } from "@/services/logistics/psl";
 import { auth } from "../../../../../../firebase";
@@ -194,7 +199,19 @@ export const CreateOrderView = () => {
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
 
   const [routeGeometry, setRouteGeometry] = useState<any>(null);
-  const [routeInfo, setRouteInfo] = useState([]);
+  type RouteInfoType = {
+    legs: any[];
+    weight: number;
+    distance: number;
+    duration: number;
+    geometry: {
+      type: string;
+      coordinates: [number, number][];
+    };
+    weight_name: string;
+  }[];
+
+  const [routeInfo, setRouteInfo] = useState<RouteInfoType>([]);
   const [distance, setDistance] = useState<any>(null);
   const [timetravel, setTimetravel] = useState<any>(null);
   const [timetravelInSecs, setTimetravelInSecs] = useState<number | null>(null);
@@ -411,11 +428,58 @@ export const CreateOrderView = () => {
     }
   }, [JSON.stringify(routeGeometry), origin, destination]);
 
+  // Función para usar una ruta frecuente como ruta principal
+  const applyFrequentRoute = (route: IGetFrequentRoutes) => {
+    if (!route.jsonRoute || route.jsonRoute.length === 0) return;
+
+    const selectedRoute = route.jsonRoute[0]; // Usar la primera ruta del array
+
+    // Actualizar el estado de tripInfoMap con los datos de la ruta frecuente
+    setRouteGeometry(selectedRoute.geometry); // Set the route geometry
+    setDistance(parseFloat((selectedRoute.distance / 1000).toFixed(2)) + " Km");
+    calculateDuration(selectedRoute.duration);
+
+    // Actualizar el formulario con la geometría de la ruta frecuente
+    setRouteInfo(route.jsonRoute);
+  };
+
+  // Función para obtener y procesar rutas frecuentes
+  const fetchAndProcessFrequentRoutes = async (originId: number, destinationId: number) => {
+    try {
+      const routes = await getFrequentRoute(originId, destinationId);
+      // Si hay rutas frecuentes, usar la primera automáticamente
+      if (routes) {
+        applyFrequentRoute(routes);
+        return true; // Indica que se usó una ruta frecuente
+      }
+
+      return false; // No hay rutas frecuentes
+    } catch (error) {
+      console.error("Error obteniendo rutas frecuentes:", error);
+
+      return false;
+    }
+  };
+
   // calculate direction
   const calcRouteDirection = async () => {
     if (origin.current.length == 0 || destination.current.length == 0) return;
 
+    if (locationOrigin && locationDestination) {
+      const hasFrequentRoute = await fetchAndProcessFrequentRoutes(
+        locationOrigin.id,
+        locationDestination.id
+      );
+
+      // Si encontró rutas frecuentes, no hacer la petición a Mapbox
+      if (hasFrequentRoute) {
+        console.info("Usando ruta frecuente, omitiendo petición a Mapbox");
+        return;
+      }
+    }
+
     try {
+      console.info("Calculando direcciones con Mapbox...");
       const response = await axios.get(
         `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.current[0]},${origin.current[1]};${destination.current[0]},${destination.current[1]}?steps=true&geometries=geojson&access_token=${mapsAccessToken}`
       );
