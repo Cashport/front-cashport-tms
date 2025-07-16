@@ -1,6 +1,24 @@
-import styles from "./ModalSelectCarrierPricing.module.scss";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import useSWR from "swr";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+import { Check } from "phosphor-react";
+import { Checkbox, Flex, message, Modal, Spin, Switch, Typography } from "antd";
+import { X } from "@phosphor-icons/react";
+
 import { sendCarrierRequest } from "@/services/logistics/carrier-request";
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
+import { convertToSendCarrierRequest, getServiceType } from "./utils/utils";
+
+import CommunityIcon from "../communityIcon/CommunityIcon";
+import UiSearchInput from "@/components/ui/search-input";
+import UiTabs from "@/components/ui/ui-tabs";
+import CarrierPriceCard from "./components/CarrierPriceCard/CarrierPriceCard";
+import { Footer } from "./components/Footer/Footer";
+import { Header } from "./components/Header/Header";
+
 import { ITransferRequestJourneyReview } from "@/types/logistics/schema";
 import {
   CarriersPricingModal,
@@ -8,21 +26,8 @@ import {
   ServiceTab,
   serviceType
 } from "@/types/logistics/trips/TripsSchema";
-import { Checkbox, Flex, message, Modal, Spin, Typography } from "antd";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import useSWR from "swr";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import CommunityIcon from "../communityIcon/CommunityIcon";
-import UiSearchInput from "@/components/ui/search-input";
-import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
-import UiTabs from "@/components/ui/ui-tabs";
-import CarrierPriceCard from "./components/CarrierPriceCard/CarrierPriceCard";
-import { convertToSendCarrierRequest, getServiceType } from "./utils/utils";
-import { Footer } from "./components/Footer/Footer";
-import { Header } from "./components/Header/Header";
-dayjs.extend(utc);
+
+import styles from "./ModalSelectCarrierPricing.module.scss";
 
 const { Text } = Typography;
 type Props = {
@@ -47,12 +52,13 @@ export default function ModalSelectCarrierPricing({
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [tripsList, setTripsList] = useState<ServiceTab[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAll, setShowAll] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { data, isLoading, isValidating } = useSWR(
-    { idTransferRequest: id, open },
+    { idTransferRequest: id, open, showAll },
     ({ idTransferRequest, open }) =>
-      open ? getTransferRequestPricing({ idTransferRequest }) : undefined,
+      open ? getTransferRequestPricing({ idTransferRequest, showAll }) : undefined,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -214,6 +220,10 @@ export default function ModalSelectCarrierPricing({
     setSearchTerm(value);
   };
 
+  const handleShowAll = (checked: boolean) => {
+    setShowAll(checked);
+  };
+
   const allSelected = (): boolean => {
     const currentTrip = selectedTrip?.service;
     return currentTrip?.carriers_pricing?.every((carrier) => carrier.checked);
@@ -326,17 +336,23 @@ export default function ModalSelectCarrierPricing({
             initialTabIndex={0}
             className={styles.scrollableTabsUI}
           />
-          <Flex
-            justify="space-between"
-            gap={24}
-            style={{ marginTop: "1rem", marginBottom: "1.5rem" }}
-          >
+          <Flex gap={20} style={{ marginTop: "1rem", marginBottom: "1.5rem" }}>
             <UiSearchInput
               className={styles.searchBar}
               placeholder="Buscar"
               onChange={handleSearchChange}
             />
-            <FilterProjects setSelecetedProjects={() => {}} height={"48"} />
+            <Flex align="center" gap={8}>
+              <Switch
+                className={styles.switchShowAll}
+                style={{ width: "3rem" }}
+                checked={showAll}
+                checkedChildren={<Check style={{ paddingTop: "5px" }} size={16} />}
+                unCheckedChildren={<X style={{ paddingTop: "5px" }} size={16} />}
+                onChange={handleShowAll}
+              />
+              <Text style={{ fontWeight: "400", fontSize: "0.875rem" }}>Mostrar todos</Text>
+            </Flex>
           </Flex>
           <Flex vertical gap={8} className={styles.tripCarrierPricing} key={selectedTripId ?? 0}>
             <Checkbox
