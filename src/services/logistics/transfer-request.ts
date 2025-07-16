@@ -138,15 +138,17 @@ export const submitTrips = async (
 };
 
 export const getTransferRequestPricing = async ({
-  idTransferRequest
+  idTransferRequest,
+  showAll = false
 }: {
   idTransferRequest: number;
+  showAll?: boolean;
 }) => {
   const response: GenericResponse<JourneyTripPricing[]> = await API.get(
-    `/transfer-request/pricing/${idTransferRequest}`
+    `/transfer-request/pricing/${idTransferRequest}?seeAll=${showAll}`
   );
   if (response.success) {
-    console.log("response fata", response.data);
+    console.log("response data", response.data);
     return response.data;
   }
 
