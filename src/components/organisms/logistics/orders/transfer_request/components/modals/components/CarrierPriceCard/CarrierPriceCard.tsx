@@ -1,8 +1,8 @@
 import React from "react";
 import { Checkbox, Flex, Typography } from "antd"; // Assuming Ant Design is used for the Checkbox
+import { Star, Truck } from "@phosphor-icons/react";
 import styles from "./CarrierPriceCard.module.scss"; // Custom styles (create a separate SCSS file if needed)
 
-import { Truck } from "phosphor-react"; // Icon library, adjust based on your setup
 import { CarriersPricingModal, serviceType } from "@/types/logistics/trips/TripsSchema";
 const { Text } = Typography;
 
@@ -24,12 +24,7 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
 }) => {
   if (!currentTripId) return <></>;
   return (
-    <Flex
-      className={styles.checks}
-      justify="space-between"
-      gap={24}
-      key={`carrier-${carrier.id_carrier_pricing}-${currentTripId}`}
-    >
+    <div className={styles.checks} key={`carrier-${carrier.id_carrier_pricing}-${currentTripId}`}>
       <Flex align="center" gap={8} justify="center">
         <Checkbox
           id={`checkbox-${carrier.id_carrier_pricing}-${currentTripId}`}
@@ -53,7 +48,13 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
           </Flex>
         </label>
       </Flex>
-      <Flex vertical align="end" justify="center">
+      <Flex vertical align="end" justify="center" gap={"0.2rem"}>
+        {carrier.isBest && (
+          <Flex align="center" gap={4} style={{ marginBottom: "0.5rem" }}>
+            <Star size={16} />
+            <Text style={{ fontSize: "0.75rem" }}>Recomendada</Text>
+          </Flex>
+        )}
         <Text style={{ fontSize: "1.2rem" }}>${carrier.price?.toLocaleString("es-CO")}</Text>
         {type === "other_requirement" && carrier.pricing_description ? (
           <Text>{carrier.pricing_description}</Text>
@@ -63,7 +64,7 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
           </Text>
         )}
       </Flex>
-    </Flex>
+    </div>
   );
 };
 
