@@ -57,6 +57,7 @@ export interface CarriersPricing {
   nit: string;
   fee_description: string;
   pricing_description?: string;
+  isBest?: boolean;
 }
 
 export interface CarriersPricingModal extends CarriersPricing {
