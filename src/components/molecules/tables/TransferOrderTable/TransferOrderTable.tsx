@@ -130,6 +130,12 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
         showSizeChanger: false
       }}
       loading={loading}
+      className="customSticky"
+      sticky={
+        {
+          offsetHeader: 130
+        } as any
+      }
     />
   );
 };

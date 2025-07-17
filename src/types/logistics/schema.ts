@@ -3925,3 +3925,23 @@ export interface IAddTransferOrder {
   transfer_order_vehicles: IAddTransferOrderVehicle[];
   geometry: IRoute[]; // JSON string del array de rutas
 }
+
+export interface IGetFrequentRoutes {
+  id: number;
+  idStartLocation: number;
+  idEndLocation: number;
+  distanceKm: number;
+  updatedAt: string;
+  version: number;
+  jsonRoute: Array<{
+    legs: any[];
+    weight: number;
+    distance: number;
+    duration: number;
+    geometry: {
+      type: string;
+      coordinates: [number, number][];
+    };
+    weight_name: string;
+  }>;
+}

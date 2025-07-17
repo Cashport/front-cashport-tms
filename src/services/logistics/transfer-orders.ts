@@ -3,7 +3,8 @@ import {
   IAddTransferOrder,
   IDocumentCompleted,
   IGetAllPeople,
-  ITransferOrder
+  ITransferOrder,
+  IGetFrequentRoutes
 } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
@@ -115,5 +116,20 @@ export const getAllUsers = async (): Promise<GenericResponse<IGetAllPeople[]>> =
   } catch (error) {
     console.log("Error get all getAllUsers: ", error);
     return error as any;
+  }
+};
+
+export const getFrequentRoute = async (
+  originLocationId: number,
+  destinationLocationId: number
+): Promise<IGetFrequentRoutes> => {
+  try {
+    const response: GenericResponse<IGetFrequentRoutes> = await API.get(
+      `/logistic-location/frequent-routes/${originLocationId}/${destinationLocationId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error getFrequetRoutes: ", error);
+    throw error;
   }
 };
