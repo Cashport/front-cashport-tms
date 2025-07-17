@@ -13,6 +13,7 @@ export interface CarrierRequest {
   id_trip?: number;
   id_pricing: number;
   id_requirement?: number;
+  pricingOrderRecomended: number[];
 }
 
 export interface DriverDocument {

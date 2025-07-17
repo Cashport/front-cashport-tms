@@ -49,12 +49,12 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
         </label>
       </Flex>
       <Flex vertical align="end" justify="center" gap={"0.2rem"}>
-        {carrier.isBest && (
+        {/* {carrier.isBest && (
           <Flex align="center" gap={4} style={{ marginBottom: "0.5rem" }}>
             <Star size={16} />
             <Text style={{ fontSize: "0.75rem" }}>Recomendada</Text>
           </Flex>
-        )}
+        )} */}
         <Text style={{ fontSize: "1.2rem" }}>${carrier.price?.toLocaleString("es-CO")}</Text>
         {type === "other_requirement" && carrier.pricing_description ? (
           <Text>{carrier.pricing_description}</Text>
