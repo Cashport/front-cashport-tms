@@ -138,7 +138,7 @@ export default function ModalSelectCarrierPricing({
   const handleSubmitForm = async () => {
     try {
       setIsSubmitting(true);
-      const formatedData = convertToSendCarrierRequest(tripsList, id);
+      const formatedData = convertToSendCarrierRequest(tripsList, id, showAll);
       const response = await sendCarrierRequest(formatedData);
       if (response) {
         setIsSubmitting(false);
