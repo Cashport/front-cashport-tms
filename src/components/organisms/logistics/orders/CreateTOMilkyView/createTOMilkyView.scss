@@ -1,0 +1,50 @@
+@import "@styles/variables.scss";
+
+.createTOMilkyView {
+    display: flex;
+    flex-direction: column;
+
+    &__descriptionCard {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+        background-color: $light-orange;
+        width: 100%;
+        padding: 2rem;
+        border-radius: 4px;
+
+        h3 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        h5 {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+    }
+
+    &__recommendationTripCard {
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        border: 1px solid #cacaca;
+
+        &__header {
+            padding: 20px 32px;
+            border-bottom: 1px solid #cacaca;
+
+            h6 {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+
+            p {
+                font-size: 0.75rem;
+                font-weight: 500;
+                color: $real-dark-gray;
+            }
+        }
+    }
+}
