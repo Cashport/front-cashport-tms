@@ -1,13 +1,24 @@
 import React from "react";
 import Image from "next/image";
-import { Flex } from "antd";
-import { CaretCircleDoubleUp, Star } from "@phosphor-icons/react";
+import dayjs from "dayjs";
+import "dayjs/locale/es"; // Importar locale español
+import utc from "dayjs/plugin/utc";
+import { Button, Flex, Tooltip } from "antd";
+import { CaretCircleDoubleUp, Copy, Phone, Star } from "@phosphor-icons/react";
 
 import Container from "@/components/atoms/Container/Container";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
 import "./createTOMilkyView.scss";
 
+// Configurar plugins
+dayjs.extend(utc);
+dayjs.locale("es");
+
 const CreateTOMilkyView: React.FC = () => {
+  const handleCopyDriverPhone = (driverPhone: string) => {
+    navigator.clipboard.writeText(driverPhone);
+  };
   return (
     <Container>
       <div className="createTOMilkyView">
@@ -62,12 +73,70 @@ const CreateTOMilkyView: React.FC = () => {
                   {route.dedicatedFleet && (
                     <Flex gap={"0.5rem"} align="center">
                       <CaretCircleDoubleUp size={12} />
-
                       <p>Flota dedicada</p>
                     </Flex>
                   )}
+
+                  {route.driversInfo && (
+                    <Tooltip
+                      className="driver-info-tooltip"
+                      title={
+                        <Flex
+                          gap={"1rem"}
+                          align="center"
+                          className="driver-info-tooltip-hoverMessage"
+                        >
+                          <p className="driver-phone">{route.driversInfo.driverPhone}</p>
+                          <Button
+                            onClick={() => handleCopyDriverPhone(route.driversInfo.driverPhone)}
+                            className="copyButton"
+                          >
+                            <Copy size={16} />
+                          </Button>
+                        </Flex>
+                      }
+                      color="#ffffff"
+                    >
+                      <Phone size={12} />
+                      <p className="driver-name">{route.driversInfo.driverName}</p>
+                    </Tooltip>
+                  )}
                 </Flex>
               </Flex>
+
+              <div className="createTOMilkyView__recommendationTripCard__content">
+                <Flex justify="space-between">
+                  <Flex vertical gap={"0.5rem"}>
+                    <p className="date">{dayjs(route.tripInfo.originTime).format("D MMM YYYY")}</p>
+                    <h5 className="time">{dayjs(route.tripInfo.originTime).format("HH:mm")}</h5>
+                    <p className="origin">
+                      {route.tripInfo.origin} <span>({route.tripInfo.originCity})</span>
+                    </p>
+                  </Flex>
+                  <div>Aca va la ruta</div>
+
+                  <Flex vertical gap={"0.5rem"}>
+                    <p className="date">
+                      {dayjs(route.tripInfo.destinationTime).format("D MMM YYYY")}
+                    </p>
+                    <h5 className="time">
+                      {dayjs(route.tripInfo.destinationTime).format("HH:mm")}
+                    </h5>
+                    <p className="origin">
+                      {route.tripInfo.destination} <span>({route.tripInfo.destinationCity})</span>
+                    </p>
+                  </Flex>
+                </Flex>
+
+                <Flex vertical gap={"0.5rem"} align="center" justify="center">
+                  <PrincipalButton
+                    style={{ width: "151px", height: "45px" }}
+                    className="selectRouteButton"
+                  >
+                    Seleccionar ruta
+                  </PrincipalButton>
+                </Flex>
+              </div>
             </div>
           ))}
         </Flex>

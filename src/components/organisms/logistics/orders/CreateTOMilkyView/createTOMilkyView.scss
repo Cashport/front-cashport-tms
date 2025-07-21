@@ -3,6 +3,7 @@
 .createTOMilkyView {
     display: flex;
     flex-direction: column;
+    gap: 1.5rem;
 
     &__descriptionCard {
         display: flex;
@@ -45,6 +46,66 @@
                 font-weight: 500;
                 color: $real-dark-gray;
             }
+        }
+
+        &__content {
+            display: grid;
+            grid-template-columns: 1fr 155px;
+            gap: 40px;
+            justify-content: space-between;
+            padding: 18px 32px;
+
+            .date {
+                font-size: 0.75rem;
+                font-weight: 400;
+            }
+
+            .time {
+                font-size: 1.25rem;
+                font-weight: 600;
+            }
+
+            .origin {
+                font-size: 0.75rem;
+                font-weight: 600;
+
+                span {
+                    color: $secondary-gray;
+                }
+            }
+        }
+    }
+
+    .driver-phone {
+        color: $black !important;
+        text-decoration: underline;
+    }
+
+    .driver-name {
+        text-decoration: underline;
+    }
+
+    .selectRouteButton {
+        width: 151px;
+        height: 45px !important;
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+}
+
+.driver-info-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &-hoverMessage {
+        color: $black;
+
+        .copyButton {
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            border: none;
         }
     }
 }
