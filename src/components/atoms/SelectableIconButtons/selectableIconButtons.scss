@@ -1,0 +1,21 @@
+@import "@/styles/variables.scss";
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    padding: 10px 16px;
+    border: 1px solid $dark-gray;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.active {
+    background-color: $green;
+    border-color: $green;
+}

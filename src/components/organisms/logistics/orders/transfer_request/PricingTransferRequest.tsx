@@ -187,7 +187,7 @@ export default function PricingTransferRequest({
     const res = await getSuggestedVehicles("1");
     const result: any = [];
     if (res.data.length > 0) {
-      res.data.forEach((item) => {
+      res.data.forEach((item: any) => {
         const strlabel = (
           <Flex align="center" gap={12}>
             <Circle size={24} />
@@ -210,7 +210,15 @@ export default function PricingTransferRequest({
       });
     }
 
-    setSugestedVehicles(res.data);
+    setSugestedVehicles(
+      res.data.map((item: any, idx: number) => ({
+        ...item,
+        key: idx,
+        actyvity_type: item.actyvity_type ?? "",
+        quantity: item.quantity ?? 1,
+        plate_number: item.plate_number ?? ""
+      })) as IVehicleType[]
+    );
     setOptionsVehicles(result);
   };
 

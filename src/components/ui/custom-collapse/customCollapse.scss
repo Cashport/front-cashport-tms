@@ -1,0 +1,27 @@
+@import "@/styles/variables.scss";
+
+.genericCollapse {
+    .ant-collapse-item {
+        // to prevent the content to appear distorted when the collapse is opening or closing
+        .ant-motion-collapse,
+        .ant-motion-collapse-enter,
+        .ant-motion-collapse-enter-active,
+        .ant-motion-collapse-leave,
+        .ant-motion-collapse-leave-active {
+            display: none !important;
+        }
+    }
+
+    &.sticky {
+        .ant-collapse-item {
+            position: relative; // Create positioning context
+        }
+
+        .ant-collapse-header {
+            position: sticky !important;
+            top: var(--sticky-offset) !important;
+            z-index: 2 !important;
+            background-color: $white;
+        }
+    }
+}

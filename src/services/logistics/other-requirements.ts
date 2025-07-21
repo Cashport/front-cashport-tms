@@ -1,10 +1,15 @@
-import { Data } from "@/types/logistics/schema";
+import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
-export const getOtherRequirements = async (): Promise<Data> => {
+export interface IOtherRequirement {
+  id: number;
+  description: string;
+}
+
+export const getOtherRequirements = async (): Promise<GenericResponse<IOtherRequirement[]>> => {
   try {
-    const response: Data = await API.get(
-      `/carrier/all/other-requirements`,
+    const response: GenericResponse<IOtherRequirement[]> = await API.get(
+      `/carrier/all/other-requirements`
     );
     return response;
   } catch (error) {

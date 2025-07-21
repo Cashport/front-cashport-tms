@@ -1,14 +1,21 @@
 import { API } from "@/utils/api/api";
-import { Data } from "@/types/logistics/schema";
+import { Data, ISuggestedVehicle } from "@/types/logistics/schema";
+import { GenericResponse } from "@/types/global/IGlobal";
 
-export const getSuggestedVehicles = async (typeOfServiceId: string): Promise<Data> => {
+export const getSuggestedVehicles = async (
+  typeOfServiceId?: string
+): Promise<GenericResponse<ISuggestedVehicle[]>> => {
+  // If no typeOfServiceId is provided returns all suggested vehicles
   try {
     const body = { id: typeOfServiceId };
-    const response: Data = await API.post(`/vehicle/suggested`, body);
+    const response: GenericResponse<ISuggestedVehicle[]> = await API.post(
+      `/vehicle/suggested`,
+      body
+    );
     return response;
   } catch (error) {
     console.log("Error creating new location: ", error);
-    return error as any;
+    throw error;
   }
 };
 

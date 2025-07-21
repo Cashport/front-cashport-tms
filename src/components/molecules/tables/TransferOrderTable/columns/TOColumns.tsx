@@ -131,7 +131,8 @@ export const columns = (
         </div>
       ),
       sorter: (a, b) => a.origendestino.origin.localeCompare(b.origendestino.origin),
-      showSorterTooltip: false
+      showSorterTooltip: false,
+      width: "260px"
     },
     carriersColumn,
     {

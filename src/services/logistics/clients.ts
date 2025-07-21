@@ -1,12 +1,13 @@
-import { Data } from "@/types/logistics/schema";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { IClient } from "@/types/logistics/schema";
 import { API } from "@/utils/api/api";
 
-export const getClients = async (): Promise<Data> => {
+export const getClients = async (): Promise<GenericResponse<IClient[]>> => {
   try {
-    const response: Data = await API.get(`/transfer-order/all/clients`);
+    const response: GenericResponse<IClient[]> = await API.get(`/transfer-order/all/clients`);
     return response;
   } catch (error) {
-    console.log("Error get all other requeiments: ", error);
-    return error as any;
+    console.error("Error get all clients: ", error);
+    throw error as any;
   }
 };

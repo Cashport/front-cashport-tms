@@ -1,0 +1,103 @@
+@import "@/styles/variables.scss";
+
+.productServiceLineSection {
+    &__container {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1.5rem;
+        background-color: $background;
+        border-radius: 4px;
+        padding: 24px 16px;
+        position: relative;
+    }
+
+    .removePSLButton {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        z-index: 1;
+        border: none;
+        background: none;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+
+    .PSLGeneral {
+        display: grid;
+        grid-template-columns: 6fr 4fr;
+        gap: 1.5rem;
+    }
+
+    .percentage {
+        font-weight: 700;
+        font-size: 0.875rem;
+        background-color: $dark-gray;
+        padding: 10px 16px;
+        width: 100%;
+        text-align: center;
+        border-radius: 4px;
+    }
+
+    .PSLCostCenterList {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .PSLCostCenter {
+        display: grid;
+        grid-template-columns: 7fr 4fr 20px;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+
+        .removeButton {
+            min-width: 25px;
+            margin-top: 30px;
+            margin-left: -1rem;
+        }
+    }
+
+    // Ant design specific styles
+    .inputPercentage {
+        height: 40px;
+        .ant-input-number-group-addon {
+            background-color: $white;
+            padding: 0;
+        }
+        .ant-input-number-outlined {
+            border-left: 0;
+            border-right: 0;
+        }
+
+        .ant-input-number-wrapper {
+            height: 100%;
+        }
+
+        .ant-input-number-input-wrap,
+        .ant-input-number-input {
+            height: 100%;
+            text-align: center;
+        }
+
+        .percentageControl {
+            height: 100%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &.decrement {
+                margin-left: 20px;
+            }
+
+            &.increment {
+                margin-right: 20px;
+            }
+        }
+    }
+}
