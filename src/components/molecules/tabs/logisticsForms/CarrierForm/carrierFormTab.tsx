@@ -36,6 +36,8 @@ import {
 import { IFormCarrier } from "@/types/logistics/schema";
 
 import "./carrierformtab.scss";
+import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+import { useCarrierFormTabTypes } from "./useCarrierFormTabTypes";
 
 const { Title, Text } = Typography;
 
@@ -60,6 +62,9 @@ export const CarrierFormTab = ({
   const [loading, setloading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  const { locationTypes, isloadingTripTypes, groupLocations, availableCommunityCarrierTypes } =
+    useCarrierFormTabTypes();
+
   const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data);
   const {
     watch,
@@ -67,6 +72,7 @@ export const CarrierFormTab = ({
     handleSubmit,
     reset,
     trigger,
+    setValue,
     formState: { errors }
   } = useForm<IFormCarrier>({
     defaultValues,
@@ -74,6 +80,7 @@ export const CarrierFormTab = ({
   });
   const trip_type = watch("trip_type");
   const providerStatus = watch("status");
+  const carrierType = watch("carrier_type");
   /*archivos*/
   interface FileObject {
     docReference: string;
@@ -103,6 +110,15 @@ export const CarrierFormTab = ({
   useEffect(() => {
     console.log(files);
   }, [files]);
+
+  useEffect(() => {
+    if (!availableCommunityCarrierTypes.includes(Number(carrierType))) {
+      setValue("group_location_select", []);
+    }
+  }, [carrierType]);
+
+  const groupLocationDisable =
+    !availableCommunityCarrierTypes.includes(Number(carrierType)) || statusForm === "review";
 
   const onSubmit = (data: IFormCarrier) => {
     if (statusForm === "edit") {
@@ -207,7 +223,6 @@ export const CarrierFormTab = ({
                 onClick={() => {
                   console.log("click");
                 }}
-                disabled={statusForm === "review"}
               />
             </Dropdown>
           </Flex>
@@ -259,12 +274,17 @@ export const CarrierFormTab = ({
                   />
                 </Col>
                 <Col span={8}>
-                  <InputForm
+                  <InputSelect
                     titleInput="Tipo de proveedor"
                     nameInput="carrier_type"
                     control={control}
                     error={undefined}
-                    disabled={statusForm !== "create"}
+                    options={locationTypes?.map((locationType) => ({
+                      label: locationType.description,
+                      value: locationType.id
+                    }))}
+                    disabled={statusForm === "review"}
+                    loading={isloadingTripTypes}
                   />
                 </Col>
                 <Col span={8}>
@@ -288,7 +308,7 @@ export const CarrierFormTab = ({
                 <Col span={8}>
                   <InputForm
                     titleInput="Correo de comunicacion"
-                    nameInput="carrier_type"
+                    nameInput="email_communication"
                     control={control}
                     error={undefined}
                     disabled={statusForm !== "create"}
@@ -349,6 +369,33 @@ export const CarrierFormTab = ({
                     value: tripType.id
                   }))}
                   disabled={statusForm === "review"}
+                />
+              )}
+            />
+          </Row>
+          <Row style={{ width: "100%", marginTop: "2rem" }}>
+            <Title className="title" level={4}>
+              Grupo de ubicaciones {groupLocationDisable.toString()}
+            </Title>
+            <Controller
+              name="group_location_select"
+              control={control}
+              disabled={groupLocationDisable}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <MultiSelectTags
+                  field={field}
+                  defaultValue={data?.group_location_ids?.map((id) => ({
+                    label: groupLocations?.find((gl) => gl.id === id)?.name || "",
+                    value: id
+                  }))}
+                  placeholder="Seleccione"
+                  title="Solo para transportadores tipo comunidad"
+                  errors={errors?.group_location_select}
+                  options={groupLocations?.map((groupLocation) => ({
+                    label: groupLocation.name,
+                    value: groupLocation.id
+                  }))}
                 />
               )}
             />

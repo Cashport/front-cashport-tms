@@ -1111,15 +1111,7 @@ export interface IFormLocation {
 
 export interface IGroupLocation {
   id: number;
-  description: string;
-  city_id: string;
-  geoJSON: string;
-  active: boolean;
-  created_at: Date;
-  created_by: string;
-  modified_at: Date;
-  modified_by: string;
-  locations: Location[];
+  name: string;
 }
 
 export interface IRouteSecure {
@@ -1304,7 +1296,7 @@ export interface ICarrier {
   active: any;
   vehicles: any;
   drivers: any;
-  carrier_type: string;
+  carrier_type: number;
   created_at: Date;
   created_by: string;
   modified_at?: Date | null;
@@ -1312,6 +1304,7 @@ export interface ICarrier {
   photo?: string;
   trip_type: { label: string; value: number }[];
   status: IStatus;
+  group_location_ids: number[];
 }
 export interface IAPICarrier {
   id: number;
@@ -3303,6 +3296,7 @@ export interface IFormCarrier extends ICarrier {
   // TEMPORARY - MADE UP:`
   phone?: string;
   email?: string;
+  group_location_select: { label: string; value: number }[];
 }
 export interface Ifeature {
   description: string;

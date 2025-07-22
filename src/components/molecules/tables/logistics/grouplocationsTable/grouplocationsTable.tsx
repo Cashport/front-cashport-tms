@@ -54,24 +54,6 @@ export const GroupLocationsTable = () => {
       key: "description"
     },
     {
-      title: "Estado",
-      key: "active",
-      className: "tableTitle",
-      width: "130px",
-      dataIndex: "active",
-      render: (_, { active }) => (
-        <Flex>
-          <Flex
-            align="center"
-            className={active ? "statusContainerActive" : "statusContainerInactive"}
-          >
-            <div className={active ? "statusActive" : "statusInactive"} />
-            <Text>{active ? "Activo" : "Inactivo"}</Text>
-          </Flex>
-        </Flex>
-      )
-    },
-    {
       title: "",
       key: "buttonSee",
       width: "54px",
