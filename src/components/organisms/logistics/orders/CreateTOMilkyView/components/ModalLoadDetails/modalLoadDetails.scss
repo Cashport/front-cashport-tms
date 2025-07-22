@@ -1,0 +1,29 @@
+@import "@/styles/variables.scss";
+
+.modalLoadDetails {
+    &__loadInfo {
+        border: 1px solid $dark-gray;
+        border-radius: 4px;
+        padding: 1rem;
+    }
+
+    &__loadSummary {
+        align-self: flex-end;
+        padding: 18px 16px;
+        padding-bottom: 0;
+    }
+
+    .ant-tabs-nav .ant-tabs-tab .ant-tabs-tab-btn {
+        color: $dark-gray;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    .ant-tabs-nav .ant-tabs-tab {
+        padding-bottom: 0.25rem !important;
+
+        &.ant-tabs-tab-active .ant-tabs-tab-btn {
+            color: $black;
+            font-weight: 700;
+        }
+    }
+}

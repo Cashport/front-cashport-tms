@@ -63,7 +63,7 @@ export const TripInfo: React.FC<TripInfoProps> = ({
         <Flex vertical gap={"0.5rem"} align="center" style={{ flexGrow: 1 }}>
           <span className="hhmmDuration">38h 45m</span>
           <Flex style={{ width: "100%" }} align="center">
-            <Truck size={24} className="truckIcon" />
+            <Truck size={24} className="truckIcon" weight="fill" />
             <span className="durationLine" />
           </Flex>
 

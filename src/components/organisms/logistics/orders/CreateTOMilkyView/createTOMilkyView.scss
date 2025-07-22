@@ -63,6 +63,10 @@
 
             .loadInfo {
                 padding-top: 1.25rem;
+
+                p {
+                    font-size: 0.875rem;
+                }
             }
 
             .date {
@@ -97,7 +101,8 @@
             }
 
             .durationLine {
-                border-bottom: 1px gray dashed;
+                border-bottom: 0.125rem $gray dashed;
+                background-size: 8px 1.5px;
                 width: 100%;
             }
         }
@@ -152,10 +157,8 @@
     }
 }
 
-/* En tu archivo CSS */
 .custom-progress .ant-progress-bg {
     background-color: $green !important;
-    // delete border radius on right top and lower right corners
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }

@@ -8,6 +8,7 @@ import { Flex } from "antd";
 import Container from "@/components/atoms/Container/Container";
 import RouteCard from "./components/RouteCard/RouteCard";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import ModalLoadDetails from "./components/ModalLoadDetails/ModalLoadDetails";
 
 import "./createTOMilkyView.scss";
 
@@ -16,46 +17,55 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 const CreateTOMilkyView: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const handleSeeLoad = () => {
     // Lógica para ver la carga
-    console.log("Ver carga clicked");
+    setIsModalOpen(true);
+  };
+
+  const handleSelectRoute = (routeId: string) => {
+    // Lógica para seleccionar la ruta
+    console.info(`Ruta seleccionada: ${routeId}`);
   };
   return (
-    <Container>
-      <div className="createTOMilkyView">
-        <div className="createTOMilkyView__descriptionCard">
-          <Flex vertical gap={"1rem"} style={{ maxWidth: "575px" }}>
-            <h3>Flota dedicada</h3>
-            <h5>Identificamos vehículos con capacidad disponible en la ruta de tu carga.</h5>
-            <p>
-              “Al compartir el transporte con otros envíos, puedes optimizar recursos, ahorrar en
-              costos logísticos y acelerar los tiempos de entrega.”
-            </p>
-          </Flex>
+    <>
+      <Container>
+        <div className="createTOMilkyView">
+          <div className="createTOMilkyView__descriptionCard">
+            <Flex vertical gap={"1rem"} style={{ maxWidth: "575px" }}>
+              <h3>Flota dedicada</h3>
+              <h5>Identificamos vehículos con capacidad disponible en la ruta de tu carga.</h5>
+              <p>
+                “Al compartir el transporte con otros envíos, puedes optimizar recursos, ahorrar en
+                costos logísticos y acelerar los tiempos de entrega.”
+              </p>
+            </Flex>
 
-          <Image
-            src="/images/logistics/createTODescriptionImage.png"
-            alt="Create TO Description"
-            width={595}
-            height={250}
-          />
+            <Image
+              src="/images/logistics/createTODescriptionImage.png"
+              alt="Create TO Description"
+              width={595}
+              height={250}
+            />
+          </div>
+
+          {mockRoutes.map((route) => (
+            <RouteCard
+              key={route.id}
+              recommendationData={route}
+              currentUserLoad={mockCurrentUserLoad}
+              onSelectRoute={() => handleSelectRoute(route.id)}
+              onSeeLoad={handleSeeLoad}
+            />
+          ))}
+
+          <PrincipalButton className="createTOMilkyView__footerButton">
+            Seleccionar ruta
+          </PrincipalButton>
         </div>
-
-        {mockRoutes.map((route) => (
-          <RouteCard
-            key={route.id}
-            recommendationData={route}
-            currentUserLoad={mockCurrentUserLoad}
-            onSelectRoute={() => console.log(route.id)}
-            onSeeLoad={handleSeeLoad}
-          />
-        ))}
-
-        <PrincipalButton className="createTOMilkyView__footerButton">
-          Seleccionar ruta
-        </PrincipalButton>
-      </div>
-    </Container>
+      </Container>
+      <ModalLoadDetails isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 };
 

@@ -1,7 +1,5 @@
-import { MenuProps } from "antd";
 import React from "react";
 import { RouteCardHeader } from "../RouteCardHeader/RouteCardHeader";
-import dayjs from "dayjs";
 import { TripInfo } from "../TripInfo/TripInfo";
 import { DiscountCTA } from "../DiscountCTA/DiscountCTA";
 
