@@ -54,6 +54,7 @@
             gap: 40px;
             justify-content: space-between;
             padding: 18px 32px;
+            padding-bottom: 24px;
 
             .tripInfo {
                 padding-bottom: 0.75rem;
@@ -61,7 +62,7 @@
             }
 
             .loadInfo {
-                padding: 1.25rem 0;
+                padding-top: 1.25rem;
             }
 
             .date {
@@ -101,6 +102,9 @@
             }
         }
     }
+    &__footerButton {
+        align-self: flex-end;
+    }
 
     .driver-phone {
         color: $black !important;
@@ -112,10 +116,12 @@
     }
 
     .selectRouteButton {
-        width: 151px;
+        width: 100%;
         height: 45px !important;
         font-size: 0.875rem;
         font-weight: 700;
+        border: 1px solid $black;
+        margin-top: auto;
     }
 }
 
@@ -149,10 +155,15 @@
 /* En tu archivo CSS */
 .custom-progress .ant-progress-bg {
     background-color: $green !important;
+    // delete border radius on right top and lower right corners
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 .custom-progress .ant-progress-success-bg {
     background-color: $light-green !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 .progressCircleInfo {

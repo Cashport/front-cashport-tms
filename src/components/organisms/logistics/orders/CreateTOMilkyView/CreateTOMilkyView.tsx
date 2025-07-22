@@ -3,19 +3,10 @@ import Image from "next/image";
 import dayjs from "dayjs";
 import "dayjs/locale/es"; // Importar locale español
 import utc from "dayjs/plugin/utc";
-import { Button, Dropdown, Flex, MenuProps, Progress, Tooltip } from "antd";
-import {
-  CaretCircleDoubleUp,
-  CaretDown,
-  Copy,
-  Eye,
-  HandPalm,
-  Phone,
-  Star,
-  Truck
-} from "@phosphor-icons/react";
+import { Flex } from "antd";
 
 import Container from "@/components/atoms/Container/Container";
+import RouteCard from "./components/RouteCard/RouteCard";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
 import "./createTOMilkyView.scss";
@@ -25,10 +16,6 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 const CreateTOMilkyView: React.FC = () => {
-  const handleCopyDriverPhone = (driverPhone: string) => {
-    navigator.clipboard.writeText(driverPhone);
-  };
-
   const handleSeeLoad = () => {
     // Lógica para ver la carga
     console.log("Ver carga clicked");
@@ -54,202 +41,19 @@ const CreateTOMilkyView: React.FC = () => {
           />
         </div>
 
-        <Flex vertical gap={"1.5rem"}>
-          {mockRoutes.map((route) => {
-            const stopsItems: MenuProps["items"] = route?.stops?.map((stop, i) => ({
-              key: stop.id,
-              label: (
-                <>
-                  <div
-                    className="stopItem"
-                    style={{
-                      borderBottom: i === route.stops.length - 1 ? "none" : "1px solid #DDDDDD",
-                      paddingBottom: i === route.stops.length - 1 ? 0 : "0.5rem"
-                    }}
-                  >
-                    <p>
-                      {i + 1}. {stop.name} <span>({stop.cityName})</span>
-                    </p>
+        {mockRoutes.map((route) => (
+          <RouteCard
+            key={route.id}
+            recommendationData={route}
+            currentUserLoad={mockCurrentUserLoad}
+            onSelectRoute={() => console.log(route.id)}
+            onSeeLoad={handleSeeLoad}
+          />
+        ))}
 
-                    <p>{dayjs(stop.time).format("MMM DD - HH:mm")}</p>
-                  </div>
-                </>
-              )
-            }));
-            return (
-              <div key={route.id} className="createTOMilkyView__recommendationTripCard">
-                {/* HEADER */}
-                <Flex
-                  className="createTOMilkyView__recommendationTripCard__header"
-                  gap={"1rem"}
-                  align="center"
-                  justify="space-between"
-                >
-                  <Flex gap={"0.75rem"} align="center">
-                    <Image
-                      src={route.companyInfo.companyLogo}
-                      alt={route.companyInfo.companyName}
-                      width={50}
-                      height={50}
-                    />
-                    <Flex vertical>
-                      <h6>{route.tripDescription}</h6>
-                      <p>{route.companyInfo.companyName}</p>
-                    </Flex>
-                  </Flex>
-
-                  <Flex gap={"1.25rem"} align="center">
-                    {route.isRecommended && (
-                      <Flex gap={"0.5rem"} align="center">
-                        <Star size={12} />
-                        <p>Recomendado</p>
-                      </Flex>
-                    )}
-
-                    {route.dedicatedFleet && (
-                      <Flex gap={"0.5rem"} align="center">
-                        <CaretCircleDoubleUp size={12} />
-                        <p>Flota dedicada</p>
-                      </Flex>
-                    )}
-
-                    {route.driversInfo && (
-                      <Tooltip
-                        className="driver-info-tooltip"
-                        title={
-                          <Flex
-                            gap={"1rem"}
-                            align="center"
-                            className="driver-info-tooltip-hoverMessage"
-                          >
-                            <p className="driver-phone">{route.driversInfo.driverPhone}</p>
-                            <Button
-                              onClick={() => handleCopyDriverPhone(route.driversInfo.driverPhone)}
-                              className="copyButton"
-                            >
-                              <Copy size={16} />
-                            </Button>
-                          </Flex>
-                        }
-                        color="#ffffff"
-                      >
-                        <Phone size={12} />
-                        <p className="driver-name">{route.driversInfo.driverName}</p>
-                      </Tooltip>
-                    )}
-                  </Flex>
-                </Flex>
-
-                {/* CONTENT */}
-                <div className="createTOMilkyView__recommendationTripCard__content">
-                  {/* TRIP AND LOAD INFO */}
-                  <Flex vertical>
-                    {/* STOPS AND TRIP INFO */}
-                    <Flex gap={"1.5rem"} justify="space-between" className="tripInfo">
-                      <Flex vertical gap={"0.5rem"}>
-                        <p className="date">
-                          {dayjs(route.tripInfo.originTime).format("D MMM YYYY")}
-                        </p>
-                        <h5 className="time">{dayjs(route.tripInfo.originTime).format("HH:mm")}</h5>
-                        <p className="origin">
-                          {route.tripInfo.origin} <span>({route.tripInfo.originCity})</span>
-                        </p>
-                      </Flex>
-                      <Flex vertical gap={"0.5rem"} align="center" style={{ flexGrow: 1 }}>
-                        <span className="hhmmDuration">38h 45m</span>
-                        <Flex style={{ width: "100%" }} align="center">
-                          <Truck size={24} className="truckIcon" />
-                          <span className="durationLine" />
-                        </Flex>
-
-                        {stopsItems && stopsItems.length > 0 && (
-                          <Dropdown menu={{ items: stopsItems }} placement="bottom">
-                            <Button>
-                              <HandPalm size={16} />
-                              Paradas {stopsItems.length}
-                              <CaretDown size={16} />
-                            </Button>
-                          </Dropdown>
-                        )}
-                      </Flex>
-
-                      <Flex vertical gap={"0.5rem"}>
-                        <p className="date">
-                          {dayjs(route.tripInfo.destinationTime).format("D MMM YYYY")}
-                        </p>
-                        <h5 className="time">
-                          {dayjs(route.tripInfo.destinationTime).format("HH:mm")}
-                        </h5>
-                        <p className="origin">
-                          {route.tripInfo.destination}{" "}
-                          <span>({route.tripInfo.destinationCity})</span>
-                        </p>
-                      </Flex>
-                    </Flex>
-
-                    {/* LOAD INFO */}
-                    <Flex vertical className="loadInfo" gap={"1rem"}>
-                      <Progress
-                        percent={60}
-                        success={{ percent: mockCurrentUserLoad }}
-                        showInfo={false} // Esto oculta el número de progreso
-                        className="custom-progress"
-                        size={{ height: 10 }}
-                      />
-
-                      <Flex align="center" justify="space-between">
-                        <Flex gap={"1.5rem"}>
-                          <Flex gap={"0.5rem"} align="center">
-                            <span
-                              className="progressCircleInfo"
-                              style={{ backgroundColor: "#f2ffa2 " }}
-                            />
-                            <p>Carga actual</p>
-                          </Flex>
-
-                          <Flex gap={"0.5rem"} align="center">
-                            <span
-                              className="progressCircleInfo"
-                              style={{
-                                backgroundColor: "#cbe71e"
-                              }}
-                            />
-                            <p>Tu carga</p>
-                          </Flex>
-
-                          <Flex gap={"0.5rem"} align="center">
-                            <span className="progressCircleInfo" />
-                            <p>Disponible</p>
-                          </Flex>
-                        </Flex>
-
-                        <Flex gap={"1rem"}>
-                          <button className="viewLoadButton" onClick={handleSeeLoad}>
-                            Ver carga <Eye size={"16"} />
-                          </button>
-
-                          <p className="loadUsage">
-                            Utilización <span>{mockCurrentUserLoad}%</span>
-                          </p>
-                        </Flex>
-                      </Flex>
-                    </Flex>
-                  </Flex>
-
-                  {/* TRIP CTA AND DISCOUNT */}
-                  <Flex vertical gap={"0.5rem"} align="center" justify="center">
-                    <PrincipalButton
-                      style={{ width: "151px", height: "45px" }}
-                      className="selectRouteButton"
-                    >
-                      Seleccionar ruta
-                    </PrincipalButton>
-                  </Flex>
-                </div>
-              </div>
-            );
-          })}
-        </Flex>
+        <PrincipalButton className="createTOMilkyView__footerButton">
+          Seleccionar ruta
+        </PrincipalButton>
       </div>
     </Container>
   );
@@ -314,6 +118,7 @@ const mockRoutes = [
     },
     discount: 0,
     usedPercentage: 30,
+    discountPercentage: 20,
     tripInfo: {
       origin: "Barrio C",
       originCity: "Ciudad C",
