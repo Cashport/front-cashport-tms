@@ -1,0 +1,21 @@
+@import "@/styles/variables.scss";
+
+.summaryCard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid $dark-gray;
+
+    &__item {
+        display: flex;
+        gap: 1rem;
+        background-color: $background;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+
+    &__icon {
+        color: $gray;
+    }
+}

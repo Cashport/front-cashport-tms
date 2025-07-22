@@ -155,5 +155,5 @@ export const InProcess: FC<IInProcessProps> = ({
       </div>
     );
 
-  return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
+  return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} stickyLabel />;
 };

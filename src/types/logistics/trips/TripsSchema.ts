@@ -45,10 +45,16 @@ export interface RequirementCarriersPricing {
   carriers_pricing: CarriersPricing[];
 }
 
+export interface IPricingScore {
+  total: number;
+  averageFare: number;
+  usage: number;
+  miniumBonus: number;
+  carrierScore: number;
+}
+
 export interface CarriersPricing {
   id_carrier_pricing: number;
-  valid_from: string;
-  valid_to: string;
   description: string;
   disponibility: number;
   price?: number;
@@ -57,6 +63,8 @@ export interface CarriersPricing {
   nit: string;
   fee_description: string;
   pricing_description?: string;
+  pricingScore?: IPricingScore;
+  isBest?: boolean;
 }
 
 export interface CarriersPricingModal extends CarriersPricing {

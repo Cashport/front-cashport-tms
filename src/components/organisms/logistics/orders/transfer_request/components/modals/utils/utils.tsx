@@ -18,9 +18,14 @@ export const getServiceType = (id_type_service: number) => {
 
 export const convertToSendCarrierRequest = (
   tripsLists: ServiceTab[],
-  id_transfer_request: number
+  id_transfer_request: number,
+  excludePricingOrder: boolean = false
 ): SendCarrierRequest => {
   const carrierRequest: CarrierRequest[] = [];
+
+  const allCarriersPricingIds = tripsLists.flatMap((tab) =>
+    tab.service.carriers_pricing.map((pricing) => pricing.id_carrier_pricing)
+  );
 
   tripsLists.forEach((tab) => {
     const { service } = tab;
@@ -33,7 +38,9 @@ export const convertToSendCarrierRequest = (
             id_vehicle_type: pricing.id_vehicle_type,
             fare: pricing.price || 0,
             id_trip: service.id,
-            id_pricing: pricing.id_carrier_pricing
+            id_pricing: pricing.id_carrier_pricing,
+            pricingScore: pricing.pricingScore,
+            ...(!excludePricingOrder && { pricingOrderRecomended: allCarriersPricingIds })
           });
         } else {
           carrierRequest.push({
@@ -41,7 +48,9 @@ export const convertToSendCarrierRequest = (
             id_carrier: pricing.id_carrier,
             fare: pricing.price || 0,
             id_requirement: service.id,
-            id_pricing: pricing.id_carrier_pricing
+            id_pricing: pricing.id_carrier_pricing,
+            pricingScore: pricing.pricingScore,
+            ...(!excludePricingOrder && { pricingOrderRecomended: allCarriersPricingIds })
           });
         }
       }

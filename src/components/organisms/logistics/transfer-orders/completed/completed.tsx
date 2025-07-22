@@ -126,5 +126,5 @@ export const Completed: FC<ICompletedProps> = ({ allSelectedRows, handleCheckAll
       </div>
     );
 
-  return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} />;
+  return <CustomCollapse ghost items={renderItems} defaultActiveKey={["0"]} stickyLabel />;
 };

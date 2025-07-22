@@ -1,0 +1,141 @@
+@import "@/styles/variables.scss";
+
+.selectLocationAndTime {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .stepItem {
+        display: flex;
+        column-gap: 10px;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        padding-left: 5px;
+        width: 100%;
+        // lets make a margin left according to stepLine and gap
+        margin-left: -23px;
+
+        &:last-child {
+            min-height: auto;
+            padding-bottom: 0;
+        }
+
+        .stepCircleContainer {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+
+            .stepCircle {
+                z-index: 2;
+                height: fit-content;
+                margin: -10px;
+                background-color: $white;
+            }
+
+            .stepLine {
+                position: absolute;
+                width: 1px;
+                height: 100%;
+                border-left: 1px dashed $black;
+                margin-left: 1px;
+
+                &.first {
+                    top: 50%;
+                    height: 50%;
+                }
+                &.last {
+                    height: 50%;
+                    bottom: 50%;
+                }
+            }
+        }
+
+        .stepLabel {
+            display: flex;
+            margin-top: -7px;
+            width: 100%;
+        }
+    }
+
+    .divider {
+        height: 1.5rem;
+        width: 100%;
+        border-left: 1px dashed $black;
+        margin: 1px 0;
+        margin-left: -13px;
+
+        &.noShow {
+            display: none;
+        }
+    }
+
+    .timeAndLocationCard {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+        max-width: 660px;
+        width: 100%;
+        background-color: $background;
+        padding: 1rem;
+        border-radius: 4px;
+
+        .selectPlace {
+            height: 40px;
+        }
+
+        .check {
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            grid-column: 8 / 11;
+            white-space: nowrap;
+        }
+
+        .inputNumber {
+            grid-column: 11 / -1;
+            min-width: 10px;
+            height: 40px;
+        }
+
+        .inputDate {
+            grid-column: 1 / 7;
+            height: 40px;
+        }
+        .inputTime {
+            grid-column: 7 / -1;
+            height: 40px;
+        }
+    }
+
+    .addStopButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        transition: all 0.3s ease-in-out;
+        width: fit-content;
+        font-family: inherit;
+        font-size: 1rem;
+        margin-top: 0.75rem;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+
+    .ant-input-number-input-wrap,
+    .ant-input-number-input {
+        height: 100%;
+        text-align: center;
+    }
+}
+
+.ant-input-number {
+    width: auto !important;
+}

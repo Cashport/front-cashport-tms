@@ -17,7 +17,7 @@ import {
 
 import { Confirmation } from "../../detail/components/Confirmation/Confirmation";
 import { useMapbox } from "@/utils/logistics/useMapBox";
-import { CustomStepper } from "../../detail/components/Stepper/Stepper";
+import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import { getTravelFreightDuration } from "@/utils/logistics/maps";
 import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier/carrier";
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";

@@ -1,4 +1,3 @@
-import axios, { AxiosResponse } from "axios";
 import { API } from "@/utils/api/api";
 import {
   ICity,
@@ -7,15 +6,18 @@ import {
   Data,
   ILocation,
   ILocationTypes,
-  IState
+  IState,
+  ISelectLocation
 } from "@/types/logistics/schema";
 import { CertificateType, DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { LocationData } from "@/components/molecules/tabs/logisticsForms/grouplocationForm/grouplocationFormTab.mapper";
 
-export const getAllLocations = async (): Promise<Data> => {
+export const getAllLocations = async (): Promise<GenericResponse<ISelectLocation[]>> => {
   try {
-    const response: Data = await API.get(`/logistic-location/all/locations`);
+    const response: GenericResponse<ISelectLocation[]> = await API.get(
+      `/logistic-location/all/locations`
+    );
     return response;
   } catch (error) {
     console.log("Error creating new location: ", error);
@@ -48,9 +50,12 @@ export const getAllCitiesByState = async (idstate: string = "1"): Promise<ICity[
   throw new Error(response?.message || "Error");
 };
 
-export const getAllLocationTypes = async (): Promise<ILocationTypes[]> => {
+export const getAllLocationTypes = async (type: "carrier" | "location" = "location") => {
   const response: GenericResponse<ILocationTypes[]> = await API.get(
-    `/logistic-location/all/location-types`
+    `/logistic-location/all/location-types`,
+    {
+      params: { type }
+    }
   );
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");

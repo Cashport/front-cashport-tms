@@ -1,26 +1,42 @@
+@import "@/styles/variables.scss";
 
 .filterContainer {
-  display: flex;
-  column-gap: 0.5rem;
+    display: flex;
+    column-gap: 0.5rem;
 }
 
 .tabContainer {
-  display: flex;
-  column-gap: 2rem;
-  border-bottom: 1px solid #DDD;
+    display: flex;
+    column-gap: 2rem;
+    border-bottom: 1px solid #ddd;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 4rem;
+    z-index: 11;
+    background-color: $white;
 }
 
 .tab {
-  padding-bottom: 4px;
-  color: #DDD;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
+    padding-bottom: 4px;
+    color: #ddd;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
 
-  &.active {
-    color: #141414;
-    font-weight: 700;
-    border-bottom: 1px solid #141414;
-  }
+    &.active {
+        color: #141414;
+        font-weight: 700;
+        border-bottom: 1px solid #141414;
+    }
 }
 
+.stickyHeader {
+    position: -webkit-sticky;
+    position: sticky;
+    top: -1rem;
+    background-color: $white;
+    z-index: 11;
+    padding: 1rem 0;
+    margin-left: -0.5rem;
+    margin-bottom: 0;
+}
