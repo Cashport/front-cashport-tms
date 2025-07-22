@@ -3,11 +3,12 @@ import Image from "next/image";
 import dayjs from "dayjs";
 import "dayjs/locale/es"; // Importar locale español
 import utc from "dayjs/plugin/utc";
-import { Button, Dropdown, Flex, MenuProps, Tooltip } from "antd";
+import { Button, Dropdown, Flex, MenuProps, Progress, Tooltip } from "antd";
 import {
   CaretCircleDoubleUp,
   CaretDown,
   Copy,
+  Eye,
   HandPalm,
   Phone,
   Star,
@@ -26,6 +27,11 @@ dayjs.locale("es");
 const CreateTOMilkyView: React.FC = () => {
   const handleCopyDriverPhone = (driverPhone: string) => {
     navigator.clipboard.writeText(driverPhone);
+  };
+
+  const handleSeeLoad = () => {
+    // Lógica para ver la carga
+    console.log("Ver carga clicked");
   };
   return (
     <Container>
@@ -72,6 +78,7 @@ const CreateTOMilkyView: React.FC = () => {
             }));
             return (
               <div key={route.id} className="createTOMilkyView__recommendationTripCard">
+                {/* HEADER */}
                 <Flex
                   className="createTOMilkyView__recommendationTripCard__header"
                   gap={"1rem"}
@@ -133,48 +140,103 @@ const CreateTOMilkyView: React.FC = () => {
                   </Flex>
                 </Flex>
 
+                {/* CONTENT */}
                 <div className="createTOMilkyView__recommendationTripCard__content">
-                  <Flex gap={"1.5rem"} justify="space-between">
-                    <Flex vertical gap={"0.5rem"}>
-                      <p className="date">
-                        {dayjs(route.tripInfo.originTime).format("D MMM YYYY")}
-                      </p>
-                      <h5 className="time">{dayjs(route.tripInfo.originTime).format("HH:mm")}</h5>
-                      <p className="origin">
-                        {route.tripInfo.origin} <span>({route.tripInfo.originCity})</span>
-                      </p>
-                    </Flex>
-                    <Flex vertical gap={"0.5rem"} align="center" style={{ flexGrow: 1 }}>
-                      <span className="hhmmDuration">38h 45m</span>
-                      <Flex style={{ width: "100%" }} align="center">
-                        <Truck size={24} />
-                        <span className="durationLine" />
+                  {/* TRIP AND LOAD INFO */}
+                  <Flex vertical>
+                    {/* STOPS AND TRIP INFO */}
+                    <Flex gap={"1.5rem"} justify="space-between" className="tripInfo">
+                      <Flex vertical gap={"0.5rem"}>
+                        <p className="date">
+                          {dayjs(route.tripInfo.originTime).format("D MMM YYYY")}
+                        </p>
+                        <h5 className="time">{dayjs(route.tripInfo.originTime).format("HH:mm")}</h5>
+                        <p className="origin">
+                          {route.tripInfo.origin} <span>({route.tripInfo.originCity})</span>
+                        </p>
+                      </Flex>
+                      <Flex vertical gap={"0.5rem"} align="center" style={{ flexGrow: 1 }}>
+                        <span className="hhmmDuration">38h 45m</span>
+                        <Flex style={{ width: "100%" }} align="center">
+                          <Truck size={24} className="truckIcon" />
+                          <span className="durationLine" />
+                        </Flex>
+
+                        {stopsItems && stopsItems.length > 0 && (
+                          <Dropdown menu={{ items: stopsItems }} placement="bottom">
+                            <Button>
+                              <HandPalm size={16} />
+                              Paradas {stopsItems.length}
+                              <CaretDown size={16} />
+                            </Button>
+                          </Dropdown>
+                        )}
                       </Flex>
 
-                      {stopsItems && stopsItems.length > 0 && (
-                        <Dropdown menu={{ items: stopsItems }} placement="bottom">
-                          <Button>
-                            <HandPalm size={16} />
-                            Paradas {stopsItems.length}
-                            <CaretDown size={16} />
-                          </Button>
-                        </Dropdown>
-                      )}
+                      <Flex vertical gap={"0.5rem"}>
+                        <p className="date">
+                          {dayjs(route.tripInfo.destinationTime).format("D MMM YYYY")}
+                        </p>
+                        <h5 className="time">
+                          {dayjs(route.tripInfo.destinationTime).format("HH:mm")}
+                        </h5>
+                        <p className="origin">
+                          {route.tripInfo.destination}{" "}
+                          <span>({route.tripInfo.destinationCity})</span>
+                        </p>
+                      </Flex>
                     </Flex>
 
-                    <Flex vertical gap={"0.5rem"}>
-                      <p className="date">
-                        {dayjs(route.tripInfo.destinationTime).format("D MMM YYYY")}
-                      </p>
-                      <h5 className="time">
-                        {dayjs(route.tripInfo.destinationTime).format("HH:mm")}
-                      </h5>
-                      <p className="origin">
-                        {route.tripInfo.destination} <span>({route.tripInfo.destinationCity})</span>
-                      </p>
+                    {/* LOAD INFO */}
+                    <Flex vertical className="loadInfo" gap={"1rem"}>
+                      <Progress
+                        percent={60}
+                        success={{ percent: mockCurrentUserLoad }}
+                        showInfo={false} // Esto oculta el número de progreso
+                        className="custom-progress"
+                        size={{ height: 10 }}
+                      />
+
+                      <Flex align="center" justify="space-between">
+                        <Flex gap={"1.5rem"}>
+                          <Flex gap={"0.5rem"} align="center">
+                            <span
+                              className="progressCircleInfo"
+                              style={{ backgroundColor: "#f2ffa2 " }}
+                            />
+                            <p>Carga actual</p>
+                          </Flex>
+
+                          <Flex gap={"0.5rem"} align="center">
+                            <span
+                              className="progressCircleInfo"
+                              style={{
+                                backgroundColor: "#cbe71e"
+                              }}
+                            />
+                            <p>Tu carga</p>
+                          </Flex>
+
+                          <Flex gap={"0.5rem"} align="center">
+                            <span className="progressCircleInfo" />
+                            <p>Disponible</p>
+                          </Flex>
+                        </Flex>
+
+                        <Flex gap={"1rem"}>
+                          <button className="viewLoadButton" onClick={handleSeeLoad}>
+                            Ver carga <Eye size={"16"} />
+                          </button>
+
+                          <p className="loadUsage">
+                            Utilización <span>{mockCurrentUserLoad}%</span>
+                          </p>
+                        </Flex>
+                      </Flex>
                     </Flex>
                   </Flex>
 
+                  {/* TRIP CTA AND DISCOUNT */}
                   <Flex vertical gap={"0.5rem"} align="center" justify="center">
                     <PrincipalButton
                       style={{ width: "151px", height: "45px" }}

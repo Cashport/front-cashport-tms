@@ -55,6 +55,15 @@
             justify-content: space-between;
             padding: 18px 32px;
 
+            .tripInfo {
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid #cacaca;
+            }
+
+            .loadInfo {
+                padding: 1.25rem 0;
+            }
+
             .date {
                 font-size: 0.75rem;
                 font-weight: 400;
@@ -80,6 +89,10 @@
                 padding: 6px 8px;
                 font-size: 0.75rem;
                 font-weight: 400;
+            }
+
+            .truckIcon {
+                color: $gray;
             }
 
             .durationLine {
@@ -130,5 +143,49 @@
 
     span {
         color: $gray;
+    }
+}
+
+/* En tu archivo CSS */
+.custom-progress .ant-progress-bg {
+    background-color: $green !important;
+}
+
+.custom-progress .ant-progress-success-bg {
+    background-color: $light-green !important;
+}
+
+.progressCircleInfo {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: $background;
+}
+
+.viewLoadButton {
+    font-family: inherit;
+    border: none;
+    background-color: transparent;
+    color: $link;
+    font-size: 0.875rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.loadUsage {
+    padding-left: 1rem;
+    border-left: 1px solid #cacaca;
+    span {
+        background-color: $background;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 1.25rem;
+        font-weight: 600;
     }
 }
