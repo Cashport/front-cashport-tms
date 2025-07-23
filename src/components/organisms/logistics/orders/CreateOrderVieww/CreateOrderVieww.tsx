@@ -12,7 +12,7 @@ import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
-import ResponsiblesView from "./components/ResponsiblesView/ResponsiblesView";
+import AdditionalInfoView from "./components/ResponsiblesView/AdditionalInfoView";
 
 import {
   IClient,
@@ -59,15 +59,17 @@ type IOtherServicesForm = {
   quantity: number;
 };
 
-interface IAdditionalInfoContact {
-  contactOriginName: string;
-  originPhone: string;
-  contactDestinationName: string;
-  destinationPhone: string;
+interface IContactsPerLocation {
+  contacts: {
+    contact_phone?: string;
+    contact_name?: string;
+  }[];
+  location_id?: number;
+  locationName?: string;
 }
 
 interface IAdditionalInfoForm {
-  contacts: IAdditionalInfoContact[];
+  contacts: IContactsPerLocation[];
   instructions?: string;
 }
 
@@ -103,10 +105,10 @@ export interface IFormCreateOrder {
   productServiceLine?: IProductServiceLineForm;
 }
 
-export type IViewOption = "scheduling" | "load" | "responsibles";
+export type IViewOption = "scheduling" | "load" | "additionalInfo";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("scheduling");
+  const [view, setView] = useState<IViewOption>("additionalInfo");
   const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
 
   const { push } = useRouter();
@@ -148,6 +150,12 @@ export const CreateOrderVieww: React.FC = () => {
             originPhone: "",
             contactDestinationName: "",
             destinationPhone: ""
+          },
+          {
+            contactOriginName: "",
+            originPhone: "",
+            contactDestinationName: "",
+            destinationPhone: ""
           }
         ]
       },
@@ -184,8 +192,8 @@ export const CreateOrderVieww: React.FC = () => {
         return <SchedulingView control={control} setValue={setValue} />;
       case "load":
         return <LoadView control={control} />;
-      case "responsibles":
-        return <ResponsiblesView control={control} setValue={setValue} />;
+      case "additionalInfo":
+        return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
         return null;
     }
@@ -197,10 +205,10 @@ export const CreateOrderVieww: React.FC = () => {
         setView("load");
         break;
       case "load":
-        setView("responsibles");
+        setView("additionalInfo");
 
         break;
-      case "responsibles":
+      case "additionalInfo":
         setLoadingRequest(true);
         const modeledData = mapFormToTransferOrder(data);
         console.log("Modeled data for transfer order:", modeledData);
@@ -259,7 +267,7 @@ export const CreateOrderVieww: React.FC = () => {
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
 
         return !validMaterial || !validVehicles || !validOtherServices;
-      case "responsibles":
+      case "additionalInfo":
         const validAdditionalInfo =
           additionalInfo &&
           additionalInfo.contacts.length > 0 &&
@@ -309,7 +317,7 @@ export const CreateOrderVieww: React.FC = () => {
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
-    const viewsOrder: IViewOption[] = ["scheduling", "load", "responsibles"];
+    const viewsOrder: IViewOption[] = ["scheduling", "load", "additionalInfo"];
     const currentIndex = viewsOrder.indexOf(currentView);
     if (currentIndex > 0) {
       return viewsOrder[currentIndex - 1];
@@ -341,7 +349,7 @@ export const CreateOrderVieww: React.FC = () => {
           loading={loadingRequest}
           onClick={handleSubmit(onSubmit)}
         >
-          {view !== "responsibles" ? "Siguiente" : "Confirmar"}
+          {view !== "additionalInfo" ? "Siguiente" : "Confirmar"}
         </PrincipalButton>
       </div>
     </div>
@@ -350,7 +358,7 @@ export const CreateOrderVieww: React.FC = () => {
 const stepIndexMap: Record<string, number> = {
   scheduling: 0,
   load: 1,
-  responsibles: 2
+  additionalInfo: 2
 };
 
-const steps = [{ title: "Agendamiento" }, { title: "Carga" }, { title: "Responsables" }];
+const steps = [{ title: "Agendamiento" }, { title: "Carga" }, { title: "Información adicional" }];
