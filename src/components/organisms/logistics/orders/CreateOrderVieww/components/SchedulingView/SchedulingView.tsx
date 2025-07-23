@@ -370,6 +370,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
           }))}
           onChangeOrigin={onChangeOrigin}
           onChangeDestination={onChangeDestination}
+          setValue={setValue}
         />
 
         <SummaryCard

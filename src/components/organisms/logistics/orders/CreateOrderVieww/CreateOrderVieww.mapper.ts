@@ -27,24 +27,6 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
 
   // Mapear contactos desde additionalInfo
   const contacts: IAddTransferOrderContact[] = [];
-  if (formData.additionalInfo?.contacts) {
-    // Contacto de origen
-    if (formData.additionalInfo.contacts[0]) {
-      contacts.push({
-        contact_type: "1", // Tipo origen
-        name: formData.additionalInfo.contacts[0].contactOriginName,
-        contact_number: formData.additionalInfo.contacts[0].originPhone
-      });
-    }
-    // Contacto de destino
-    if (formData.additionalInfo.contacts[0]) {
-      contacts.push({
-        contact_type: "2", // Tipo destino
-        name: formData.additionalInfo.contacts[0].contactDestinationName,
-        contact_number: formData.additionalInfo.contacts[0].destinationPhone
-      });
-    }
-  }
 
   // Mapear centros de costo desde productServiceLine
   const costCenters: IAddTransferOrderCostCenter[] = [];

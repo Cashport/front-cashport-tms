@@ -30,6 +30,7 @@ import "./createOrderView.scss";
 
 type ITripForm = {
   placeId?: number;
+  placeName?: string;
   date?: Dayjs;
   time?: Dayjs;
   requiresRaising?: boolean;
@@ -69,7 +70,7 @@ interface IContactsPerLocation {
 }
 
 interface IAdditionalInfoForm {
-  contacts: IContactsPerLocation[];
+  contactsPerLocation: IContactsPerLocation[];
   instructions?: string;
 }
 
@@ -143,22 +144,6 @@ export const CreateOrderVieww: React.FC = () => {
           quantity: 1
         }
       ],
-      additionalInfo: {
-        contacts: [
-          {
-            contactOriginName: "",
-            originPhone: "",
-            contactDestinationName: "",
-            destinationPhone: ""
-          },
-          {
-            contactOriginName: "",
-            originPhone: "",
-            contactDestinationName: "",
-            destinationPhone: ""
-          }
-        ]
-      },
       productServiceLine: {
         productServiceLine: [
           {
@@ -200,6 +185,7 @@ export const CreateOrderVieww: React.FC = () => {
   };
 
   const onSubmit = async (data: IFormCreateOrder) => {
+    console.info("Submitting data:", data);
     switch (view) {
       case "scheduling":
         setView("load");
@@ -270,13 +256,13 @@ export const CreateOrderVieww: React.FC = () => {
       case "additionalInfo":
         const validAdditionalInfo =
           additionalInfo &&
-          additionalInfo.contacts.length > 0 &&
-          additionalInfo.contacts.every(
+          additionalInfo.contactsPerLocation.length > 0 &&
+          additionalInfo.contactsPerLocation.every(
             (contact) =>
-              contact.contactOriginName &&
-              contact.originPhone &&
-              contact.contactDestinationName &&
-              contact.destinationPhone
+              contact.contacts.length > 0 &&
+              contact.contacts.every(
+                (c) => c.contact_phone && c.contact_name && c.contact_phone.trim() !== ""
+              )
           );
 
         const validBilling = billing && billing.companyCode && billing.endClient;
