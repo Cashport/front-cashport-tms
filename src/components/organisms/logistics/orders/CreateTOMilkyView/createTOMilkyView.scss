@@ -12,16 +12,16 @@
         align-items: center;
         background-color: $light-orange;
         width: 100%;
-        padding: 2rem;
+        padding: 1.5rem 2rem;
         border-radius: 4px;
 
         h3 {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
         }
 
         h5 {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 500;
         }
     }
@@ -35,6 +35,10 @@
         &__header {
             padding: 20px 32px;
             border-bottom: 1px solid #cacaca;
+
+            &__logo {
+                border-radius: 50%;
+            }
 
             h6 {
                 font-size: 1rem;
@@ -109,6 +113,9 @@
     }
     &__footerButton {
         align-self: flex-end;
+        font-weight: 600;
+        border: 1px solid $black !important;
+        padding: 12px 24px !important;
     }
 
     .driver-phone {
@@ -125,7 +132,6 @@
         height: 45px !important;
         font-size: 0.875rem;
         font-weight: 700;
-        border: 1px solid $black;
         margin-top: auto;
     }
 }

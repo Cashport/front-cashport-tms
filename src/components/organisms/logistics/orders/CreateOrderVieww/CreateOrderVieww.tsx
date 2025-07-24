@@ -1,19 +1,24 @@
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Button, Flex } from "antd";
 import { Dayjs } from "dayjs";
+import { Button, Flex, message } from "antd";
+
+import { mapFormToTransferOrder } from "./CreateOrderVieww.mapper";
+import { addTransferOrderNew } from "@/services/logistics/transfer-orders";
 
 import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import SchedulingView from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
-import ResponsiblesView from "./components/ResponsiblesView/ResponsiblesView";
+import AdditionalInfoView from "./components/ResponsiblesView/AdditionalInfoView";
 
 import {
   IClient,
   ICompanyCode,
   ICostCenter,
+  IGetAllPeople,
   IGetPSL,
   IMaterialStepOne,
   IRoute,
@@ -25,6 +30,7 @@ import "./createOrderView.scss";
 
 type ITripForm = {
   placeId?: number;
+  placeName?: string;
   date?: Dayjs;
   time?: Dayjs;
   requiresRaising?: boolean;
@@ -35,6 +41,10 @@ type IMaterialForm = {
   [K in keyof IMaterialStepOne]?: IMaterialStepOne[K];
 } & {
   quantity: number;
+};
+
+export type IPeopleForm = {
+  [K in keyof IGetAllPeople]?: IGetAllPeople[K];
 };
 
 type ISuggestedVehicleForm = {
@@ -50,15 +60,17 @@ type IOtherServicesForm = {
   quantity: number;
 };
 
-interface IAdditionalInfoContact {
-  contactOriginName: string;
-  originPhone: string;
-  contactDestinationName: string;
-  destinationPhone: string;
+interface IContactsPerLocation {
+  contacts: {
+    contact_phone?: string;
+    contact_name?: string;
+  }[];
+  location_id?: number;
+  locationName?: string;
 }
 
 interface IAdditionalInfoForm {
-  contacts: IAdditionalInfoContact[];
+  contactsPerLocation: IContactsPerLocation[];
   instructions?: string;
 }
 
@@ -86,6 +98,7 @@ export interface IFormCreateOrder {
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
+  people?: IPeopleForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;
@@ -93,10 +106,13 @@ export interface IFormCreateOrder {
   productServiceLine?: IProductServiceLineForm;
 }
 
-export type IViewOption = "scheduling" | "load" | "responsibles";
+export type IViewOption = "scheduling" | "load" | "additionalInfo";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("scheduling");
+  const [view, setView] = useState<IViewOption>("additionalInfo");
+  const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
+
+  const { push } = useRouter();
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
@@ -128,16 +144,6 @@ export const CreateOrderVieww: React.FC = () => {
           quantity: 1
         }
       ],
-      additionalInfo: {
-        contacts: [
-          {
-            contactOriginName: "",
-            originPhone: "",
-            contactDestinationName: "",
-            destinationPhone: ""
-          }
-        ]
-      },
       productServiceLine: {
         productServiceLine: [
           {
@@ -171,26 +177,46 @@ export const CreateOrderVieww: React.FC = () => {
         return <SchedulingView control={control} setValue={setValue} />;
       case "load":
         return <LoadView control={control} />;
-      case "responsibles":
-        return <ResponsiblesView control={control} setValue={setValue} />;
+      case "additionalInfo":
+        return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
         return null;
     }
   };
 
-  const onSubmit = (data: IFormCreateOrder) => {
-    console.log("Form submitted with data:", data);
+  const onSubmit = async (data: IFormCreateOrder) => {
+    console.info("Submitting data:", data);
     switch (view) {
       case "scheduling":
         setView("load");
         break;
       case "load":
-        setView("responsibles");
+        setView("additionalInfo");
 
         break;
-      case "responsibles":
-        console.log("Responsibles view data:", data);
+      case "additionalInfo":
+        // TO DO: Determine wheter an api call is needed here or not
+        // Also, we need to leave the data in the zustand store to be used later
+        // setLoadingRequest(true);
+        // const modeledData = mapFormToTransferOrder(data);
+        // console.log("Modeled data for transfer order:", modeledData);
 
+        // try {
+        //   const res = await addTransferOrderNew(modeledData, []);
+        //   console.log("Response from addTransferOrderNew:", res);
+
+        //   message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
+        //     push("/logistics/orders/details/" + res.id)
+        //   );
+        // } catch (error) {
+        //   message.error("Error al crear la orden de transferencia", 2);
+        //   console.error("Error adding transfer order:", error);
+        // }
+        // setLoadingRequest(false);
+
+        setLoadingRequest(true);
+        // Change route to the details page
+        push("/logistics/orders/milkyWIP");
         break;
       default:
         console.error("Unknown view:", view);
@@ -232,16 +258,16 @@ export const CreateOrderVieww: React.FC = () => {
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
 
         return !validMaterial || !validVehicles || !validOtherServices;
-      case "responsibles":
+      case "additionalInfo":
         const validAdditionalInfo =
           additionalInfo &&
-          additionalInfo.contacts.length > 0 &&
-          additionalInfo.contacts.every(
+          additionalInfo.contactsPerLocation.length > 0 &&
+          additionalInfo.contactsPerLocation.every(
             (contact) =>
-              contact.contactOriginName &&
-              contact.originPhone &&
-              contact.contactDestinationName &&
-              contact.destinationPhone
+              contact.contacts.length > 0 &&
+              contact.contacts.every(
+                (c) => c.contact_phone && c.contact_name && c.contact_phone.trim() !== ""
+              )
           );
 
         const validBilling = billing && billing.companyCode && billing.endClient;
@@ -282,7 +308,7 @@ export const CreateOrderVieww: React.FC = () => {
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
-    const viewsOrder: IViewOption[] = ["scheduling", "load", "responsibles"];
+    const viewsOrder: IViewOption[] = ["scheduling", "load", "additionalInfo"];
     const currentIndex = viewsOrder.indexOf(currentView);
     if (currentIndex > 0) {
       return viewsOrder[currentIndex - 1];
@@ -311,9 +337,10 @@ export const CreateOrderVieww: React.FC = () => {
         <PrincipalButton
           className="nextButton"
           disabled={isNextButtonDisabled}
+          loading={loadingRequest}
           onClick={handleSubmit(onSubmit)}
         >
-          {view !== "responsibles" ? "Siguiente" : "Confirmar"}
+          Siguiente
         </PrincipalButton>
       </div>
     </div>
@@ -322,7 +349,7 @@ export const CreateOrderVieww: React.FC = () => {
 const stepIndexMap: Record<string, number> = {
   scheduling: 0,
   load: 1,
-  responsibles: 2
+  additionalInfo: 2
 };
 
-const steps = [{ title: "Agendamiento" }, { title: "Carga" }, { title: "Responsables" }];
+const steps = [{ title: "Agendamiento" }, { title: "Carga" }, { title: "Información adicional" }];

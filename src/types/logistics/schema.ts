@@ -3837,6 +3837,95 @@ export interface IGetPSL {
   id: number;
 }
 
+export interface IGetAllPeople {
+  id: number;
+  name: string;
+  contact_number: string;
+  id_psl: number;
+  psl_desc: string;
+  id_cost_center: number;
+  cost_center_desc: string;
+}
+
+export interface IAddTransferOrderContact {
+  id_contact?: string;
+  contact_type: string;
+  name: string;
+  contact_number: string;
+}
+
+export interface IAddTransferOrderCostCenter {
+  id_psl: string;
+  id_costcenter: string;
+  percentage: string;
+}
+
+export interface IAddTransferOrderDocument {
+  id_document_type: string;
+  url_document?: string;
+  status?: string;
+}
+
+export interface IAddTransferOrderMaterial {
+  id_material: string;
+  quantity: string;
+}
+
+export interface IAddTransferOrderOtherRequirements {
+  id_other_requeriments: string;
+  quantity: string;
+}
+
+export interface IAddTransferOrderPerson {
+  id_user: string;
+  id_user_line: string;
+}
+
+export interface IAddTransferOrderProduct {
+  id_product: string;
+  units: string;
+}
+
+export interface IAddTransferOrderVehicle {
+  id_vehicle_type: string;
+  quantity: string;
+}
+
+export interface IAddTransferOrder {
+  id?: string;
+  id_user: string;
+  user?: string;
+  id_start_location: string;
+  id_end_location: string;
+  start_date: string; // formato: "YYYY-MM-DD HH:mm:ss"
+  end_date: string; // formato: "YYYY-MM-DD HH:mm:ss"
+  start_freight_equipment: string;
+  end_freight_equipment: string;
+  freight_origin_time: number;
+  freight_destination_time: number;
+  rotation: string;
+  start_date_flexible: string;
+  end_date_flexible: string;
+  id_route?: string;
+  id_company: string;
+  isFixedRate: number; // 0 o 1
+  status?: string;
+  active?: string;
+  created_at?: string;
+  created_by?: string;
+  modified_at?: string;
+  modified_by?: string;
+  transfer_order_contacts: IAddTransferOrderContact[];
+  transfer_order_cost_center: IAddTransferOrderCostCenter[];
+  transfer_order_documents: IAddTransferOrderDocument[];
+  transfer_order_material: IAddTransferOrderMaterial[];
+  transfer_order_other_requeriments: IAddTransferOrderOtherRequirements[];
+  transfer_order_persons: IAddTransferOrderPerson[];
+  transfer_order_products: IAddTransferOrderProduct[];
+  transfer_order_vehicles: IAddTransferOrderVehicle[];
+  geometry: IRoute[]; // JSON string del array de rutas
+}
+
 export interface IGetFrequentRoutes {
   id: number;
   idStartLocation: number;

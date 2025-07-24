@@ -1,7 +1,8 @@
 import React from "react";
 import { Flex } from "antd";
 import { Tag } from "@phosphor-icons/react";
-import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
+
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
 interface DiscountCTAProps {
   discountPercentage?: number;
@@ -36,9 +37,9 @@ export const DiscountCTA: React.FC<DiscountCTAProps> = ({ discountPercentage, on
         </Flex>
       )}
 
-      <SecondaryButton className="selectRouteButton" onClick={onSelectRoute}>
+      <PrincipalButton className="selectRouteButton" onClick={onSelectRoute}>
         Seleccionar ruta
-      </SecondaryButton>
+      </PrincipalButton>
     </Flex>
   );
 };

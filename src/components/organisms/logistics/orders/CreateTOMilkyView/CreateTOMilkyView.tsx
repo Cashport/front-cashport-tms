@@ -7,7 +7,7 @@ import { Flex } from "antd";
 
 import Container from "@/components/atoms/Container/Container";
 import RouteCard from "./components/RouteCard/RouteCard";
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import ModalLoadDetails from "./components/ModalLoadDetails/ModalLoadDetails";
 
 import "./createTOMilkyView.scss";
@@ -32,7 +32,7 @@ const CreateTOMilkyView: React.FC = () => {
       <Container>
         <div className="createTOMilkyView">
           <div className="createTOMilkyView__descriptionCard">
-            <Flex vertical gap={"1rem"} style={{ maxWidth: "575px" }}>
+            <Flex vertical gap={"0.25rem"}>
               <h3>Flota dedicada</h3>
               <h5>Identificamos vehículos con capacidad disponible en la ruta de tu carga.</h5>
               <p>
@@ -44,8 +44,8 @@ const CreateTOMilkyView: React.FC = () => {
             <Image
               src="/images/logistics/createTODescriptionImage.png"
               alt="Create TO Description"
-              width={595}
-              height={250}
+              width={215}
+              height={90}
             />
           </div>
 
@@ -59,9 +59,9 @@ const CreateTOMilkyView: React.FC = () => {
             />
           ))}
 
-          <PrincipalButton className="createTOMilkyView__footerButton">
-            Seleccionar ruta
-          </PrincipalButton>
+          <SecondaryButton className="createTOMilkyView__footerButton">
+            No, continuar
+          </SecondaryButton>
         </div>
       </Container>
       <ModalLoadDetails isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
