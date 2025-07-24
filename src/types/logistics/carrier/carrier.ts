@@ -1,5 +1,6 @@
 import { Pagination } from "@/types/global/IGlobal";
 import { Config, WelcomeHeaders } from "../schema";
+import { IPricingScore } from "../trips/TripsSchema";
 
 export interface SendCarrierRequest {
   carrierRequest: CarrierRequest[];
@@ -13,7 +14,8 @@ export interface CarrierRequest {
   id_trip?: number;
   id_pricing: number;
   id_requirement?: number;
-  pricingOrderRecomended: number[];
+  pricingOrderRecomended?: number[];
+  pricingScore?: IPricingScore;
 }
 
 export interface DriverDocument {
