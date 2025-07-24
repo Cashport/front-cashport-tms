@@ -36,6 +36,10 @@
             padding: 20px 32px;
             border-bottom: 1px solid #cacaca;
 
+            &__logo {
+                border-radius: 50%;
+            }
+
             h6 {
                 font-size: 1rem;
                 font-weight: 600;
@@ -109,6 +113,9 @@
     }
     &__footerButton {
         align-self: flex-end;
+        font-weight: 600;
+        border: 1px solid $black !important;
+        padding: 12px 24px !important;
     }
 
     .driver-phone {
@@ -125,7 +132,6 @@
         height: 45px !important;
         font-size: 0.875rem;
         font-weight: 700;
-        border: 1px solid $black;
         margin-top: auto;
     }
 }

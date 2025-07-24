@@ -7,7 +7,7 @@ import { Flex } from "antd";
 
 import Container from "@/components/atoms/Container/Container";
 import RouteCard from "./components/RouteCard/RouteCard";
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import ModalLoadDetails from "./components/ModalLoadDetails/ModalLoadDetails";
 
 import "./createTOMilkyView.scss";
@@ -59,9 +59,9 @@ const CreateTOMilkyView: React.FC = () => {
             />
           ))}
 
-          <PrincipalButton className="createTOMilkyView__footerButton">
-            Seleccionar ruta
-          </PrincipalButton>
+          <SecondaryButton className="createTOMilkyView__footerButton">
+            No, continuar
+          </SecondaryButton>
         </div>
       </Container>
       <ModalLoadDetails isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

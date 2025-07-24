@@ -35,7 +35,13 @@ export const RouteCardHeader: React.FC<RouteCardHeaderProps> = ({
       justify="space-between"
     >
       <Flex gap={"0.75rem"} align="center">
-        <Image src={companyLogo} alt={companyName} width={50} height={50} />
+        <Image
+          className="createTOMilkyView__recommendationTripCard__header__logo"
+          src={companyLogo}
+          alt={companyName}
+          width={50}
+          height={50}
+        />
         <Flex vertical>
           <h6>{tripDescription}</h6>
           <p>{companyName}</p>
