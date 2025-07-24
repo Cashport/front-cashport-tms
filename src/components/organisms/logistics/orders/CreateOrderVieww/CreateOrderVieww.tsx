@@ -335,7 +335,7 @@ export const CreateOrderVieww: React.FC = () => {
           loading={loadingRequest}
           onClick={handleSubmit(onSubmit)}
         >
-          {view !== "additionalInfo" ? "Siguiente" : "Confirmar"}
+          Siguiente
         </PrincipalButton>
       </div>
     </div>
