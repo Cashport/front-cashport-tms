@@ -195,23 +195,28 @@ export const CreateOrderVieww: React.FC = () => {
 
         break;
       case "additionalInfo":
+        // TO DO: Determine wheter an api call is needed here or not
+        // Also, we need to leave the data in the zustand store to be used later
+        // setLoadingRequest(true);
+        // const modeledData = mapFormToTransferOrder(data);
+        // console.log("Modeled data for transfer order:", modeledData);
+
+        // try {
+        //   const res = await addTransferOrderNew(modeledData, []);
+        //   console.log("Response from addTransferOrderNew:", res);
+
+        //   message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
+        //     push("/logistics/orders/details/" + res.id)
+        //   );
+        // } catch (error) {
+        //   message.error("Error al crear la orden de transferencia", 2);
+        //   console.error("Error adding transfer order:", error);
+        // }
+        // setLoadingRequest(false);
+
         setLoadingRequest(true);
-        const modeledData = mapFormToTransferOrder(data);
-        console.log("Modeled data for transfer order:", modeledData);
-
-        try {
-          const res = await addTransferOrderNew(modeledData, []);
-          console.log("Response from addTransferOrderNew:", res);
-
-          message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
-            push("/logistics/orders/details/" + res.id)
-          );
-        } catch (error) {
-          message.error("Error al crear la orden de transferencia", 2);
-          console.error("Error adding transfer order:", error);
-        }
-        setLoadingRequest(false);
-
+        // Change route to the details page
+        push("/logistics/orders/milkyWIP");
         break;
       default:
         console.error("Unknown view:", view);
