@@ -109,7 +109,7 @@ export interface IFormCreateOrder {
 export type IViewOption = "scheduling" | "load" | "additionalInfo";
 
 export const CreateOrderVieww: React.FC = () => {
-  const [view, setView] = useState<IViewOption>("additionalInfo");
+  const [view, setView] = useState<IViewOption>("scheduling");
   const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
 
   const { push } = useRouter();
