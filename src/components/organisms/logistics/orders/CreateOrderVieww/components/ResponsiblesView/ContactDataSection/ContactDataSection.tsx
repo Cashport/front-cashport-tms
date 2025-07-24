@@ -107,6 +107,7 @@ const ContactDataSection: React.FC<AdditionalInfoSectionProps> = ({ control }) =
               isLast={locationIndex === fields.length - 1}
               isFilled={locationIndex === fields.length - 1}
               stepCircleBackgroundColor="#f7f7f7"
+              circlePosition="top"
             >
               <div className="contactDataSection__locationContacts">
                 <p>{locationField.locationName || `Ubicación ${locationIndex + 1}`}</p>

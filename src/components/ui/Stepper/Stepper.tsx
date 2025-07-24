@@ -13,6 +13,7 @@ interface StepperProps {
 
   className?: string;
   stepCircleBackgroundColor?: string;
+  circlePosition?: "top" | "center";
 }
 
 export const Stepper: React.FC<StepperProps> = ({
@@ -22,15 +23,18 @@ export const Stepper: React.FC<StepperProps> = ({
   isFilled = false,
   showDivider = true,
   className = "",
-  stepCircleBackgroundColor
+  stepCircleBackgroundColor,
+  circlePosition = "center"
 }) => {
   return (
     <>
       <div className={`stepItem ${className}`}>
         <div className="stepCircleContainer">
-          <div className={`stepLine ${isFirst ? "first" : ""} ${isLast ? "last" : ""}`} />
+          <div
+            className={`stepLine -${circlePosition} ${isFirst ? "first" : ""} ${isLast ? "last" : ""}`}
+          />
           <DotOutline
-            className="stepCircle"
+            className={`stepCircle -${circlePosition}`}
             size={30}
             weight={isFilled ? "fill" : "regular"}
             style={stepCircleBackgroundColor ? { backgroundColor: stepCircleBackgroundColor } : {}}

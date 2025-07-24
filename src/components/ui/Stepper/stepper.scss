@@ -28,6 +28,14 @@
             height: fit-content;
             margin: -10px;
             background-color: $white;
+
+            &.-top {
+                align-self: flex-start;
+                margin-top: 1px;
+            }
+            &.-bottom {
+                align-self: flex-end;
+            }
         }
 
         .stepLine {
@@ -41,9 +49,24 @@
                 top: 50%;
                 height: 50%;
             }
+
             &.last {
                 height: 50%;
                 bottom: 50%;
+            }
+
+            // Estilos cuando tiene la clase -top
+            &.-top {
+                &.first {
+                    top: 5px;
+                    height: 100%;
+                }
+
+                &.last {
+                    top: 5px;
+                    height: 10px;
+                    bottom: auto;
+                }
             }
         }
     }
