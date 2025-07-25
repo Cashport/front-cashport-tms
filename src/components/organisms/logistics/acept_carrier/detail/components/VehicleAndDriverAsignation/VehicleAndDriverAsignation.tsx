@@ -97,9 +97,24 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState<boolean>(false);
 
   const isContinueButtonEnabled = () => {
-    if (formMode === FormMode.CREATE && !isFormCompleted) return false;
-    if (formMode === FormMode.EDIT && !isFormCompleted) return false;
-    else return true;
+    if (!isFormCompleted) return false;
+
+    const vehicleStatus = getVehicleStatus();
+    if (selectedVehicle && vehicleStatus && vehicleStatus.id !== VALID_STATUS) {
+      return false;
+    }
+
+    const hasInvalidDriver = selectedDrivers.some((driver) => {
+      if (driver.driverId) {
+        const driverStatus = getDriverStatus(driver.driverId);
+        return driverStatus && driverStatus.id !== VALID_STATUS;
+      }
+      return false;
+    });
+
+    if (hasInvalidDriver) return false;
+
+    return true;
   };
 
   useEffect(() => {
@@ -349,6 +364,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                     onClick={() => append({ driverId: null })}
                     disabled={fields.length === DRIVERS_MAX_QUANTITY || !canEditDrivers}
                     text="Agregar otro conductor"
+                    style={{ textAlign: "left", whiteSpace: "nowrap" }}
                   />
                 )}
               </div>
