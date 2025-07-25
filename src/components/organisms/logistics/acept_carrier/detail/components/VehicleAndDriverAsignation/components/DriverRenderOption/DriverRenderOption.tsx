@@ -3,7 +3,7 @@ import { ICarrierRequestDrivers } from "@/types/logistics/schema";
 import { Flex, Tag, Typography } from "antd";
 import { Circle } from "phosphor-react";
 
-import styles from "./DriverRenderOption.module.scss";
+import styles from "./driverRenderOption.module.scss";
 
 interface IDriverOption {
   selectedDrivers: {
