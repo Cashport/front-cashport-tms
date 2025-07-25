@@ -175,18 +175,16 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                       key={`option-vehicle-${vehicle.id}-${index}`}
                       value={vehicle.id}
                       label={`${vehicle.vehicle_type} ${vehicle.brand} ${vehicle.line} ${vehicle.color} ${vehicle.plate_number}`}
+                      style={{ borderTop: index !== 0 ? "1px solid #f7f7f7" : "none" }}
                     >
-                      <VehicleRenderOption
-                        data={vehicle}
-                        index={index}
-                        selectedVehicle={selectedVehicle}
-                      />
+                      <VehicleRenderOption data={vehicle} selectedVehicle={selectedVehicle} />
                     </Option>
                   ))}
                 </Select>
               );
             }}
           />
+          <p>ESTADO DEL VEHICULO SELECCIONADO</p>
         </div>
         {fields.map((field, indexField: number) => (
           <div key={`field-${field.id}-${indexField}`}>
@@ -240,11 +238,11 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                             key={`option-driver-${driver.id}-${index}`}
                             value={driver.id}
                             label={`${driver.name} ${driver.last_name} ${driver.phone}`}
+                            style={{ borderTop: index !== 0 ? "1px solid #f7f7f7" : "none" }}
                           >
                             <DriverRenderOption
                               selectedDrivers={selectedDrivers}
                               data={driver}
-                              index={index}
                               selectIndex={indexField}
                             />
                           </Option>
