@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, Dispatch, SetStateAction, forwardRef, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { Flex, Select } from "antd";
+import { Flex, Select, Tag } from "antd";
 import { ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
 import styles from "./vehicleAndDriverAsignation.module.scss";
 import DriverRenderOption from "./components/DriverRenderOption/DriverRenderOption";
@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import { FormMode } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 import Buttons from "../Buttons/Buttons";
 import { IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
+import { Circle } from "phosphor-react";
 
 const { Option } = Select;
 
@@ -82,6 +83,9 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
   const selectedVehicle = watch("vehicleForm");
   const selectedDrivers = watch("driverForm");
 
+  console.log("selectedDrivers", selectedDrivers);
+  console.log("selectedVehicle", selectedVehicle);
+
   const formCurrentValues = getValues();
 
   const DRIVERS_MAX_QUANTITY = 5;
@@ -135,6 +139,20 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
     setSelectedFiles(docsWithLink);
   }, [documentsTypes]);
 
+  // Función helper para obtener el status del vehículo seleccionado
+  const getVehicleStatus = () => {
+    if (!selectedVehicle || !vehicles) return null;
+    const vehicle = vehicles.find((v) => v.id === selectedVehicle);
+    return vehicle?.status;
+  };
+
+  // Función helper para obtener el status del conductor seleccionado
+  const getDriverStatus = (driverId: number | null) => {
+    if (!driverId || !drivers) return null;
+    const driver = drivers.find((d) => d.id === driverId);
+    return driver?.status;
+  };
+
   return (
     <div>
       <div className={styles.wrapper}>
@@ -146,45 +164,59 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
         </Flex>
         <div className={styles.container} style={{ gap: "6px" }}>
           <p className={styles.subtitle}>Seleccione el vehículo</p>
-          <Controller
-            {...register(`vehicleForm`)}
-            control={control}
-            render={({ field }) => {
-              return (
-                <Select
-                  {...field}
-                  disabled={!canEditVehicle}
-                  showSearch
-                  placeholder="Seleccione el vehículo"
-                  style={{ width: "33rem", height: "2.5rem" }}
-                  optionLabelProp="label"
-                  labelRender={(selectedValue) => (
-                    <VehicleRenderLabel vehicles={vehicles} selectedValue={selectedValue} />
-                  )}
-                  optionFilterProp="label"
-                  filterOption={(input: string, option: any) => {
-                    if (option) {
-                      return option.label?.toLowerCase().includes(input.toLowerCase());
-                    }
-                    return false;
-                  }}
-                  popupMatchSelectWidth={false}
-                >
-                  {vehicles?.map((vehicle, index) => (
-                    <Option
-                      key={`option-vehicle-${vehicle.id}-${index}`}
-                      value={vehicle.id}
-                      label={`${vehicle.vehicle_type} ${vehicle.brand} ${vehicle.line} ${vehicle.color} ${vehicle.plate_number}`}
-                      style={{ borderTop: index !== 0 ? "1px solid #f7f7f7" : "none" }}
-                    >
-                      <VehicleRenderOption data={vehicle} selectedVehicle={selectedVehicle} />
-                    </Option>
-                  ))}
-                </Select>
-              );
-            }}
-          />
-          <p>ESTADO DEL VEHICULO SELECCIONADO</p>
+          <Flex gap={"0.5rem"} align="center">
+            <Controller
+              {...register(`vehicleForm`)}
+              control={control}
+              render={({ field }) => {
+                return (
+                  <Select
+                    {...field}
+                    disabled={!canEditVehicle}
+                    showSearch
+                    placeholder="Seleccione el vehículo"
+                    style={{ width: "33rem", height: "2.5rem" }}
+                    optionLabelProp="label"
+                    labelRender={(selectedValue) => (
+                      <VehicleRenderLabel vehicles={vehicles} selectedValue={selectedValue} />
+                    )}
+                    optionFilterProp="label"
+                    filterOption={(input: string, option: any) => {
+                      if (option) {
+                        return option.label?.toLowerCase().includes(input.toLowerCase());
+                      }
+                      return false;
+                    }}
+                    popupMatchSelectWidth={false}
+                  >
+                    {vehicles?.map((vehicle, index) => (
+                      <Option
+                        key={`option-vehicle-${vehicle.id}-${index}`}
+                        value={vehicle.id}
+                        label={`${vehicle.vehicle_type} ${vehicle.brand} ${vehicle.line} ${vehicle.color} ${vehicle.plate_number}`}
+                        style={{ borderTop: index !== 0 ? "1px solid #f7f7f7" : "none" }}
+                      >
+                        <VehicleRenderOption data={vehicle} selectedVehicle={selectedVehicle} />
+                      </Option>
+                    ))}
+                  </Select>
+                );
+              }}
+            />
+
+            {getVehicleStatus() && (
+              <Tag
+                icon={<Circle color={getVehicleStatus()?.color} weight="fill" size={6} />}
+                style={{
+                  backgroundColor: getVehicleStatus()?.backgroundColor || " #F7F7F7",
+                  color: getVehicleStatus()?.color
+                }}
+                className={styles.tag}
+              >
+                {getVehicleStatus()?.description || getVehicleStatus()?.name}
+              </Tag>
+            )}
+          </Flex>
         </div>
         {fields.map((field, indexField: number) => (
           <div key={`field-${field.id}-${indexField}`}>
@@ -209,48 +241,72 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
             <div className={styles.container}>
               <p className={styles.subtitle}>Seleccione el conductor</p>
               <div className={styles.selector}>
-                <Controller
-                  {...register(`driverForm.${indexField}.driverId`)}
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <Select
-                        {...field}
-                        disabled={!canEditDrivers}
-                        showSearch
-                        placeholder="Seleccione el conductor"
-                        style={{ width: "33rem", height: "2.5rem" }}
-                        optionLabelProp="label"
-                        labelRender={(selectedValue) => (
-                          <DriverRenderLabel selectedValue={selectedValue} drivers={drivers} />
-                        )}
-                        optionFilterProp="label"
-                        filterOption={(input: string, option: any) => {
-                          if (option) {
-                            return option.label?.toLowerCase().includes(input.toLowerCase());
-                          }
-                          return false;
-                        }}
-                        popupMatchSelectWidth={false}
-                      >
-                        {filterDrivers(indexField)?.map((driver, index) => (
-                          <Option
-                            key={`option-driver-${driver.id}-${index}`}
-                            value={driver.id}
-                            label={`${driver.name} ${driver.last_name} ${driver.phone}`}
-                            style={{ borderTop: index !== 0 ? "1px solid #f7f7f7" : "none" }}
-                          >
-                            <DriverRenderOption
-                              selectedDrivers={selectedDrivers}
-                              data={driver}
-                              selectIndex={indexField}
-                            />
-                          </Option>
-                        ))}
-                      </Select>
-                    );
-                  }}
-                />
+                <Flex gap={"0.5rem"} align="center">
+                  <Controller
+                    {...register(`driverForm.${indexField}.driverId`)}
+                    control={control}
+                    render={({ field }) => {
+                      return (
+                        <Select
+                          {...field}
+                          disabled={!canEditDrivers}
+                          showSearch
+                          placeholder="Seleccione el conductor"
+                          style={{ width: "33rem", height: "2.5rem" }}
+                          optionLabelProp="label"
+                          labelRender={(selectedValue) => (
+                            <DriverRenderLabel selectedValue={selectedValue} drivers={drivers} />
+                          )}
+                          optionFilterProp="label"
+                          filterOption={(input: string, option: any) => {
+                            if (option) {
+                              return option.label?.toLowerCase().includes(input.toLowerCase());
+                            }
+                            return false;
+                          }}
+                          popupMatchSelectWidth={false}
+                        >
+                          {filterDrivers(indexField)?.map((driver, index) => (
+                            <Option
+                              key={`option-driver-${driver.id}-${index}`}
+                              value={driver.id}
+                              label={`${driver.name} ${driver.last_name} ${driver.phone}`}
+                              style={{ borderTop: index !== 0 ? "1px solid #f7f7f7" : "none" }}
+                            >
+                              <DriverRenderOption
+                                selectedDrivers={selectedDrivers}
+                                data={driver}
+                                selectIndex={indexField}
+                              />
+                            </Option>
+                          ))}
+                        </Select>
+                      );
+                    }}
+                  />
+
+                  {getDriverStatus(selectedDrivers[indexField]?.driverId) && (
+                    <Tag
+                      icon={
+                        <Circle
+                          color={getDriverStatus(selectedDrivers[indexField]?.driverId)?.color}
+                          weight="fill"
+                          size={6}
+                        />
+                      }
+                      style={{
+                        backgroundColor:
+                          getDriverStatus(selectedDrivers[indexField]?.driverId)?.backgroundColor ||
+                          " #F7F7F7",
+                        color: getDriverStatus(selectedDrivers[indexField]?.driverId)?.color
+                      }}
+                      className={styles.tag}
+                    >
+                      {getDriverStatus(selectedDrivers[indexField]?.driverId)?.description ||
+                        getDriverStatus(selectedDrivers[indexField]?.driverId)?.name}
+                    </Tag>
+                  )}
+                </Flex>
                 {indexField === fields.length - 1 && (
                   <AddRemoveButton
                     type="add"
