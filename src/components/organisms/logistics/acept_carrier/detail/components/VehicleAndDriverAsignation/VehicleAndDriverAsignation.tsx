@@ -2,7 +2,6 @@
 import React, { useEffect, Dispatch, SetStateAction, forwardRef, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { Flex, Select } from "antd";
-import { UploadDocumentButton } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
 import styles from "./vehicleAndDriverAsignation.module.scss";
 import DriverRenderOption from "./components/DriverRenderOption/DriverRenderOption";
@@ -10,12 +9,10 @@ import DriverRenderLabel from "./components/DriverRenderLabel/DriverRenderLabel"
 import VehicleRenderOption from "./components/VehicleRenderOption/VehicleRenderOption";
 import VehicleRenderLabel from "./components/VehicleRenderLabel/VehicleRenderLabel";
 import AddRemoveButton from "./components/AddRemoveButton/AddRemoveButton";
-import EditDocsButton from "./components/EditDocsButton/EditDocsButton";
 import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
 import { documentsTypes } from "../../mockdata";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import dayjs from "dayjs";
-import UploadDocumentChild from "@/components/atoms/UploadDocumentChild/UploadDocumentChild";
 import { FormMode } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 import Buttons from "../Buttons/Buttons";
 import { IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
@@ -49,13 +46,9 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
   currentVehicle,
   formMode,
   setView,
-  carrier,
   handleReject,
   showRejectButton
 }: VehicleAndDriverAsignationProps) {
-  const MANDATORY_DRIVERS_DOCS = [7];
-  const MANDATORY_VEHICLE_DOCS = [3, 4];
-
   const [canEditVehicle, setCanEditVehicle] = useState<boolean>(formMode === FormMode.CREATE);
   const [canEditDrivers, setCanEditDrivers] = useState<boolean>(formMode === FormMode.CREATE);
   const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
@@ -193,39 +186,6 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
               );
             }}
           />
-          <div className={styles.documentsTop}>
-            <p className={styles.subtitle}>Documentos del vehículo</p>
-            <EditDocsButton
-              onClick={() => setIsOpenModalDocuments(true)}
-              text="Editar documentos"
-              disabled={formMode !== FormMode.CREATE}
-            />
-          </div>
-          <div className={styles.uploadContainer}>
-            {selectedFiles
-              .filter((sf) => MANDATORY_VEHICLE_DOCS.includes(sf.id))
-              .map((file) => (
-                <UploadDocumentButton
-                  key={file.id}
-                  title={file.description}
-                  isMandatory={!file.optional}
-                  aditionalData={file.id}
-                  setFiles={() => {}}
-                  files={file.file}
-                  disabled
-                  column
-                >
-                  {file?.link ? (
-                    <UploadDocumentChild
-                      linkFile={file.link}
-                      nameFile={file.link.split("-").pop() ?? ""}
-                      onDelete={() => {}}
-                      showTrash={false}
-                    />
-                  ) : undefined}
-                </UploadDocumentButton>
-              ))}
-          </div>
         </div>
         {fields.map((field, indexField: number) => (
           <div key={`field-${field.id}-${indexField}`}>
@@ -299,39 +259,6 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                     text="Agregar otro conductor"
                   />
                 )}
-              </div>
-              <div className={styles.documentsTop}>
-                <p className={styles.subtitle}>Documentos del conductor</p>
-                <EditDocsButton
-                  onClick={() => setIsOpenModalDocuments(true)}
-                  text="Editar documentos"
-                  disabled={formMode !== FormMode.CREATE}
-                />
-              </div>
-              <div className={styles.uploadContainer}>
-                {selectedFiles
-                  .filter((sf) => MANDATORY_DRIVERS_DOCS.includes(sf.id))
-                  .map((file) => (
-                    <UploadDocumentButton
-                      key={file.id}
-                      title={file.description}
-                      isMandatory={!file.optional}
-                      aditionalData={file.id}
-                      setFiles={() => {}}
-                      files={file.file}
-                      disabled
-                      column
-                    >
-                      {file?.link ? (
-                        <UploadDocumentChild
-                          linkFile={file.link}
-                          nameFile={file.link.split("-").pop() ?? ""}
-                          onDelete={() => {}}
-                          showTrash={false}
-                        />
-                      ) : undefined}
-                    </UploadDocumentButton>
-                  ))}
               </div>
             </div>
           </div>
