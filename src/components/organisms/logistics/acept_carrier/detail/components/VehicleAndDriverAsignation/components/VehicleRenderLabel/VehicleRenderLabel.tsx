@@ -14,7 +14,7 @@ function VehicleRenderLabel({ vehicles, selectedValue }: IVehicleLabel) {
   return (
     selectedVehicle && (
       <Flex gap={8} align="center">
-        <Flex flex={2} gap={8} style={{ minWidth: "0" }}>
+        <Flex flex={3} gap={8} style={{ minWidth: "0" }}>
           <Text ellipsis strong>
             {selectedVehicle.vehicle_type}
           </Text>

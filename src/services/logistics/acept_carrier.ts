@@ -1,5 +1,5 @@
 import { API } from "@/utils/api/api";
-import { Data } from "@/types/logistics/schema";
+import { Data, ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
 
@@ -46,9 +46,13 @@ export const getAceptCarrierRequestById = async (id: string): Promise<any> => {
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };
 
-export const getVehiclesByCarrierId = async (id: number): Promise<Data> => {
+export const getVehiclesByCarrierId = async (
+  id: number
+): Promise<GenericResponse<ICarrierRequestVehicles[]>> => {
   try {
-    const response: Data = await API.get(`/vehicle/provider-active/${id}`);
+    const response: GenericResponse<ICarrierRequestVehicles[]> = await API.get(
+      `/vehicle/provider-active/${id}`
+    );
     return response;
   } catch (error) {
     console.log("Error get all getAllTransferRequestList: ", error);
@@ -56,9 +60,13 @@ export const getVehiclesByCarrierId = async (id: number): Promise<Data> => {
   }
 };
 
-export const getDriverByCarrierId = async (id: number): Promise<Data> => {
+export const getDriverByCarrierId = async (
+  id: number
+): Promise<GenericResponse<ICarrierRequestDrivers[]>> => {
   try {
-    const response: Data = await API.get(`/driver/provider-active/${id}`);
+    const response: GenericResponse<ICarrierRequestDrivers[]> = await API.get(
+      `/driver/provider-active/${id}`
+    );
     return response;
   } catch (error) {
     console.log("Error get all getAllTransferRequestList: ", error);
@@ -104,7 +112,7 @@ export const getTransferRequestById = async (id: string): Promise<Data> => {
     const response: Data = await API.post(`/transfer-request/id`, form, {
       headers: {
         Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "multipart/form-data"
       }
     });
     return response;
