@@ -9,7 +9,7 @@ import Buttons from "../Buttons/Buttons";
 
 interface ConfirmationProps {
   driverSelected: ICarrierRequestDrivers[];
-  vehicleSelected: ICarrierRequestVehicles;
+  vehicleSelected?: ICarrierRequestVehicles;
   setObservation: Dispatch<SetStateAction<any>>;
   formMode: FormMode;
   currentObservation: string;
@@ -87,8 +87,9 @@ export function Confirmation({
             disabled={formMode === FormMode.VIEW}
           />
           <div className={styles.text}>
-            Confirmo que el conductor y el vehículo asignados cumplen con todos los requerimientos contractuales y
-            estipulados por HSEQ, y acepto el valor establecido para la ejecución del servicio.
+            Confirmo que el conductor y el vehículo asignados cumplen con todos los requerimientos
+            contractuales y estipulados por HSEQ, y acepto el valor establecido para la ejecución
+            del servicio.
           </div>
         </Flex>
       </Flex>

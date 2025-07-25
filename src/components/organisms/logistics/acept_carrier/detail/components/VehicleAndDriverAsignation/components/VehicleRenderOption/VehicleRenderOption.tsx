@@ -1,8 +1,8 @@
 import RadioButtonIcon from "@/components/atoms/RadioButton/RadioButton";
 import { ICarrierRequestVehicles } from "@/types/logistics/schema";
 import styles from "./VehicleRenderOption.module.scss";
-import { Col, Flex, Typography } from "antd";
-import { Check, Circle } from "phosphor-react";
+import { Flex, Tag, Typography } from "antd";
+import { Circle } from "phosphor-react";
 const { Text } = Typography;
 
 interface IVehicleOption {
@@ -12,43 +12,37 @@ interface IVehicleOption {
 }
 function VehicleRenderOption({ data, index, selectedVehicle }: Readonly<IVehicleOption>) {
   return (
-    <Flex vertical key={`vehicle-${data.id}-${index}`}>
+    <Flex vertical key={`vehicle-${data.id}-${index}`} style={{ width: "560px" }}>
       {index !== 0 && <hr style={{ borderTop: "1px solid #f7f7f7", margin: "0 0 0.5rem 0" }}></hr>}
-      <Flex align="center" style={{ height: "2.75rem" }}>
-        <Col
-          span={2}
-          style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}
-        >
+      <Flex
+        align="center"
+        justify="space-between"
+        style={{ height: "2.75rem" }}
+        className="AHHHHHH"
+      >
+        <Flex align="center" gap={"1rem"}>
           {selectedVehicle === data.id ? <RadioButtonIcon /> : <Circle size={20} />}
-        </Col>
-        <Col span={20}>
-          <p className={styles.textStrong}>{data.vehicle_type}</p>
-          <Flex gap={4}>
-            <Col span={12}>
+
+          <Flex vertical>
+            <p className={styles.textStrong}>{data.vehicle_type}</p>
+            <Flex gap={"0.5rem"}>
               <Text ellipsis>{data.brand}</Text>
-            </Col>
-            <Col span={2} style={{ display: "flex", justifyContent: "center" }}>
               <p color="black">•</p>
-            </Col>
-            <Col span={10}>
               <Text>{data.plate_number}</Text>
-            </Col>
+            </Flex>
           </Flex>
-        </Col>
-        <Col span={2} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Flex
-            style={{
-              backgroundColor: "#CBE71E",
-              width: "24px",
-              height: "24px",
-              borderRadius: "4px"
-            }}
-            align="center"
-            justify="center"
-          >
-            <Check size={20} color="white" />
-          </Flex>
-        </Col>
+        </Flex>
+
+        <Tag
+          icon={<Circle color={data.status.color} weight="fill" size={6} />}
+          style={{
+            backgroundColor: data.status.backgroundColor || " #F7F7F7",
+            color: data.status.color
+          }}
+          className={styles.tag}
+        >
+          {data.status.description}
+        </Tag>
       </Flex>
     </Flex>
   );

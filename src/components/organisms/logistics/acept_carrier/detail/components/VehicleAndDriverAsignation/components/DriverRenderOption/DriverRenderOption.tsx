@@ -1,7 +1,9 @@
 import RadioButtonIcon from "@/components/atoms/RadioButton/RadioButton";
 import { ICarrierRequestDrivers } from "@/types/logistics/schema";
-import { Col, Flex, Typography } from "antd";
-import { Check, Circle } from "phosphor-react";
+import { Flex, Tag, Typography } from "antd";
+import { Circle } from "phosphor-react";
+
+import styles from "./DriverRenderOption.module.scss";
 
 interface IDriverOption {
   selectedDrivers: {
@@ -22,46 +24,31 @@ function DriverRenderOption({
   return (
     <Flex vertical key={`driver-${data.id}-${index}`}>
       {index !== 0 && <hr style={{ borderTop: "1px solid #f7f7f7", margin: "0 0 0.5rem 0" }}></hr>}
-      <Flex align="center" style={{ height: "1.5rem" }}>
-        <Col
-          span={2}
-          style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}
-        >
+      <Flex align="center" justify="space-between" style={{ height: "1.5rem" }} gap={"1rem"}>
+        <Flex>
           {selectedDrivers[selectIndex].driverId == data.id ? (
             <RadioButtonIcon />
           ) : (
             <Circle size={20} />
           )}
-        </Col>
-        <Col span={20} style={{ padding: "0.25rem 0px" }}>
           <Flex gap={4}>
-            <Col span={12}>
-              <Text ellipsis>
-                {data.name} {data.last_name}
-              </Text>
-            </Col>
-            <Col span={2} style={{ display: "flex", justifyContent: "center" }}>
-              <p color="black">•</p>
-            </Col>
-            <Col span={10}>
-              <Text>{data.phone}</Text>
-            </Col>
+            <Text ellipsis>
+              {data.name} {data.last_name}
+            </Text>
+            <p color="black">•</p>
+            <Text>{data.phone}</Text>
           </Flex>
-        </Col>
-        <Col span={2} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Flex
-            style={{
-              backgroundColor: "#CBE71E",
-              width: "24px",
-              height: "24px",
-              borderRadius: "4px"
-            }}
-            align="center"
-            justify="center"
-          >
-            <Check size={20} color="white" />
-          </Flex>
-        </Col>
+        </Flex>
+        <Tag
+          icon={<Circle color={data.status.color} weight="fill" size={6} />}
+          style={{
+            backgroundColor: data.status.backgroundColor || " #F7F7F7",
+            color: data.status.color
+          }}
+          className={styles.tag}
+        >
+          {data.status.description || data.status.name}
+        </Tag>
       </Flex>
     </Flex>
   );

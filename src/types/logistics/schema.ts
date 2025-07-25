@@ -566,6 +566,8 @@ export interface ICarrierRequestDrivers {
   name: string;
   phone: string;
   rh: string;
+  status: IStatusWithStyling;
+  subject_id: number;
 }
 /**
  * Exposes all fields present in carrier_request_vehicles as a typescript
@@ -592,6 +594,8 @@ export interface ICarrierRequestVehicles {
   modified_at: string;
   modified_by: string;
   plate_number: string;
+  status: IStatusWithStyling;
+  subject_id: number;
   vehicle_type: string;
   year: number;
 }
@@ -3855,4 +3859,13 @@ export interface IGetFrequentRoutes {
     };
     weight_name: string;
   }>;
+}
+
+interface IStatusWithStyling {
+  backgroundColor: string;
+  color: string;
+  description: string;
+  id: string;
+  name: string;
+  subjectId: number;
 }

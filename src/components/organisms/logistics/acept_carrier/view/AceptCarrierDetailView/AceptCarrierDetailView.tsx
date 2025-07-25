@@ -23,6 +23,7 @@ import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 import ModalRejectTripInvite from "@/components/molecules/modals/ModalRejectTripInvite/ModalRejectTripInvite";
+import { ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
 
 export interface IHandleReject {
   rejection_causes: string;
@@ -49,8 +50,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [formMode, setFormMode] = useState<FormMode>(FormMode.VIEW);
   const [vehicleSelected, setVehicleSelected] = useState<number | null>(null);
   const [driversSelected, setDriversSelected] = useState<Array<number | null>>([]);
-  const [vehicles, setVehicles] = useState<any[]>([]);
-  const [drivers, setDrivers] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<ICarrierRequestVehicles[]>([]);
+  const [drivers, setDrivers] = useState<ICarrierRequestDrivers[]>([]);
   const [canBeRejected, setCanBeRejected] = useState<boolean>(false);
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);

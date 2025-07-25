@@ -168,6 +168,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                     }
                     return false;
                   }}
+                  popupMatchSelectWidth={false}
                 >
                   {vehicles?.map((vehicle, index) => (
                     <Option
@@ -232,6 +233,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                           }
                           return false;
                         }}
+                        popupMatchSelectWidth={false}
                       >
                         {filterDrivers(indexField)?.map((driver, index) => (
                           <Option
