@@ -156,7 +156,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                   disabled={!canEditVehicle}
                   showSearch
                   placeholder="Seleccione el vehículo"
-                  style={{ width: "25rem", height: "2.5rem" }}
+                  style={{ width: "33rem", height: "2.5rem" }}
                   optionLabelProp="label"
                   labelRender={(selectedValue) => (
                     <VehicleRenderLabel vehicles={vehicles} selectedValue={selectedValue} />
@@ -220,7 +220,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                         disabled={!canEditDrivers}
                         showSearch
                         placeholder="Seleccione el conductor"
-                        style={{ width: "25rem", height: "2.5rem" }}
+                        style={{ width: "33rem", height: "2.5rem" }}
                         optionLabelProp="label"
                         labelRender={(selectedValue) => (
                           <DriverRenderLabel selectedValue={selectedValue} drivers={drivers} />
