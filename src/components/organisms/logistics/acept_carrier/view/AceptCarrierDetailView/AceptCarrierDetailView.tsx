@@ -57,11 +57,9 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
 
+  // swr hooks used for revalidateOnFocus capability
   const { vehicles: vehiclesData } = useVehicles(carrier?.id_carrier);
-  console.log("vehiclesData", vehiclesData);
-
   const { drivers: driversData } = useDrivers(carrier?.id_carrier);
-  console.log("driversData", driversData);
 
   const [messageApi, contextHolder] = message.useMessage();
 
