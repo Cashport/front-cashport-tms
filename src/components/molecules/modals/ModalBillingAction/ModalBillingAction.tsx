@@ -92,7 +92,8 @@ export default function ModalBillingAction(props: Readonly<PropsModal>) {
           <UploadServiceSupport
             onClose={onClose}
             journeysData={billingData?.journeys}
-            trId={billingData?.billing.idTransferRequest}
+            trId={billingData?.billing.idTransferRequest || 0}
+            carrierId={billingData?.billing.idCarrier || 0}
           />
         );
       default:

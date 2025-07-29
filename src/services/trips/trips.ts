@@ -1,6 +1,7 @@
 import { createFormDataFinalizeTrip } from "@/components/molecules/modals/ModalBillingMT/controllers/createFormData";
 import { IParsedFormValues } from "@/components/molecules/modals/ModalBillingMT/controllers/formbillingmt.types";
 import { createFormData } from "@/components/molecules/modals/ModalGenerateActionTO/FinalizeTrip/controllers/createFormData";
+import { ICarrierAPI, IRequestAPI } from "@/components/molecules/modals/ModalGenerateActionTO/FinalizeTrip/FinalizeTrip";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
@@ -25,7 +26,17 @@ export const getTripDetails = async (idTrip: number): Promise<IGetTripDetails | 
   throw new Error(response.message);
 };
 
-export const sendFinalizeTrip = async (form: IParsedFormValues[], idTrip: number): Promise<any> => {
+export const getOtherRequirementDetails = async (
+  idRequirement: number
+): Promise<IRequestAPI | undefined> => {
+  const response: GenericResponse<IRequestAPI> = await API.get(
+    `/transfer-request/other-requirement-details/${idRequirement}`
+  );
+  if (response.success) return response.data;
+  throw new Error(response.message);
+};
+
+export const addTripDocuments = async (form: IParsedFormValues[], idTrip: number): Promise<any> => {
   try {
     const formData = createFormDataFinalizeTrip(form);
     const response: GenericResponse<any> = await API.post(
@@ -44,18 +55,54 @@ export const sendFinalizeTrip = async (form: IParsedFormValues[], idTrip: number
     throw new Error("Hubo un error finalizando el viaje");
   }
 };
+
+export const addOtherRequirementDocuments = async (form: IParsedFormValues[], idOt: number): Promise<any> => {
+  try {
+    const formData = createFormDataFinalizeTrip(form);
+    const response: any = await API.post(`/transfer-request/add-mt-other-requirement/${idOt}`, formData, {
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "multipart/form-data"
+      }
+    });
+    if (response?.data) return true;
+    return false;
+  } catch (error) {
+    throw new Error("Hubo un error finalizando el viaje");
+  }
+};
+
 export const getCarriersTripsDetails = async (idTR: number): Promise<any[] | undefined> => {
   try {
     const response: GenericResponse<any> = await API.get(`/transfer-request/trips-details/${idTR}`);
-    console.log("response getCarriersTripsDetails", response);
     if (response.data) {
       return response?.data;
     } else {
       console.log(`Error getCarriersTripsDetails: `);
     }
   } catch (error) {
-    console.log(`Error getCarriersTripsDetails: `, error);
-    return error as any;
+    console.error(`Error getCarriersTripsDetails: `, error);
+    return [];
+  }
+};
+
+export const getTripsDetailsByCarrier = async (
+  idTR: number,
+  idCarrier: number
+): Promise<ICarrierAPI | null> => {
+  try {
+    const response: GenericResponse<ICarrierAPI> = await API.get(
+      `/transfer-request/trips-details/${idTR}/carrier/${idCarrier}`
+    );
+    if (response.data) {
+      return response?.data;
+    } else {
+      console.error(`Error getCarriersTripsDetails: `);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error getCarriersTripsDetails: `, error);
+    return null;
   }
 };
 
@@ -90,6 +137,10 @@ interface IPostAddMTTRipTracking {
     tripId: number;
     file: string;
   }[];
+  otherRequirementsAttachments: {
+    otId: number;
+    file: string;
+  }[];
   commentary: string;
   files: {
     name: string;
@@ -100,6 +151,7 @@ interface IPostAddMTTRipTracking {
 export const postAddMTTRipTracking = async ({
   trId,
   documentsMTs,
+  otherRequirementsAttachments,
   commentary,
   files
 }: IPostAddMTTRipTracking) => {
@@ -107,6 +159,7 @@ export const postAddMTTRipTracking = async ({
 
   const request = {
     documentsMTs,
+    otherRequirementsAttachments,
     commentary
   };
 

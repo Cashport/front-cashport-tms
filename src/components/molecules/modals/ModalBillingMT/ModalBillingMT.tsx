@@ -3,20 +3,23 @@ import { CaretLeft } from "phosphor-react";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./ModalBillingMT.module.scss";
 import { MessageInstance } from "antd/es/message/interface";
-import {
-  emptyForm,
-  emptyVehicle,
-  EvidenceByVehicleForm,
-  IParsedFormValues
-} from "./controllers/formbillingmt.types";
+import { EvidenceByVehicleForm, IParsedFormValues } from "./controllers/formbillingmt.types";
 import { useForm, useWatch } from "react-hook-form";
 import FooterButtons from "../ModalBillingAction/FooterButtons/FooterButtons";
 import { DocumentFields } from "./components/DocumentsFields";
-import { getTripDetails, IGetTripDetails, sendFinalizeTrip } from "@/services/trips/trips";
+import {
+  getOtherRequirementDetails,
+  getTripDetails,
+  IGetTripDetails,
+  addTripDocuments,
+  addOtherRequirementDocuments
+} from "@/services/trips/trips";
+import { IRequestAPI } from "../ModalGenerateActionTO/FinalizeTrip/FinalizeTrip";
 
 type PropsModalBillingMT = {
   idTR: string;
   idTrip: number;
+  idReq: number;
   isOpen: boolean;
   onClose: () => void;
   messageApi: MessageInstance;
@@ -24,26 +27,48 @@ type PropsModalBillingMT = {
 };
 
 export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
-  const { isOpen, onClose, idTrip, messageApi, mode } = props;
+  const { isOpen, onClose, idTrip, idReq, messageApi, mode } = props;
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [vehicleInfo, setVehicleInfo] = useState<IGetTripDetails>(emptyVehicle);
-  const [defaultValues, setDefaultValues] = useState<EvidenceByVehicleForm>(emptyForm);
   const [deletedDocs, setDeletedDocs] = useState<string[]>([]);
 
-  const { control, handleSubmit, setValue, reset, trigger, register } =
-    useForm<EvidenceByVehicleForm>({
-      defaultValues
-    });
+  const { control, handleSubmit, setValue, reset, trigger, register, formState } =
+    useForm<EvidenceByVehicleForm>();
   const formValues = useWatch({ control });
 
-  function createDefaultValues(vehicle: IGetTripDetails): EvidenceByVehicleForm {
+  function createDefaultValuesVehicle(vehicle: IGetTripDetails): EvidenceByVehicleForm {
     return {
-      plate: vehicle.plate_number,
-      idTrip: vehicle.id,
+      description: vehicle.plate_number,
+      entityId: vehicle.id,
+      entityType: "trip",
       documents:
         vehicle.MT?.length > 0
           ? vehicle.MT.map((MT, index) => {
+              return {
+                link: MT.url ?? undefined,
+                file: undefined,
+                docReference: index.toString(),
+                name: MT.name ?? ""
+              };
+            })
+          : [
+              {
+                link: undefined,
+                file: undefined,
+                docReference: "",
+                name: ""
+              }
+            ]
+    };
+  }
+  function createDefaultValuesReq(req: IRequestAPI): EvidenceByVehicleForm {
+    return {
+      description: req.description,
+      entityId: req.id,
+      entityType: "requirement",
+      documents:
+        req.MT?.length > 0
+          ? req.MT.map((MT, index) => {
               return {
                 link: MT.url ?? undefined,
                 file: undefined,
@@ -65,13 +90,19 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   async function getFormInfo() {
     try {
       setIsLoading(true);
-      const response = await getTripDetails(idTrip);
-      console.log("responseTripDetails", response);
-      if (response) {
-        setVehicleInfo({
-          ...response,
-          MT: response.MT
-        });
+      if (props.idTrip) {
+        const response = await getTripDetails(idTrip);
+        if (response) {
+          const defaultValues = createDefaultValuesVehicle(response);
+          reset(defaultValues);
+        }
+      }
+      if (props.idReq) {
+        const response = await getOtherRequirementDetails(idReq);
+        if (response) {
+          const defaultValues = createDefaultValuesReq(response);
+          reset(defaultValues);
+        }
       }
     } catch (error) {
       messageApi?.open({
@@ -86,17 +117,32 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   async function sendForm(form: IParsedFormValues[]) {
     try {
       setIsLoading(true);
-      const response = await sendFinalizeTrip(form, idTrip);
-      messageApi?.open({
-        type: "success",
-        content: (
-          <>
-            <p>Cambios guardados correctamente</p>
-            <p>{response?.message}</p>
-          </>
-        ),
-        duration: 3
-      });
+      if (idTrip) {
+        const response = await addTripDocuments(form, idTrip);
+        messageApi?.open({
+          type: "success",
+          content: (
+            <>
+              <p>Cambios guardados correctamente</p>
+              <p>{response?.message}</p>
+            </>
+          ),
+          duration: 3
+        });
+      }
+      if (idReq) {
+        const response = await addOtherRequirementDocuments(form, idReq);
+        messageApi?.open({
+          type: "success",
+          content: (
+            <>
+              <p>Cambios guardados correctamente</p>
+              <p>{response?.message}</p>
+            </>
+          ),
+          duration: 3
+        });
+      }
     } catch (error: any) {
       messageApi?.open({
         type: "error",
@@ -123,7 +169,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
 
     // 2. Documentos actuales (nuevos o actualizados)
     data.documents.forEach((doc) => {
-      const originalDoc = defaultValues.documents.find((d) => d.docReference === doc.docReference);
+      const originalDoc = formValues?.documents?.find((d) => d.docReference === doc.docReference);
 
       if (doc.file) {
         // Si no existía antes o cambió el archivo
@@ -166,14 +212,6 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
   }, [isInitialized, isOpen]);
 
   useEffect(() => {
-    if (vehicleInfo) {
-      const newDefaultValues = createDefaultValues(vehicleInfo);
-      setDefaultValues(newDefaultValues);
-      reset(newDefaultValues);
-    }
-  }, [vehicleInfo, reset]);
-
-  useEffect(() => {
     const allDocsAreEmpty = !formValues.documents || formValues.documents.length === 0;
 
     if (allDocsAreEmpty) {
@@ -186,10 +224,6 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
       ]);
     }
   }, [formValues, setValue]);
-
-  const isConfirmDisabled = useMemo(() => {
-    return areFilesEqual(formValues.documents ?? [], defaultValues.documents ?? []);
-  }, [formValues.documents, defaultValues.documents]);
 
   const renderTitle = () => {
     return (
@@ -213,7 +247,9 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
             </Flex>
           </Flex>
           <Flex vertical key={`vehicle-1`}>
-            <p className={styles.vehicleName}>Vehículo {formValues.plate}</p>
+            <p className={styles.vehicleName}>
+              {formValues?.entityType == "requirement" ? "" : "Vehículo"} {formValues.description}
+            </p>
             <DocumentFields
               mode={mode}
               control={control}
@@ -233,6 +269,13 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
     );
   };
 
+  const isValid = useMemo(() => {
+    return (
+      formState.isDirty &&
+      formValues.documents?.length !== formValues.documents?.filter((d) => d.file || d.link).length
+    );
+  }, [formState.isDirty, formValues.documents]);
+
   return (
     <Modal
       width={698}
@@ -244,7 +287,7 @@ export default function ModalBillingMT(props: Readonly<PropsModalBillingMT>) {
       footer={
         !isLoading && (
           <FooterButtons
-            isConfirmDisabled={isConfirmDisabled}
+            isConfirmDisabled={isValid}
             titleConfirm={mode === "edit" ? "Guardar cambios" : "Cerrar"}
             onClose={onClose}
             handleOk={mode === "edit" ? handleSubmit(onSubmit) : onClose}
