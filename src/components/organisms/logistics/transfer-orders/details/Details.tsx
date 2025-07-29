@@ -79,6 +79,7 @@ export const TransferOrderDetails = () => {
   });
 
   const [tripId, setTripId] = useState<number | null>(null);
+  const [reqId, setReqId] = useState<number | null>(null);
   const [form, setForm] = useState<IForm>({
     noeltyTypeId: 0,
     quantity: 0,
@@ -146,6 +147,7 @@ export const TransferOrderDetails = () => {
             handleShowDetails={findNoveltyDetail}
             transferJournies={transferJournies || []}
             setTripId={(id: number) => setTripId(id)}
+            setReqId={(id: number) => setReqId(id)}
             handleOpenMTModal={handleOpenMTModal}
             setTripData={setTripData}
             resetNovelty={() => setNovelty(null)}
@@ -443,6 +445,7 @@ export const TransferOrderDetails = () => {
         isOpen={isModalMTVisible}
         onClose={() => setIsModalMTVisible(false)}
         idTR={id as string}
+        idReq={reqId ?? 0}
         idTrip={tripId ?? 0}
         messageApi={messageApi}
       />
