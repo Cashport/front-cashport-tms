@@ -57,7 +57,7 @@ export const CreateDriverView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("1", getTripTypes, {
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("getTripTypesDriver", getTripTypes, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false
