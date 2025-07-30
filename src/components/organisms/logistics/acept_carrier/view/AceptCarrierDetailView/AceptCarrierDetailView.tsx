@@ -8,8 +8,6 @@ import { useEffect, useState } from "react";
 import styles from "./AceptCarrierDetailView.module.scss";
 import {
   getAceptCarrierRequestById,
-  getDriverByCarrierId,
-  getVehiclesByCarrierId,
   postCarrierReject,
   postCarrierRequest,
   putEditCarrierRequest
@@ -23,7 +21,8 @@ import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 import ModalRejectTripInvite from "@/components/molecules/modals/ModalRejectTripInvite/ModalRejectTripInvite";
-import { ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
+import { useVehicles } from "../../../hooks/useVehicles";
+import { useDrivers } from "../../../hooks/useDrivers";
 
 export interface IHandleReject {
   rejection_causes: string;
@@ -50,8 +49,6 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [formMode, setFormMode] = useState<FormMode>(FormMode.VIEW);
   const [vehicleSelected, setVehicleSelected] = useState<number | null>(null);
   const [driversSelected, setDriversSelected] = useState<Array<number | null>>([]);
-  const [vehicles, setVehicles] = useState<ICarrierRequestVehicles[]>([]);
-  const [drivers, setDrivers] = useState<ICarrierRequestDrivers[]>([]);
   const [canBeRejected, setCanBeRejected] = useState<boolean>(false);
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
@@ -59,6 +56,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const router = useRouter();
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
+
+  // swr hooks used for revalidateOnFocus capability
+  const { vehicles: vehiclesData } = useVehicles(carrier?.id_carrier);
+  const { drivers: driversData } = useDrivers(carrier?.id_carrier);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -118,10 +119,6 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         setEntityType(to.entity);
         setFormMode(getFormMode(to?.statusdesc));
         setCanBeRejected(to?.statusdesc !== "Rechazado");
-        const driversResult = await getDriverByCarrierId(to?.id_carrier);
-        setDrivers(driversResult.data);
-        const vehiclesResult = await getVehiclesByCarrierId(to?.id_carrier);
-        setVehicles(vehiclesResult.data);
         setCarrier(to);
         to.carrier_request_material_by_trip?.forEach(async (mat) => {
           mat?.material?.forEach(async (m) => {
@@ -293,8 +290,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       case "asignation":
         return (
           <VehicleAndDriverAsignation
-            drivers={drivers}
-            vehicles={vehicles}
+            drivers={driversData}
+            vehicles={vehiclesData}
             setDrivers={setDriversSelected}
             setVehicle={setVehicleSelected}
             carrier={carrier}
@@ -310,8 +307,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       default:
         return (
           <Confirmation
-            driverSelected={drivers?.filter((driver) => driversSelected.includes(driver.id))}
-            vehicleSelected={vehicles.find((a) => a.id === vehicleSelected)}
+            driverSelected={driversData?.filter((driver) => driversSelected.includes(driver.id))}
+            vehicleSelected={vehiclesData.find((a) => a.id === vehicleSelected)}
             setObservation={setObservation}
             hasFormValuesChanged={hasFormValuesChanged}
             formMode={formMode}

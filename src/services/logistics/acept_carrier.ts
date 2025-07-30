@@ -55,7 +55,7 @@ export const getVehiclesByCarrierId = async (
     );
     return response;
   } catch (error) {
-    console.log("Error get all getAllTransferRequestList: ", error);
+    console.error("Error get all getAllTransferRequestList: ", error);
     return error as any;
   }
 };
@@ -69,7 +69,7 @@ export const getDriverByCarrierId = async (
     );
     return response;
   } catch (error) {
-    console.log("Error get all getAllTransferRequestList: ", error);
+    console.error("Error get all getAllTransferRequestList: ", error);
     return error as any;
   }
 };
