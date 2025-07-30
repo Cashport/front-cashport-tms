@@ -4,7 +4,7 @@ import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDi
 import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { formatMoney } from "@/utils/utils";
+import { formatMoney, formatTimeAgo } from "@/utils/utils";
 import { Radioactive } from "@phosphor-icons/react";
 import "./transferOrderTable.scss";
 import Link from "next/link";
@@ -24,9 +24,9 @@ export const columns = (
     ? {
         title: "Tiempo transcurrido",
         dataIndex: "tiempodeviaje",
-        render: (text: string) => (
-          <Text className="row-text">{calculateMinutesDifference(text)} min</Text>
-        ),
+        render: (text: string) => {
+          return <Text className="row-text">{formatTimeAgo(text)} </Text>;
+        },
         sorter: (a: any, b: any) =>
           calculateMinutesDifference(a.tiempodeviaje) - calculateMinutesDifference(b.tiempodeviaje),
         showSorterTooltip: false

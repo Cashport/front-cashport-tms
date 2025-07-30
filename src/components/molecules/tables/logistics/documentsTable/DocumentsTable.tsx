@@ -58,18 +58,12 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
     {
       title: "Nombre",
       dataIndex: "name",
-      key: "name",
-      ellipsis: {
-        showTitle: false
-      }
+      key: "name"
     },
     {
       title: "Descripción",
       dataIndex: "description",
-      key: "description",
-      ellipsis: {
-        showTitle: false
-      }
+      key: "description"
     },
     {
       title: "Fecha cargue",
@@ -127,7 +121,6 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
     <>
       <Table
         className="documentsTable"
-        scroll={{ x: "max-content" }}
         columns={tableColumns}
         pagination={false}
         dataSource={currentFiles?.map((data) => ({ ...data, key: data.id }))}
