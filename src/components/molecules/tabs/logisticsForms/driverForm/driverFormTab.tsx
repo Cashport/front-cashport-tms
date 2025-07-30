@@ -71,7 +71,8 @@ export const DriverFormTab = ({
   vehiclesTypesList,
   isLoadingSubmit,
   tripTypes,
-  onAuditDriver = async () => {}
+  onAuditDriver = async () => {},
+  mutateData = () => {}
 }: DriverFormTabProps) => {
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
@@ -195,6 +196,7 @@ export const DriverFormTab = ({
     try {
       await auditWithCashportAI(subjectId);
       message.success("Auditoría enviada con éxito a CashportAI.");
+      mutateData();
     } catch (error) {
       message.error("Error al enviar auditoría.");
       console.error("Audit error:", error);

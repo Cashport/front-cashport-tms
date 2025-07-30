@@ -114,6 +114,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
         onDesactivateVehicle={() => handlechangeStatus(0)}
         onAuditVehicle={() => handlechangeStatus(2)}
         features={features || []}
+        mutateData={mutate}
       />
     </Skeleton>
   );
