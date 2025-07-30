@@ -592,7 +592,7 @@ export const DriverFormTab = ({
                   <Row style={{ marginTop: 16, marginBottom: 8 }}>
                     <Col span={24}>
                       <Flex justify="end">
-                        <Button className="iaButton" onClick={handleAudit}>
+                        <Button className="iaButton" onClick={handleAudit} loading={loadingRequest}>
                           <Sparkle size={14} color="#5b21b6" weight="fill" />
                           <span className="textNormal">
                             Auditar con{" "}
