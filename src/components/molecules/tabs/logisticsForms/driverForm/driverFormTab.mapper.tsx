@@ -41,6 +41,7 @@ export interface DriverFormTabProps {
   vehiclesTypesList: VehicleType[];
   isLoadingSubmit: boolean;
   tripTypes: ITripType[];
+  mutateData?: () => void;
 }
 
 export type DriverData = IAPIDriver & { licence?: string } & { documents?: ICertificates[] };

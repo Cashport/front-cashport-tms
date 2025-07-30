@@ -68,7 +68,8 @@ export const VehicleFormTab = ({
   features = [],
   isLoading,
   // eslint-disable-next-line no-unused-vars
-  onAuditVehicle = () => {}
+  onAuditVehicle = () => {},
+  mutateData = () => {}
 }: VehicleFormTabProps) => {
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
@@ -161,6 +162,8 @@ export const VehicleFormTab = ({
     try {
       await auditWithCashportAI(subjectId);
       message.success("Auditoría enviada con éxito a CashportAI.");
+      // TO DO: Mutate to refresh the data after audit
+      mutateData();
     } catch (error) {
       message.error("Error al enviar auditoría.");
       console.error("Audit error:", error);
