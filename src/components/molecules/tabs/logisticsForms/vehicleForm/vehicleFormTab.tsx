@@ -144,10 +144,11 @@ export const VehicleFormTab = ({
         id: tripType.value
       }))
     };
-    const formImages = data.images?.map((file) => ({
-      file,
-      docReference: file.name
-    })) || [];
+    const formImages =
+      data.images?.map((file) => ({
+        file,
+        docReference: file.name
+      })) || [];
 
     _onSubmitVehicle(vehicleData, uploadedFiles, formImages, setImageError, onSubmitForm);
     setImages(Array(5).fill({ file: undefined }));
@@ -509,7 +510,7 @@ export const VehicleFormTab = ({
                   <Row style={{ marginTop: 16, marginBottom: 8 }}>
                     <Col span={24}>
                       <Flex justify="end">
-                        <Button className="iaButton" onClick={handleAudit}>
+                        <Button className="iaButton" onClick={handleAudit} loading={loadingRequest}>
                           <Sparkle size={14} color="#5b21b6" weight="fill" />
                           <span className="textNormal">
                             Auditar con{" "}
