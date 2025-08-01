@@ -36,6 +36,7 @@ export interface VehicleFormTabProps {
   vehiclesTypesList: VehicleType[];
   features: IFeature[];
   isLoading: boolean;
+  mutateData?: () => void;
 }
 export interface VehicleImage {
   id: number;

@@ -46,3 +46,17 @@ export const createDocumentComment = async (comment: string, documentSubjectId: 
     throw error;
   }
 };
+export const auditWithCashportAI = async (
+  subjectId: number
+): Promise<any> => {
+  try {
+    const response = await API.post(
+      `${config.API_AUDIT_TAB_AI}`,
+      { subject_id: subjectId }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error auditWithCashportAI:", error);
+    throw error;
+  }
+};

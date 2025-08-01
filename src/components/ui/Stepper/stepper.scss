@@ -1,0 +1,86 @@
+@import "@/styles/variables.scss";
+
+.stepItem {
+    display: flex;
+    column-gap: 10px;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    padding-left: 5px;
+    width: 100%;
+    // lets make a margin left according to stepLine and gap
+    margin-left: -23px;
+
+    &:last-child {
+        min-height: auto;
+        padding-bottom: 0;
+    }
+
+    .stepCircleContainer {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+
+        .stepCircle {
+            z-index: 2;
+            height: fit-content;
+            margin: -10px;
+            background-color: $white;
+
+            &.-top {
+                align-self: flex-start;
+                margin-top: 1px;
+            }
+            &.-bottom {
+                align-self: flex-end;
+            }
+        }
+
+        .stepLine {
+            position: absolute;
+            width: 1px;
+            height: 100%;
+            border-left: 1px dashed $black;
+            margin-left: 1px;
+
+            &.first {
+                top: 50%;
+                height: 50%;
+            }
+
+            &.last {
+                height: 50%;
+                bottom: 50%;
+            }
+
+            // Estilos cuando tiene la clase -top
+            &.-top {
+                &.first {
+                    top: 5px;
+                    height: 100%;
+                }
+
+                &.last {
+                    top: 5px;
+                    height: 10px;
+                    bottom: auto;
+                }
+            }
+        }
+    }
+
+    .stepLabel {
+        display: flex;
+        margin-top: -7px;
+        width: 100%;
+    }
+}
+
+.stepper-divider {
+    height: 1.5rem;
+    border-left: 1px dashed $black;
+    margin: 1px 0;
+    margin-left: -13px;
+}

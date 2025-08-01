@@ -61,7 +61,7 @@ export const ProviderInfoView = ({ isEdit = false, idParam, statusFormProp = "re
     }
   };
 
-  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("1", getTripTypes, {
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("getTripTypesProvider", getTripTypes, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false

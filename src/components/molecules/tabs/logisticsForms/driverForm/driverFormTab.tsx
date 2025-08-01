@@ -42,6 +42,7 @@ import ModalGenerateActionProviders from "@/components/organisms/logistics/prove
 import { ModalAddRequirement } from "@/components/organisms/logistics/proveedores/ModalAddRequirement/ModalAddRequirement";
 import ModalAuditRequirements from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { auditWithCashportAI } from "@/services/logistics/documents/documents";
 
 //types
 import {
@@ -70,7 +71,8 @@ export const DriverFormTab = ({
   vehiclesTypesList,
   isLoadingSubmit,
   tripTypes,
-  onAuditDriver = async () => {}
+  onAuditDriver = async () => {},
+  mutateData = () => {}
 }: DriverFormTabProps) => {
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
@@ -186,6 +188,22 @@ export const DriverFormTab = ({
     setIsModalOpen({
       selected: 0
     });
+
+  const handleAudit = async () => {
+    setLoadingRequest(true);
+    const subjectId = data?.subject_id ?? 0;
+
+    try {
+      await auditWithCashportAI(subjectId);
+      message.success("Auditoría enviada con éxito a CashportAI.");
+      mutateData();
+    } catch (error) {
+      message.error("Error al enviar auditoría.");
+      console.error("Audit error:", error);
+    }
+
+    setLoadingRequest(false);
+  };
 
   const handleOpenModal = (modalNumber: number) =>
     setIsModalOpen({
@@ -570,6 +588,24 @@ export const DriverFormTab = ({
                       </span>
                     </span>
                   </Button>
+                )}
+
+                {statusForm !== "create" && (
+                  <Row style={{ marginTop: 16, marginBottom: 8 }}>
+                    <Col span={24}>
+                      <Flex justify="end">
+                        <Button className="iaButton" onClick={handleAudit} loading={loadingRequest}>
+                          <Sparkle size={14} color="#5b21b6" weight="fill" />
+                          <span className="textNormal">
+                            Auditar con{" "}
+                            <span className="cashportIATextGradient" style={{ fontWeight: 500 }}>
+                              CashportAI
+                            </span>
+                          </span>
+                        </Button>
+                      </Flex>
+                    </Col>
+                  </Row>
                 )}
               </Flex>
             </Col>

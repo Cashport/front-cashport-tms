@@ -1,8 +1,8 @@
 import React from "react";
-import { Control, Controller, useFieldArray } from "react-hook-form";
+import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
-import { DotOutline, Plus, Trash } from "@phosphor-icons/react";
+import { DotOutline, Trash } from "@phosphor-icons/react";
 
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 import { ISelectOption } from "../SchedulingView";
@@ -12,6 +12,7 @@ import "./selectLocationAndTime.scss";
 interface SelectLocationAndTimeProps {
   selectedType: string;
   control: Control<IFormCreateOrder, any>;
+  setValue: UseFormSetValue<IFormCreateOrder>;
   locationOptions?: ISelectOption[];
   // eslint-disable-next-line no-unused-vars
   onChangeOrigin: (value: number) => void;
@@ -22,11 +23,17 @@ interface SelectLocationAndTimeProps {
 const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
   selectedType,
   control,
+  setValue,
   locationOptions,
   onChangeOrigin,
   onChangeDestination
 }) => {
   const { fields, remove, insert } = useFieldArray({
+    control,
+    name: "TripDetails"
+  });
+
+  const tripDetails = useWatch({
     control,
     name: "TripDetails"
   });
@@ -88,22 +95,37 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         style={{
                           gridColumn: showRaising ? "1 / 8" : "1 / -1"
                         }}
+                        value={
+                          field.value && tripDetails[i]
+                            ? {
+                                value: field.value,
+                                label: tripDetails[i].placeName || "Seleccionar ubicación"
+                              }
+                            : undefined
+                        }
                         filterOption={(input: string, option?: any) => {
                           return (
                             option?.label?.toLowerCase().includes(input.toLowerCase()) ?? false
                           );
                         }}
-                        onChange={(value) => {
-                          field.onChange(value);
+                        onChange={(
+                          value: {
+                            value: number;
+                            label: string;
+                          } | null
+                        ) => {
+                          setValue(`TripDetails.${i}.placeId`, value?.value);
+                          setValue(`TripDetails.${i}.placeName`, value?.label);
 
                           if (i === 0) {
-                            onChangeOrigin(value);
+                            onChangeOrigin(value?.value || 0);
                           }
 
                           if (i === fields.length - 1) {
-                            onChangeDestination(value);
+                            onChangeDestination(value?.value || 0);
                           }
                         }}
+                        labelInValue
                       />
                     )}
                   />

@@ -32,6 +32,23 @@
         border-top: 1px solid $dark-gray;
     }
 
+    // material styles section
+    .inputNumberMaterial {
+        text-align: center;
+        height: 36px;
+        max-width: 100px;
+        min-width: 84px;
+
+        .ant-input-number-input-wrap,
+        .ant-input-number-input {
+            height: 100%;
+            text-align: center;
+        }
+    }
+    .restrictionColumn {
+        padding-right: 0 !important;
+    }
+
     // suggested vehicle styles section
     .usedPercentage {
         padding: 4px 8px;

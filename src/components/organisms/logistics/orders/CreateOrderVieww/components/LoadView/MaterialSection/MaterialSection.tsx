@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { Select, Table, Button, Popconfirm, Flex, Checkbox, TableProps } from "antd";
+import { Select, Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
 import { getAllMaterials } from "@/services/logistics/materials";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import { IMaterialStepOne } from "@/types/logistics/schema";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
@@ -14,6 +15,26 @@ interface IMaterialSectionProps {
 
 const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
   const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
+
+  const width = useScreenWidth();
+
+  const matchiWidthNameColumn = React.useMemo(() => {
+    if (!width) return undefined;
+    switch (true) {
+      case width < 1350:
+        return "200px";
+      case width >= 1350 && width < 1400:
+        return "300px";
+      case width >= 1400 && width < 1480:
+        return "350px";
+      case width >= 1480 && width < 1600:
+        return "400px";
+      case width > 1600:
+        return "100%";
+      default:
+        return undefined;
+    }
+  }, [width]);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -104,8 +125,165 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                   });
                 }
               }}
-              style={{ width: "100%" }}
-              className="inputSelect"
+              className="inputSelect -ellipsis"
+              style={{ width: matchiWidthNameColumn }}
+            />
+          )}
+        />
+      ),
+      width: matchiWidthNameColumn
+    },
+    {
+      title: "Peso",
+      dataIndex: "kg_weight",
+      key: "kg_weight",
+      render: (_: any, __: any, index: number) => (
+        <Controller
+          control={control}
+          name={`material.${index}.kg_weight`}
+          render={({ field: { value, onChange, ...field } }) => (
+            <InputNumber
+              {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
+              min={0}
+              step={0.1}
+              placeholder="1"
+              className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} Kg`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
+              precision={2}
+            />
+          )}
+        />
+      )
+    },
+    {
+      title: "Alto",
+      dataIndex: "mt_height",
+      key: "mt_height",
+      render: (_: any, __: any, index: number) => (
+        <Controller
+          control={control}
+          name={`material.${index}.mt_height`}
+          render={({ field: { value, onChange, ...field } }) => (
+            <InputNumber
+              {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
+              min={0}
+              step={0.01}
+              placeholder="0"
+              className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} m`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
+              precision={2}
+            />
+          )}
+        />
+      )
+    },
+    {
+      title: "Ancho",
+      dataIndex: "mt_width",
+      key: "mt_width",
+      render: (_: any, __: any, index: number) => (
+        <Controller
+          control={control}
+          name={`material.${index}.mt_width`}
+          render={({ field: { value, onChange, ...field } }) => (
+            <InputNumber
+              {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
+              min={0}
+              step={0.01}
+              placeholder="0"
+              className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} m`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
+              precision={2}
+            />
+          )}
+        />
+      )
+    },
+    {
+      title: "Largo",
+      dataIndex: "mt_length",
+      key: "mt_length",
+      render: (_: any, __: any, index: number) => (
+        <Controller
+          control={control}
+          name={`material.${index}.mt_length`}
+          render={({ field: { value, onChange, ...field } }) => (
+            <InputNumber
+              {...field}
+              value={value}
+              onChange={(val) => {
+                // Aseguramos que siempre sea algo valido
+                const numericValue = val === null || val === undefined ? 0 : Number(val);
+                onChange(numericValue);
+              }}
+              min={0}
+              step={0.01}
+              placeholder="0"
+              className="inputNumberMaterial"
+              formatter={(value?: number | string) => {
+                if (value === null || value === undefined || value === "") {
+                  return "--";
+                }
+                return `${value} m`;
+              }}
+              parser={(value) => {
+                // Extrae solo el número del string formateado
+                if (!value) return 0;
+                const parsed = value.replace(/[^\d.]/g, "");
+                return parsed === "" ? 0 : Number(parsed);
+              }}
+              precision={2}
             />
           )}
         />
@@ -115,38 +293,24 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
       title: "Volumen",
       dataIndex: "m3_volume",
       key: "m3_volume",
-      render: (_: any, __: any, index: number) => (fields[index]?.m3_volume ?? "-") + " m3"
-    },
-    {
-      title: "Alto",
-      dataIndex: "mt_height",
-      key: "mt_height",
-      render: (_: any, __: any, index: number) => (fields[index]?.mt_height ?? "-") + " m"
-    },
-    {
-      title: "Ancho",
-      dataIndex: "mt_width",
-      key: "mt_width",
-      render: (_: any, __: any, index: number) => (fields[index]?.mt_width ?? "-") + " m"
-    },
-    {
-      title: "Largo",
-      dataIndex: "mt_length",
-      key: "mt_length",
-      render: (_: any, __: any, index: number) => (fields[index]?.mt_length ?? "-") + " m"
-    },
-    {
-      title: "Peso",
-      dataIndex: "kg_weight",
-      key: "kg_weight",
-      render: (_: any, __: any, index: number) => (fields[index]?.kg_weight ?? "-") + " kg"
+      render: (volume) => <span>{volume ? `${volume} m³` : "--"}</span>
     },
     {
       title: "S. Controladas",
-      dataIndex: "check",
-      key: "check",
-      render: () => <Checkbox />,
-      align: "center"
+      dataIndex: "restriction",
+      key: "restriction",
+      className: "restrictionColumn",
+      render: (_: any, __: any, index: number) => (
+        <Controller
+          control={control}
+          name={`material.${index}.restriction`}
+          render={({ field }) => (
+            <Checkbox checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />
+          )}
+        />
+      ),
+      align: "center",
+      width: 160
     },
     {
       title: "",
@@ -156,7 +320,8 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
           <Button type="link" danger icon={<Trash size={20} />} />
         </Popconfirm>
       ),
-      width: 60
+      width: 40,
+      className: "actionColumn"
     }
   ];
 
