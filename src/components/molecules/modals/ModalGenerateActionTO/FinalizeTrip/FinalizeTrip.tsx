@@ -20,15 +20,21 @@ interface FinalizeTrip {
   setNav: Dispatch<SetStateAction<NavEnum>>;
 }
 
+interface IMT {
+  id: number;
+  name: string;
+  url: string;
+}
+
 export interface IVehicleAPI {
   id: number;
   plate_number: string;
-  MT: string[];
+  MT: IMT[];
 }
 export interface IRequestAPI {
   id: number;
   description: string;
-  MT: string[];
+  MT: IMT[];
 }
 export interface ICarrierAPI {
   carrier_id: number;
@@ -71,7 +77,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
           v.MT?.length > 0
             ? v.MT.map((MTlink) => {
                 return {
-                  link: MTlink ?? undefined,
+                  link: MTlink.url ?? undefined,
                   file: undefined,
                   docReference: carrierIndex
                 };
@@ -91,7 +97,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
           r.MT?.length > 0
             ? r.MT?.map((MTlink) => {
                 return {
-                  link: MTlink ?? undefined,
+                  link: MTlink.url ?? undefined,
                   file: undefined,
                   docReference: carrierIndex
                 };
