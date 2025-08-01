@@ -37,6 +37,26 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
     loadingRemove?: boolean;
   }>();
   const handleUpload = async (file: File) => {
+    // Validar tipo de archivo
+    const isValidType = ["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(
+      file.type
+    );
+
+    if (!isValidType) {
+      message.error(
+        "Solo recibimos archivos en formato PDF e imagen (.jpg, .jpeg, .png). Por favor, carga nuevamente un archivo válido."
+      );
+      return false;
+    }
+
+    // Validar tamaño (30MB)
+    const isValidSize = file.size / 1024 / 1024 < 30;
+
+    if (!isValidSize) {
+      message.error("El archivo debe ser menor a 30MB");
+      return false;
+    }
+
     try {
       await uploadDocument(subjectId, documentId, file);
       message.success("Documento subido exitosamente");
