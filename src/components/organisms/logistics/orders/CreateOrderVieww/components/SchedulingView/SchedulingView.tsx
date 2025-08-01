@@ -10,6 +10,7 @@ import axios, { AxiosResponse } from "axios";
 // services and utils
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
 import { getAllLocations } from "@/services/logistics/locations";
+import { getFrequentRoute } from "@/services/logistics/transfer-orders";
 
 // mapbox
 import mapboxgl from "mapbox-gl";
@@ -22,7 +23,12 @@ import SelectableIconButtons, {
 } from "@/components/atoms/SelectableIconButtons/SelectableIconButtons";
 import SummaryCard from "./SummaryCard/SummaryCard";
 
-import { IDirectionsMapboxResponse, IGeometry, ISelectLocation } from "@/types/logistics/schema";
+import {
+  IDirectionsMapboxResponse,
+  IGeometry,
+  IGetFrequentRoutes,
+  ISelectLocation
+} from "@/types/logistics/schema";
 
 import { IFormCreateOrder } from "../../CreateOrderVieww";
 
@@ -170,7 +176,6 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
 
   // Ejecutar `calcRouteDirection` solo cuando `origin` o `destination` cambien
   useEffect(() => {
-    console.log("Origin:", origin.current, "Destination:", destination.current);
     if (origin.current.length > 0 && destination.current.length > 0) {
       calcRouteDirection();
     }
@@ -257,9 +262,57 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
     }
   };
 
+  // Función para usar una ruta frecuente como ruta principal
+  const applyFrequentRoute = (route: IGetFrequentRoutes) => {
+    if (!route.jsonRoute || route.jsonRoute.length === 0) return;
+
+    const selectedRoute = route.jsonRoute[0]; // Usar la primera ruta del array
+
+    // Actualizar el estado de tripInfoMap con los datos de la ruta frecuente
+    setTripInfoMap({
+      distance: selectedRoute.distance,
+      duration: selectedRoute.duration,
+      geometry: selectedRoute.geometry
+    });
+
+    // Actualizar el formulario con la geometría de la ruta frecuente
+    setValue("geometry", route.jsonRoute);
+  };
+
+  // Función para obtener y procesar rutas frecuentes
+  const fetchAndProcessFrequentRoutes = async (originId: number, destinationId: number) => {
+    try {
+      const routes = await getFrequentRoute(originId, destinationId);
+      // Si hay rutas frecuentes, usar la primera automáticamente
+      if (routes) {
+        applyFrequentRoute(routes);
+        return true; // Indica que se usó una ruta frecuente
+      }
+
+      return false; // No hay rutas frecuentes
+    } catch (error) {
+      console.error("Error obteniendo rutas frecuentes:", error);
+
+      return false;
+    }
+  };
+
   // calculate direction
   const calcRouteDirection = async () => {
     if (origin.current.length == 0 || destination.current.length == 0) return;
+
+    if (originLocation && destinationLocation) {
+      const hasFrequentRoute = await fetchAndProcessFrequentRoutes(
+        originLocation.id,
+        destinationLocation.id
+      );
+
+      // Si encontró rutas frecuentes, no hacer la petición a Mapbox
+      if (hasFrequentRoute) {
+        console.info("Usando ruta frecuente, omitiendo petición a Mapbox");
+        return;
+      }
+    }
 
     try {
       const response: AxiosResponse<IDirectionsMapboxResponse> = await axios.get(
@@ -268,9 +321,9 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
 
       const routes = response.data.routes;
       //   TO DO: revisar si es necesario limpiar las rutas
-      //   if (routes != undefined && routes.length > 0) {
-      //     routes[0].legs = [];
-      //   }
+      if (routes != undefined && routes.length > 0) {
+        routes[0].legs = [];
+      }
 
       // hacemos el set pero dentro del valor geometry en el form
       setValue("geometry", routes);
@@ -317,6 +370,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
           }))}
           onChangeOrigin={onChangeOrigin}
           onChangeDestination={onChangeDestination}
+          setValue={setValue}
         />
 
         <SummaryCard

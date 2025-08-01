@@ -1,10 +1,45 @@
-import { API, getIdToken } from "@/utils/api/api";
-import config from "@/config";
-import { IDocumentCompleted, IGetFrequentRoutes, ITransferOrder } from "@/types/logistics/schema";
+import { API } from "@/utils/api/api";
+import {
+  IAddTransferOrder,
+  IDocumentCompleted,
+  IGetAllPeople,
+  ITransferOrder,
+  IGetFrequentRoutes
+} from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export const addTransferOrder = async (
   data: ITransferOrder,
+  files: IDocumentCompleted[]
+): Promise<any> => {
+  try {
+    const form = new FormData();
+    const body: any = data;
+    body.files = files;
+    files.forEach((file) => {
+      if (file.file) form.append(`file-for-${file.id_document_type}`, file.file);
+    });
+    form.append("body", JSON.stringify({ ...body }));
+    const response = await API.post(`/transfer-order/create`, form, {
+      headers: {
+        "content-type": "multipart/form-data",
+        Accept: "application/json, text/plain, */*"
+      }
+    });
+    if (response?.data) return response.data;
+  } catch (error: any) {
+    console.log("Error post transfer-order/: ", error);
+    let msg = "";
+    if (Array.isArray(error?.response?.data?.data))
+      msg = error?.response?.data?.data.map((item: any) => item?.msg || "").join(" - ");
+    throw new Error(
+      msg || error?.response?.data?.message || "Ocurrio un error al crear la operacion"
+    ) as any;
+  }
+};
+
+export const addTransferOrderNew = async (
+  data: IAddTransferOrder,
   files: IDocumentCompleted[]
 ): Promise<any> => {
   try {
@@ -74,9 +109,9 @@ export const getAllUserSearch = async (term: string): Promise<GenericResponse> =
   }
 };
 
-export const getAllUsers = async (): Promise<GenericResponse> => {
+export const getAllUsers = async (): Promise<GenericResponse<IGetAllPeople[]>> => {
   try {
-    const response: GenericResponse = await API.get(`/transfer-order/all/users`);
+    const response: GenericResponse<IGetAllPeople[]> = await API.get(`/transfer-order/all/users`);
     return response;
   } catch (error) {
     console.log("Error get all getAllUsers: ", error);

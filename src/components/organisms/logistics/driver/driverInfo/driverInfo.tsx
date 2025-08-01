@@ -43,7 +43,7 @@ export const DriverInfoView = ({ params }: Props) => {
     return getDriverById(params.driverId);
   };
 
-  const { data, isLoading, isValidating } = useSWR(params.driverId, fetcher, {
+  const { data, isLoading, isValidating, mutate } = useSWR(params.driverId, fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -128,6 +128,7 @@ export const DriverInfoView = ({ params }: Props) => {
         vehiclesTypesList={vehiclesTypesData ?? []}
         isLoadingSubmit={isLoadingSubmit}
         tripTypes={tripTypes ?? []}
+        mutateData={mutate}
       />
     </Skeleton>
   );

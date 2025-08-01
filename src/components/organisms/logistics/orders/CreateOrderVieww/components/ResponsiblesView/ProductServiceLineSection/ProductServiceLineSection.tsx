@@ -224,7 +224,7 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
   };
 
   return (
-    <Flex vertical gap={"2rem"} className="productServiceLineSection">
+    <Flex vertical className="productServiceLineSection">
       {pslFields.map((pslField, pslIndex) => {
         const costCenters = watchedPSL?.[pslIndex]?.costCenters || [];
         const pslPercentage = watchedPSL?.[pslIndex]?.percentagePSL || 0;
@@ -234,7 +234,7 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
             {/* Remove PSL Button */}
             {pslIndex > 0 && (
               <button className="removePSLButton" onClick={() => handleRemovePSL(pslIndex)}>
-                <X size={20} />
+                <X size={16} />
               </button>
             )}
 
@@ -439,6 +439,39 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                       />
                     </div>
 
+                    {ccIndex === 0 && (
+                      <Button
+                        className="plusButton"
+                        icon={<Plus size={24} />}
+                        onClick={() => {
+                          const updated = [
+                            ...costCenters,
+                            { selectedCostCenter: undefined, percentage: 0 }
+                          ];
+                          setValue(
+                            `productServiceLine.productServiceLine.${pslIndex}.costCenters`,
+                            updated
+                          );
+
+                          // Si hay un límite de PSL y los CCs actuales ya lo ocupan todo, redistribuir
+                          const currentTotal = costCenters.reduce(
+                            (sum, cc) => sum + (cc.percentage || 0),
+                            0
+                          );
+                          if (currentTotal >= pslPercentage && pslPercentage > 0) {
+                            // Distribuir equitativamente el porcentaje del PSL entre todos los CCs
+                            const equalPercentage = Math.floor(pslPercentage / updated.length);
+                            updated.forEach((_, idx) => {
+                              setValue(
+                                `productServiceLine.productServiceLine.${pslIndex}.costCenters.${idx}.percentage`,
+                                equalPercentage
+                              );
+                            });
+                          }
+                        }}
+                      />
+                    )}
+
                     {ccIndex > 0 && (
                       <Button
                         className="removeButton"
@@ -487,46 +520,18 @@ const ProductServiceLineSection: React.FC<ProductServiceLineSectionProps> = ({
                   </div>
                 );
               })}
-
-              <Button
-                className="addButton"
-                onClick={() => {
-                  const updated = [
-                    ...costCenters,
-                    { selectedCostCenter: undefined, percentage: 0 }
-                  ];
-                  setValue(
-                    `productServiceLine.productServiceLine.${pslIndex}.costCenters`,
-                    updated
-                  );
-
-                  // Si hay un límite de PSL y los CCs actuales ya lo ocupan todo, redistribuir
-                  const currentTotal = costCenters.reduce(
-                    (sum, cc) => sum + (cc.percentage || 0),
-                    0
-                  );
-                  if (currentTotal >= pslPercentage && pslPercentage > 0) {
-                    // Distribuir equitativamente el porcentaje del PSL entre todos los CCs
-                    const equalPercentage = Math.floor(pslPercentage / updated.length);
-                    updated.forEach((_, idx) => {
-                      setValue(
-                        `productServiceLine.productServiceLine.${pslIndex}.costCenters.${idx}.percentage`,
-                        equalPercentage
-                      );
-                    });
-                  }
-                }}
-              >
-                Agregar
-                <Plus size={16} />
-              </Button>
             </div>
+
+            {pslIndex !== pslFields.length - 1 && (
+              <div className="productServiceLineSection__divider" />
+            )}
           </div>
         );
       })}
 
       <Button
         className="addButton"
+        style={{ marginBottom: 0 }}
         onClick={() =>
           appendPSL({
             selectedPSL: undefined,
