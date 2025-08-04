@@ -205,8 +205,7 @@ export const columns = (
         row
       ) => {
         const hoursUntilTrip = dayjs(row.fechas.origin).diff(dayjs(), "hour");
-        const is24HoursOrLessToTrip =
-          (hoursUntilTrip >= 0 && hoursUntilTrip <= 24) || hoursUntilTrip < 0;
+        const is24HoursOrLessToTrip = hoursUntilTrip >= 0 && hoursUntilTrip <= 24;
 
         return (
           <div className="btnContainer">
