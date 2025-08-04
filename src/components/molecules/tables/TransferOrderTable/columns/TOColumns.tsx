@@ -5,7 +5,7 @@ import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { formatMoney, formatTimeAgo } from "@/utils/utils";
-import { Radioactive } from "@phosphor-icons/react";
+import { Radioactive, WarningCircle } from "@phosphor-icons/react";
 import "./transferOrderTable.scss";
 import Link from "next/link";
 
@@ -195,36 +195,57 @@ export const columns = (
     {
       title: "",
       dataIndex: "validator",
-      render: (text: {
-        tr: string;
-        ismaterialsproblem: boolean;
-        ispeopleproblem: boolean;
-        isRejected: boolean;
-      }) => (
-        <div className="btnContainer">
-          {text.isRejected && (
-            <Button
-              className="btn"
-              type="text"
-              size="middle"
-              icon={
-                <Tooltip title="Esta orden tiene una factura rechazada">
-                  <WarningOctagon size={24} color="red" />
-                </Tooltip>
-              }
-            />
-          )}
-          {!!text.ismaterialsproblem && (
-            <Button className="btn" type="text" size="middle" icon={<Radioactive size={24} />} />
-          )}
-          {!!text.ismaterialsproblem && (
-            <Button className="btn" type="text" size="middle" icon={<Warning size={24} />} />
-          )}
-          <Link href={`${redirect ? redirect : "/logistics/transfer-orders/details"}/${text.tr}`}>
-            <Button className="btn" type="text" size="middle" icon={<Eye size={24} />} />
-          </Link>
-        </div>
-      )
+      render: (
+        text: {
+          tr: string;
+          ismaterialsproblem: boolean;
+          ispeopleproblem: boolean;
+          isRejected: boolean;
+        },
+        row
+      ) => {
+        const hoursUntilTrip = dayjs(row.fechas.origin).diff(dayjs(), "hour");
+        const is24HoursOrLessToTrip =
+          (hoursUntilTrip >= 0 && hoursUntilTrip <= 24) || hoursUntilTrip < 0;
+
+        return (
+          <div className="btnContainer">
+            {text.isRejected && (
+              <Button
+                className="btn"
+                type="text"
+                size="middle"
+                icon={
+                  <Tooltip title="Esta orden tiene una factura rechazada">
+                    <WarningOctagon size={24} color="red" />
+                  </Tooltip>
+                }
+              />
+            )}
+            {!!text.ismaterialsproblem && (
+              <Button className="btn" type="text" size="middle" icon={<Radioactive size={24} />} />
+            )}
+            {!!text.ismaterialsproblem && (
+              <Button className="btn" type="text" size="middle" icon={<Warning size={24} />} />
+            )}
+
+            {is24HoursOrLessToTrip && (
+              <Tooltip title="Este viaje inicia en menos de 24 horas">
+                <Button
+                  className="btn"
+                  type="text"
+                  size="middle"
+                  icon={<WarningCircle size={24} color="#FF4D4F" />}
+                />
+              </Tooltip>
+            )}
+
+            <Link href={`${redirect ? redirect : "/logistics/transfer-orders/details"}/${text.tr}`}>
+              <Button className="btn" type="text" size="middle" icon={<Eye size={24} />} />
+            </Link>
+          </div>
+        );
+      }
     }
   ];
 };
