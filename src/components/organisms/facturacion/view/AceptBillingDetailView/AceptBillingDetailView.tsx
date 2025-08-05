@@ -33,6 +33,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
   const [openDrawer, setOpenDrawer] = useState<boolean>(false);
   const [isModalMTVisible, setIsModalMTVisible] = useState(false);
   const [tripId, setTripId] = useState<number | null>(null);
+  const [reqId, setReqId] = useState<number | null>(null);
 
   const canMakeAnAction = billingStatus
     ? billingStatus === BillingStatusEnum.PorAceptar ||
@@ -205,10 +206,27 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
     billingData?.journeys.flatMap((journey: IJourney) => {
       return [
         <TitleComponent key={`title-${journey.id}`} id={journey.id} journey={journey} />,
-        ...journey.requirements.flatMap((req, index) => {
-          return <RequirementHeader key={`req-${req.id}`} requirement={req} />;
+        ...journey.requirements.flatMap((req) => {
+          return (
+            <>
+              <RequirementHeader key={`req-${req.id}`} requirement={req} />
+              <Flex vertical justify="flex-end" align="flex-end">
+                <Button
+                  type="text"
+                  onClick={() => {
+                    handleOpenMTModal();
+                    setTripId(0);
+                    setReqId(req.id);
+                  }}
+                >
+                  <Receipt size={20} />
+                  <p>Ver Soportes</p>
+                </Button>
+              </Flex>
+            </>
+          );
         }),
-        ...journey.trips.flatMap((trip, index) => {
+        ...journey.trips.flatMap((trip) => {
           const allIncidents =
             trip.incidents.length > 0 ? trip.incidents.map(convertIncidentToNovelty) : [];
 
@@ -229,6 +247,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
                   onClick={() => {
                     handleOpenMTModal();
                     setTripId(trip.id);
+                    setReqId(0);
                   }}
                 >
                   <Receipt size={20} />
@@ -339,6 +358,7 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         isOpen={isModalMTVisible}
         onClose={() => setIsModalMTVisible(false)}
         idTR={billingData?.billing?.idTransferRequest.toString() ?? "0"}
+        idReq={reqId ?? 0}
         idTrip={tripId ?? 0}
         messageApi={messageApi}
       />

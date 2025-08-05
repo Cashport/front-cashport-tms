@@ -26,6 +26,7 @@ interface INoveltyProps {
   }) => void;
   resetNovelty: () => void;
   handleOpenMTModal: () => void;
+  setReqId: (id: number) => void;
 }
 
 export const Novelty: FC<INoveltyProps> = ({
@@ -36,7 +37,8 @@ export const Novelty: FC<INoveltyProps> = ({
   setTripId,
   setTripData,
   resetNovelty,
-  handleOpenMTModal
+  handleOpenMTModal,
+  setReqId
 }) => {
   const [key, setKey] = useState<number | null>(null);
 
@@ -57,6 +59,24 @@ export const Novelty: FC<INoveltyProps> = ({
                     {journey.requirements?.map((req) => (
                       <div key={req.id}>
                         <RequirementHeader key={req.id} isHeader requirement={req} />
+                        <Flex gap={8} justify="flex-end" align="flex-end">
+                          <button
+                            className={styles.buttonTransparent}
+                            onClick={() => {
+                              handleOpenMTModal();
+                              setReqId(req.id);
+                              setTripId(0);
+                              setTripData({
+                                idCarrier: req.id_provider,
+                                idVehicleType: 0,
+                                canEditNovelties: !!0
+                              });
+                            }}
+                          >
+                            <Receipt size={20} />
+                            <p>Ver soportes</p>
+                          </button>
+                        </Flex>
                       </div>
                     ))}
                     {journey.trips?.map((trip) => (
@@ -80,6 +100,7 @@ export const Novelty: FC<INoveltyProps> = ({
                             onClick={() => {
                               handleOpenMTModal();
                               setTripId(trip.id);
+                              setReqId(0);
                               setTripData({
                                 idCarrier: trip.id_provider,
                                 idVehicleType: trip.id_vehicle_type,
