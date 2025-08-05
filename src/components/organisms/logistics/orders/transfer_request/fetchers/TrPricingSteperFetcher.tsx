@@ -17,8 +17,8 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
     {
       revalidateOnMount: true,
       revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
       onError: (error) => {
         console.error("error", error);
       }
