@@ -11,7 +11,7 @@ import {
 } from "@/types/logistics/schema";
 
 export default function TrPricingSteperFetcher({ id }: { id: number }) {
-  const { data, isLoading, mutate, isValidating } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     id ? [id] : null, // Solo ejecutar SWR si `id` es válido
     () => getTransferRequestSteps(id),
     {
@@ -25,7 +25,7 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
     }
   );
 
-  if (isLoading || !data || isValidating) return <Spin />;
+  if (isLoading || !data) return <Spin />;
   const mutateStepthree = (journey: ITransferRequestJourneyReview[]) => {
     mutate({ ...data, stepThree: { journey } }, { revalidate: false });
   };
