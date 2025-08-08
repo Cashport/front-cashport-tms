@@ -17,8 +17,8 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
     {
       revalidateOnMount: true,
       revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
       onError: (error) => {
         console.error("error", error);
       }
@@ -32,7 +32,7 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
   const mapJourneyToTracking: (journey?: ITransferRequestJourneyInfo[]) => ITrackingResponse[] = (
     journey
   ) =>
-    journey?.map((a, i) => ({
+    journey?.map((a) => ({
       end_date: a.end_date,
       start_date: a.start_date,
       end_location_desc: a.end_location_desc,
