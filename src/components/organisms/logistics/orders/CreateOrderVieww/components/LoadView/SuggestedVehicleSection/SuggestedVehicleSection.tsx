@@ -54,9 +54,11 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
   const requestData = useMemo(() => {
     if (
       !typeActive ||
-      (debouncedSelectedMaterials.length > 0 && !debouncedSelectedMaterials[0].id) ||
-      (selectedPeople.length > 0 && !selectedPeople[0].id)
+      (typeActive !== "3" &&
+        debouncedSelectedMaterials.length > 0 &&
+        !debouncedSelectedMaterials[0].id)
     ) {
+      console.info("No hay datos suficientes para la solicitud");
       return null;
     }
 
@@ -94,7 +96,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         mt_height: m.mt_height
       }))
     ),
-    selectedPeople.length
+    JSON.stringify(selectedPeople)
   ]);
 
   useEffect(() => {
@@ -102,9 +104,6 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
     (async () => {
       if (!requestData) return;
-
-      // Evitar llamadas duplicadas mientras se está cargando
-      if (isLoading) return;
 
       try {
         setIsLoading(true);
