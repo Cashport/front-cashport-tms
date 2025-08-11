@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 import {
   Select,
@@ -14,10 +14,7 @@ import {
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
 import { useDebounce } from "@/hooks/useSearch";
-import {
-  getSuggestedVehicles,
-  getSuggestedVehiclesByMaterials
-} from "@/services/logistics/vehicles";
+import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 import { IVehicleWithOccupation } from "@/types/logistics/schema";
@@ -32,6 +29,7 @@ interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
 
 const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
   const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -49,62 +47,106 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
   const selectedMaterials = useWatch({ control, name: "material" }) || [];
   const debouncedSelectedMaterials = useDebounce(selectedMaterials, 700);
 
-  useEffect(() => {
-    (async () => {
-      if (
-        debouncedSelectedMaterials.length === 0 ||
-        !debouncedSelectedMaterials[0].id ||
-        !typeActive
-      )
-        return;
-      const materials = debouncedSelectedMaterials.map((material) => {
-        const quantity = material.quantity ?? 1;
-        const weight = material.kg_weight ?? 0;
-        const length = material.mt_length ?? 0;
-        const width = material.mt_width ?? 0;
-        const height = material.mt_height ?? 0;
+  const selectedPeople = useWatch({ control, name: "people" }) || [];
 
-        return {
-          id: material.id ?? 0,
-          weight: weight * quantity,
-          length: length * quantity,
-          width: width * quantity,
-          height: height * quantity
-        };
-      });
+  // Solución 1: Usar useMemo para estabilizar el objeto de request
+  const requestData = useMemo(() => {
+    if (
+      !typeActive ||
+      (debouncedSelectedMaterials.length > 0 && !debouncedSelectedMaterials[0].id) ||
+      (selectedPeople.length > 0 && !selectedPeople[0].id)
+    ) {
+      return null;
+    }
 
-      const formattedMaterials = {
-        serviceTypeId: Number(typeActive) ?? 0,
-        materials
+    const materials = debouncedSelectedMaterials.map((material) => {
+      const quantity = material.quantity ?? 1;
+      const weight = material.kg_weight ?? 0;
+      const length = material.mt_length ?? 0;
+      const width = material.mt_width ?? 0;
+      const height = material.mt_height ?? 0;
+
+      return {
+        id: material.id ?? 0,
+        weight: weight * quantity,
+        length: length * quantity,
+        width: width * quantity,
+        height: height * quantity
       };
+    });
 
-      if (debouncedSelectedMaterials.length > 0) {
-        const res = await getSuggestedVehiclesByMaterials(formattedMaterials);
-        setVehicles(res.vehiclesWithOcupation ?? []);
+    return {
+      serviceTypeId: Number(typeActive) ?? 0,
+      ...(typeActive !== "3" ? { materials } : {}),
+      ...(typeActive === "3" ? { passengers: selectedPeople.length } : {})
+    };
+  }, [
+    typeActive,
+    // Crear una clave estable basada en los datos relevantes
+    JSON.stringify(
+      debouncedSelectedMaterials.map((m) => ({
+        id: m.id,
+        quantity: m.quantity,
+        kg_weight: m.kg_weight,
+        mt_length: m.mt_length,
+        mt_width: m.mt_width,
+        mt_height: m.mt_height
+      }))
+    ),
+    selectedPeople.length
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (!requestData) return;
+
+      // Evitar llamadas duplicadas mientras se está cargando
+      if (isLoading) return;
+
+      try {
+        setIsLoading(true);
+        const res = await getSuggestedVehiclesByMaterials(requestData);
+
+        // Solo actualizar si el componente sigue montado
+        if (!cancelled) {
+          setVehicles(res.vehiclesWithOcupation ?? []);
+        }
+      } catch (error) {
+        console.error("Error fetching suggested vehicles:", error);
+        if (!cancelled) {
+          message.error("Error al obtener vehículos sugeridos");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     })();
-  }, [debouncedSelectedMaterials]);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const constraintTypes = ["1", "2"];
-  //     try {
-  //       if (constraintTypes.includes(typeActive || "")) {
-  //         const promises = constraintTypes.map((type) => getSuggestedVehicles(type));
-  //         const results = await Promise.all(promises);
-  //         setVehicles(results.flatMap((res) => res.data ?? []));
-  //       } else if (typeActive === "4") {
-  //         const res = await getSuggestedVehicles();
-  //         setVehicles(res.data ?? []);
-  //       } else {
-  //         const res = await getSuggestedVehicles(typeActive);
-  //         setVehicles(res.data ?? []);
-  //       }
-  //     } catch (error) {
-  //       message.error("Error al cargar opciones de vehículos sugeridos");
-  //     }
-  //   })();
-  // }, [typeActive]);
+    // Cleanup function para evitar actualizaciones en componente desmontado
+    return () => {
+      cancelled = true;
+    };
+  }, [requestData]); // Solo depende de requestData que está memoizado
+
+  // Helper function to get occupation percentage
+  const getOccupationPercentage = (vehicle: ISuggestedVehicleOptions) => {
+    if (!vehicle) return 0;
+
+    switch (typeActive) {
+      case "1":
+      case "4":
+        return vehicle.ocupationM3 || 0;
+      case "2":
+        return vehicle.ocupationKg || 0;
+      case "3":
+        return vehicle.ocupationPassengers || 0;
+      default:
+        return 0;
+    }
+  };
 
   const columns: TableProps<any>["columns"] = [
     {
@@ -154,6 +196,8 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                 style={{ width: 520 }}
                 allowClear
                 className="inputSelect"
+                loading={isLoading}
+                disabled={isLoading}
                 value={
                   selectedVehicle
                     ? {
@@ -166,11 +210,15 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                   const found = vehicles.find((v) => v.id === option.value);
                   field.onChange(option.value);
                   if (found) {
+                    // Calculate and store the occupation percentage
+                    const occupationPercentage = getOccupationPercentage(found);
+
                     update(index, {
                       ...fields[index],
                       ...{
                         ...found,
-                        aditional_info: found.aditional_info ?? undefined
+                        aditional_info: found.aditional_info ?? undefined,
+                        usedPercentage: occupationPercentage
                       },
                       id: found.id
                     });
@@ -178,7 +226,8 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                     update(index, {
                       ...fields[index],
                       id: undefined,
-                      description: undefined
+                      description: undefined,
+                      usedPercentage: 0
                     });
                   }
                 }}
@@ -187,19 +236,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                     (v) => !selectedVehicles.some((row, idx) => row.id === v.id && idx !== index)
                   )
                   .map((vehicle) => {
-                    const percentageSlider = (() => {
-                      switch (typeActive) {
-                        case "1":
-                        case "4":
-                          return vehicle.ocupationM3;
-                        case "2":
-                          return vehicle.ocupationKg;
-                        case "3":
-                          return 0;
-                        default:
-                          return 0;
-                      }
-                    })();
+                    const percentageSlider = getOccupationPercentage(vehicle);
 
                     return {
                       value: vehicle.id,
@@ -256,10 +293,17 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
     },
     {
       title: "Tasa de utilización",
-      dataIndex: "used_percentage",
-      key: "used_percentage",
+      dataIndex: "usedPercentage",
+      key: "usedPercentage",
       align: "center",
-      render: () => <p className="usedPercentage">0%</p>
+      render: (_: any, record: any) => {
+        // Get the percentage from the stored value or calculate it
+        console.log("Record:", record);
+
+        const percentage = record.usedPercentage || getOccupationPercentage(record) || 0;
+
+        return <p className="usedPercentage">{percentage}%</p>;
+      }
     },
     {
       title: "",
@@ -294,7 +338,13 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       <Flex vertical gap={"1.5rem"} className="suggestedVehicleSection">
         <h3 className="subTitle">Vehículo sugerido</h3>
 
-        <Table columns={columns} dataSource={fields} pagination={false} rowKey={"id"} />
+        <Table
+          columns={columns}
+          dataSource={fields}
+          pagination={false}
+          rowKey={"id"}
+          loading={isLoading}
+        />
 
         <Button className="addButton" onClick={() => append({ quantity: 1 })}>
           Agregar

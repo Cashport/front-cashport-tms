@@ -3967,8 +3967,9 @@ export interface IMaterialInput {
   height: number;
 }
 
-export interface IMaterialsRequest {
-  materials: IMaterialInput[];
+export interface ISuggestedVehiclesByMaterialsRequest {
+  materials?: IMaterialInput[];
+  passengers?: number;
   serviceTypeId: number;
 }
 
@@ -3997,6 +3998,7 @@ export interface IVehicleWithOccupation {
   price: number;
   ocupationM3: number;
   ocupationKg: number;
+  ocupationPassengers: number;
 }
 
 interface IMaterialCalculated {

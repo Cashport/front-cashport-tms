@@ -1,9 +1,9 @@
 import { API } from "@/utils/api/api";
 import {
   Data,
-  IMaterialsRequest,
   ISuggestedVehicle,
-  ISuggestedVehiclesByMaterials
+  ISuggestedVehiclesByMaterials,
+  ISuggestedVehiclesByMaterialsRequest
 } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
@@ -35,7 +35,7 @@ export const getVehicleById = async (id: string): Promise<Data> => {
 };
 
 export const getSuggestedVehiclesByMaterials = async (
-  materials: IMaterialsRequest
+  materials: ISuggestedVehiclesByMaterialsRequest
 ): Promise<ISuggestedVehiclesByMaterials> => {
   try {
     const response: GenericResponse<ISuggestedVehiclesByMaterials> = await API.post(
