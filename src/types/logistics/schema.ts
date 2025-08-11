@@ -3977,7 +3977,7 @@ interface ITotalMaterials {
   kg: number;
 }
 
-interface IVehicleWithOccupation {
+export interface IVehicleWithOccupation {
   id: number;
   description: string;
   vehicle_subtype: number;

@@ -36,13 +36,13 @@ export const getVehicleById = async (id: string): Promise<Data> => {
 
 export const getSuggestedVehiclesByMaterials = async (
   materials: IMaterialsRequest
-): Promise<GenericResponse<ISuggestedVehiclesByMaterials>> => {
+): Promise<ISuggestedVehiclesByMaterials> => {
   try {
     const response: GenericResponse<ISuggestedVehiclesByMaterials> = await API.post(
       `/material/calculate`,
       materials
     );
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Error fetching suggested vehicles by materials: ", error);
     throw error;

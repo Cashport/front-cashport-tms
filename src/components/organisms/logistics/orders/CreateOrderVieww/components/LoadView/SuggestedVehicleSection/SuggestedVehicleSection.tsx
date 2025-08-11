@@ -18,15 +18,15 @@ import {
   getSuggestedVehicles,
   getSuggestedVehiclesByMaterials
 } from "@/services/logistics/vehicles";
-import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
-import { ISuggestedVehicle } from "@/types/logistics/schema";
+import { IFormCreateOrder } from "../../../CreateOrderVieww";
+import { IVehicleWithOccupation } from "@/types/logistics/schema";
 
 interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
 }
 
-interface ISuggestedVehicleOptions extends ISuggestedVehicle {
+interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
   usedPercentage?: number;
 }
 
@@ -51,7 +51,12 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   useEffect(() => {
     (async () => {
-      if (!debouncedSelectedMaterials[0].id || !typeActive) return;
+      if (
+        debouncedSelectedMaterials.length === 0 ||
+        !debouncedSelectedMaterials[0].id ||
+        !typeActive
+      )
+        return;
       const materials = debouncedSelectedMaterials.map((material) => {
         const quantity = material.quantity ?? 1;
         const weight = material.kg_weight ?? 0;
@@ -75,31 +80,31 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
       if (debouncedSelectedMaterials.length > 0) {
         const res = await getSuggestedVehiclesByMaterials(formattedMaterials);
-        console.log("Suggested vehicles by materials: ", res);
+        setVehicles(res.vehiclesWithOcupation ?? []);
       }
     })();
   }, [debouncedSelectedMaterials]);
 
-  useEffect(() => {
-    (async () => {
-      const contraintTypes = ["1", "2"];
-      try {
-        if (contraintTypes.includes(typeActive || "")) {
-          const promises = contraintTypes.map((type) => getSuggestedVehicles(type));
-          const results = await Promise.all(promises);
-          setVehicles(results.flatMap((res) => res.data ?? []));
-        } else if (typeActive === "4") {
-          const res = await getSuggestedVehicles();
-          setVehicles(res.data ?? []);
-        } else {
-          const res = await getSuggestedVehicles(typeActive);
-          setVehicles(res.data ?? []);
-        }
-      } catch (error) {
-        message.error("Error al cargar opciones de vehículos sugeridos");
-      }
-    })();
-  }, [typeActive]);
+  // useEffect(() => {
+  //   (async () => {
+  //     const constraintTypes = ["1", "2"];
+  //     try {
+  //       if (constraintTypes.includes(typeActive || "")) {
+  //         const promises = constraintTypes.map((type) => getSuggestedVehicles(type));
+  //         const results = await Promise.all(promises);
+  //         setVehicles(results.flatMap((res) => res.data ?? []));
+  //       } else if (typeActive === "4") {
+  //         const res = await getSuggestedVehicles();
+  //         setVehicles(res.data ?? []);
+  //       } else {
+  //         const res = await getSuggestedVehicles(typeActive);
+  //         setVehicles(res.data ?? []);
+  //       }
+  //     } catch (error) {
+  //       message.error("Error al cargar opciones de vehículos sugeridos");
+  //     }
+  //   })();
+  // }, [typeActive]);
 
   const columns: TableProps<any>["columns"] = [
     {
@@ -163,7 +168,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                   if (found) {
                     update(index, {
                       ...fields[index],
-                      ...found,
+                      ...{
+                        ...found,
+                        aditional_info: found.aditional_info ?? undefined
+                      },
                       id: found.id
                     });
                   } else {
@@ -178,38 +186,64 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                   .filter(
                     (v) => !selectedVehicles.some((row, idx) => row.id === v.id && idx !== index)
                   )
-                  .map((vehicle) => ({
-                    value: vehicle.id,
-                    label: (
-                      <div className="vehicleOption">
-                        <Flex
-                          vertical
-                          gap="0.5rem"
-                          className="vehicleDetails left"
-                          justify="space-between"
-                        >
-                          <strong style={{ fontWeight: 600 }}>{vehicle.description}</strong>
-                          <span>
-                            Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
-                            {vehicle.height}m
-                          </span>
-                        </Flex>
+                  .map((vehicle) => {
+                    const percentageSlider = (() => {
+                      switch (typeActive) {
+                        case "1":
+                        case "4":
+                          return vehicle.ocupationM3;
+                        case "2":
+                          return vehicle.ocupationKg;
+                        case "3":
+                          return 0;
+                        default:
+                          return 0;
+                      }
+                    })();
 
-                        <Flex vertical gap="0.5rem" className="vehicleDetails right">
-                          <Flex style={{ width: "100%" }} justify="space-between" align="center">
-                            <Flex align="center" gap="4px">
-                              <Truck size={16} />
-                              <p>Utilización</p>
-                            </Flex>
-
-                            <strong style={{ fontWeight: 600 }}>90%</strong>
+                    return {
+                      value: vehicle.id,
+                      label: (
+                        <div className="vehicleOption">
+                          <Flex
+                            vertical
+                            gap="0.5rem"
+                            className="vehicleDetails left"
+                            justify="space-between"
+                          >
+                            <strong
+                              style={{
+                                fontWeight: 600,
+                                maxWidth: "255px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap"
+                              }}
+                            >
+                              {vehicle.description}
+                            </strong>
+                            <span>
+                              Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
+                              {vehicle.height}m
+                            </span>
                           </Flex>
-                          <Slider value={90} style={{ margin: 0 }} />
-                        </Flex>
-                      </div>
-                    ),
-                    title: vehicle.description
-                  }))}
+
+                          <Flex vertical gap="0.5rem" className="vehicleDetails right">
+                            <Flex style={{ width: "100%" }} justify="space-between" align="center">
+                              <Flex align="center" gap="4px">
+                                <Truck size={16} />
+                                <p>Utilización</p>
+                              </Flex>
+
+                              <strong style={{ fontWeight: 600 }}>{percentageSlider}%</strong>
+                            </Flex>
+                            <Slider value={percentageSlider} style={{ margin: 0 }} />
+                          </Flex>
+                        </div>
+                      ),
+                      title: vehicle.description
+                    };
+                  })}
                 optionRender={(option) => option.label}
                 filterOption={(input, option) =>
                   (option?.title || "").toLowerCase().includes(input.toLowerCase())
