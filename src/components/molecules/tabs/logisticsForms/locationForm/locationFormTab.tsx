@@ -26,7 +26,6 @@ import {
   ILocationTypes,
   IState
 } from "@/types/logistics/schema";
-import ModalDocuments from "@/components/molecules/modals/ModalDocuments/ModalDocuments";
 // get deptos munis, grups , tipos
 import { getAllCitiesByState } from "@/services/logistics/locations";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
@@ -46,12 +45,10 @@ const { Title } = Typography;
 export const LocationFormTab = ({
   data,
   handleFormState = () => {},
-  onEditLocation = () => {},
   onSubmitForm = () => {},
   statusForm = "create",
   onActiveLocation = () => {},
   onDesactivateLocation = () => {},
-  params,
   isLoadingSubmit,
   documentsType,
   statesData,
@@ -60,7 +57,6 @@ export const LocationFormTab = ({
 }: LocationFormTabProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenModalDocuments, setIsOpenModalDocuments] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [isSelectedState, setIsSelectedState] = useState(false);
   const [selectedState, setSelectedState] = useState<any>(null);
 
@@ -74,7 +70,7 @@ export const LocationFormTab = ({
   }>("zone/all", async (url: any) => API.get(url), {});
 
   useEffect(() => {
-    const subscription = watch((data, { name, type }) => {
+    const subscription = watch((data, { name }) => {
       //console.log(data, name, type);
       if (name == "general.state_id") {
         setIsSelectedState(true);
@@ -115,11 +111,8 @@ export const LocationFormTab = ({
     watch,
     control,
     handleSubmit,
-    resetField,
     reset,
     setValue,
-    getValues,
-    trigger,
     formState: { errors, isValid }
   } = useForm<IFormLocation>({
     defaultValues,
@@ -127,9 +120,14 @@ export const LocationFormTab = ({
     mode: "onChange"
   });
 
-  const cuser = auth.currentUser;
-  const username: string = String(cuser?.email);
-  setValue("general.user", username);
+  const locationType = watch("general.location_type");
+
+  // reset group_location_id when location_type is changed to 1
+  useEffect(() => {
+    if (locationType == 1) {
+      setValue("general.group_location_id", undefined);
+    }
+  }, [locationType, setValue]);
 
   const isFormCompleted = () => {
     return isValid;
@@ -193,7 +191,6 @@ export const LocationFormTab = ({
     file: File | undefined;
   }
   const [files, setFiles] = useState<FileObject[] | any[]>([]);
-  const [listFiles, setListFiles] = useState<DocumentCompleteType[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<DocumentCompleteType[]>([]);
 
   useEffect(() => {
@@ -253,11 +250,6 @@ export const LocationFormTab = ({
         setValue("general.state_id", data?.state_id);
         setIsSelectedState(true);
         setSelectedState(state_id);
-
-        setTimeout(() => {
-          const city_id: number = Number(data?.city_id?.valueOf());
-          setValue("general.city_id", city_id);
-        }, 500);
 
         setTimeout(() => {
           const docsWithLink =
@@ -332,7 +324,7 @@ export const LocationFormTab = ({
 
   const convertGroupLocationsToSelectOptions = (groupLocations: IGroupLocation[]) => {
     return groupLocations?.map((groupLocation) => ({
-      value: groupLocation.description,
+      value: groupLocation.name,
       id: groupLocation.id
     }));
   };
@@ -548,7 +540,7 @@ export const LocationFormTab = ({
                   <Controller
                     name="general.group_location_id"
                     control={control}
-                    disabled={statusForm === "review"}
+                    disabled={locationType == 1 || statusForm === "review"}
                     rules={{ required: false }}
                     render={({ field }) => (
                       <SelectInputForm
