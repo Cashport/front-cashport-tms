@@ -13,7 +13,11 @@ import {
 } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
-import { getSuggestedVehicles } from "@/services/logistics/vehicles";
+import { useDebounce } from "@/hooks/useSearch";
+import {
+  getSuggestedVehicles,
+  getSuggestedVehiclesByMaterials
+} from "@/services/logistics/vehicles";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
 import { ISuggestedVehicle } from "@/types/logistics/schema";
@@ -41,6 +45,40 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
     }) || [];
 
   const typeActive = useWatch({ control, name: "typeActive" });
+
+  const selectedMaterials = useWatch({ control, name: "material" }) || [];
+  const debouncedSelectedMaterials = useDebounce(selectedMaterials, 700);
+  console.log("debouncedSelectedMaterials", debouncedSelectedMaterials);
+
+  useEffect(() => {
+    (async () => {
+      const materials = debouncedSelectedMaterials.map((material) => {
+        const quantity = material.quantity ?? 1;
+        const weight = material.kg_weight ?? 0;
+        const length = material.mt_length ?? 0;
+        const width = material.mt_width ?? 0;
+        const height = material.mt_height ?? 0;
+
+        return {
+          id: material.id ?? 0,
+          weight: weight * quantity,
+          length: length * quantity,
+          width: width * quantity,
+          height: height * quantity
+        };
+      });
+
+      const formattedMaterials = {
+        serviceTypeId: Number(typeActive) ?? 0,
+        materials
+      };
+
+      if (debouncedSelectedMaterials.length > 0) {
+        const res = await getSuggestedVehiclesByMaterials(formattedMaterials);
+        console.log("Suggested vehicles by materials: ", res);
+      }
+    })();
+  }, [debouncedSelectedMaterials]);
 
   useEffect(() => {
     (async () => {

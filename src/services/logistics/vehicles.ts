@@ -1,5 +1,10 @@
 import { API } from "@/utils/api/api";
-import { Data, ISuggestedVehicle } from "@/types/logistics/schema";
+import {
+  Data,
+  IMaterialsRequest,
+  ISuggestedVehicle,
+  ISuggestedVehiclesByMaterials
+} from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export const getSuggestedVehicles = async (
@@ -27,5 +32,22 @@ export const getVehicleById = async (id: string): Promise<Data> => {
   } catch (error) {
     console.log("Error: ", error);
     return error as any;
+  }
+};
+
+export const getSuggestedVehiclesByMaterials = async (
+  materials: IMaterialsRequest
+): Promise<GenericResponse<ISuggestedVehiclesByMaterials>> => {
+  try {
+    const response: GenericResponse<ISuggestedVehiclesByMaterials> = await API.post(
+      `/material/calculate`,
+      {
+        materials
+      }
+    );
+    return response;
+  } catch (error) {
+    console.log("Error fetching suggested vehicles by materials: ", error);
+    throw error;
   }
 };
