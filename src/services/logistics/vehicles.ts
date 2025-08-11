@@ -19,7 +19,7 @@ export const getSuggestedVehicles = async (
     );
     return response;
   } catch (error) {
-    console.log("Error creating new location: ", error);
+    console.error("Error creating new location: ", error);
     throw error;
   }
 };
@@ -27,10 +27,9 @@ export const getSuggestedVehicles = async (
 export const getVehicleById = async (id: string): Promise<Data> => {
   try {
     const response: Data = await API.get(`/vehicle/${id}`);
-    console.log(response);
     return response;
   } catch (error) {
-    console.log("Error: ", error);
+    console.error("Error: ", error);
     return error as any;
   }
 };
@@ -41,13 +40,11 @@ export const getSuggestedVehiclesByMaterials = async (
   try {
     const response: GenericResponse<ISuggestedVehiclesByMaterials> = await API.post(
       `/material/calculate`,
-      {
-        materials
-      }
+      materials
     );
     return response;
   } catch (error) {
-    console.log("Error fetching suggested vehicles by materials: ", error);
+    console.error("Error fetching suggested vehicles by materials: ", error);
     throw error;
   }
 };

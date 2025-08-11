@@ -48,10 +48,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   const selectedMaterials = useWatch({ control, name: "material" }) || [];
   const debouncedSelectedMaterials = useDebounce(selectedMaterials, 700);
-  console.log("debouncedSelectedMaterials", debouncedSelectedMaterials);
 
   useEffect(() => {
     (async () => {
+      if (!debouncedSelectedMaterials[0].id || !typeActive) return;
       const materials = debouncedSelectedMaterials.map((material) => {
         const quantity = material.quantity ?? 1;
         const weight = material.kg_weight ?? 0;
