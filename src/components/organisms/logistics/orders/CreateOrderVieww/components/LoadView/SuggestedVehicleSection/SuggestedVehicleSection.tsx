@@ -33,7 +33,8 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: "suggestedVehicle"
+    name: "suggestedVehicle",
+    keyName: "generatedId"
   });
 
   const selectedVehicles =
@@ -132,7 +133,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
   }, [requestData]); // Solo depende de requestData que está memoizado
 
   // Helper function to get occupation percentage
-  const getOccupationPercentage = (vehicle: ISuggestedVehicleOptions) => {
+  const getOccupationPercentage = (vehicle?: ISuggestedVehicleOptions) => {
     if (!vehicle) return 0;
 
     switch (typeActive) {
@@ -218,9 +219,11 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                       ...{
                         ...found,
                         aditional_info: found.aditional_info ?? undefined,
-                        usedPercentage: occupationPercentage
-                      },
-                      id: found.id
+                        usedPercentage: occupationPercentage,
+                        id: found.id,
+                        HEEEEELP: "ASDASDASD",
+                        ID: found.id
+                      }
                     });
                   } else {
                     update(index, {
@@ -298,11 +301,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       align: "center",
       render: (_: any, record: any) => {
         // Get the percentage from the stored value or calculate it
-        console.log("Record:", record);
+        const currentVehicle = vehicles.find((v) => v.id === record.id);
+        const updatedPercentage = getOccupationPercentage(currentVehicle);
 
-        const percentage = record.usedPercentage || getOccupationPercentage(record) || 0;
-
-        return <p className="usedPercentage">{percentage}%</p>;
+        return <p className="usedPercentage">{updatedPercentage}%</p>;
       }
     },
     {
@@ -340,7 +342,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
         <Table
           columns={columns}
-          dataSource={fields}
+          dataSource={fields.map((field) => ({ ...field, key: field.id }))}
           pagination={false}
           rowKey={"id"}
           loading={isLoading}
