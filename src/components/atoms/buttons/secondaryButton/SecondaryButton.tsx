@@ -50,7 +50,7 @@ export default function SecondaryButton({
         type="default"
         size="large"
         {...rest}
-        className={className}
+        className={`${rest.className ? rest.className : ""} ${className}`}
         style={{ ...customStyles }}
         onClick={onClick}
       >

@@ -123,7 +123,7 @@ export const sendFinalizeTripAllCarriers = async (
         }
       }
     );
-    if (response?.data) return true;
+    if (response?.success) return true;
     return false;
   } catch (error) {
     console.log(`Error sendFinalizeTrip: `, error);
