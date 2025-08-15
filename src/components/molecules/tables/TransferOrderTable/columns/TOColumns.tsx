@@ -1,17 +1,19 @@
+import Link from "next/link";
 import { Button, Flex, TableColumnsType, Tooltip, Typography } from "antd";
-import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
-import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
-import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { Eye, Radioactive, Warning, WarningCircle, WarningOctagon } from "@phosphor-icons/react";
+
+import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
 import { formatMoney, formatTimeAgo } from "@/utils/utils";
-import { Radioactive, WarningCircle } from "@phosphor-icons/react";
+import { STATUS } from "@/utils/constants/globalConstants";
+
+import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
+
 import "./transferOrderTable.scss";
-import Link from "next/link";
+const { Text } = Typography;
 
 dayjs.extend(utc);
-
-const { Text } = Typography;
 
 export const columns = (
   showColumn: boolean,
@@ -204,8 +206,17 @@ export const columns = (
         },
         row
       ) => {
-        const hoursUntilTrip = dayjs(row.fechas.origin).diff(dayjs(), "hour");
+        const tripDate = dayjs(row.fechas.origin);
+        const now = dayjs();
+
+        const isSameDay = tripDate.isSame(now, "day");
+        const hoursUntilTrip = tripDate.diff(now, "hour");
         const is24HoursOrLessToTrip = hoursUntilTrip >= 0 && hoursUntilTrip <= 24;
+
+        // warning only appear in certain states
+        const showWarning =
+          (isSameDay || is24HoursOrLessToTrip) &&
+          allowedStatesForWarningTrips.includes(row.statusId);
 
         return (
           <div className="btnContainer">
@@ -228,7 +239,7 @@ export const columns = (
               <Button className="btn" type="text" size="middle" icon={<Warning size={24} />} />
             )}
 
-            {is24HoursOrLessToTrip && (
+            {showWarning && (
               <Tooltip title="Este viaje inicia en menos de 24 horas">
                 <Button
                   className="btn"
@@ -248,3 +259,9 @@ export const columns = (
     }
   ];
 };
+
+const allowedStatesForWarningTrips = [
+  STATUS.TO.SIN_PROCESAR,
+  STATUS.TR.ESPERANDO_PROVEEDOR,
+  STATUS.TR.ASIGNANDO_VEHICULO
+];
