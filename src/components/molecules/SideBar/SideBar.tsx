@@ -15,9 +15,9 @@ import {
   Receipt,
   Clipboard,
   Bank,
-  TrendUp,
-  CurrencyDollar
+  TrendUp
 } from "phosphor-react";
+import { ChatCircleDots } from "@phosphor-icons/react";
 
 import "./sidebar.scss";
 import { usePathname, useRouter } from "next/navigation";
@@ -27,8 +27,10 @@ import { useAppStore } from "@/lib/store/store";
 import useStore from "@/lib/hook/useStore";
 import { getUserPermissions } from "@/services/permissions/userPermissions";
 import { checkUserViewPermissions } from "@/utils/utils";
+
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
-import { TMSMODULES } from "@/utils/constants/globalConstants";
+
+import "./sidebar.scss";
 import { setProjectInApi } from "@/utils/api/api";
 
 export const SideBar = () => {
@@ -278,6 +280,18 @@ export const SideBar = () => {
               className={
                 path.startsWith("/logistics/configuration") ? "buttonIcon" : "buttonIconActive"
               }
+            >
+              {isSideBarLarge && "Ajustes"}
+            </Button>
+          </Link>
+        )}
+        {true && (
+          <Link href="/chat" passHref legacyBehavior>
+            <Button
+              type="primary"
+              size="large"
+              icon={<ChatCircleDots size={26} />}
+              className={path === "/chat" ? "buttonIcon" : "buttonIconActive"}
             >
               {isSideBarLarge && "Ajustes"}
             </Button>
