@@ -47,7 +47,12 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
   // Mapear materiales
   const materials: IAddTransferOrderMaterial[] = (formData.material || []).map((mat) => ({
     id_material: mat.id?.toString() || "",
-    quantity: mat.quantity.toString()
+    quantity: mat.quantity.toString(),
+    weight: mat.kg_weight ?? 0,
+    height: mat.mt_height ?? 0,
+    width: mat.mt_width ?? 0,
+    length: mat.mt_length ?? 0,
+    is_controlled_substance: Number(mat.restriction) ?? 0
   }));
 
   // Mapear otros requerimientos
@@ -102,6 +107,14 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     transfer_order_persons: persons,
     transfer_order_products: products,
     transfer_order_vehicles: vehicles,
-    geometry: formData.geometry
+    geometry: formData.geometry,
+    id_service_type: formData.typeActive,
+    id_client: 0,
+    observation: formData.additionalInfo?.instructions || "",
+    service_type_desc: "",
+    client_desc: "",
+    contractNumber: "",
+    declaredCargoValue: 0,
+    files: []
   };
 };

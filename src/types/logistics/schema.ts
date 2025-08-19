@@ -3846,7 +3846,7 @@ export interface IGetAllPeople {
 }
 
 export interface IAddTransferOrderContact {
-  id_contact?: string;
+  id_contact: string;
   contact_type: string;
   name: string;
   contact_number: string;
@@ -3867,6 +3867,11 @@ export interface IAddTransferOrderDocument {
 export interface IAddTransferOrderMaterial {
   id_material: string;
   quantity: string;
+  weight: number;
+  height: number;
+  width: number;
+  length: number;
+  is_controlled_substance: number;
 }
 
 export interface IAddTransferOrderOtherRequirements {
@@ -3922,6 +3927,14 @@ export interface IAddTransferOrder {
   transfer_order_products: IAddTransferOrderProduct[];
   transfer_order_vehicles: IAddTransferOrderVehicle[];
   geometry: IRoute[]; // JSON string del array de rutas
+  id_service_type: string;
+  id_client: number;
+  observation: string | null;
+  service_type_desc: string;
+  client_desc: string;
+  contractNumber: string;
+  declaredCargoValue: number;
+  files: any[];
 }
 
 export interface IGetFrequentRoutes {

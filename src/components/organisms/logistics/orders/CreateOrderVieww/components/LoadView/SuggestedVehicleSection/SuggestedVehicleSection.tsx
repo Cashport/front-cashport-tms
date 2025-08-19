@@ -1,16 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import {
-  Select,
-  Table,
-  Button,
-  Popconfirm,
-  Flex,
-  TableProps,
-  message,
-  Slider,
-  ConfigProvider
-} from "antd";
+import { Select, Table, Button, Popconfirm, Flex, TableProps, Slider, ConfigProvider } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
 import { useDebounce } from "@/hooks/useSearch";
@@ -115,9 +105,6 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         }
       } catch (error) {
         console.error("Error fetching suggested vehicles:", error);
-        if (!cancelled) {
-          message.error("Error al obtener vehículos sugeridos");
-        }
       } finally {
         if (!cancelled) {
           setIsLoading(false);
