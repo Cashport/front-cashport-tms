@@ -102,6 +102,14 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     transfer_order_persons: persons,
     transfer_order_products: products,
     transfer_order_vehicles: vehicles,
-    geometry: formData.geometry
+    geometry: formData.geometry,
+    id_service_type: formData.typeActive,
+    id_client: 0,
+    observation: formData.additionalInfo?.instructions || "",
+    service_type_desc: "",
+    client_desc: "",
+    contractNumber: "",
+    declaredCargoValue: 0,
+    files: []
   };
 };

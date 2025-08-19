@@ -94,7 +94,7 @@ interface IProductServiceLineForm {
 }
 
 export interface IFormCreateOrder {
-  typeActive?: string; // "1" | "2" | "3" | "4"
+  typeActive: string; // "1" | "2" | "3" | "4"
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
@@ -116,6 +116,7 @@ export const CreateOrderVieww: React.FC = () => {
 
   const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
     defaultValues: {
+      typeActive: "1",
       TripDetails: [
         {
           placeId: undefined,
@@ -197,9 +198,9 @@ export const CreateOrderVieww: React.FC = () => {
       case "additionalInfo":
         // TO DO: Determine wheter an api call is needed here or not
         // Also, we need to leave the data in the zustand store to be used later
-        // setLoadingRequest(true);
-        // const modeledData = mapFormToTransferOrder(data);
-        // console.log("Modeled data for transfer order:", modeledData);
+        setLoadingRequest(true);
+        const modeledData = mapFormToTransferOrder(data);
+        console.log("Modeled data for transfer order:", modeledData);
 
         // try {
         //   const res = await addTransferOrderNew(modeledData, []);
@@ -212,11 +213,11 @@ export const CreateOrderVieww: React.FC = () => {
         //   message.error("Error al crear la orden de transferencia", 2);
         //   console.error("Error adding transfer order:", error);
         // }
-        // setLoadingRequest(false);
+        setLoadingRequest(false);
 
-        setLoadingRequest(true);
         // Change route to the details page
-        push("/logistics/orders/milkyWIP");
+        // TEMP: COMMENT OUT THE PUSH
+        // push("/logistics/orders/milkyWIP");
         break;
       default:
         console.error("Unknown view:", view);
@@ -343,6 +344,7 @@ export const CreateOrderVieww: React.FC = () => {
           Siguiente
         </PrincipalButton>
       </div>
+      <button onClick={() => setLoadingRequest(false)}>Submit</button>
     </div>
   );
 };
