@@ -344,7 +344,6 @@ export const CreateOrderVieww: React.FC = () => {
           Siguiente
         </PrincipalButton>
       </div>
-      <button onClick={() => setLoadingRequest(false)}>Submit</button>
     </div>
   );
 };

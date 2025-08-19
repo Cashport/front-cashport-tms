@@ -3873,11 +3873,11 @@ export interface IAddTransferOrderDocument {
 export interface IAddTransferOrderMaterial {
   id_material: string;
   quantity: string;
-  weight?: number;
-  height?: number;
-  width?: number;
-  length?: number;
-  is_controlled_substance?: number;
+  weight: number;
+  height: number;
+  width: number;
+  length: number;
+  is_controlled_substance: number;
 }
 
 export interface IAddTransferOrderOtherRequirements {

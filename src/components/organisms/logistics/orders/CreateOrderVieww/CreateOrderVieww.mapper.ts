@@ -47,7 +47,12 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
   // Mapear materiales
   const materials: IAddTransferOrderMaterial[] = (formData.material || []).map((mat) => ({
     id_material: mat.id?.toString() || "",
-    quantity: mat.quantity.toString()
+    quantity: mat.quantity.toString(),
+    weight: mat.kg_weight ?? 0,
+    height: mat.mt_height ?? 0,
+    width: mat.mt_width ?? 0,
+    length: mat.mt_length ?? 0,
+    is_controlled_substance: Number(mat.restriction) ?? 0
   }));
 
   // Mapear otros requerimientos
