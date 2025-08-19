@@ -216,8 +216,7 @@ export const CreateOrderVieww: React.FC = () => {
         setLoadingRequest(false);
 
         // Change route to the details page
-        // TEMP: COMMENT OUT THE PUSH
-        // push("/logistics/orders/milkyWIP");
+        push("/logistics/orders/milkyWIP");
         break;
       default:
         console.error("Unknown view:", view);
