@@ -3971,3 +3971,60 @@ interface IStatusWithStyling {
   name: string;
   subjectId: number;
 }
+
+export interface IMaterialInput {
+  id: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+}
+
+export interface ISuggestedVehiclesByMaterialsRequest {
+  materials?: IMaterialInput[];
+  passengers?: number;
+  serviceTypeId: number;
+}
+
+interface ITotalMaterials {
+  volume: number;
+  kg: number;
+}
+
+export interface IVehicleWithOccupation {
+  id: number;
+  description: string;
+  vehicle_subtype: number;
+  kg_capacity: number;
+  m3_volume: number;
+  width: number;
+  height: number;
+  aditional_info: string | null;
+  length: number;
+  passenger_capacity: number;
+  speed_multiple: number;
+  active: boolean;
+  icon: string;
+  image: string;
+  id_service_type: number;
+  available: number;
+  price: number;
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number;
+}
+
+interface IMaterialCalculated {
+  id: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  volume: number;
+}
+
+export interface ISuggestedVehiclesByMaterials {
+  totalMaterials: ITotalMaterials;
+  vehiclesWithOcupation: IVehicleWithOccupation[];
+  materialCalculated: IMaterialCalculated[];
+}

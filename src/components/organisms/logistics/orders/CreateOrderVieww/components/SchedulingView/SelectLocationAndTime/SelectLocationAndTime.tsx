@@ -10,7 +10,7 @@ import { ISelectOption } from "../SchedulingView";
 import "./selectLocationAndTime.scss";
 
 interface SelectLocationAndTimeProps {
-  selectedType: string;
+  selectedType?: string;
   control: Control<IFormCreateOrder, any>;
   setValue: UseFormSetValue<IFormCreateOrder>;
   locationOptions?: ISelectOption[];

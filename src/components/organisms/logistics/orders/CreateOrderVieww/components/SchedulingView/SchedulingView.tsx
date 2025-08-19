@@ -54,7 +54,7 @@ interface SchedulingViewProps {
 
 const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) => {
   const [locationOptions, setLocationOptions] = useState<ISelectLocation[]>([]);
-  const typeActive = useWatch({ control, name: "typeActive" }) ?? "1";
+  const typeActive = useWatch({ control, name: "typeActive" });
   const tripDetails = useWatch({ control, name: "TripDetails" }) ?? [];
 
   const timeBasedOnSelectedDateAndTime = useMemo(() => {
