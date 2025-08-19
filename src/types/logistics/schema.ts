@@ -2050,6 +2050,7 @@ export interface CarriersPricing {
   driver_delay: number;
   diver_trips: number;
   driver_score: number;
+  driver_id: number;
   id: number;
   id_carrier: number;
   id_service_type: number;
