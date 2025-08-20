@@ -115,7 +115,9 @@ export const CreateOrderVieww: React.FC = () => {
 
   const { push } = useRouter();
 
-  const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
+  const emptyValue = [{ id: undefined, quantity: 1 }];
+
+  const { control, handleSubmit, setValue, watch, resetField } = useForm<IFormCreateOrder>({
     defaultValues: {
       typeActive: "1",
       TripDetails: [
@@ -134,23 +136,14 @@ export const CreateOrderVieww: React.FC = () => {
           raisingNum: 0
         } // Destino
       ],
-      material: [
-        {
-          id: undefined,
-          quantity: 1
-        }
-      ],
-      suggestedVehicle: [
-        {
-          id: undefined,
-          quantity: 1
-        }
-      ],
+      material: emptyValue,
+      suggestedVehicle: emptyValue,
+      people: emptyValue,
       productServiceLine: {
         productServiceLine: [
           {
             selectedPSL: undefined,
-            percentagePSL: 0,
+            percentagePSL: 100,
             costCenters: [{ selectedCostCenter: undefined }]
           }
         ]
@@ -176,7 +169,7 @@ export const CreateOrderVieww: React.FC = () => {
   const renderView = (currentView: IViewOption) => {
     switch (currentView) {
       case "scheduling":
-        return <SchedulingView control={control} setValue={setValue} />;
+        return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
         return <LoadView control={control} />;
       case "additionalInfo":
