@@ -3,6 +3,7 @@ import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "r
 import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
 import { DotOutline, Trash } from "@phosphor-icons/react";
+import dayjs from "dayjs";
 
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 import { ISelectOption } from "../SchedulingView";
@@ -41,6 +42,11 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
   const showRaising = selectedType === "1";
 
   const destinationAvailable = selectedType == "4";
+
+  const disabledDate = (current: dayjs.Dayjs) => {
+    // Deshabilita todas las fechas antes de hoy
+    return current && current < dayjs().startOf("day");
+  };
 
   // Lógica: agrega una parada justo antes del último (Destino)
   const handleAddStop = () => {
@@ -171,6 +177,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         value={field.value}
                         onChange={field.onChange}
                         disabled={i > 0 && !destinationAvailable}
+                        disabledDate={disabledDate}
                       />
                     )}
                   />
