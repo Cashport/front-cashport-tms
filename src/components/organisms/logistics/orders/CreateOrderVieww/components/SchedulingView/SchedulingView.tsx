@@ -36,7 +36,7 @@ import "./schedulingView.scss";
 
 dayjs.extend(duration);
 
-interface ITripInfoMap {
+export interface ITripInfoMap {
   distance: number;
   duration: number;
   geometry: IGeometry;
@@ -275,6 +275,12 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
       geometry: selectedRoute.geometry
     });
 
+    setValue("infoMap", {
+      distance: selectedRoute.distance,
+      duration: selectedRoute.duration,
+      geometry: selectedRoute.geometry
+    });
+
     // Actualizar el formulario con la geometría de la ruta frecuente
     setValue("geometry", route.jsonRoute);
   };
@@ -332,6 +338,12 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
         const { distance, duration, geometry } = routes[0];
 
         setTripInfoMap({
+          distance: distance,
+          duration: duration,
+          geometry: geometry
+        });
+
+        setValue("infoMap", {
           distance: distance,
           duration: duration,
           geometry: geometry
