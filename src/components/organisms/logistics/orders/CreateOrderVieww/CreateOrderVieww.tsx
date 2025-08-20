@@ -9,7 +9,7 @@ import { addTransferOrderNew } from "@/services/logistics/transfer-orders";
 
 import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
-import SchedulingView from "./components/SchedulingView/SchedulingView";
+import SchedulingView, { ITripInfoMap } from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
 import AdditionalInfoView from "./components/ResponsiblesView/AdditionalInfoView";
@@ -104,6 +104,7 @@ export interface IFormCreateOrder {
   additionalInfo?: IAdditionalInfoForm;
   billing?: IBillingForm;
   productServiceLine?: IProductServiceLineForm;
+  infoMap: ITripInfoMap;
 }
 
 export type IViewOption = "scheduling" | "load" | "additionalInfo";
@@ -186,7 +187,6 @@ export const CreateOrderVieww: React.FC = () => {
   };
 
   const onSubmit = async (data: IFormCreateOrder) => {
-    console.info("Submitting data:", data);
     switch (view) {
       case "scheduling":
         setView("load");
@@ -198,12 +198,8 @@ export const CreateOrderVieww: React.FC = () => {
       case "additionalInfo":
         setLoadingRequest(true);
         const modeledData = mapFormToTransferOrder(data);
-        console.log("Modeled data for transfer order:", modeledData);
-
         try {
           const res = await addTransferOrderNew(modeledData, []);
-          console.log("Response from addTransferOrderNew:", res);
-
           message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
             push("/logistics/orders/details/" + res.id)
           );

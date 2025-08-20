@@ -3895,9 +3895,9 @@ export interface IAddTransferOrderVehicle {
 }
 
 export interface IAddTransferOrder {
-  id?: string;
+  id: number;
   id_user: string;
-  user?: string;
+  user: string;
   id_start_location: string;
   id_end_location: string;
   start_date: string; // formato: "YYYY-MM-DD HH:mm:ss"
@@ -3911,7 +3911,7 @@ export interface IAddTransferOrder {
   end_date_flexible: string;
   id_route?: string;
   id_company: string;
-  isFixedRate: number; // 0 o 1
+  isFixedRate: string;
   status?: string;
   active?: string;
   created_at?: string;
