@@ -3981,9 +3981,16 @@ export interface IMaterialInput {
 }
 
 export interface ISuggestedVehiclesByMaterialsRequest {
-  materials?: IMaterialInput[];
-  passengers?: number;
   serviceTypeId: number;
+  vehiclesSelected?: {
+    id?: number;
+    quantity: number;
+  }[];
+  // load and hoisting Types
+  materials?: IMaterialInput[];
+  requireLift?: boolean;
+  // people Types
+  passengers?: number;
 }
 
 interface ITotalMaterials {
@@ -4027,4 +4034,5 @@ export interface ISuggestedVehiclesByMaterials {
   totalMaterials: ITotalMaterials;
   vehiclesWithOcupation: IVehicleWithOccupation[];
   materialCalculated: IMaterialCalculated[];
+  vehiclesSelectedWithOcupation: IVehicleWithOccupation[];
 }

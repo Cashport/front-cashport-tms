@@ -19,6 +19,7 @@ interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
 
 const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
   const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
+  const [selectedVehiclesInfo, setSelectedVehiclesInfo] = useState<IVehicleWithOccupation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { fields, append, remove, update } = useFieldArray({
@@ -32,6 +33,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       control,
       name: "suggestedVehicle"
     }) || [];
+  const debouncedSelectedVehicles = useDebounce(selectedVehicles, 700);
 
   const typeActive = useWatch({ control, name: "typeActive" });
 
@@ -68,8 +70,16 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       };
     });
 
+    const vehiclesSelected = debouncedSelectedVehicles
+      .filter((vehicle) => vehicle.id)
+      .map((vehicle) => ({
+        id: vehicle.id,
+        quantity: vehicle.quantity
+      }));
+
     return {
       serviceTypeId: Number(typeActive) ?? 0,
+      ...(vehiclesSelected.length > 0 ? { vehiclesSelected } : {}),
       ...(typeActive !== "3" ? { materials } : {}),
       ...(typeActive === "3" ? { passengers: selectedPeople.length } : {})
     };
@@ -86,7 +96,8 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         mt_height: m.mt_height
       }))
     ),
-    JSON.stringify(selectedPeople)
+    JSON.stringify(selectedPeople),
+    JSON.stringify(debouncedSelectedVehicles)
   ]);
 
   useEffect(() => {
@@ -102,6 +113,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         // Solo actualizar si el componente sigue montado
         if (!cancelled) {
           setVehicles(res.vehiclesWithOcupation ?? []);
+          setSelectedVehiclesInfo(res.vehiclesSelectedWithOcupation ?? []);
         }
       } catch (error) {
         console.error("Error fetching suggested vehicles:", error);
@@ -287,7 +299,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       align: "center",
       render: (_: any, record: any) => {
         // Get the percentage from the stored value or calculate it
-        const currentVehicle = vehicles.find((v) => v.id === record.id);
+        const currentVehicle = selectedVehiclesInfo.find((v) => v.id === record.id);
         const updatedPercentage = getOccupationPercentage(currentVehicle);
 
         return <p className="usedPercentage">{updatedPercentage}%</p>;
