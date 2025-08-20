@@ -309,7 +309,11 @@ export const CreateOrderVieww: React.FC = () => {
       <Container customStyles={{ height: "auto" }}>
         <Flex vertical>
           {/* ------------Main Info Order-------------- */}
-          <CustomStepper steps={steps} currentStepIndex={currentStepIndex} />
+          <CustomStepper
+            steps={steps}
+            currentStepIndex={currentStepIndex}
+            customClassName="createOrderView__stepper"
+          />
           <hr className="separator" />
           {renderView(view)}
         </Flex>
