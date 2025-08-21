@@ -284,7 +284,7 @@ export const SideBar = () => {
             </Button>
           </Link>
         )}
-        {true && (
+        {/* {true && (
           <Link href="/chat" passHref legacyBehavior>
             <Button
               type="primary"
@@ -295,7 +295,7 @@ export const SideBar = () => {
               {isSideBarLarge && "Ajustes"}
             </Button>
           </Link>
-        )}
+        )} */}
       </Flex>
       <Flex className="exit">
         <Button
