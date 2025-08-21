@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Control, Controller } from "react-hook-form";
-import { Flex, Select } from "antd";
+import { Flex, Select, Input } from "antd";
 import { Info } from "@phosphor-icons/react";
+import { NumericFormat } from "react-number-format";
 
 import { getCompanyCodes } from "@/services/logistics/company-codes";
 import { getClients } from "@/services/logistics/clients";
@@ -117,6 +118,47 @@ const BillingSection: React.FC<BillingSectionProps> = ({ control }) => {
                 placeholder="Seleccionar"
                 style={{ width: "100%" }}
                 className="inputField"
+              />
+            )}
+          />
+        </div>
+      </Flex>
+
+      <Flex gap={"2rem"}>
+        <div className="titleAndSelect">
+          <p>N° de contrato / Sales order</p>
+          <Controller
+            control={control}
+            name="billing.contractNumber"
+            render={({ field }) => (
+              <Input {...field} placeholder="Ingrese número de contrato" className="inputField" />
+            )}
+          />
+        </div>
+
+        <div className="titleAndSelect">
+          <p>Valor declarado de la carga</p>
+          <Controller
+            control={control}
+            name="billing.declaredCargoValue"
+            render={({ field: { onChange, onBlur, value, name, ref } }) => (
+              <NumericFormat
+                value={value}
+                onValueChange={(values) => {
+                  onChange(values.floatValue || null);
+                }}
+                onBlur={onBlur}
+                name={name}
+                getInputRef={ref}
+                thousandSeparator="."
+                decimalSeparator=","
+                prefix="$ "
+                placeholder="Ingrese valor declarado"
+                customInput={Input}
+                style={{ width: "100%" }}
+                className="inputField"
+                allowNegative={false}
+                decimalScale={0}
               />
             )}
           />

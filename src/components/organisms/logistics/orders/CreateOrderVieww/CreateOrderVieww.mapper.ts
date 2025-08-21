@@ -184,8 +184,8 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     observation: formData.additionalInfo?.instructions || null,
     service_type_desc: getServiceTypeDescription(formData.typeActive),
     client_desc: "",
-    contractNumber: "", // Agregar si existe en el form
-    declaredCargoValue: 0, // Agregar si existe en el form
+    contractNumber: formData.billing?.contractNumber || "",
+    declaredCargoValue: formData.billing?.declaredCargoValue || 0,
     files: []
   };
 };

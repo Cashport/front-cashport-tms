@@ -77,6 +77,8 @@ interface IAdditionalInfoForm {
 interface IBillingForm {
   companyCode?: ICompanyCode;
   endClient?: IClient;
+  contractNumber?: string;
+  declaredCargoValue?: number;
 }
 
 export type ICostCenterForm = {
