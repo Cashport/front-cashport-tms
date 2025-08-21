@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Control, UseFormSetValue, useWatch } from "react-hook-form";
+import { Control, UseFormResetField, UseFormSetValue, useWatch } from "react-hook-form";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { Flex, message } from "antd";
@@ -50,14 +50,22 @@ export interface ISelectOption {
 interface SchedulingViewProps {
   control: Control<IFormCreateOrder, any>;
   setValue: UseFormSetValue<IFormCreateOrder>;
+  resetField: UseFormResetField<IFormCreateOrder>;
 }
 
-const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) => {
+const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, resetField }) => {
   const [locationOptions, setLocationOptions] = useState<ISelectLocation[]>([]);
   const typeActive = useWatch({ control, name: "typeActive" });
   const tripDetails = useWatch({ control, name: "TripDetails" }) ?? [];
 
-  const timeBasedOnSelectedDateAndTime = useMemo(() => {
+  const timeBasedOnSelectedDateTimeHours = useMemo(() => {
+    if (typeActive === "2") {
+      const selectedHours = tripDetails[0]?.raisingNum ?? 0;
+      return {
+        days: 0,
+        hours: selectedHours
+      };
+    }
     const originDate = tripDetails[0]?.date;
     const originTime = tripDetails[0]?.time;
     const destinationDate = tripDetails[tripDetails.length - 1]?.date;
@@ -363,6 +371,23 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
     }
   };
 
+  const handleOrderTypeChange = (id: string) => {
+    setValue("typeActive", id);
+    const emptyValue = [{ id: undefined, quantity: 1 }];
+    resetField("material", {
+      defaultValue: emptyValue
+    });
+    resetField("people", {
+      defaultValue: emptyValue
+    });
+    resetField("suggestedVehicle", {
+      defaultValue: emptyValue
+    });
+    resetField("otherServices", {
+      defaultValue: undefined
+    });
+  };
+
   return (
     <div className="schedulingView">
       {/* Form */}
@@ -370,7 +395,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
         <SelectableIconButtons
           options={tripTypeOptions}
           activeId={typeActive}
-          onChange={(id) => setValue("typeActive", id)}
+          onChange={handleOrderTypeChange}
         />
 
         <SelectLocationAndTime
@@ -389,7 +414,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue }) =>
           distance={tripInfoMap?.distance}
           duration={tripInfoMap?.duration}
           selectedTripType={typeActive}
-          durationBasedOnSelects={timeBasedOnSelectedDateAndTime}
+          durationBasedOnSelects={timeBasedOnSelectedDateTimeHours}
         />
       </Flex>
 

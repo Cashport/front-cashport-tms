@@ -77,6 +77,8 @@ interface IAdditionalInfoForm {
 interface IBillingForm {
   companyCode?: ICompanyCode;
   endClient?: IClient;
+  contractNumber?: string;
+  declaredCargoValue?: number;
 }
 
 export type ICostCenterForm = {
@@ -115,7 +117,9 @@ export const CreateOrderVieww: React.FC = () => {
 
   const { push } = useRouter();
 
-  const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
+  const emptyValue = [{ id: undefined, quantity: 1 }];
+
+  const { control, handleSubmit, setValue, watch, resetField } = useForm<IFormCreateOrder>({
     defaultValues: {
       typeActive: "1",
       TripDetails: [
@@ -134,24 +138,15 @@ export const CreateOrderVieww: React.FC = () => {
           raisingNum: 0
         } // Destino
       ],
-      material: [
-        {
-          id: undefined,
-          quantity: 1
-        }
-      ],
-      suggestedVehicle: [
-        {
-          id: undefined,
-          quantity: 1
-        }
-      ],
+      material: emptyValue,
+      suggestedVehicle: emptyValue,
+      people: emptyValue,
       productServiceLine: {
         productServiceLine: [
           {
             selectedPSL: undefined,
-            percentagePSL: 0,
-            costCenters: [{ selectedCostCenter: undefined }]
+            percentagePSL: 100,
+            costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
           }
         ]
       }
@@ -170,13 +165,14 @@ export const CreateOrderVieww: React.FC = () => {
   const additionalInfo = watch("additionalInfo");
   const billing = watch("billing");
   const productServiceLine = watch("productServiceLine");
+  const people = watch("people");
 
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
   const renderView = (currentView: IViewOption) => {
     switch (currentView) {
       case "scheduling":
-        return <SchedulingView control={control} setValue={setValue} />;
+        return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
         return <LoadView control={control} />;
       case "additionalInfo":
@@ -230,27 +226,50 @@ export const CreateOrderVieww: React.FC = () => {
           );
           return !isValid;
         }
+
+        if (tripType === "2") {
+          const isValid =
+            tripDetails[0]?.placeId &&
+            tripDetails[0]?.date &&
+            tripDetails[0]?.time &&
+            tripDetails[0]?.raisingNum;
+
+          return !isValid;
+        }
         // aca solo verificamos que la primera ubicación tenga todo y haya un destino
         const isValid =
-          tripDetails[0].placeId &&
-          tripDetails[0].date &&
-          tripDetails[0].time &&
-          tripDetails[1].placeId;
+          tripDetails[0]?.placeId &&
+          tripDetails[0]?.date &&
+          tripDetails[0]?.time &&
+          tripDetails[1]?.placeId;
         return !isValid;
       case "load":
-        // at least one material and vehicle must be selected
-        // if there is a row should have something selected, an id
-        const validMaterial =
-          materialDetails &&
-          materialDetails?.length > 0 &&
-          materialDetails?.every((detail) => detail.id !== undefined);
-
         const validVehicles =
           suggestedVehicles &&
           suggestedVehicles?.length > 0 &&
           suggestedVehicles?.every((vehicle) => vehicle.id !== undefined);
 
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
+
+        // Type 4 only needs vehicle validation
+        if (tripType === "4") {
+          return !validVehicles || !validOtherServices;
+        }
+
+        // Type 3 requires people selection
+        if (tripType === "3") {
+          const validPeople =
+            people !== undefined &&
+            people.length > 0 &&
+            people.every((person) => person.id !== undefined);
+          return !validPeople || !validVehicles || !validOtherServices;
+        }
+
+        // Type 1 and 2 require material selection
+        const validMaterial =
+          materialDetails &&
+          materialDetails?.length > 0 &&
+          materialDetails?.every((detail) => detail.id !== undefined);
 
         return !validMaterial || !validVehicles || !validOtherServices;
       case "additionalInfo":
@@ -291,15 +310,16 @@ export const CreateOrderVieww: React.FC = () => {
 
     // Forces React to recalculate useMemo whenever any data changes, even if the reference doesn't.
   }, [
-    JSON.stringify(tripDetails),
+    tripType,
     view,
+    JSON.stringify(tripDetails),
     JSON.stringify(materialDetails),
     JSON.stringify(suggestedVehicles),
     JSON.stringify(otherServices),
     JSON.stringify(additionalInfo),
     JSON.stringify(billing),
     JSON.stringify(productServiceLine),
-    tripType
+    JSON.stringify(people)
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
@@ -316,7 +336,11 @@ export const CreateOrderVieww: React.FC = () => {
       <Container customStyles={{ height: "auto" }}>
         <Flex vertical>
           {/* ------------Main Info Order-------------- */}
-          <CustomStepper steps={steps} currentStepIndex={currentStepIndex} />
+          <CustomStepper
+            steps={steps}
+            currentStepIndex={currentStepIndex}
+            customClassName="createOrderView__stepper"
+          />
           <hr className="separator" />
           {renderView(view)}
         </Flex>

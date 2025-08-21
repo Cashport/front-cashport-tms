@@ -179,13 +179,13 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     transfer_order_products: products,
     transfer_order_vehicles: vehicles,
     geometry: formData.geometry || [],
-    id_service_type: formData.typeActive || "1",
+    id_service_type: formData.typeActive || "0",
     id_client: formData.billing?.endClient?.id || 0,
     observation: formData.additionalInfo?.instructions || null,
     service_type_desc: getServiceTypeDescription(formData.typeActive),
     client_desc: "",
-    contractNumber: "", // Agregar si existe en el form
-    declaredCargoValue: 0, // Agregar si existe en el form
+    contractNumber: formData.billing?.contractNumber || "",
+    declaredCargoValue: formData.billing?.declaredCargoValue || 0,
     files: []
   };
 };
