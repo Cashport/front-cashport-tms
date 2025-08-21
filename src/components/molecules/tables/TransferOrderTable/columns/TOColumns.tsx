@@ -29,11 +29,12 @@ export const columns = (
         render: (text: string) => {
           return <Text className="row-text">{formatTimeAgo(text)} </Text>;
         },
-        sorter: (a: any, b: any) =>
+        sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
           calculateMinutesDifference(a.tiempodeviaje) - calculateMinutesDifference(b.tiempodeviaje),
         showSorterTooltip: false
       }
-    : {};
+    : null;
+
   const carriersColumn = showCarriersColumn
     ? {
         title: "Proveedores",
@@ -71,17 +72,18 @@ export const columns = (
             </div>
           );
         },
-        sorter: (a: any, b: any) => a.carriers.localeCompare(b.carriers),
+        sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+          a.carriers.localeCompare(b.carriers),
         showSorterTooltip: false,
         width: 200
       }
-    : {};
+    : null;
 
   return [
     {
       title: "TR",
       dataIndex: "tr",
-      render: (id, record) => {
+      render: (id: string, record: DataTypeForTransferOrderTable) => {
         if (showBothIds && record.id_transfer_request) {
           return (
             <Flex vertical gap={4}>
@@ -113,9 +115,11 @@ export const columns = (
           </Link>
         );
       },
-      sorter: (a, b) => Number(a.tr) - Number(b.tr),
+      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+        Number(a.tr) - Number(b.tr),
       showSorterTooltip: false,
-      sortDirections: ["descend", "ascend"]
+      sortDirections: ["descend", "ascend"] as const,
+      width: 84
     },
     {
       title: "Origen y destino",
@@ -132,7 +136,8 @@ export const columns = (
           </div>
         </div>
       ),
-      sorter: (a, b) => a.origendestino.origin.localeCompare(b.origendestino.origin),
+      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+        a.origendestino.origin.localeCompare(b.origendestino.origin),
       showSorterTooltip: false,
       width: "260px"
     },
@@ -146,14 +151,16 @@ export const columns = (
           <Text className="row-text">{`${dayjs.utc(text.destination).format("DD/MM/YY - HH:mm")} h`}</Text>
         </div>
       ),
-      sorter: (a, b) => dayjs(a.fechas.origin).valueOf() - dayjs(b.fechas.origin).valueOf(),
+      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+        dayjs(a.fechas.origin).valueOf() - dayjs(b.fechas.origin).valueOf(),
       showSorterTooltip: false
     },
     {
       title: "Tipo de viaje",
       dataIndex: "tipodeviaje",
       render: (text: string) => <Text className="row-text">{text}</Text>,
-      sorter: (a, b) => a.tipodeviaje.localeCompare(b.tipodeviaje),
+      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+        a.tipodeviaje.localeCompare(b.tipodeviaje),
       showSorterTooltip: false
     },
     // {
@@ -190,10 +197,10 @@ export const columns = (
       render: (text: string) => (
         <Text className="row-text value">{text ? formatMoney(text) : "$ 0"}</Text>
       ),
-      sorter: (a, b) => Number(a.valor) - Number(b.valor),
+      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+        Number(a.valor) - Number(b.valor),
       showSorterTooltip: false
     },
-
     {
       title: "",
       dataIndex: "validator",
@@ -204,7 +211,7 @@ export const columns = (
           ispeopleproblem: boolean;
           isRejected: boolean;
         },
-        row
+        row: DataTypeForTransferOrderTable
       ) => {
         const tripDate = dayjs(row.fechas.origin);
         const now = dayjs();
@@ -235,7 +242,7 @@ export const columns = (
             {!!text.ismaterialsproblem && (
               <Button className="btn" type="text" size="middle" icon={<Radioactive size={24} />} />
             )}
-            {!!text.ismaterialsproblem && (
+            {!!text.ispeopleproblem && (
               <Button className="btn" type="text" size="middle" icon={<Warning size={24} />} />
             )}
 
@@ -257,7 +264,7 @@ export const columns = (
         );
       }
     }
-  ];
+  ].filter(Boolean) as TableColumnsType<DataTypeForTransferOrderTable>;
 };
 
 const allowedStatesForWarningTrips = [

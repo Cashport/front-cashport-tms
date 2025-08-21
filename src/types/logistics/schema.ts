@@ -3847,7 +3847,7 @@ export interface IGetAllPeople {
 }
 
 export interface IAddTransferOrderContact {
-  id_contact?: string;
+  id_contact: string;
   contact_type: string;
   name: string;
   contact_number: string;
@@ -3868,6 +3868,11 @@ export interface IAddTransferOrderDocument {
 export interface IAddTransferOrderMaterial {
   id_material: string;
   quantity: string;
+  weight: number;
+  height: number;
+  width: number;
+  length: number;
+  is_controlled_substance: number;
 }
 
 export interface IAddTransferOrderOtherRequirements {
@@ -3891,9 +3896,9 @@ export interface IAddTransferOrderVehicle {
 }
 
 export interface IAddTransferOrder {
-  id?: string;
+  id: number;
   id_user: string;
-  user?: string;
+  user: string;
   id_start_location: string;
   id_end_location: string;
   start_date: string; // formato: "YYYY-MM-DD HH:mm:ss"
@@ -3907,7 +3912,7 @@ export interface IAddTransferOrder {
   end_date_flexible: string;
   id_route?: string;
   id_company: string;
-  isFixedRate: number; // 0 o 1
+  isFixedRate: string;
   status?: string;
   active?: string;
   created_at?: string;
@@ -3923,6 +3928,14 @@ export interface IAddTransferOrder {
   transfer_order_products: IAddTransferOrderProduct[];
   transfer_order_vehicles: IAddTransferOrderVehicle[];
   geometry: IRoute[]; // JSON string del array de rutas
+  id_service_type: string;
+  id_client: number;
+  observation: string | null;
+  service_type_desc: string;
+  client_desc: string;
+  contractNumber: string;
+  declaredCargoValue: number;
+  files: any[];
 }
 
 export interface IGetFrequentRoutes {
@@ -3952,4 +3965,69 @@ interface IStatusWithStyling {
   id: string;
   name: string;
   subjectId: number;
+}
+
+export interface IMaterialInput {
+  id: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+}
+
+export interface ISuggestedVehiclesByMaterialsRequest {
+  serviceTypeId: number;
+  vehiclesSelected?: {
+    id?: number;
+    quantity: number;
+  }[];
+  // load and hoisting Types
+  materials?: IMaterialInput[];
+  requireLift?: boolean;
+  // people Types
+  passengers?: number;
+}
+
+interface ITotalMaterials {
+  volume: number;
+  kg: number;
+}
+
+export interface IVehicleWithOccupation {
+  id: number;
+  description: string;
+  vehicle_subtype: number;
+  kg_capacity: number;
+  m3_volume: number;
+  width: number;
+  height: number;
+  aditional_info: string | null;
+  length: number;
+  passenger_capacity: number;
+  speed_multiple: number;
+  active: boolean;
+  icon: string;
+  image: string;
+  id_service_type: number;
+  available: number;
+  price: number;
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number;
+}
+
+interface IMaterialCalculated {
+  id: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  volume: number;
+}
+
+export interface ISuggestedVehiclesByMaterials {
+  totalMaterials: ITotalMaterials;
+  vehiclesWithOcupation: IVehicleWithOccupation[];
+  materialCalculated: IMaterialCalculated[];
+  vehiclesSelectedWithOcupation: IVehicleWithOccupation[];
 }
