@@ -144,7 +144,7 @@ export const CreateOrderVieww: React.FC = () => {
           {
             selectedPSL: undefined,
             percentagePSL: 100,
-            costCenters: [{ selectedCostCenter: undefined }]
+            costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
           }
         ]
       }
