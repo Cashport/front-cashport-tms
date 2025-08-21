@@ -127,6 +127,8 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
               }}
               className="inputSelect -ellipsis"
               style={{ width: matchiWidthNameColumn }}
+              popupMatchSelectWidth={false}
+              popupClassName="custom-popup"
             />
           )}
         />
