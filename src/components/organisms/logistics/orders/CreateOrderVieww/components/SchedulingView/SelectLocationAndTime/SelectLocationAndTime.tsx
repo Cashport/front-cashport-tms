@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
@@ -39,9 +39,39 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
     name: "TripDetails"
   });
 
-  const showRaising = selectedType === "1";
+  const showRaisingCheckbox = selectedType === "1";
+  const showRaisingHours = selectedType === "1" || selectedType === "2";
 
   const destinationAvailable = selectedType == "4";
+
+  useEffect(() => {
+    if (selectedType === "2") {
+      // When selectedType is "2", remove the last field (destination)
+      if (fields.length > 1) {
+        remove(fields.length - 1);
+      }
+    } else {
+      // When selectedType is not "2", reset to default tripDetails
+      if (fields.length < 2) {
+        setValue(`TripDetails`, [
+          {
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          },
+          {
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          }
+        ]);
+      }
+    }
+  }, [selectedType]);
 
   const disabledDate = (current: dayjs.Dayjs) => {
     // Deshabilita todas las fechas antes de hoy
@@ -99,7 +129,11 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         placeholder={LABELS(i, fields.length)}
                         options={locationOptions}
                         style={{
-                          gridColumn: showRaising ? "1 / 8" : "1 / -1"
+                          gridColumn: showRaisingCheckbox
+                            ? "1 / 8"
+                            : showRaisingHours
+                              ? "1 /11"
+                              : "1 / -1"
                         }}
                         value={
                           field.value && tripDetails[i]
@@ -136,33 +170,33 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                     )}
                   />
 
-                  {/* Raising checkbox/hours */}
-                  {showRaising && (
-                    <>
-                      <Controller
-                        control={control}
-                        name={`TripDetails.${i}.requiresRaising`}
-                        render={({ field }) => (
-                          <Checkbox {...field} checked={!!field.value} className="check">
-                            {"Requiere izaje"}
-                          </Checkbox>
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`TripDetails.${i}.raisingNum`}
-                        render={({ field }) => (
-                          <InputNumber
-                            {...field}
-                            className="inputNumber"
-                            placeholder="0 Hrs"
-                            min={0}
-                            style={{ gridColumn: "11 / -1" }}
-                            formatter={(value) => `${value} Hrs`}
-                          />
-                        )}
-                      />
-                    </>
+                  {showRaisingCheckbox && (
+                    <Controller
+                      control={control}
+                      name={`TripDetails.${i}.requiresRaising`}
+                      render={({ field }) => (
+                        <Checkbox {...field} checked={!!field.value} className="check">
+                          {"Requiere izaje"}
+                        </Checkbox>
+                      )}
+                    />
+                  )}
+
+                  {showRaisingHours && (
+                    <Controller
+                      control={control}
+                      name={`TripDetails.${i}.raisingNum`}
+                      render={({ field }) => (
+                        <InputNumber
+                          {...field}
+                          className="inputNumber"
+                          placeholder="0 Hrs"
+                          min={0}
+                          style={{ gridColumn: "11 / -1" }}
+                          formatter={(value) => `${value} Hrs`}
+                        />
+                      )}
+                    />
                   )}
 
                   {/* Date */}

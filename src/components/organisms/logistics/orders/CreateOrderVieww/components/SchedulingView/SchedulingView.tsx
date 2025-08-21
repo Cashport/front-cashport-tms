@@ -58,7 +58,14 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
   const typeActive = useWatch({ control, name: "typeActive" });
   const tripDetails = useWatch({ control, name: "TripDetails" }) ?? [];
 
-  const timeBasedOnSelectedDateAndTime = useMemo(() => {
+  const timeBasedOnSelectedDateTimeHours = useMemo(() => {
+    if (typeActive === "2") {
+      const selectedHours = tripDetails[0]?.raisingNum ?? 0;
+      return {
+        days: 0,
+        hours: selectedHours
+      };
+    }
     const originDate = tripDetails[0]?.date;
     const originTime = tripDetails[0]?.time;
     const destinationDate = tripDetails[tripDetails.length - 1]?.date;
@@ -407,7 +414,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
           distance={tripInfoMap?.distance}
           duration={tripInfoMap?.duration}
           selectedTripType={typeActive}
-          durationBasedOnSelects={timeBasedOnSelectedDateAndTime}
+          durationBasedOnSelects={timeBasedOnSelectedDateTimeHours}
         />
       </Flex>
 

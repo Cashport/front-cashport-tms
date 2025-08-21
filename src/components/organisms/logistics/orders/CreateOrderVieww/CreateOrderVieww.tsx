@@ -224,12 +224,22 @@ export const CreateOrderVieww: React.FC = () => {
           );
           return !isValid;
         }
+
+        if (tripType === "2") {
+          const isValid =
+            tripDetails[0]?.placeId &&
+            tripDetails[0]?.date &&
+            tripDetails[0]?.time &&
+            tripDetails[0]?.raisingNum;
+
+          return !isValid;
+        }
         // aca solo verificamos que la primera ubicación tenga todo y haya un destino
         const isValid =
-          tripDetails[0].placeId &&
-          tripDetails[0].date &&
-          tripDetails[0].time &&
-          tripDetails[1].placeId;
+          tripDetails[0]?.placeId &&
+          tripDetails[0]?.date &&
+          tripDetails[0]?.time &&
+          tripDetails[1]?.placeId;
         return !isValid;
       case "load":
         const validVehicles =
