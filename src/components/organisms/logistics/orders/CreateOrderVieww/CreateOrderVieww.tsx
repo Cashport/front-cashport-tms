@@ -163,6 +163,7 @@ export const CreateOrderVieww: React.FC = () => {
   const additionalInfo = watch("additionalInfo");
   const billing = watch("billing");
   const productServiceLine = watch("productServiceLine");
+  const people = watch("people");
 
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
@@ -231,19 +232,32 @@ export const CreateOrderVieww: React.FC = () => {
           tripDetails[1].placeId;
         return !isValid;
       case "load":
-        // at least one material and vehicle must be selected
-        // if there is a row should have something selected, an id
-        const validMaterial =
-          materialDetails &&
-          materialDetails?.length > 0 &&
-          materialDetails?.every((detail) => detail.id !== undefined);
-
         const validVehicles =
           suggestedVehicles &&
           suggestedVehicles?.length > 0 &&
           suggestedVehicles?.every((vehicle) => vehicle.id !== undefined);
 
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
+
+        // Type 4 only needs vehicle validation
+        if (tripType === "4") {
+          return !validVehicles || !validOtherServices;
+        }
+
+        // Type 3 requires people selection
+        if (tripType === "3") {
+          const validPeople =
+            people !== undefined &&
+            people.length > 0 &&
+            people.every((person) => person.id !== undefined);
+          return !validPeople || !validVehicles || !validOtherServices;
+        }
+
+        // Type 1 and 2 require material selection
+        const validMaterial =
+          materialDetails &&
+          materialDetails?.length > 0 &&
+          materialDetails?.every((detail) => detail.id !== undefined);
 
         return !validMaterial || !validVehicles || !validOtherServices;
       case "additionalInfo":
@@ -284,15 +298,16 @@ export const CreateOrderVieww: React.FC = () => {
 
     // Forces React to recalculate useMemo whenever any data changes, even if the reference doesn't.
   }, [
-    JSON.stringify(tripDetails),
+    tripType,
     view,
+    JSON.stringify(tripDetails),
     JSON.stringify(materialDetails),
     JSON.stringify(suggestedVehicles),
     JSON.stringify(otherServices),
     JSON.stringify(additionalInfo),
     JSON.stringify(billing),
     JSON.stringify(productServiceLine),
-    tripType
+    JSON.stringify(people)
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
