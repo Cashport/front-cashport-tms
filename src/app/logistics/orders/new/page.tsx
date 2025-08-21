@@ -1,9 +1,9 @@
 "use client";
 
-import { CreateOrderView } from "@/components/organisms/logistics/orders/CreateOrderView/CreateOrderView";
+import { CreateOrderVieww } from "@/components/organisms/logistics/orders/CreateOrderVieww/CreateOrderVieww";
 
 function CreateOrderPage() {
-  return <CreateOrderView />;
+  return <CreateOrderVieww />;
 }
 
 export default CreateOrderPage;
