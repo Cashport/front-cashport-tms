@@ -1180,8 +1180,8 @@ export interface ILocation {
   contact_name: string;
   contact_number: string;
   user: string;
-  is_community?: boolean;
-  community_name?: string;
+  is_community: boolean;
+  community_name: string;
   documents?: any[];
 }
 
@@ -1650,8 +1650,8 @@ export interface ITrackingResponse extends ITrackingPartial {
   start_location_desc: string;
   end_location_desc: string;
   type_service_desc: string;
-  is_community?: 0 | 1;
-  community_name?: string;
+  is_community: 0 | 1;
+  community_name: string;
   id?: number;
 }
 
@@ -2013,8 +2013,8 @@ export interface ITransferRequestJourneyInfo {
   end_location_desc: string;
   trips: IVehiclesPricingTrips[];
   otherRequirements: IRequirement[];
-  is_community?: 0 | 1;
-  community_name?: string;
+  is_community: 0 | 1;
+  community_name: string;
   end_date_flexible: number;
   start_date_flexible: number;
   route: any;
@@ -2030,6 +2030,8 @@ export interface ITransferRequestJourneyReview {
   start_location_desc: string;
   end_location_desc: string;
   service_type: number;
+  is_community: 0 | 1;
+  community_name: string;
   trips: TripCarriersPricing[];
   otherRequirements: TripCarriersPricing[];
 }
