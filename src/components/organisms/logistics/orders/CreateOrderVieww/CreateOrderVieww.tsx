@@ -96,8 +96,9 @@ interface IProductServiceLineForm {
 }
 
 export interface IFormCreateOrder {
-  typeActive: string; // "1" | "2" | "3" | "4"
+  typeActive: "1" | "2" | "3";
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
+  isFixRate: boolean;
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
   people?: IPeopleForm[];
@@ -153,10 +154,9 @@ export const CreateOrderVieww: React.FC = () => {
     }
   });
 
-  // watchTripType
   const tripType = watch("typeActive");
-  // Watch the TripDetails to see if any changes are made
   const tripDetails = watch("TripDetails");
+  const isFixRate = watch("isFixRate");
 
   // watch Load form values
   const materialDetails = watch("material");
@@ -218,9 +218,7 @@ export const CreateOrderVieww: React.FC = () => {
     // for every view we check if the next button should be disabled
     switch (view) {
       case "scheduling":
-        const isDestinationDateAndTimeMandatory = tripType === "4";
-
-        if (isDestinationDateAndTimeMandatory) {
+        if (isFixRate) {
           const isValid = tripDetails.every(
             (detail) => detail.placeId && detail.date && detail.time
           );
@@ -251,8 +249,8 @@ export const CreateOrderVieww: React.FC = () => {
 
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
 
-        // Type 4 only needs vehicle validation
-        if (tripType === "4") {
+        // If fix rateneeds vehicle validation
+        if (isFixRate) {
           return !validVehicles || !validOtherServices;
         }
 

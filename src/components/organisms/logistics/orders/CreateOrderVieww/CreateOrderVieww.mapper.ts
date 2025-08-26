@@ -165,7 +165,7 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     end_date_flexible: "0",
     id_route: "", // Vacío por defecto
     id_company: formData.billing?.companyCode?.id?.toString() || "1",
-    isFixedRate: formData.typeActive === "4" ? "1" : "0",
+    isFixedRate: formData.isFixRate ? "1" : "0",
     status: "",
     active: "true",
     created_at: new Date().toISOString(),
