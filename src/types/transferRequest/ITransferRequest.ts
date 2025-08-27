@@ -18,6 +18,8 @@ export interface ITransferRequest {
   statusId: string;
   transferType: string;
   TOs?: string;
+  start_group_location: string | null;
+  end_group_location: string | null;
 }
 
 export interface ITimeLine {

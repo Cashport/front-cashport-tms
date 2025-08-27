@@ -8,6 +8,7 @@ import { formatMoney, formatTimeAgo } from "@/utils/utils";
 import { Radioactive, WarningCircle } from "@phosphor-icons/react";
 import "./transferOrderTable.scss";
 import Link from "next/link";
+import CommunityIcon from "@/components/organisms/logistics/orders/transfer_request/components/communityIcon/CommunityIcon";
 
 dayjs.extend(utc);
 
@@ -118,15 +119,31 @@ export const columns = (
     {
       title: "Origen y destino",
       dataIndex: "origendestino",
-      render: (text: { origin: string; destination: string }) => (
+      render: (text: { origin: string; destination: string }, row) => (
         <div className="titleContainer">
           <div className="textContainer">
             <Text className="title">Origen</Text>
             <Text className="title">Destino</Text>
           </div>
           <div className="textContainer">
-            <Text className="row-text">{text.origin}</Text>
-            <Text className="row-text">{text.destination}</Text>
+            <Flex gap={"0.5rem"} align="center">
+              <Text className="row-text">{text.origin}</Text>
+
+              {row.start_group_location ? (
+                <Tooltip title={row.start_group_location}>
+                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
+                </Tooltip>
+              ) : null}
+            </Flex>
+
+            <Flex gap={"0.5rem"} align="center">
+              <Text className="row-text">{text.destination}</Text>
+              {row.end_group_location ? (
+                <Tooltip title={row.end_group_location}>
+                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
+                </Tooltip>
+              ) : null}
+            </Flex>
           </div>
         </div>
       ),
@@ -206,9 +223,11 @@ export const columns = (
       ) => {
         const hoursUntilTrip = dayjs(row.fechas.origin).diff(dayjs(), "hour");
         const is24HoursOrLessToTrip = hoursUntilTrip >= 0 && hoursUntilTrip <= 24;
-
+        const isCommunity = row.start_group_location && row.end_group_location;
         return (
           <div className="btnContainer">
+            {isCommunity && <CommunityIcon withTooltip={false} iconSize={20} />}
+
             {text.isRejected && (
               <Button
                 className="btn"
