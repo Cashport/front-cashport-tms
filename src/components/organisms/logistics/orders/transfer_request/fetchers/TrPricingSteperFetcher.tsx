@@ -48,13 +48,14 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
       end_date_flexible: a.end_date_flexible,
       route: a.route,
       community_name: a.community_name,
-      is_community: a.is_community
+      is_community: a.is_community,
+      start_group_location_desc: a.start_group_location_desc,
+      end_group_location_desc: a.end_group_location_desc
     })) || [];
 
   const handleRevalidate = () => {
     mutate();
   };
-  console.log("trackingOG", mapJourneyToTracking(data.stepTwo?.journey));
   return (
     <PricingTransferRequest
       data={data}

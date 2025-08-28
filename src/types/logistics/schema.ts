@@ -1653,6 +1653,8 @@ export interface ITrackingResponse extends ITrackingPartial {
   is_community: 0 | 1;
   community_name: string;
   id?: number;
+  start_group_location_desc: string | null;
+  end_group_location_desc: string | null;
 }
 
 /**
@@ -2018,6 +2020,11 @@ export interface ITransferRequestJourneyInfo {
   end_date_flexible: number;
   start_date_flexible: number;
   route: any;
+  distance: number;
+  id_route_backup: string | null;
+  fixed_rate: number;
+  start_group_location_desc: string | null;
+  end_group_location_desc: string | null;
 }
 /**
  * Exposes all fields present in transfer_request_journey_review as a typescript

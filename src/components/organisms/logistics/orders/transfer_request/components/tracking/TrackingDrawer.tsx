@@ -3,7 +3,7 @@ import { Card, Col, Flex, Row } from "antd";
 import { DotsSixVertical } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { Users } from "@phosphor-icons/react";
+import { Users, WarningCircle } from "@phosphor-icons/react";
 dayjs.extend(utc);
 
 export default function TrackingDrawer({
@@ -37,8 +37,23 @@ export default function TrackingDrawer({
               />
             ) : null}
           </Flex>
-          <p>{trip.start_location_desc}</p>
-          {trip.end_location_desc !== trip.start_location_desc && <p>{trip.end_location_desc}</p>}
+          <Flex>
+            <p>{trip.start_location_desc}</p>
+
+            {trip.start_group_location_desc ? (
+              <WarningCircle size={16} style={{ minWidth: "16px" }} />
+            ) : null}
+          </Flex>
+
+          {trip.end_location_desc !== trip.start_location_desc && (
+            <Flex>
+              <p>{trip.end_location_desc}</p>{" "}
+              {trip.end_group_location_desc ? (
+                <WarningCircle size={16} style={{ minWidth: "16px" }} />
+              ) : null}
+            </Flex>
+          )}
+
           <p>
             <b>Inicio</b> {dayjs.utc(trip.start_date).format("DD MMM YYYY - HH:mm")}
           </p>
