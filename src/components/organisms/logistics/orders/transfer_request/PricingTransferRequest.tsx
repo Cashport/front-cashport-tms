@@ -1062,13 +1062,7 @@ export default function PricingTransferRequest({
                       journey={a}
                       transferRequest={transferRequest}
                       index={index}
-                      id_journey={a.id_journey}
-                      start_location_desc={a.start_location_desc}
-                      end_location_desc={a.end_location_desc}
-                      id_type_service={a.id_type_service}
                       setIsNextStepActive={setIsNextStepActive}
-                      is_community={a.is_community}
-                      community_name={a.community_name}
                     />
                   ))}
                 </Flex>
