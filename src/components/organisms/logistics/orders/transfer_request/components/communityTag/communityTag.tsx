@@ -12,6 +12,7 @@ const CommunityTag: React.FC<CommunityTagProps> = ({ name }) => {
         color: "#FFFFFF",
         borderRadius: "8px",
         padding: "2px 10px",
+        fontSize: "14px",
         display: "flex",
         alignItems: "center",
         height: "fit-content"
