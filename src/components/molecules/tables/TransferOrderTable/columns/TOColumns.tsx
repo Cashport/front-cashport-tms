@@ -12,6 +12,7 @@ import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
 
 import "./transferOrderTable.scss";
 const { Text } = Typography;
+import CommunityIcon from "@/components/organisms/logistics/orders/transfer_request/components/communityIcon/CommunityIcon";
 
 dayjs.extend(utc);
 
@@ -124,15 +125,31 @@ export const columns = (
     {
       title: "Origen y destino",
       dataIndex: "origendestino",
-      render: (text: { origin: string; destination: string }) => (
+      render: (text: { origin: string; destination: string }, row: any) => (
         <div className="titleContainer">
           <div className="textContainer">
             <Text className="title">Origen</Text>
             <Text className="title">Destino</Text>
           </div>
           <div className="textContainer">
-            <Text className="row-text">{text.origin}</Text>
-            <Text className="row-text">{text.destination}</Text>
+            <Flex gap={"0.5rem"} align="center">
+              <Text className="row-text">{text.origin}</Text>
+
+              {row.start_group_location ? (
+                <Tooltip title={row.start_group_location}>
+                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
+                </Tooltip>
+              ) : null}
+            </Flex>
+
+            <Flex gap={"0.5rem"} align="center">
+              <Text className="row-text">{text.destination}</Text>
+              {row.end_group_location ? (
+                <Tooltip title={row.end_group_location}>
+                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
+                </Tooltip>
+              ) : null}
+            </Flex>
           </div>
         </div>
       ),
@@ -219,7 +236,7 @@ export const columns = (
         const isSameDay = tripDate.isSame(now, "day");
         const hoursUntilTrip = tripDate.diff(now, "hour");
         const is24HoursOrLessToTrip = hoursUntilTrip >= 0 && hoursUntilTrip <= 24;
-
+        const isCommunity = row.start_group_location && row.end_group_location;
         // warning only appear in certain states
         const showWarning =
           (isSameDay || is24HoursOrLessToTrip) &&
@@ -227,6 +244,8 @@ export const columns = (
 
         return (
           <div className="btnContainer">
+            {isCommunity && <CommunityIcon withTooltip={false} iconSize={20} />}
+
             {text.isRejected && (
               <Button
                 className="btn"

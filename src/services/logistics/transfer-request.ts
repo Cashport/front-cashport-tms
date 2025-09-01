@@ -148,7 +148,6 @@ export const getTransferRequestPricing = async ({
     `/transfer-request/pricing/${idTransferRequest}?seeAll=${showAll}`
   );
   if (response.success) {
-    console.log("response data", response.data);
     return response.data;
   }
 

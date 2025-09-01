@@ -46,13 +46,16 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
       id: a.id_journey,
       start_date_flexible: a.start_date_flexible,
       end_date_flexible: a.end_date_flexible,
-      route: a.route
+      route: a.route,
+      community_name: a.community_name,
+      is_community: a.is_community,
+      start_group_location_desc: a.start_group_location_desc,
+      end_group_location_desc: a.end_group_location_desc
     })) || [];
 
   const handleRevalidate = () => {
     mutate();
   };
-
   return (
     <PricingTransferRequest
       data={data}
