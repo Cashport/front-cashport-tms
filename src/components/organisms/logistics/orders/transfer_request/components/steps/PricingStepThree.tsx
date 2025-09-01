@@ -12,9 +12,8 @@ import {
 import { STATUS } from "@/utils/constants/globalConstants";
 
 type Props = {
-  data: {
-    journey?: ITransferRequestJourneyReview[];
-  };
+  data: ITransferRequestJourneyReview[];
+
   control: Control<TransferRequestFinish, any>;
 };
 export default function PricingStepThree({ data, control }: Props) {
@@ -24,7 +23,7 @@ export default function PricingStepThree({ data, control }: Props) {
   });
   const handleSelectCarrier = (cp: CarrierPricingFinish) => {
     if (
-      !data?.journey?.some(
+      !data?.some(
         (j) =>
           j.trips.some((t) =>
             t.carriers_pricing.some(
@@ -46,7 +45,7 @@ export default function PricingStepThree({ data, control }: Props) {
       update(index, cp);
     }
   };
-  const [openTabs, setOpenTabs] = useState<number[]>(data.journey?.map((_, i) => i) || []);
+  const [openTabs, setOpenTabs] = useState<number[]>(data?.map((_, i) => i) || []);
   const tag = ({
     trips,
     otherRequirements
@@ -77,7 +76,7 @@ export default function PricingStepThree({ data, control }: Props) {
   );
   return (
     <Flex gap={24} vertical>
-      {data.journey?.map((journey, index) => {
+      {data?.map((journey, index) => {
         return (
           <JourneyCollapse
             key={index}
@@ -88,6 +87,8 @@ export default function PricingStepThree({ data, control }: Props) {
             openTabs={openTabs}
             setOpenTabs={setOpenTabs}
             tag={tag({ trips: journey.trips, otherRequirements: journey.otherRequirements })}
+            start_group_location_desc={journey.start_group_location_desc}
+            end_group_location_desc={journey.end_group_location_desc}
           />
         );
       })}

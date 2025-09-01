@@ -2041,6 +2041,8 @@ export interface ITransferRequestJourneyReview {
   community_name: string;
   trips: TripCarriersPricing[];
   otherRequirements: TripCarriersPricing[];
+  start_group_location_desc?: string | null;
+  end_group_location_desc?: string | null;
 }
 export interface TripCarriersPricing {
   id_trip: number;

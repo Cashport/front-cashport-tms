@@ -1,5 +1,5 @@
 import { Flex, Typography, message, Select, Table, TableProps, Button, Drawer } from "antd";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 
 // dayjs locale
 import dayjs, { Dayjs } from "dayjs";
@@ -100,8 +100,24 @@ export default function PricingTransferRequest({
   });
 
   /* Data first page*/
-  const [ordersId, setOrdersId] = useState<number[]>(
-    transferRequest?.stepOne?.transferOrders.map((a) => a.id)
+  const ordersId = useMemo(
+    () => transferRequest?.stepOne?.transferOrders.map((a) => a.id) || [],
+    [transferRequest?.stepOne?.transferOrders]
+  );
+  const stepThreeJourneysWithCommunities = transferRequest?.stepThree?.journey?.map(
+    (stepThreeJourney) => {
+      const stepTwoJourney = transferRequest?.stepTwo?.journey?.find(
+        (stepTwoJourney) => stepTwoJourney.id_journey === stepThreeJourney.id_journey
+      );
+
+      return {
+        ...stepThreeJourney,
+        ...(stepTwoJourney && {
+          start_group_location_desc: stepTwoJourney.start_group_location_desc,
+          end_group_location_desc: stepTwoJourney.end_group_location_desc
+        })
+      };
+    }
   );
   const [orders, setOrders] = useState<ITransferOrdersRequest | undefined>({
     orders: transferRequest?.stepOne?.transferOrders,
@@ -109,7 +125,6 @@ export default function PricingTransferRequest({
   });
   const [orderRequest, setOrderRequest] = useState<ITransferOrderRequest>();
   const [dataCarga, setDataCarga] = useState<IMaterial[]>([]);
-  const [_transferRequest, setTransferRequest] = useState<ITransferRequestCreation>();
 
   /*Data second page */
   const [vehicleKey, setVehicleKey] = useState<number | null>(null);
@@ -1068,10 +1083,7 @@ export default function PricingTransferRequest({
                 </Flex>
               </div>
             ) : (
-              <PricingStepThree
-                data={transferRequest?.stepThree || { journey: [] }}
-                control={control}
-              />
+              <PricingStepThree data={stepThreeJourneysWithCommunities || []} control={control} />
             )}
           </Flex>
         </Flex>
