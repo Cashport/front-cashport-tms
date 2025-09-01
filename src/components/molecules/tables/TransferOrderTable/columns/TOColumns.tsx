@@ -125,7 +125,7 @@ export const columns = (
     {
       title: "Origen y destino",
       dataIndex: "origendestino",
-      render: (text: { origin: string; destination: string }, row) => (
+      render: (text: { origin: string; destination: string }, row: any) => (
         <div className="titleContainer">
           <div className="textContainer">
             <Text className="title">Origen</Text>
