@@ -145,7 +145,7 @@ export const CarrierTable = () => {
         </div>
       </Flex>
       <Table
-        scroll={{ y: height ? height - 400 : undefined }}
+        scroll={{ y: height ? (height < 720 ? height - 310 : height - 330) : undefined }}
         columns={columns as TableProps<any>["columns"]}
         loading={isLoading}
         pagination={{
