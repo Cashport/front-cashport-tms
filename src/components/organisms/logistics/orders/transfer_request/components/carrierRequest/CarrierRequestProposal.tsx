@@ -1,8 +1,9 @@
-import { Checkbox, Collapse, Flex, Radio, Tag, Typography } from "antd";
+import { Collapse, Flex, Radio, Tag, Typography } from "antd";
 import style from "./CarrierRequestProposal.module.scss";
-import { CarriersPricing, TripCarriersPricing } from "@/types/logistics/schema";
+import { CarriersPricing } from "@/types/logistics/schema";
 import { CollapseProps } from "antd/lib";
 import { Star } from "phosphor-react";
+import Link from "next/link";
 
 const { Title, Text } = Typography;
 
@@ -22,10 +23,22 @@ export default function CarrierRequestProposal({ carrier }: Props) {
       <Flex gap={24} className={style.children}>
         <Flex gap={10} vertical>
           <Flex justify="space-between">
-            <strong>Placas</strong> <div>{carrier.plate_number}</div>
+            <strong>Placas</strong>{" "}
+            <Link
+              href={`/logistics/providers/${carrier.id_carrier}/vehicle/${carrier.id_vehicle}`}
+              target="_blank"
+            >
+              {carrier.plate_number}
+            </Link>
           </Flex>
           <Flex justify="space-between">
-            <strong>Conductor</strong> <div>{carrier.driver}</div>
+            <strong>Conductor</strong>{" "}
+            <Link
+              href={`/logistics/providers/${carrier.id_carrier}/driver/${carrier.driver_id}`}
+              target="_blank"
+            >
+              {carrier.driver}
+            </Link>
           </Flex>
           <Flex justify="space-between">
             <strong>Teléfono</strong> <div>{carrier.phone}</div>

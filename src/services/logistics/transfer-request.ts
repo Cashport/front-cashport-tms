@@ -255,15 +255,13 @@ export const getFinishedTransferRequest = async (
   }
 };
 
-export const getTransferRequestDetail = async (
-  id: number
-): Promise<ITransferRequestDetail | {}> => {
+export const getTransferRequestDetail = async (id: number): Promise<ITransferRequestDetail> => {
   try {
-    const { success, data }: GenericResponse<ITransferRequestResponse> = await API.get(
+    const { success, data }: GenericResponse<ITransferRequestDetail> = await API.get(
       `/transfer-request/details/${id}`
     );
     if (success) return data;
-    return {};
+    throw new Error("Error obteniendo los detalles de la solicitud de transferencia");
   } catch (error) {
     console.error("Error get request/details/:id/: ", error);
     throw error as any;

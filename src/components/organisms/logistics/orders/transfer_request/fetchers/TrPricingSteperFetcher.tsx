@@ -11,28 +11,28 @@ import {
 } from "@/types/logistics/schema";
 
 export default function TrPricingSteperFetcher({ id }: { id: number }) {
-  const { data, isLoading, mutate, isValidating } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     id ? [id] : null, // Solo ejecutar SWR si `id` es válido
     () => getTransferRequestSteps(id),
     {
       revalidateOnMount: true,
       revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
       onError: (error) => {
         console.error("error", error);
       }
     }
   );
 
-  if (isLoading || !data || isValidating) return <Spin />;
+  if (isLoading || !data) return <Spin />;
   const mutateStepthree = (journey: ITransferRequestJourneyReview[]) => {
     mutate({ ...data, stepThree: { journey } }, { revalidate: false });
   };
   const mapJourneyToTracking: (journey?: ITransferRequestJourneyInfo[]) => ITrackingResponse[] = (
     journey
   ) =>
-    journey?.map((a, i) => ({
+    journey?.map((a) => ({
       end_date: a.end_date,
       start_date: a.start_date,
       end_location_desc: a.end_location_desc,

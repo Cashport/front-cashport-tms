@@ -1,37 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import {
-  Select,
-  Table,
-  Button,
-  Popconfirm,
-  Flex,
-  TableProps,
-  message,
-  Slider,
-  ConfigProvider
-} from "antd";
+import { Select, Table, Button, Popconfirm, Flex, TableProps, Slider, ConfigProvider } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
-import { getSuggestedVehicles } from "@/services/logistics/vehicles";
-import { IFormCreateOrder } from "../../../CreateOrderVieww";
+import { useDebounce } from "@/hooks/useSearch";
+import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 
-import { ISuggestedVehicle } from "@/types/logistics/schema";
+import { IFormCreateOrder } from "../../../CreateOrderVieww";
+import { IVehicleWithOccupation } from "@/types/logistics/schema";
 
 interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
 }
 
-interface ISuggestedVehicleOptions extends ISuggestedVehicle {
+interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
   usedPercentage?: number;
 }
 
 const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
   const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
+  const [selectedVehiclesInfo, setSelectedVehiclesInfo] = useState<IVehicleWithOccupation[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: "suggestedVehicle"
+    name: "suggestedVehicle",
+    keyName: "generatedId"
   });
 
   const selectedVehicles =
@@ -39,29 +33,118 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       control,
       name: "suggestedVehicle"
     }) || [];
+  const debouncedSelectedVehicles = useDebounce(selectedVehicles, 700);
 
   const typeActive = useWatch({ control, name: "typeActive" });
 
+  const selectedMaterials = useWatch({ control, name: "material" }) || [];
+  const debouncedSelectedMaterials = useDebounce(selectedMaterials, 700);
+
+  const selectedPeople = useWatch({ control, name: "people" }) || [];
+
+  // Solución 1: Usar useMemo para estabilizar el objeto de request
+  const requestData = useMemo(() => {
+    if (
+      !typeActive ||
+      (typeActive !== "3" &&
+        debouncedSelectedMaterials.length > 0 &&
+        !debouncedSelectedMaterials[0].id)
+    ) {
+      console.info("No hay datos suficientes para la solicitud");
+      return null;
+    }
+
+    const materials = debouncedSelectedMaterials.map((material) => {
+      const quantity = material.quantity ?? 1;
+      const weight = material.kg_weight ?? 0;
+      const length = material.mt_length ?? 0;
+      const width = material.mt_width ?? 0;
+      const height = material.mt_height ?? 0;
+
+      return {
+        id: material.id ?? 0,
+        weight: weight * quantity,
+        length: length * quantity,
+        width: width * quantity,
+        height: height * quantity
+      };
+    });
+
+    const vehiclesSelected = debouncedSelectedVehicles
+      .filter((vehicle) => vehicle.id)
+      .map((vehicle) => ({
+        id: vehicle.id,
+        quantity: vehicle.quantity
+      }));
+
+    return {
+      serviceTypeId: Number(typeActive) ?? 0,
+      ...(vehiclesSelected.length > 0 ? { vehiclesSelected } : {}),
+      ...(typeActive !== "3" ? { materials } : {}),
+      ...(typeActive === "3" ? { passengers: selectedPeople.length } : {})
+    };
+  }, [
+    typeActive,
+    // Crear una clave estable basada en los datos relevantes
+    JSON.stringify(
+      debouncedSelectedMaterials.map((m) => ({
+        id: m.id,
+        quantity: m.quantity,
+        kg_weight: m.kg_weight,
+        mt_length: m.mt_length,
+        mt_width: m.mt_width,
+        mt_height: m.mt_height
+      }))
+    ),
+    JSON.stringify(selectedPeople),
+    JSON.stringify(debouncedSelectedVehicles)
+  ]);
+
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
-      const contraintTypes = ["1", "2"];
+      if (!requestData) return;
+
       try {
-        if (contraintTypes.includes(typeActive || "")) {
-          const promises = contraintTypes.map((type) => getSuggestedVehicles(type));
-          const results = await Promise.all(promises);
-          setVehicles(results.flatMap((res) => res.data ?? []));
-        } else if (typeActive === "4") {
-          const res = await getSuggestedVehicles();
-          setVehicles(res.data ?? []);
-        } else {
-          const res = await getSuggestedVehicles(typeActive);
-          setVehicles(res.data ?? []);
+        setIsLoading(true);
+        const res = await getSuggestedVehiclesByMaterials(requestData);
+
+        // Solo actualizar si el componente sigue montado
+        if (!cancelled) {
+          setVehicles(res.vehiclesWithOcupation ?? []);
+          setSelectedVehiclesInfo(res.vehiclesSelectedWithOcupation ?? []);
         }
       } catch (error) {
-        message.error("Error al cargar opciones de vehículos sugeridos");
+        console.error("Error fetching suggested vehicles:", error);
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     })();
-  }, [typeActive]);
+
+    // Cleanup function para evitar actualizaciones en componente desmontado
+    return () => {
+      cancelled = true;
+    };
+  }, [requestData]); // Solo depende de requestData que está memoizado
+
+  // Helper function to get occupation percentage
+  const getOccupationPercentage = (vehicle?: ISuggestedVehicleOptions) => {
+    if (!vehicle) return 0;
+
+    switch (typeActive) {
+      case "1":
+        return vehicle.ocupationM3 || 0;
+      case "2":
+        return vehicle.ocupationKg || 0;
+      case "3":
+        return vehicle.ocupationPassengers || 0;
+      default:
+        return 0;
+    }
+  };
 
   const columns: TableProps<any>["columns"] = [
     {
@@ -111,6 +194,8 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                 style={{ width: 520 }}
                 allowClear
                 className="inputSelect"
+                loading={isLoading}
+                disabled={isLoading}
                 value={
                   selectedVehicle
                     ? {
@@ -123,16 +208,26 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                   const found = vehicles.find((v) => v.id === option.value);
                   field.onChange(option.value);
                   if (found) {
+                    // Calculate and store the occupation percentage
+                    const occupationPercentage = getOccupationPercentage(found);
+
                     update(index, {
                       ...fields[index],
-                      ...found,
-                      id: found.id
+                      ...{
+                        ...found,
+                        aditional_info: found.aditional_info ?? undefined,
+                        usedPercentage: occupationPercentage,
+                        id: found.id,
+                        HEEEEELP: "ASDASDASD",
+                        ID: found.id
+                      }
                     });
                   } else {
                     update(index, {
                       ...fields[index],
                       id: undefined,
-                      description: undefined
+                      description: undefined,
+                      usedPercentage: 0
                     });
                   }
                 }}
@@ -140,38 +235,52 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                   .filter(
                     (v) => !selectedVehicles.some((row, idx) => row.id === v.id && idx !== index)
                   )
-                  .map((vehicle) => ({
-                    value: vehicle.id,
-                    label: (
-                      <div className="vehicleOption">
-                        <Flex
-                          vertical
-                          gap="0.5rem"
-                          className="vehicleDetails left"
-                          justify="space-between"
-                        >
-                          <strong style={{ fontWeight: 600 }}>{vehicle.description}</strong>
-                          <span>
-                            Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
-                            {vehicle.height}m
-                          </span>
-                        </Flex>
+                  .map((vehicle) => {
+                    const percentageSlider = getOccupationPercentage(vehicle);
 
-                        <Flex vertical gap="0.5rem" className="vehicleDetails right">
-                          <Flex style={{ width: "100%" }} justify="space-between" align="center">
-                            <Flex align="center" gap="4px">
-                              <Truck size={16} />
-                              <p>Utilización</p>
-                            </Flex>
-
-                            <strong style={{ fontWeight: 600 }}>90%</strong>
+                    return {
+                      value: vehicle.id,
+                      label: (
+                        <div className="vehicleOption">
+                          <Flex
+                            vertical
+                            gap="0.5rem"
+                            className="vehicleDetails left"
+                            justify="space-between"
+                          >
+                            <strong
+                              style={{
+                                fontWeight: 600,
+                                maxWidth: "255px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap"
+                              }}
+                            >
+                              {vehicle.description}
+                            </strong>
+                            <span>
+                              Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
+                              {vehicle.height}m
+                            </span>
                           </Flex>
-                          <Slider value={90} style={{ margin: 0 }} />
-                        </Flex>
-                      </div>
-                    ),
-                    title: vehicle.description
-                  }))}
+
+                          <Flex vertical gap="0.5rem" className="vehicleDetails right">
+                            <Flex style={{ width: "100%" }} justify="space-between" align="center">
+                              <Flex align="center" gap="4px">
+                                <Truck size={16} />
+                                <p>Utilización</p>
+                              </Flex>
+
+                              <strong style={{ fontWeight: 600 }}>{percentageSlider}%</strong>
+                            </Flex>
+                            <Slider value={percentageSlider} style={{ margin: 0 }} />
+                          </Flex>
+                        </div>
+                      ),
+                      title: vehicle.description
+                    };
+                  })}
                 optionRender={(option) => option.label}
                 filterOption={(input, option) =>
                   (option?.title || "").toLowerCase().includes(input.toLowerCase())
@@ -184,10 +293,16 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
     },
     {
       title: "Tasa de utilización",
-      dataIndex: "used_percentage",
-      key: "used_percentage",
+      dataIndex: "usedPercentage",
+      key: "usedPercentage",
       align: "center",
-      render: () => <p className="usedPercentage">0%</p>
+      render: (_: any, record: any) => {
+        // Get the percentage from the stored value or calculate it
+        const currentVehicle = selectedVehiclesInfo.find((v) => v.id === record.id);
+        const updatedPercentage = getOccupationPercentage(currentVehicle);
+
+        return <p className="usedPercentage">{updatedPercentage}%</p>;
+      }
     },
     {
       title: "",
@@ -222,7 +337,13 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
       <Flex vertical gap={"1.5rem"} className="suggestedVehicleSection">
         <h3 className="subTitle">Vehículo sugerido</h3>
 
-        <Table columns={columns} dataSource={fields} pagination={false} rowKey={"id"} />
+        <Table
+          columns={columns}
+          dataSource={fields.map((field) => ({ ...field, key: field.id }))}
+          pagination={false}
+          rowKey={"id"}
+          loading={isLoading}
+        />
 
         <Button className="addButton" onClick={() => append({ quantity: 1 })}>
           Agregar

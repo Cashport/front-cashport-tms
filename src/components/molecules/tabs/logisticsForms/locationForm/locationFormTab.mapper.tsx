@@ -53,7 +53,7 @@ export const normalizeLocationData = (data: LocationData): any => {
     general: {
       id: data.id.toString(),
       description: data.description,
-      city_id: data.city_id.toString(),
+      city_id: data.city_id,
       postal_code: "",
       url_location: "",
       latitude: data.latitude,
