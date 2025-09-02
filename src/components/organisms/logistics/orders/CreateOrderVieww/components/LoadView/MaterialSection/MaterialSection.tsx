@@ -47,6 +47,18 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
       name: "material"
     }) || [];
 
+  const calculateVolume = (height?: number, width?: number, length?: number): number => {
+    const h = height || 0;
+    const w = width || 0;
+    const l = length || 0;
+    return h * w * l;
+  };
+
+  const formatVolume = (volume: number): string => {
+    if (volume === 0) return "--";
+    return `${volume.toFixed(3)} m³`;
+  };
+
   useEffect(() => {
     (async () => {
       const res = await getAllMaterials();
@@ -115,13 +127,16 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                   update(index, {
                     ...fields[index],
                     ...found,
-                    id: found.id
+                    id: found.id,
+                    // Calcular el volumen inicial si tiene dimensiones
+                    m3_volume: calculateVolume(found.mt_height, found.mt_width, found.mt_length)
                   });
                 } else {
                   // Limpia la fila si se deselecciona
                   update(index, {
                     ...fields[index],
-                    id: undefined
+                    id: undefined,
+                    m3_volume: 0
                   });
                 }
               }}
@@ -190,6 +205,21 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                 // Aseguramos que siempre sea algo valido
                 const numericValue = val === null || val === undefined ? 0 : Number(val);
                 onChange(numericValue);
+
+                // Actualizar el volumen cuando cambia el alto
+                const currentRow = selectedMaterials[index];
+                if (currentRow) {
+                  const newVolume = calculateVolume(
+                    numericValue,
+                    currentRow.mt_width,
+                    currentRow.mt_length
+                  );
+                  update(index, {
+                    ...currentRow,
+                    mt_height: numericValue,
+                    m3_volume: newVolume
+                  });
+                }
               }}
               min={0}
               step={0.01}
@@ -229,6 +259,21 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                 // Aseguramos que siempre sea algo valido
                 const numericValue = val === null || val === undefined ? 0 : Number(val);
                 onChange(numericValue);
+
+                // Actualizar el volumen cuando cambia el ancho
+                const currentRow = selectedMaterials[index];
+                if (currentRow) {
+                  const newVolume = calculateVolume(
+                    currentRow.mt_height,
+                    numericValue,
+                    currentRow.mt_length
+                  );
+                  update(index, {
+                    ...currentRow,
+                    mt_width: numericValue,
+                    m3_volume: newVolume
+                  });
+                }
               }}
               min={0}
               step={0.01}
@@ -268,6 +313,21 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                 // Aseguramos que siempre sea algo valido
                 const numericValue = val === null || val === undefined ? 0 : Number(val);
                 onChange(numericValue);
+
+                // Actualizar el volumen cuando cambia el largo
+                const currentRow = selectedMaterials[index];
+                if (currentRow) {
+                  const newVolume = calculateVolume(
+                    currentRow.mt_height,
+                    currentRow.mt_width,
+                    numericValue
+                  );
+                  update(index, {
+                    ...currentRow,
+                    mt_length: numericValue,
+                    m3_volume: newVolume
+                  });
+                }
               }}
               min={0}
               step={0.01}
@@ -295,7 +355,14 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
       title: "Volumen",
       dataIndex: "m3_volume",
       key: "m3_volume",
-      render: (volume) => <span>{volume ? `${volume} m³` : "--"}</span>
+      render: (_: any, __: any, index: number) => {
+        const height = selectedMaterials[index]?.mt_height;
+        const width = selectedMaterials[index]?.mt_width;
+        const length = selectedMaterials[index]?.mt_length;
+
+        const volume = calculateVolume(height, width, length);
+        return <span>{formatVolume(volume)}</span>;
+      }
     },
     {
       title: "S. Controladas",

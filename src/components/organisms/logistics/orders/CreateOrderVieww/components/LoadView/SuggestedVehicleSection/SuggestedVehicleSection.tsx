@@ -136,7 +136,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
     switch (typeActive) {
       case "1":
-        return vehicle.ocupationM3 || 0;
+        return (
+          (vehicle.ocupationM3 > vehicle.ocupationKg ? vehicle.ocupationM3 : vehicle.ocupationKg) ||
+          0
+        );
       case "2":
         return vehicle.ocupationKg || 0;
       case "3":
