@@ -9,6 +9,8 @@ import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 import { IVehicleWithOccupation } from "@/types/logistics/schema";
 
+import "./suggestedVehicleSection.scss";
+
 interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
 }
@@ -197,6 +199,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                 style={{ width: 520 }}
                 allowClear
                 className="inputSelect"
+                popupClassName="vehicleSelectPopup"
                 loading={isLoading}
                 disabled={isLoading}
                 value={
@@ -221,7 +224,6 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                         aditional_info: found.aditional_info ?? undefined,
                         usedPercentage: occupationPercentage,
                         id: found.id,
-                        HEEEEELP: "ASDASDASD",
                         ID: found.id
                       }
                     });
@@ -251,17 +253,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                             className="vehicleDetails left"
                             justify="space-between"
                           >
-                            <strong
-                              style={{
-                                fontWeight: 600,
-                                maxWidth: "255px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {vehicle.description}
-                            </strong>
+                            <strong className="vehicleDescription">{vehicle.description}</strong>
                             <span>
                               Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
                               {vehicle.height}m
@@ -337,7 +329,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         }
       }}
     >
-      <Flex vertical gap={"1.5rem"} className="suggestedVehicleSection">
+      <Flex vertical gap={"1.5rem"}>
         <h3 className="subTitle">Vehículo sugerido</h3>
 
         <Table
