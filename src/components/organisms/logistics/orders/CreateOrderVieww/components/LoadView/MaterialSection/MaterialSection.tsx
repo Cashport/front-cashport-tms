@@ -54,7 +54,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
 
   const formatVolume = (volume: number): string => {
     if (volume === 0) return "--";
-    return `${volume.toFixed(3)} m³`;
+    return `${volume.toFixed(2).replace(".", ",")} m³`;
   };
 
   const materialOptions = allMaterials?.map((mat) => ({
