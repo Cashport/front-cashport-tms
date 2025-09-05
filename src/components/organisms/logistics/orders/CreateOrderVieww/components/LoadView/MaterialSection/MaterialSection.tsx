@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 import { Select, Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
-import { getAllMaterials } from "@/services/logistics/materials";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import { IMaterialStepOne } from "@/types/logistics/schema";
@@ -11,11 +10,10 @@ import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
 interface IMaterialSectionProps {
   control: Control<IFormCreateOrder, any>;
+  allMaterials: IMaterialStepOne[] | undefined;
 }
 
-const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
-  const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
-
+const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterials }) => {
   const width = useScreenWidth();
 
   const matchiWidthNameColumn = React.useMemo(() => {
@@ -59,14 +57,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
     return `${volume.toFixed(3)} m³`;
   };
 
-  useEffect(() => {
-    (async () => {
-      const res = await getAllMaterials();
-      setAllMaterials(res.data ?? []);
-    })();
-  }, []);
-
-  const materialOptions = allMaterials.map((mat) => ({
+  const materialOptions = allMaterials?.map((mat) => ({
     label: mat.description,
     value: mat.id
   }));
@@ -115,14 +106,14 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
               allowClear
-              options={materialOptions.filter(
+              options={materialOptions?.filter(
                 (option) =>
                   !selectedMaterials.some((row, idx) => row.id === option.value && idx !== index)
               )}
               onChange={(value) => {
                 field.onChange(value);
                 // Al seleccionar, setea automáticamente todos los datos en la fila
-                const found = allMaterials.find((mat) => mat.id === value);
+                const found = allMaterials?.find((mat) => mat.id === value);
                 if (found) {
                   update(index, {
                     ...fields[index],

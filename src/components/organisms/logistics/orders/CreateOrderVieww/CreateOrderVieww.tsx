@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Dayjs } from "dayjs";
@@ -6,6 +6,7 @@ import { Button, Flex, message } from "antd";
 
 import { mapFormToTransferOrder } from "./CreateOrderVieww.mapper";
 import { addTransferOrderNew } from "@/services/logistics/transfer-orders";
+import { getAllMaterials } from "@/services/logistics/materials";
 
 import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
@@ -115,8 +116,17 @@ export type IViewOption = "scheduling" | "load" | "additionalInfo";
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
   const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
+  const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
 
   const { push } = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      if (allMaterials.length > 0) return;
+      const res = await getAllMaterials();
+      setAllMaterials(res.data ?? []);
+    })();
+  }, []);
 
   const emptyValue = [{ id: undefined, quantity: 1 }];
 
@@ -174,7 +184,7 @@ export const CreateOrderVieww: React.FC = () => {
       case "scheduling":
         return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
-        return <LoadView control={control} />;
+        return <LoadView control={control} allMaterials={allMaterials} />;
       case "additionalInfo":
         return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
