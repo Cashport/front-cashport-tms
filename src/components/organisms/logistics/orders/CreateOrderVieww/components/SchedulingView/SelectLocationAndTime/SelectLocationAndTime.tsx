@@ -39,10 +39,15 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
     name: "TripDetails"
   });
 
+  const isFixRate = useWatch({
+    control,
+    name: "isFixRate"
+  });
+
   const showRaisingCheckbox = selectedType === "1";
   const showRaisingHours = selectedType === "1" || selectedType === "2";
 
-  const destinationAvailable = selectedType == "4";
+  const destinationAvailable = isFixRate;
 
   useEffect(() => {
     if (selectedType === "2") {
