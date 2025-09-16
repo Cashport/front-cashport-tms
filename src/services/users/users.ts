@@ -212,6 +212,6 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
 };
 
 export const sendEmailResetPassword = async (email: string) => {
-  const response: GenericResponse = await API.post(`/logistic-user/resetpassword`, { email });
+  const response: GenericResponse = await axios.post(`/logistic-user/resetpassword`, { email });
   return response;
 };
