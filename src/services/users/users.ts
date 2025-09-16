@@ -6,6 +6,7 @@ import { IGroupsByUser } from "@/types/clientsGroups/IClientsGroups";
 import { MessageType } from "@/context/MessageContext";
 import { GenericResponse } from "@/types/global/IGlobal";
 import axios from "axios";
+import config from "@/config";
 
 export const getUserById = async (idUser: string): Promise<WelcomeData> => {
   try {
@@ -212,6 +213,6 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
 };
 
 export const sendEmailResetPassword = async (email: string) => {
-  const response: GenericResponse = await axios.post(`/logistic-user/resetpassword`, { email });
+  const response: GenericResponse = await axios.post(`${config.API_HOST}/logistic-user/resetpassword`, { email });
   return response;
 };
