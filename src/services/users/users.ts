@@ -210,3 +210,8 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
     return error as any;
   }
 };
+
+export const sendEmailResetPassword = async (email: string) => {
+  const response: GenericResponse = await API.post(`/logistic-user/resetpassword`, { email });
+  return response;
+};
