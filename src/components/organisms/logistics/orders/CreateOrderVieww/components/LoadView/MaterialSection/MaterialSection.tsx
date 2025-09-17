@@ -1,6 +1,6 @@
 import React from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { Select, Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber } from "antd";
+import { Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber, Select } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
 import useScreenWidth from "@/components/hooks/useScreenWidth";
@@ -138,6 +138,24 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
             />
           )}
         />
+        // TO DO: Optimize select
+        // <Controller
+        //   control={control}
+        //   name={`material.${index}.id`}
+        //   render={({ field }) => (
+        //     <SelectTooManyOptions
+        //       {...field}
+        //       options={materialOptions}
+        //       selectedMaterials={selectedMaterials}
+        //       index={index}
+        //       allMaterials={allMaterials}
+        //       fields={fields}
+        //       update={update}
+        //       calculateVolume={calculateVolume}
+        //       style={{ width: matchiWidthNameColumn }}
+        //     />
+        //   )}
+        // />
       ),
       width: matchiWidthNameColumn
     },
