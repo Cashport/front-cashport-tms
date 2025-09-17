@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
@@ -44,39 +44,9 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
     name: "isFixRate"
   });
 
-  const showRaisingCheckbox = selectedType === "1";
-  const showRaisingHours = selectedType === "1" || selectedType === "2";
+  const showRaisingCheckbox = selectedType === "1" || selectedType === "3";
 
   const destinationAvailable = isFixRate;
-
-  useEffect(() => {
-    if (selectedType === "2") {
-      // When selectedType is "2", remove the last field (destination)
-      if (fields.length > 1) {
-        remove(fields.length - 1);
-      }
-    } else {
-      // When selectedType is not "2", reset to default tripDetails
-      if (fields.length < 2) {
-        setValue(`TripDetails`, [
-          {
-            placeId: undefined,
-            date: undefined,
-            time: undefined,
-            requiresRaising: false,
-            raisingNum: 0
-          },
-          {
-            placeId: undefined,
-            date: undefined,
-            time: undefined,
-            requiresRaising: false,
-            raisingNum: 0
-          }
-        ]);
-      }
-    }
-  }, [selectedType]);
 
   const disabledDate = (current: dayjs.Dayjs) => {
     // Deshabilita todas las fechas antes de hoy
@@ -134,11 +104,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         placeholder={LABELS(i, fields.length)}
                         options={locationOptions}
                         style={{
-                          gridColumn: showRaisingCheckbox
-                            ? "1 / 8"
-                            : showRaisingHours
-                              ? "1 /11"
-                              : "1 / -1"
+                          gridColumn: showRaisingCheckbox ? "1 / 8" : "1 /11"
                         }}
                         value={
                           field.value && tripDetails[i]
@@ -187,12 +153,16 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                     />
                   )}
 
-                  {showRaisingHours && (
-                    <Controller
-                      control={control}
-                      name={`TripDetails.${i}.raisingNum`}
-                      render={({ field }) => (
+                  <Controller
+                    control={control}
+                    name={`TripDetails.${i}.raisingNum`}
+                    render={({ field }) => {
+                      const shouldDisable =
+                        !tripDetails[i]?.requiresRaising && selectedType !== "2";
+
+                      return (
                         <InputNumber
+                          disabled={shouldDisable}
                           {...field}
                           className="inputNumber"
                           placeholder="0 Hrs"
@@ -200,9 +170,9 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                           style={{ gridColumn: "11 / -1" }}
                           formatter={(value) => `${value} Hrs`}
                         />
-                      )}
-                    />
-                  )}
+                      );
+                    }}
+                  />
 
                   {/* Date */}
                   <Controller
