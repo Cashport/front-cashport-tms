@@ -125,6 +125,18 @@ export const ChangePassForm = ({ mode }: IChangePassFormProps) => {
                   variant="borderless"
                   required
                   autoComplete="current-password"
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCopy={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCut={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
                   suffix={
                     <Tooltip title={showPassword.password ? "Hidden Password" : "Show Password"}>
                       {!showPassword.password ? (
@@ -174,6 +186,18 @@ export const ChangePassForm = ({ mode }: IChangePassFormProps) => {
                   variant="borderless"
                   required
                   autoComplete="current-password"
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCopy={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCut={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
                   suffix={
                     <Tooltip
                       title={showPassword.confirmPassword ? "Hidden Password" : "Show Password"}
