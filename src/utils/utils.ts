@@ -3,6 +3,8 @@ import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 import { IChanel } from "@/types/bre/IBRE";
 import { CountryCode } from "@/types/global/IGlobal";
 import { IComponentPermission } from "@/types/userPermissions/IUserPermissions";
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 interface Subline {
   id: number;
@@ -442,4 +444,8 @@ export function formatTimeAgo(utcDateString: string): string {
   if (months < 12) return `${months} meses`;
   if (years === 1) return `1 año`;
   return `${years} años`;
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

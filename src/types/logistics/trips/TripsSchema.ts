@@ -55,8 +55,6 @@ export interface IPricingScore {
 
 export interface CarriersPricing {
   id_carrier_pricing: number;
-  valid_from: string;
-  valid_to: string;
   description: string;
   disponibility: number;
   price?: number;
