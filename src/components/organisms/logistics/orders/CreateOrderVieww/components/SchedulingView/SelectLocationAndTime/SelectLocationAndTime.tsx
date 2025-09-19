@@ -50,7 +50,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
   const destinationAvailable = isFixRate;
 
   useEffect(() => {
-    if (selectedType === "2") {
+    if (selectedType === "2" && !isFixRate) {
       // When selectedType is "2", remove the last field (destination)
       if (fields.length > 1) {
         remove(fields.length - 1);
@@ -76,7 +76,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
         ]);
       }
     }
-  }, [selectedType]);
+  }, [selectedType, isFixRate]);
 
   const disabledDate = (current: dayjs.Dayjs) => {
     // Deshabilita todas las fechas antes de hoy
