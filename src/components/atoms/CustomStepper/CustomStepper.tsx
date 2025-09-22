@@ -43,9 +43,10 @@ interface Step {
 interface CustomStepperProps {
   steps: Step[];
   currentStepIndex: number;
+  customClassName?: string;
 }
 
-export const CustomStepper = ({ steps, currentStepIndex }: CustomStepperProps) => {
+export const CustomStepper = ({ steps, currentStepIndex, customClassName }: CustomStepperProps) => {
   const getStepStyle = (step: Step, stepIndex: number, currentIndex: number) => {
     if (step.disabled) return STEPSTYLES.DISABLED;
     if (currentIndex === stepIndex) return STEPSTYLES.CURRENT;
@@ -54,7 +55,7 @@ export const CustomStepper = ({ steps, currentStepIndex }: CustomStepperProps) =
   };
 
   return (
-    <Flex className={styles.stepper}>
+    <Flex className={`${styles.stepper} ${customClassName}`}>
       <Flex justify="space-evenly">
         {steps.map((step, stepIndex) => {
           const currentStepStyle = getStepStyle(step, stepIndex, currentStepIndex);
