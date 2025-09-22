@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
@@ -19,6 +19,7 @@ import ChatThread from "./chat-thread";
 import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
 import { Chat, Funnel, MagnifyingGlass, Users } from "@phosphor-icons/react";
+import { getTickets } from "@/services/chat/chat";
 
 import "@/modules/chat/styles/chatStyles.css";
 
@@ -38,6 +39,18 @@ export default function ChatInbox() {
   const [activeId, setActiveId] = useState<string>(conversationsMock[0]?.id ?? "");
   const [massOpen, setMassOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
+
+  useEffect(() => {
+    const fetchTicketsTest = async () => {
+      try {
+        const res = await getTickets();
+        console.log("Fetched tickets:", res);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+      }
+    };
+    fetchTicketsTest();
+  }, []);
 
   const filtered = useMemo(() => {
     return conversationsMock.filter((c) => {
