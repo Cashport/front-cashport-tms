@@ -14,6 +14,7 @@ import SchedulingView, { ITripInfoMap } from "./components/SchedulingView/Schedu
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
 import AdditionalInfoView from "./components/ResponsiblesView/AdditionalInfoView";
+import { ModalVehicleOccupation } from "./components/LoadView/ModalVehicleOccupation/ModalVehicleOccupation";
 
 import {
   IClient,
@@ -23,7 +24,8 @@ import {
   IGetPSL,
   IMaterialStepOne,
   IRoute,
-  ISuggestedVehicle
+  ISuggestedVehicle,
+  IVehicleWithOccupation
 } from "@/types/logistics/schema";
 import { IOtherRequirement } from "@/services/logistics/other-requirements";
 
@@ -104,6 +106,7 @@ export interface IFormCreateOrder {
   material?: IMaterialForm[];
   people?: IPeopleForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
+  selectedVehiclesInfo?: IVehicleWithOccupation[];
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;
   billing?: IBillingForm;
@@ -116,6 +119,7 @@ export type IViewOption = "scheduling" | "load" | "additionalInfo";
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
   const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
 
   const { push } = useRouter();
@@ -171,6 +175,7 @@ export const CreateOrderVieww: React.FC = () => {
   // watch Load form values
   const materialDetails = watch("material");
   const suggestedVehicles = watch("suggestedVehicle");
+  const selectedVehiclesInfo = watch("selectedVehiclesInfo");
   const otherServices = watch("otherServices");
   const additionalInfo = watch("additionalInfo");
   const billing = watch("billing");
@@ -184,7 +189,7 @@ export const CreateOrderVieww: React.FC = () => {
       case "scheduling":
         return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
-        return <LoadView control={control} allMaterials={allMaterials} />;
+        return <LoadView control={control} allMaterials={allMaterials} setValue={setValue} />;
       case "additionalInfo":
         return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
@@ -370,6 +375,8 @@ export const CreateOrderVieww: React.FC = () => {
           Siguiente
         </PrincipalButton>
       </div>
+
+      <ModalVehicleOccupation isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };

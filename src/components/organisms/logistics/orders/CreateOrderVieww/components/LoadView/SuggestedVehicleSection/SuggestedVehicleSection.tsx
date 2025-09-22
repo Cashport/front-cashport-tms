@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
+import { Control, Controller, useFieldArray, useWatch, UseFormSetValue } from "react-hook-form";
 import { Select, Table, Button, Popconfirm, Flex, TableProps, Slider, ConfigProvider } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
@@ -13,15 +13,15 @@ import "./suggestedVehicleSection.scss";
 
 interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
+  setValue: UseFormSetValue<IFormCreateOrder>;
 }
 
 interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
   usedPercentage?: number;
 }
 
-const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
+const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control, setValue }) => {
   const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
-  const [selectedVehiclesInfo, setSelectedVehiclesInfo] = useState<IVehicleWithOccupation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { fields, append, remove, update } = useFieldArray({
@@ -44,7 +44,9 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   const selectedPeople = useWatch({ control, name: "people" }) || [];
 
-  // Solución 1: Usar useMemo para estabilizar el objeto de request
+  const selectedVehiclesInfo = useWatch({ control, name: "selectedVehiclesInfo" }) || [];
+
+  //  useMemo para estabilizar el objeto de request
   const requestData = useMemo(() => {
     if (
       !typeActive ||
@@ -115,7 +117,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         // Solo actualizar si el componente sigue montado
         if (!cancelled) {
           setVehicles(res.vehiclesWithOcupation ?? []);
-          setSelectedVehiclesInfo(res.vehiclesSelectedWithOcupation ?? []);
+          setValue("selectedVehiclesInfo", res.vehiclesSelectedWithOcupation ?? []);
         }
       } catch (error) {
         console.error("Error fetching suggested vehicles:", error);
