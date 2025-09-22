@@ -11,8 +11,6 @@ type Props = {
   tag: any;
   openTabs: number[];
   setOpenTabs: any;
-  start_group_location_desc?: string | null;
-  end_group_location_desc?: string | null;
 };
 export default function JourneyCollapse({
   index,
@@ -23,9 +21,7 @@ export default function JourneyCollapse({
   community_name,
   openTabs,
   setOpenTabs,
-  tag,
-  start_group_location_desc,
-  end_group_location_desc
+  tag
 }: Readonly<Props>) {
   const handleChange = () => {
     if (openTabs.includes(index)) {
@@ -49,8 +45,6 @@ export default function JourneyCollapse({
           handleChange={handleChange}
           community_name={community_name}
           is_community={is_community}
-          start_group_location_desc={start_group_location_desc}
-          end_group_location_desc={end_group_location_desc}
         />
       ),
       showArrow: false,
@@ -58,12 +52,6 @@ export default function JourneyCollapse({
     }
   ];
   return (
-    <Collapse
-      defaultActiveKey={openTabs.map(getKey)}
-      expandIconPosition="end"
-      ghost
-      items={actionsOptionsVehiclesSelection}
-      key={index}
-    />
+    <Collapse defaultActiveKey={openTabs.map(getKey)} expandIconPosition="end" ghost items={actionsOptionsVehiclesSelection} key={index} />
   );
 }

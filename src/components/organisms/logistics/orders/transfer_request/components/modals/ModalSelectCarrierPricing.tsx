@@ -18,7 +18,6 @@ import UiTabs from "@/components/ui/ui-tabs";
 import CarrierPriceCard from "./components/CarrierPriceCard/CarrierPriceCard";
 import { Footer } from "./components/Footer/Footer";
 import { Header } from "./components/Header/Header";
-import CommunityTag from "../communityTag/communityTag";
 
 import { ITransferRequestJourneyReview } from "@/types/logistics/schema";
 import {
@@ -323,22 +322,12 @@ export default function ModalSelectCarrierPricing({
               </Flex>
             </Flex>
             <Flex gap={8} vertical align="start" style={{ width: "100%" }}>
-              <Flex gap={"12px"} align="center">
-                <Text>
-                  <strong>Origen</strong> {journey?.start_location_desc}
-                </Text>
-                {journey?.start_group_location_desc && (
-                  <CommunityTag name={journey.start_group_location_desc} />
-                )}
-              </Flex>
-              <Flex gap={"12px"} align="center">
-                <Text>
-                  <strong>Destino</strong> {journey?.end_location_desc}
-                </Text>
-                {journey?.end_group_location_desc && (
-                  <CommunityTag name={journey.end_group_location_desc} />
-                )}
-              </Flex>
+              <Text>
+                <strong>Origen</strong> {journey?.start_location_desc}
+              </Text>
+              <Text>
+                <strong>Destino</strong> {journey?.end_location_desc}
+              </Text>
             </Flex>
           </Flex>
           <UiTabs
@@ -382,7 +371,6 @@ export default function ModalSelectCarrierPricing({
                 isChecked={carrier?.checked ?? false}
                 handleCheck={handleCheck}
                 type={selectedTrip.service.type}
-                journey={journey}
               />
             ))}
           </Flex>

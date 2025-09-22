@@ -50,12 +50,9 @@ export const getAllCitiesByState = async (idstate: string = "1"): Promise<ICity[
   throw new Error(response?.message || "Error");
 };
 
-export const getAllLocationTypes = async (type: "carrier" | "location" = "location") => {
+export const getAllLocationTypes = async (): Promise<ILocationTypes[]> => {
   const response: GenericResponse<ILocationTypes[]> = await API.get(
-    `/logistic-location/all/location-types`,
-    {
-      params: { type }
-    }
+    `/logistic-location/all/location-types`
   );
   if (response.success) return response.data;
   throw new Error(response?.message || "Error");

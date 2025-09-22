@@ -8,22 +8,20 @@ import OtherServicesSection from "./OtherServicesSection/OtherServicesSection";
 import PersonalSection from "./PersonalSection/PersonalSection";
 
 import { IFormCreateOrder } from "../../CreateOrderVieww";
-import { IMaterialStepOne } from "@/types/logistics/schema";
 
 import "./loadView.scss";
 
 interface ILoadViewProps {
   control: Control<IFormCreateOrder, any>;
-  allMaterials: IMaterialStepOne[] | undefined;
 }
 
-const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials }) => {
+const LoadView: React.FC<ILoadViewProps> = ({ control }) => {
   const typeActive = useWatch({ control, name: "typeActive" });
 
   return (
     <Flex vertical gap={"1.5rem"} style={{ marginBottom: "2rem" }} className="loadView">
       {typeActive !== "3" ? (
-        <MaterialSection control={control} allMaterials={allMaterials} />
+        <MaterialSection control={control} />
       ) : (
         <PersonalSection control={control} />
       )}

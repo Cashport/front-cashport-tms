@@ -11,28 +11,28 @@ import {
 } from "@/types/logistics/schema";
 
 export default function TrPricingSteperFetcher({ id }: { id: number }) {
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate, isValidating } = useSWR(
     id ? [id] : null, // Solo ejecutar SWR si `id` es válido
     () => getTransferRequestSteps(id),
     {
       revalidateOnMount: true,
       revalidateIfStale: false,
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
       onError: (error) => {
         console.error("error", error);
       }
     }
   );
 
-  if (isLoading || !data) return <Spin />;
+  if (isLoading || !data || isValidating) return <Spin />;
   const mutateStepthree = (journey: ITransferRequestJourneyReview[]) => {
     mutate({ ...data, stepThree: { journey } }, { revalidate: false });
   };
   const mapJourneyToTracking: (journey?: ITransferRequestJourneyInfo[]) => ITrackingResponse[] = (
     journey
   ) =>
-    journey?.map((a) => ({
+    journey?.map((a, i) => ({
       end_date: a.end_date,
       start_date: a.start_date,
       end_location_desc: a.end_location_desc,
@@ -46,16 +46,13 @@ export default function TrPricingSteperFetcher({ id }: { id: number }) {
       id: a.id_journey,
       start_date_flexible: a.start_date_flexible,
       end_date_flexible: a.end_date_flexible,
-      route: a.route,
-      community_name: a.community_name,
-      is_community: a.is_community,
-      start_group_location_desc: a.start_group_location_desc,
-      end_group_location_desc: a.end_group_location_desc
+      route: a.route
     })) || [];
 
   const handleRevalidate = () => {
     mutate();
   };
+
   return (
     <PricingTransferRequest
       data={data}

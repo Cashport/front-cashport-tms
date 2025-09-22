@@ -28,7 +28,6 @@ export interface IProvider {
     color: string;
     backgroundColor: string;
   };
-  group_location_ids: number[];
 }
 
 export const getAllCarriers = async (): Promise<IProvider[]> => {
@@ -56,10 +55,7 @@ export const updateCarrier = async (form: any): Promise<any> => {
   const data = {
     features: form.trip_type.map((tripType: any) => ({
       id: tripType.value
-    })),
-    carrier_type: form.carrier_type,
-    id: form.id,
-    group_location_ids: form.group_location_select?.map(({ value }: { value: number }) => value)
+    }))
   };
   try {
     const response: GenericResponse = await API.put(`/carrier/update/${form.id}`, data);

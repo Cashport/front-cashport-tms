@@ -1,18 +1,21 @@
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { AxiosError } from "axios";
-import { Button, Drawer, Flex, message, Typography } from "antd";
+import styles from "./details.module.scss";
 import { CaretDoubleRight, CaretLeft, DotsThree } from "phosphor-react";
-
-import { STATUS, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
-import { useTransferRequestDetail } from "@/hooks/logistics/useTransferRequestDetail";
+import { AxiosError } from "axios";
+import { Button, Drawer, Flex, message, Modal, Typography } from "antd";
+import { MainDescription } from "./main-description/MainDescription";
+import { Step } from "./step/Step";
+import { useEffect, useState } from "react";
+import { Novelty } from "./novelty/Novelty";
 import {
+  getTransferRequestDetail,
   toggleFixedRate,
   updateTransferRequestStatus
 } from "@/services/logistics/transfer-request";
-import { getBillingByTransferRequest } from "@/services/logistics/billing_list";
-import { getTransferJourney } from "@/services/logistics/transfer-journey";
+import { useParams, useRouter } from "next/navigation";
+import { ITransferRequestDetail } from "@/types/transferRequest/ITransferRequest";
+import { DrawerBody } from "./drawer-body/DrawerBody";
+import { INovelty } from "@/types/novelty/INovelty";
 import {
   aprobeOrRejectDetail,
   createNovelty,
@@ -20,23 +23,17 @@ import {
   getNoveltyDetail,
   updateNovelty
 } from "@/services/logistics/novelty";
-
-import { MainDescription } from "./main-description/MainDescription";
-import { Step } from "./step/Step";
-import { DrawerBody } from "./drawer-body/DrawerBody";
-import { Novelty } from "./novelty/Novelty";
+import { getTransferJourney } from "@/services/logistics/transfer-journey";
+import { ITransferJourney } from "@/types/transferJourney/ITransferJourney";
 import { DrawerCreateBody } from "./drawer-create-body/DrawerCreateBody";
 import ModalGenerateActionTO from "@/components/molecules/modals/ModalGenerateActionTO/ModalGenerateActionTO";
 import { BillingTable } from "./billing-table/BillingTable";
+import { getBillingByTransferRequest } from "@/services/logistics/billing_list";
+import { BillingByCarrier } from "@/types/logistics/billing/billing";
 import ModalBillingMT from "@/components/molecules/modals/ModalBillingMT/ModalBillingMT";
 import ModalBillingAction from "@/components/molecules/modals/ModalBillingAction/ModalBillingAction";
+import { STATUS, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import ModalResumeTracking from "@/components/molecules/modals/ModalResumeTracking";
-
-import { BillingByCarrier } from "@/types/logistics/billing/billing";
-import { INovelty } from "@/types/novelty/INovelty";
-import { ITransferJourney } from "@/types/transferJourney/ITransferJourney";
-
-import styles from "./details.module.scss";
 
 const Text = Typography;
 
@@ -67,6 +64,7 @@ export const TransferOrderDetails = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
   const [isCreateNovelty, setIsCreateNovelty] = useState<boolean>(false);
+  const [transferRequest, setTransferRequest] = useState<ITransferRequestDetail | null>(null);
   const [transferJournies, setTransferJournies] = useState<ITransferJourney[]>();
   const [novelty, setNovelty] = useState<INovelty | null>(null);
   const [billingList, setBillingList] = useState<BillingByCarrier[]>([]);
@@ -94,10 +92,6 @@ export const TransferOrderDetails = () => {
   const { id } = useParams();
   const router = useRouter();
 
-  const { data: transferRequestData, mutate: mutateTransferRequestData } = useTransferRequestDetail(
-    Number(id)
-  );
-
   const findNoveltyDetail = async (id: number) => {
     setIsCreateNovelty(false);
     const data = await getNoveltyDetail(id);
@@ -123,8 +117,7 @@ export const TransferOrderDetails = () => {
   }
 
   const canFinalizeTrip = transferJournies
-    ? canFinalizeJourney(transferJournies) &&
-      transferRequestData?.status_id == STATUS.BNG.POR_LEGALIZAR
+    ? canFinalizeJourney(transferJournies) && transferRequest?.status_id == STATUS.BNG.POR_LEGALIZAR
     : false;
 
   const inProgressStatus = [
@@ -136,9 +129,7 @@ export const TransferOrderDetails = () => {
     STATUS.TR.DETENIDO
   ];
 
-  const canChangeStatusToPorLegalizar = inProgressStatus.includes(
-    transferRequestData?.status_id ?? ""
-  );
+  const canChangeStatusToPorLegalizar = inProgressStatus.includes(transferRequest?.status_id ?? "");
 
   const handleBillingTableViewDetails = (id: number) => {
     setIsModalBillingVisible(true);
@@ -150,7 +141,7 @@ export const TransferOrderDetails = () => {
       case NavEnum.NOVELTY:
         return (
           <Novelty
-            transferRequestId={transferRequestData?.id || null}
+            transferRequestId={transferRequest?.id || null}
             openDrawer={() => setOpenDrawer(true)}
             handleOpenCreateDrawer={handleOpenCreateDrawer}
             handleShowDetails={findNoveltyDetail}
@@ -182,15 +173,22 @@ export const TransferOrderDetails = () => {
     }
   };
 
+  const findDetails = async () => {
+    const data = await getTransferRequestDetail(Number(id));
+    if (Object.keys(data).length) {
+      setTransferRequest(data as ITransferRequestDetail);
+    }
+  };
+
   const findNovelties = async () => {
-    const data = await getTransferJourney(Number(transferRequestData?.id || id));
+    const data = await getTransferJourney(Number(transferRequest?.id || id));
     if (Object.keys(data).length) {
       setTransferJournies(data as ITransferJourney[]);
     }
   };
 
   const findBilling = async () => {
-    const data = await getBillingByTransferRequest(Number(transferRequestData?.id || id));
+    const data = await getBillingByTransferRequest(Number(transferRequest?.id || id));
     if (Object.keys(data).length) {
       setBillingList(data as BillingByCarrier[]);
     }
@@ -199,7 +197,7 @@ export const TransferOrderDetails = () => {
   const approbeOrReject = async (id: number, isApprobe: boolean) => {
     const data = await aprobeOrRejectDetail(id, isApprobe);
     if (data) {
-      mutateTransferRequestData();
+      findDetails();
       setOpenDrawer(false);
       message.success(`Novedad ${isApprobe ? "aceptada" : "rechazada"}`);
     }
@@ -270,11 +268,11 @@ export const TransferOrderDetails = () => {
   };
 
   const handleChangeStatus = async (statusId: string) => {
-    if (transferRequestData) {
+    if (transferRequest) {
       try {
-        const updateStatus = await updateTransferRequestStatus(transferRequestData?.id, statusId);
+        const updateStatus = await updateTransferRequestStatus(transferRequest?.id, statusId);
         if (updateStatus) {
-          mutateTransferRequestData();
+          findDetails();
         }
       } catch (error) {
         const axiosError = error as AxiosError;
@@ -316,9 +314,9 @@ export const TransferOrderDetails = () => {
   const handleMarkAsFixedIncome = async () => {
     setIsModalVisible(false);
     try {
-      await toggleFixedRate(transferRequestData?.id || 0);
+      await toggleFixedRate(transferRequest?.id || 0);
       message.success("Renta fija marcada exitosamente");
-      mutateTransferRequestData();
+      findDetails();
     } catch (error) {
       message.error("Error al marcar como renta fija");
     }
@@ -326,16 +324,16 @@ export const TransferOrderDetails = () => {
 
   useEffect(() => {
     if (!isModalVisible && !isModalBillingVisible) {
-      mutateTransferRequestData();
+      findDetails();
     }
   }, [isModalVisible, isModalBillingVisible]);
 
   useEffect(() => {
-    if (!!transferRequestData) {
+    if (!!transferRequest) {
       findNovelties();
       findBilling();
     }
-  }, [transferRequestData]);
+  }, [transferRequest]);
 
   return (
     <Flex vertical>
@@ -369,9 +367,9 @@ export const TransferOrderDetails = () => {
         </div>
         <MainDescription
           handleChangeStatus={handleChangeStatus}
-          transferRequest={transferRequestData}
+          transferRequest={transferRequest}
         />
-        <Step steps={transferRequestData?.steps || []} />
+        <Step steps={transferRequest?.steps || []} />
       </div>
       <div className={styles.card} style={{ marginTop: "2rem" }}>
         <div className={styles.navContainer}>
@@ -435,11 +433,11 @@ export const TransferOrderDetails = () => {
         carriersData={billingList}
         messageApi={messageApi}
         canFinalizeTrip={canFinalizeTrip}
-        statusTrId={transferRequestData?.status_id}
+        statusTrId={transferRequest?.status_id}
         canChangeStatusToPorLegalizar={canChangeStatusToPorLegalizar}
         handleChangeStatus={handleChangeStatus}
         setNav={setNav}
-        transferRequest={transferRequestData}
+        transferRequest={transferRequest}
         handleMarkAsFixedIncome={handleMarkAsFixedIncome}
       />
       <ModalBillingMT
@@ -464,7 +462,7 @@ export const TransferOrderDetails = () => {
       <ModalResumeTracking
         isOpen={isModalTrackingVisible}
         onClose={() => setIsModalTrackingVisible(false)}
-        idTR={transferRequestData?.id || 0}
+        idTR={transferRequest?.id || 0}
         refetchNovelty={findNovelties}
       />
     </Flex>

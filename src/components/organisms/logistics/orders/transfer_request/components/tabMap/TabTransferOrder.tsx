@@ -36,19 +36,6 @@ export default function TabTransferOrder({ orderRequest }: PricingStepOneProps) 
     totalVolume += material.m3_volume * item.quantity;
     totalWeight += material.kg_weight * item.quantity;
   });
-
-  const startLocationName =
-    orderRequest?.start_location?.description +
-    (orderRequest?.start_location?.community_name
-      ? ` (${orderRequest?.start_location?.community_name})`
-      : "");
-
-  const endLocationName =
-    orderRequest?.end_location?.description +
-    (orderRequest?.end_location?.community_name
-      ? ` (${orderRequest?.end_location?.community_name})`
-      : "");
-
   return (
     <Flex vertical className="travelDataWrapper">
       <Flex>
@@ -75,8 +62,8 @@ export default function TabTransferOrder({ orderRequest }: PricingStepOneProps) 
                 show: true
               }}
               vehiclesSuggested={orderRequest?.transfer_order_vehicles}
-              start_location={startLocationName}
-              end_location={endLocationName}
+              start_location={orderRequest?.start_location?.description ?? ""}
+              end_location={orderRequest?.end_location?.description ?? ""}
               start_date_flexible={
                 optionsFlexible.find((x) => x.value == orderRequest?.start_date_flexible)?.label ??
                 ""

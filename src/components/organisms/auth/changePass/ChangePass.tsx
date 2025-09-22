@@ -10,7 +10,7 @@ import { LogoCashport } from "@/components/atoms/logoCashport/LogoCashport";
 import { Suspense } from "react";
 import Loader from "@/components/atoms/loaders/loader";
 
-export const ChangePass = ({ mode }: { mode: "accept" | "change" }) => {
+export const ChangePass = ({ mode }: { mode: 'accept' | 'change' }) => {
   return (
     <main className={styles.containerChangePass}>
       <InfoCardLogin />

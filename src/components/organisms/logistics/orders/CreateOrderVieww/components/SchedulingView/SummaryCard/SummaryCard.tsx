@@ -9,7 +9,7 @@ import "./summaryCard.scss";
 interface ISummaryCardProps {
   distance?: number; // in meters
   duration?: number; // in seconds, optional for now
-  selectedTripType?: string;
+  selectedTripType: string;
   durationBasedOnSelects?: {
     days: number;
     hours: number;

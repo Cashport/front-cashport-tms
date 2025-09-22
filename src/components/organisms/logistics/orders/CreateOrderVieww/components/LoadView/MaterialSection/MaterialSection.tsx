@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber, Select } from "antd";
+import { Select, Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
+import { getAllMaterials } from "@/services/logistics/materials";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import { IMaterialStepOne } from "@/types/logistics/schema";
@@ -10,10 +11,11 @@ import { IFormCreateOrder } from "../../../CreateOrderVieww";
 
 interface IMaterialSectionProps {
   control: Control<IFormCreateOrder, any>;
-  allMaterials: IMaterialStepOne[] | undefined;
 }
 
-const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterials }) => {
+const MaterialSection: React.FC<IMaterialSectionProps> = ({ control }) => {
+  const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
+
   const width = useScreenWidth();
 
   const matchiWidthNameColumn = React.useMemo(() => {
@@ -45,19 +47,14 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
       name: "material"
     }) || [];
 
-  const calculateVolume = (height?: number, width?: number, length?: number): number => {
-    const h = height || 0;
-    const w = width || 0;
-    const l = length || 0;
-    return h * w * l;
-  };
+  useEffect(() => {
+    (async () => {
+      const res = await getAllMaterials();
+      setAllMaterials(res.data ?? []);
+    })();
+  }, []);
 
-  const formatVolume = (volume: number): string => {
-    if (volume === 0) return "--";
-    return `${volume.toFixed(2).replace(".", ",")} m³`;
-  };
-
-  const materialOptions = allMaterials?.map((mat) => ({
+  const materialOptions = allMaterials.map((mat) => ({
     label: mat.description,
     value: mat.id
   }));
@@ -106,56 +103,33 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
               allowClear
-              options={materialOptions?.filter(
+              options={materialOptions.filter(
                 (option) =>
                   !selectedMaterials.some((row, idx) => row.id === option.value && idx !== index)
               )}
               onChange={(value) => {
                 field.onChange(value);
                 // Al seleccionar, setea automáticamente todos los datos en la fila
-                const found = allMaterials?.find((mat) => mat.id === value);
+                const found = allMaterials.find((mat) => mat.id === value);
                 if (found) {
                   update(index, {
                     ...fields[index],
                     ...found,
-                    id: found.id,
-                    // Calcular el volumen inicial si tiene dimensiones
-                    m3_volume: calculateVolume(found.mt_height, found.mt_width, found.mt_length)
+                    id: found.id
                   });
                 } else {
                   // Limpia la fila si se deselecciona
                   update(index, {
                     ...fields[index],
-                    id: undefined,
-                    m3_volume: 0
+                    id: undefined
                   });
                 }
               }}
               className="inputSelect -ellipsis"
               style={{ width: matchiWidthNameColumn }}
-              popupMatchSelectWidth={false}
-              popupClassName="custom-popup"
             />
           )}
         />
-        // TO DO: Optimize select
-        // <Controller
-        //   control={control}
-        //   name={`material.${index}.id`}
-        //   render={({ field }) => (
-        //     <SelectTooManyOptions
-        //       {...field}
-        //       options={materialOptions}
-        //       selectedMaterials={selectedMaterials}
-        //       index={index}
-        //       allMaterials={allMaterials}
-        //       fields={fields}
-        //       update={update}
-        //       calculateVolume={calculateVolume}
-        //       style={{ width: matchiWidthNameColumn }}
-        //     />
-        //   )}
-        // />
       ),
       width: matchiWidthNameColumn
     },
@@ -214,21 +188,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                 // Aseguramos que siempre sea algo valido
                 const numericValue = val === null || val === undefined ? 0 : Number(val);
                 onChange(numericValue);
-
-                // Actualizar el volumen cuando cambia el alto
-                const currentRow = selectedMaterials[index];
-                if (currentRow) {
-                  const newVolume = calculateVolume(
-                    numericValue,
-                    currentRow.mt_width,
-                    currentRow.mt_length
-                  );
-                  update(index, {
-                    ...currentRow,
-                    mt_height: numericValue,
-                    m3_volume: newVolume
-                  });
-                }
               }}
               min={0}
               step={0.01}
@@ -268,21 +227,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                 // Aseguramos que siempre sea algo valido
                 const numericValue = val === null || val === undefined ? 0 : Number(val);
                 onChange(numericValue);
-
-                // Actualizar el volumen cuando cambia el ancho
-                const currentRow = selectedMaterials[index];
-                if (currentRow) {
-                  const newVolume = calculateVolume(
-                    currentRow.mt_height,
-                    numericValue,
-                    currentRow.mt_length
-                  );
-                  update(index, {
-                    ...currentRow,
-                    mt_width: numericValue,
-                    m3_volume: newVolume
-                  });
-                }
               }}
               min={0}
               step={0.01}
@@ -322,21 +266,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                 // Aseguramos que siempre sea algo valido
                 const numericValue = val === null || val === undefined ? 0 : Number(val);
                 onChange(numericValue);
-
-                // Actualizar el volumen cuando cambia el largo
-                const currentRow = selectedMaterials[index];
-                if (currentRow) {
-                  const newVolume = calculateVolume(
-                    currentRow.mt_height,
-                    currentRow.mt_width,
-                    numericValue
-                  );
-                  update(index, {
-                    ...currentRow,
-                    mt_length: numericValue,
-                    m3_volume: newVolume
-                  });
-                }
               }}
               min={0}
               step={0.01}
@@ -364,14 +293,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
       title: "Volumen",
       dataIndex: "m3_volume",
       key: "m3_volume",
-      render: (_: any, __: any, index: number) => {
-        const height = selectedMaterials[index]?.mt_height;
-        const width = selectedMaterials[index]?.mt_width;
-        const length = selectedMaterials[index]?.mt_length;
-
-        const volume = calculateVolume(height, width, length);
-        return <span>{formatVolume(volume)}</span>;
-      }
+      render: (volume) => <span>{volume ? `${volume} m³` : "--"}</span>
     },
     {
       title: "S. Controladas",

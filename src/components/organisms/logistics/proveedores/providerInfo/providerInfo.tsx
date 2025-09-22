@@ -1,7 +1,9 @@
-import { message, Skeleton } from "antd";
-import React, { useCallback, useState } from "react";
+import { Flex, Typography, message, Row, Button, Result, Spin, Skeleton } from "antd";
+import React, { useCallback, useEffect, useState } from "react";
 import "../../../../../styles/_variables_logistics.css";
 import "./providerInfo.scss";
+import { updateDriver } from "@/services/logistics/drivers";
+import { ICarrier, IFormDriver } from "@/types/logistics/schema";
 import {
   getCarrierById,
   getTripTypes,
@@ -11,6 +13,7 @@ import {
 import { CarrierFormTab } from "@/components/molecules/tabs/logisticsForms/CarrierForm/carrierFormTab";
 import useSWR from "swr";
 import { StatusForm } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab.mapper";
+import { useRouter } from "next/navigation";
 
 interface Props {
   isEdit?: boolean;
@@ -18,10 +21,13 @@ interface Props {
   statusFormProp?: StatusForm;
 }
 
+const { Text } = Typography;
 
 export const ProviderInfoView = ({ isEdit = false, idParam, statusFormProp = "review" }: Props) => {
+  console.log("idParam", idParam);
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [statusForm, setStatusForm] = useState<StatusForm>(statusFormProp);
+  const { push } = useRouter();
 
   const fetcher = async ({ id }: { id: string }) => {
     return getCarrierById(id);

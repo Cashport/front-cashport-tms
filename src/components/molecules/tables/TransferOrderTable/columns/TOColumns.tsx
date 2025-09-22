@@ -1,20 +1,17 @@
-import Link from "next/link";
 import { Button, Flex, TableColumnsType, Tooltip, Typography } from "antd";
+import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
+import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
+import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { Eye, Radioactive, Warning, WarningCircle, WarningOctagon } from "@phosphor-icons/react";
-
-import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
 import { formatMoney, formatTimeAgo } from "@/utils/utils";
-import { STATUS } from "@/utils/constants/globalConstants";
-
-import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
-
+import { Radioactive, WarningCircle } from "@phosphor-icons/react";
 import "./transferOrderTable.scss";
-const { Text } = Typography;
-import CommunityIcon from "@/components/organisms/logistics/orders/transfer_request/components/communityIcon/CommunityIcon";
+import Link from "next/link";
 
 dayjs.extend(utc);
+
+const { Text } = Typography;
 
 export const columns = (
   showColumn: boolean,
@@ -30,12 +27,11 @@ export const columns = (
         render: (text: string) => {
           return <Text className="row-text">{formatTimeAgo(text)} </Text>;
         },
-        sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
+        sorter: (a: any, b: any) =>
           calculateMinutesDifference(a.tiempodeviaje) - calculateMinutesDifference(b.tiempodeviaje),
         showSorterTooltip: false
       }
-    : null;
-
+    : {};
   const carriersColumn = showCarriersColumn
     ? {
         title: "Proveedores",
@@ -73,18 +69,17 @@ export const columns = (
             </div>
           );
         },
-        sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-          a.carriers.localeCompare(b.carriers),
+        sorter: (a: any, b: any) => a.carriers.localeCompare(b.carriers),
         showSorterTooltip: false,
         width: 200
       }
-    : null;
+    : {};
 
   return [
     {
       title: "TR",
       dataIndex: "tr",
-      render: (id: string, record: DataTypeForTransferOrderTable) => {
+      render: (id, record) => {
         if (showBothIds && record.id_transfer_request) {
           return (
             <Flex vertical gap={4}>
@@ -116,45 +111,26 @@ export const columns = (
           </Link>
         );
       },
-      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-        Number(a.tr) - Number(b.tr),
+      sorter: (a, b) => Number(a.tr) - Number(b.tr),
       showSorterTooltip: false,
-      sortDirections: ["descend", "ascend"] as const,
-      width: 84
+      sortDirections: ["descend", "ascend"]
     },
     {
       title: "Origen y destino",
       dataIndex: "origendestino",
-      render: (text: { origin: string; destination: string }, row: any) => (
+      render: (text: { origin: string; destination: string }) => (
         <div className="titleContainer">
           <div className="textContainer">
             <Text className="title">Origen</Text>
             <Text className="title">Destino</Text>
           </div>
           <div className="textContainer">
-            <Flex gap={"0.5rem"} align="center">
-              <Text className="row-text">{text.origin}</Text>
-
-              {row.start_group_location ? (
-                <Tooltip title={row.start_group_location}>
-                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
-                </Tooltip>
-              ) : null}
-            </Flex>
-
-            <Flex gap={"0.5rem"} align="center">
-              <Text className="row-text">{text.destination}</Text>
-              {row.end_group_location ? (
-                <Tooltip title={row.end_group_location}>
-                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
-                </Tooltip>
-              ) : null}
-            </Flex>
+            <Text className="row-text">{text.origin}</Text>
+            <Text className="row-text">{text.destination}</Text>
           </div>
         </div>
       ),
-      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-        a.origendestino.origin.localeCompare(b.origendestino.origin),
+      sorter: (a, b) => a.origendestino.origin.localeCompare(b.origendestino.origin),
       showSorterTooltip: false,
       width: "260px"
     },
@@ -168,16 +144,14 @@ export const columns = (
           <Text className="row-text">{`${dayjs.utc(text.destination).format("DD/MM/YY - HH:mm")} h`}</Text>
         </div>
       ),
-      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-        dayjs(a.fechas.origin).valueOf() - dayjs(b.fechas.origin).valueOf(),
+      sorter: (a, b) => dayjs(a.fechas.origin).valueOf() - dayjs(b.fechas.origin).valueOf(),
       showSorterTooltip: false
     },
     {
       title: "Tipo de viaje",
       dataIndex: "tipodeviaje",
       render: (text: string) => <Text className="row-text">{text}</Text>,
-      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-        a.tipodeviaje.localeCompare(b.tipodeviaje),
+      sorter: (a, b) => a.tipodeviaje.localeCompare(b.tipodeviaje),
       showSorterTooltip: false
     },
     // {
@@ -214,10 +188,10 @@ export const columns = (
       render: (text: string) => (
         <Text className="row-text value">{text ? formatMoney(text) : "$ 0"}</Text>
       ),
-      sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-        Number(a.valor) - Number(b.valor),
+      sorter: (a, b) => Number(a.valor) - Number(b.valor),
       showSorterTooltip: false
     },
+
     {
       title: "",
       dataIndex: "validator",
@@ -228,24 +202,13 @@ export const columns = (
           ispeopleproblem: boolean;
           isRejected: boolean;
         },
-        row: DataTypeForTransferOrderTable
+        row
       ) => {
-        const tripDate = dayjs(row.fechas.origin);
-        const now = dayjs();
-
-        const isSameDay = tripDate.isSame(now, "day");
-        const hoursUntilTrip = tripDate.diff(now, "hour");
+        const hoursUntilTrip = dayjs(row.fechas.origin).diff(dayjs(), "hour");
         const is24HoursOrLessToTrip = hoursUntilTrip >= 0 && hoursUntilTrip <= 24;
-        const isCommunity = row.start_group_location && row.end_group_location;
-        // warning only appear in certain states
-        const showWarning =
-          (isSameDay || is24HoursOrLessToTrip) &&
-          allowedStatesForWarningTrips.includes(row.statusId);
 
         return (
           <div className="btnContainer">
-            {isCommunity && <CommunityIcon withTooltip={false} iconSize={20} />}
-
             {text.isRejected && (
               <Button
                 className="btn"
@@ -261,11 +224,11 @@ export const columns = (
             {!!text.ismaterialsproblem && (
               <Button className="btn" type="text" size="middle" icon={<Radioactive size={24} />} />
             )}
-            {!!text.ispeopleproblem && (
+            {!!text.ismaterialsproblem && (
               <Button className="btn" type="text" size="middle" icon={<Warning size={24} />} />
             )}
 
-            {showWarning && (
+            {is24HoursOrLessToTrip && (
               <Tooltip title="Este viaje inicia en menos de 24 horas">
                 <Button
                   className="btn"
@@ -283,11 +246,5 @@ export const columns = (
         );
       }
     }
-  ].filter(Boolean) as TableColumnsType<DataTypeForTransferOrderTable>;
+  ];
 };
-
-const allowedStatesForWarningTrips = [
-  STATUS.TO.SIN_PROCESAR,
-  STATUS.TR.ESPERANDO_PROVEEDOR,
-  STATUS.TR.ASIGNANDO_VEHICULO
-];

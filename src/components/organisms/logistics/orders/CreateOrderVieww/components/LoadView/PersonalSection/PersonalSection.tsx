@@ -49,7 +49,7 @@ const PersonalSection: React.FC<IPersonalSectionProps> = ({ control }) => {
           render={({ field }) => (
             <Select
               {...field}
-              placeholder="Seleccionar persona"
+              placeholder="Seleccionar tipo de carga"
               showSearch
               filterOption={(input, option) =>
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false

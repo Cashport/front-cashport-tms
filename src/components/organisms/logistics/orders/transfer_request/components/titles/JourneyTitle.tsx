@@ -1,8 +1,7 @@
 import { CraneTower } from "@phosphor-icons/react";
-import { Flex, Typography } from "antd";
+import { Typography } from "antd";
 import { CaretDown, Truck, User } from "phosphor-react";
 import CommunityIcon from "../communityIcon/CommunityIcon";
-import CommunityTag from "../communityTag/communityTag";
 
 const { Text } = Typography;
 
@@ -15,19 +14,16 @@ type Props = {
   handleChange: () => void;
   is_community?: 0 | 1;
   community_name?: string;
-  start_group_location_desc?: string | null;
-  end_group_location_desc?: string | null;
 };
 const TitleComponent = ({
   id_type_service,
+  id,
   isOpen,
   start_location_desc,
   end_location_desc,
   is_community = 0,
   community_name,
-  handleChange,
-  start_group_location_desc,
-  end_group_location_desc
+  handleChange
 }: Props) => {
   const serviceType =
     id_type_service === 1
@@ -53,19 +49,12 @@ const TitleComponent = ({
       <div className="collapseFromTo">
         <div className="collapseFromToContainer">
           <Text className="collapseTitle">Origen</Text>
-          <Flex gap={"10px"} align="center">
-            <Text className="collapseSubtitle">{start_location_desc}</Text>
-            {start_group_location_desc && <CommunityTag name={start_group_location_desc} />}
-          </Flex>
+          <Text className="collapseSubtitle">{start_location_desc}</Text>
         </div>
         <div className="collapseFromToContainer collapseRight">
-          <div className="collapseFromToContainer" style={{ width: "100%" }}>
+          <div className="collapseFromToContainer">
             <Text className="collapseTitle">Destino</Text>
-            <Flex gap={"10px"}>
-              <Text className="collapseSubtitle">{end_location_desc}</Text>
-
-              {end_group_location_desc && <CommunityTag name={end_group_location_desc} />}
-            </Flex>
+            <Text className="collapseSubtitle">{end_location_desc}</Text>
           </div>
         </div>
       </div>

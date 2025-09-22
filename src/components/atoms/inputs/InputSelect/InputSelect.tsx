@@ -15,7 +15,7 @@ interface InputSelectProps {
   nameInput: string;
   control: Control<any> | undefined;
   error: FieldError | undefined;
-  options?: Option[];
+  options: Option[];
   hiddenTitle?: boolean;
   placeholder?: string;
   disabled?: boolean;
@@ -35,7 +35,7 @@ export const InputSelect = ({
   nameInput,
   control,
   error,
-  options = [],
+  options,
   hiddenTitle = false,
   placeholder = "",
   disabled,
@@ -71,9 +71,8 @@ export const InputSelect = ({
               value={field.value}
               showSearch={showSearch}
               filterOption={filterOption}
-              popupMatchSelectWidth={true}
+              dropdownMatchSelectWidth={dropdownMatchSelectWidth}
               style={style}
-              defaultValue={field.value}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>

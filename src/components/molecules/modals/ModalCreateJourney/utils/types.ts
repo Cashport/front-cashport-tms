@@ -75,8 +75,6 @@ export interface Journey {
   type_service_desc: string;
   id?: number;
   order_tr?: number;
-  start_group_location_desc: string | null;
-  end_group_location_desc: string | null;
 }
 export interface IForm {
   idTransferRequest: number;

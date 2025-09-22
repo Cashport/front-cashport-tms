@@ -1,10 +1,5 @@
 import { API } from "@/utils/api/api";
-import {
-  Data,
-  ISuggestedVehicle,
-  ISuggestedVehiclesByMaterials,
-  ISuggestedVehiclesByMaterialsRequest
-} from "@/types/logistics/schema";
+import { Data, ISuggestedVehicle } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 export const getSuggestedVehicles = async (
@@ -19,7 +14,7 @@ export const getSuggestedVehicles = async (
     );
     return response;
   } catch (error) {
-    console.error("Error creating new location: ", error);
+    console.log("Error creating new location: ", error);
     throw error;
   }
 };
@@ -27,24 +22,10 @@ export const getSuggestedVehicles = async (
 export const getVehicleById = async (id: string): Promise<Data> => {
   try {
     const response: Data = await API.get(`/vehicle/${id}`);
+    console.log(response);
     return response;
   } catch (error) {
-    console.error("Error: ", error);
+    console.log("Error: ", error);
     return error as any;
-  }
-};
-
-export const getSuggestedVehiclesByMaterials = async (
-  materials: ISuggestedVehiclesByMaterialsRequest
-): Promise<ISuggestedVehiclesByMaterials> => {
-  try {
-    const response: GenericResponse<ISuggestedVehiclesByMaterials> = await API.post(
-      `/material/calculate`,
-      materials
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching suggested vehicles by materials: ", error);
-    throw error;
   }
 };

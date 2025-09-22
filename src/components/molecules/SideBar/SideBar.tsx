@@ -30,7 +30,6 @@ import { checkUserViewPermissions } from "@/utils/utils";
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
 import { TMSMODULES } from "@/utils/constants/globalConstants";
 import { setProjectInApi } from "@/utils/api/api";
-import { ChatCircleDots } from "@phosphor-icons/react";
 
 export const SideBar = () => {
   const [isSideBarLarge, setIsSideBarLarge] = useState(false);
@@ -284,18 +283,6 @@ export const SideBar = () => {
             </Button>
           </Link>
         )}
-        {/* {true && (
-          <Link href="/chat" passHref legacyBehavior>
-            <Button
-              type="primary"
-              size="large"
-              icon={<ChatCircleDots size={26} />}
-              className={path === "/chat" ? "buttonIcon" : "buttonIconActive"}
-            >
-              {isSideBarLarge && "Ajustes"}
-            </Button>
-          </Link>
-        )} */}
       </Flex>
       <Flex className="exit">
         <Button

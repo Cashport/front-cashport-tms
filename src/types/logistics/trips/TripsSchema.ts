@@ -28,8 +28,6 @@ export interface JourneyTripPricing {
   other_requirements: RequirementCarriersPricing[];
   community_name?: string;
   is_community?: 0 | 1;
-  start_group_location_desc?: string | null;
-  end_group_location_desc?: string | null;
 }
 
 export interface TripCarriersPricing {
@@ -57,23 +55,18 @@ export interface IPricingScore {
 
 export interface CarriersPricing {
   id_carrier_pricing: number;
-  fee_description: string;
+  valid_from: string;
+  valid_to: string;
   description: string;
   disponibility: number;
   price?: number;
-  id_pricing_type: number;
   id_vehicle_type: number;
   id_carrier: number;
   nit: string;
-  Proveedor: string;
-  communities: string;
-  isBest: boolean;
-  pricing_description: string;
-  units: number;
-  // properties below are not in the get request
-  valid_from: string;
-  valid_to: string;
+  fee_description: string;
+  pricing_description?: string;
   pricingScore?: IPricingScore;
+  isBest?: boolean;
 }
 
 export interface CarriersPricingModal extends CarriersPricing {

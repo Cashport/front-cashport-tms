@@ -52,9 +52,3 @@ export const ServiceTypeIds: Record<string, number> = {
   [SERVICE_TYPES.PERSONAL]: 3,
   [SERVICE_TYPES.AEREO]: 4
 };
-
-export const NO_REVALIDATE = {
-  revalidateIfStale: false,
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false
-};

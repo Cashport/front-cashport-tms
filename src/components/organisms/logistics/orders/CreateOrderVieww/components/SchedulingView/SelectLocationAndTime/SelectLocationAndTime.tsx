@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Control, Controller, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
 import { Flex, Select } from "antd";
 import { Checkbox, DatePicker, InputNumber, TimePicker } from "antd";
 import { DotOutline, Trash } from "@phosphor-icons/react";
-import dayjs from "dayjs";
 
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 import { ISelectOption } from "../SchedulingView";
@@ -11,7 +10,7 @@ import { ISelectOption } from "../SchedulingView";
 import "./selectLocationAndTime.scss";
 
 interface SelectLocationAndTimeProps {
-  selectedType?: string;
+  selectedType: string;
   control: Control<IFormCreateOrder, any>;
   setValue: UseFormSetValue<IFormCreateOrder>;
   locationOptions?: ISelectOption[];
@@ -39,49 +38,9 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
     name: "TripDetails"
   });
 
-  const isFixRate = useWatch({
-    control,
-    name: "isFixRate"
-  });
+  const showRaising = selectedType === "1";
 
-  const showRaisingCheckbox = selectedType === "1" && !isFixRate;
-  const showRaisingHours = (selectedType === "1" || selectedType === "2") && !isFixRate;
-
-  const destinationAvailable = isFixRate;
-
-  useEffect(() => {
-    if (selectedType === "2" && !isFixRate) {
-      // When selectedType is "2", remove the last field (destination)
-      if (fields.length > 1) {
-        remove(fields.length - 1);
-      }
-    } else {
-      // When selectedType is not "2", reset to default tripDetails
-      if (fields.length < 2) {
-        setValue(`TripDetails`, [
-          {
-            placeId: undefined,
-            date: undefined,
-            time: undefined,
-            requiresRaising: false,
-            raisingNum: 0
-          },
-          {
-            placeId: undefined,
-            date: undefined,
-            time: undefined,
-            requiresRaising: false,
-            raisingNum: 0
-          }
-        ]);
-      }
-    }
-  }, [selectedType, isFixRate]);
-
-  const disabledDate = (current: dayjs.Dayjs) => {
-    // Deshabilita todas las fechas antes de hoy
-    return current && current < dayjs().startOf("day");
-  };
+  const destinationAvailable = selectedType == "4";
 
   // Lógica: agrega una parada justo antes del último (Destino)
   const handleAddStop = () => {
@@ -134,11 +93,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         placeholder={LABELS(i, fields.length)}
                         options={locationOptions}
                         style={{
-                          gridColumn: showRaisingCheckbox
-                            ? "1 / 8"
-                            : showRaisingHours
-                              ? "1 /11"
-                              : "1 / -1"
+                          gridColumn: showRaising ? "1 / 8" : "1 / -1"
                         }}
                         value={
                           field.value && tripDetails[i]
@@ -175,29 +130,23 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                     )}
                   />
 
-                  {showRaisingCheckbox && (
-                    <Controller
-                      control={control}
-                      name={`TripDetails.${i}.requiresRaising`}
-                      render={({ field }) => (
-                        <Checkbox {...field} checked={!!field.value} className="check">
-                          {"Requiere izaje"}
-                        </Checkbox>
-                      )}
-                    />
-                  )}
-
-                  {showRaisingHours && (
-                    <Controller
-                      control={control}
-                      name={`TripDetails.${i}.raisingNum`}
-                      render={({ field }) => {
-                        const shouldDisable =
-                          !tripDetails[i]?.requiresRaising && selectedType !== "2";
-
-                        return (
+                  {/* Raising checkbox/hours */}
+                  {showRaising && (
+                    <>
+                      <Controller
+                        control={control}
+                        name={`TripDetails.${i}.requiresRaising`}
+                        render={({ field }) => (
+                          <Checkbox {...field} checked={!!field.value} className="check">
+                            {"Requiere izaje"}
+                          </Checkbox>
+                        )}
+                      />
+                      <Controller
+                        control={control}
+                        name={`TripDetails.${i}.raisingNum`}
+                        render={({ field }) => (
                           <InputNumber
-                            disabled={shouldDisable}
                             {...field}
                             className="inputNumber"
                             placeholder="0 Hrs"
@@ -205,9 +154,9 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                             style={{ gridColumn: "11 / -1" }}
                             formatter={(value) => `${value} Hrs`}
                           />
-                        );
-                      }}
-                    />
+                        )}
+                      />
+                    </>
                   )}
 
                   {/* Date */}
@@ -222,7 +171,6 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                         value={field.value}
                         onChange={field.onChange}
                         disabled={i > 0 && !destinationAvailable}
-                        disabledDate={disabledDate}
                       />
                     )}
                   />

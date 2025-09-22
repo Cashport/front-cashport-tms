@@ -64,9 +64,7 @@ export const createData = ({ data, idTransferRequest }: IForm): JourneyCreate =>
       id_type_service: getIdOfTripType(data?.typeActive) ?? 0,
       start_date_flexible: data.startTimeFlexible,
       end_date_flexible: data.endTimeFlexible,
-      route: data.route,
-      end_group_location_desc: null,
-      start_group_location_desc: null
+      route: data.route
     }
   };
 };
@@ -86,9 +84,7 @@ export const createDataSoftSave = (data: JourneyFormValues): Journey => {
     end_location_desc: data.destination?.description ?? "",
     type_service_desc: data.typeActive ?? "",
     community_name: data.community_name,
-    is_community: data.is_community,
-    start_group_location_desc: data.origin?.description ?? "",
-    end_group_location_desc: data.destination?.description ?? ""
+    is_community: data.is_community
   };
 };
 

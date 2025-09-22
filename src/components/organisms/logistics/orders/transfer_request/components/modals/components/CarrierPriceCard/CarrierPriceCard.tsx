@@ -1,24 +1,18 @@
 import React from "react";
-import { Checkbox, Flex, Typography } from "antd";
+import { Checkbox, Flex, Typography } from "antd"; // Assuming Ant Design is used for the Checkbox
 import { Star, Truck } from "@phosphor-icons/react";
-import styles from "./CarrierPriceCard.module.scss";
+import styles from "./CarrierPriceCard.module.scss"; // Custom styles (create a separate SCSS file if needed)
 
-import {
-  CarriersPricingModal,
-  JourneyTripPricing,
-  serviceType
-} from "@/types/logistics/trips/TripsSchema";
-import CommunityTag from "../../../communityTag/communityTag";
-
+import { CarriersPricingModal, serviceType } from "@/types/logistics/trips/TripsSchema";
 const { Text } = Typography;
 
+// Defining the props interface
 interface CarrierPriceCardProps {
   carrier: CarriersPricingModal;
   currentTripId: number | null;
   isChecked: boolean;
   handleCheck: (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => void;
   type: serviceType;
-  journey: Omit<JourneyTripPricing, "trips" | "other_requirements">;
 }
 
 const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
@@ -26,38 +20,9 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
   currentTripId,
   isChecked,
   handleCheck,
-  type,
-  journey
+  type
 }) => {
   if (!currentTripId) return <></>;
-
-  // Obtener las comunidades del journey
-  const journeyCommunities = [
-    journey.start_group_location_desc,
-    journey.end_group_location_desc
-  ].filter(Boolean); // Filtrar valores null/undefined
-
-  // Parsear las comunidades del carrier
-  const carrierCommunities = carrier.communities
-    ? carrier.communities
-        .split(",")
-        .map((c) => c.trim())
-        .filter(Boolean)
-    : []; // Si no hay communities, usar array vacío
-
-  // Encontrar la comunidad que coincide
-  let isCommunityCarrier: string | null = null;
-
-  for (const carrierCommunity of carrierCommunities) {
-    for (const journeyCommunity of journeyCommunities) {
-      if (carrierCommunity?.toLowerCase() === journeyCommunity?.toLowerCase()) {
-        isCommunityCarrier = carrierCommunity; // Guardar el nombre de la comunidad que coincide
-        break;
-      }
-    }
-    if (isCommunityCarrier) break;
-  }
-
   return (
     <div className={styles.checks} key={`carrier-${carrier.id_carrier_pricing}-${currentTripId}`}>
       <Flex align="center" gap={8} justify="center">
@@ -69,22 +34,17 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
         <label htmlFor={`checkbox-${carrier.id_carrier_pricing}-${currentTripId}`}>
           <Flex vertical style={{ cursor: "pointer" }}>
             <Text
-              style={{ fontWeight: "600", fontSize: "1rem", maxWidth: "440px" }}
+              style={{ fontWeight: "600", fontSize: "1rem" }}
               id={`description-${currentTripId}`}
-              ellipsis={{ tooltip: false }}
             >
               {carrier.description}
             </Text>
-            <Flex gap={"12px"} align="center">
-              <Text
-                style={{ fontSize: "1rem", fontWeight: "500", color: "#666666" }}
-                id={`fee_description-${currentTripId}`}
-              >
-                {carrier.fee_description}
-              </Text>
-              {/* Mostrar el nombre de la comunidad si hay match */}
-              {isCommunityCarrier && <CommunityTag name={isCommunityCarrier} />}
-            </Flex>
+            <Text
+              style={{ fontSize: "1rem", fontWeight: "500", color: "#666666" }}
+              id={`fee_description-${currentTripId}`}
+            >
+              {carrier.fee_description}
+            </Text>
           </Flex>
         </label>
       </Flex>
