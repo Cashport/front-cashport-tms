@@ -122,6 +122,8 @@ export const CreateOrderVieww: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
 
+  const MINIMUM_OCCUPATION = 50;
+
   const { push } = useRouter();
 
   useEffect(() => {
@@ -203,8 +205,21 @@ export const CreateOrderVieww: React.FC = () => {
         setView("load");
         break;
       case "load":
-        setView("additionalInfo");
+        // Check if any occupation percentage is below 50%
+        const shouldShowModal = selectedVehiclesInfo?.some((vehicle) => {
+          const guideValue =
+            vehicle.ocupationPassengers !== null
+              ? vehicle.ocupationPassengers
+              : Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
+          return guideValue <= MINIMUM_OCCUPATION;
+        });
 
+        if (shouldShowModal) {
+          setIsModalOpen(true);
+          return;
+        }
+
+        setView("additionalInfo");
         break;
       case "additionalInfo":
         setLoadingRequest(true);
@@ -376,7 +391,14 @@ export const CreateOrderVieww: React.FC = () => {
         </PrincipalButton>
       </div>
 
-      <ModalVehicleOccupation isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ModalVehicleOccupation
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onOk={() => {
+          setIsModalOpen(false);
+          setView("additionalInfo");
+        }}
+      />
     </div>
   );
 };
