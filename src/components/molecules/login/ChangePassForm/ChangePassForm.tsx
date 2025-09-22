@@ -17,15 +17,27 @@ interface IChangePassForm {
   confirmPassword: string;
 }
 
+interface IChangePassFormProps {
+  mode: "accept" | "change";
+}
+
 const schema = yup.object().shape({
-  password: yup.string().min(5).max(32).required(),
+  password: yup
+    .string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .max(32, "La contraseña no puede tener más de 32 caracteres")
+    .matches(/[a-z]/, "La contraseña debe contener al menos una minúscula")
+    .matches(/[A-Z]/, "La contraseña debe contener al menos una mayúscula")
+    .matches(/\d/, "La contraseña debe contener al menos un número")
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, "La contraseña debe contener al menos un carácter especial")
+    .required(),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("password")], "Las contraseñas no coinciden")
     .required()
 });
 
-export const ChangePassForm = ({ mode }: { mode: "accept" | "change" }) => {
+export const ChangePassForm = ({ mode }: IChangePassFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const oobCode = searchParams.get("oobCode");
@@ -104,41 +116,57 @@ export const ChangePassForm = ({ mode }: { mode: "accept" | "change" }) => {
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
-              <Input
-                size="large"
-                type={showPassword.password ? "text" : "password"}
-                className="inputPassword"
-                placeholder="Contrasena"
-                variant="borderless"
-                required
-                autoComplete="current-password"
-                suffix={
-                  <Tooltip title={showPassword.password ? "Hidden Password" : "Show Password"}>
-                    {!showPassword.password ? (
-                      <Eye
-                        onClick={() => {
-                          setShowPassword((prevState) => ({
-                            ...prevState,
-                            password: true
-                          }));
-                        }}
-                        className="iconEyePassword"
-                      />
-                    ) : (
-                      <EyeClosed
-                        onClick={() => {
-                          setShowPassword((prevState) => ({
-                            ...prevState,
-                            password: false
-                          }));
-                        }}
-                        className="iconEyePassword"
-                      />
-                    )}
-                  </Tooltip>
-                }
-                {...field}
-              />
+              <>
+                <Input
+                  size="large"
+                  type={showPassword.password ? "text" : "password"}
+                  className="inputPassword"
+                  placeholder="Contrasena"
+                  variant="borderless"
+                  required
+                  autoComplete="current-password"
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCopy={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCut={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  suffix={
+                    <Tooltip title={showPassword.password ? "Hidden Password" : "Show Password"}>
+                      {!showPassword.password ? (
+                        <Eye
+                          onClick={() => {
+                            setShowPassword((prevState) => ({
+                              ...prevState,
+                              password: true
+                            }));
+                          }}
+                          className="iconEyePassword"
+                        />
+                      ) : (
+                        <EyeClosed
+                          onClick={() => {
+                            setShowPassword((prevState) => ({
+                              ...prevState,
+                              password: false
+                            }));
+                          }}
+                          className="iconEyePassword"
+                        />
+                      )}
+                    </Tooltip>
+                  }
+                  {...field}
+                />
+
+                {errors.password && <div className="errorMessage">{errors.password.message}</div>}
+              </>
             )}
           />
         </div>
@@ -158,6 +186,18 @@ export const ChangePassForm = ({ mode }: { mode: "accept" | "change" }) => {
                   variant="borderless"
                   required
                   autoComplete="current-password"
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCopy={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
+                  onCut={(e) => {
+                    e.preventDefault();
+                    return false;
+                  }}
                   suffix={
                     <Tooltip
                       title={showPassword.confirmPassword ? "Hidden Password" : "Show Password"}
