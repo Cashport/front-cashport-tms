@@ -398,6 +398,7 @@ export const CreateOrderVieww: React.FC = () => {
           setIsModalOpen(false);
           setView("additionalInfo");
         }}
+        selectedVehiclesInfo={selectedVehiclesInfo}
       />
     </div>
   );
