@@ -50,6 +50,10 @@
                     height: 50%;
                     bottom: 50%;
                 }
+
+                &.first.last {
+                    border-left: 1px dashed transparent;
+                }
             }
         }
 

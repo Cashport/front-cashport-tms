@@ -39,14 +39,18 @@ export const getOtherRequirementDetails = async (
 export const addTripDocuments = async (form: IParsedFormValues[], idTrip: number): Promise<any> => {
   try {
     const formData = createFormDataFinalizeTrip(form);
-    const response: any = await API.post(`/transfer-request/add-mt-trip/${idTrip}`, formData, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data"
+    const response: GenericResponse<any> = await API.post(
+      `/transfer-request/add-mt-trip/${idTrip}`,
+      formData,
+      {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "multipart/form-data"
+        }
       }
-    });
-    if (response?.data) return true;
-    return false;
+    );
+    if (response?.success || response.status === 200) return response;
+    throw new Error(response.message);
   } catch (error) {
     throw new Error("Hubo un error finalizando el viaje");
   }

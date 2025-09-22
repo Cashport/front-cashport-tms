@@ -132,10 +132,8 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
 
   const createMap = (container: HTMLDivElement) => {
     if (mapRef.current) {
-      console.log("mapa ya existe");
       return mapRef.current;
     }
-    console.log("mapa nuevo");
     mapboxgl.accessToken = mapsAccessToken;
     const map = new mapboxgl.Map({
       container: container,
