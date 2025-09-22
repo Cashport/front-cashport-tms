@@ -6,6 +6,7 @@ import MaterialSection from "./MaterialSection/MaterialSection";
 import SuggestedVehicleSection from "./SuggestedVehicleSection/SuggestedVehicleSection";
 import OtherServicesSection from "./OtherServicesSection/OtherServicesSection";
 import PersonalSection from "./PersonalSection/PersonalSection";
+import { ModalVehicleOccupation } from "./ModalVehicleOccupation/ModalVehicleOccupation";
 
 import { IFormCreateOrder } from "../../CreateOrderVieww";
 import { IMaterialStepOne } from "@/types/logistics/schema";
@@ -32,6 +33,7 @@ const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials }) => {
       <SuggestedVehicleSection control={control} />
       <hr className="divider" />
       <OtherServicesSection control={control} />
+      <ModalVehicleOccupation isOpen={true} onClose={() => {}} />
     </Flex>
   );
 };
