@@ -4024,7 +4024,7 @@ export interface IVehicleWithOccupation {
   price: number;
   ocupationM3: number;
   ocupationKg: number;
-  ocupationPassengers: number;
+  ocupationPassengers: number | null;
 }
 
 interface IMaterialCalculated {

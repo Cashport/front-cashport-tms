@@ -1,5 +1,5 @@
 import React from "react";
-import { Control, useWatch } from "react-hook-form";
+import { Control, useWatch, UseFormSetValue } from "react-hook-form";
 import { Flex } from "antd";
 
 import MaterialSection from "./MaterialSection/MaterialSection";
@@ -15,9 +15,10 @@ import "./loadView.scss";
 interface ILoadViewProps {
   control: Control<IFormCreateOrder, any>;
   allMaterials: IMaterialStepOne[] | undefined;
+  setValue: UseFormSetValue<IFormCreateOrder>;
 }
 
-const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials }) => {
+const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials, setValue }) => {
   const typeActive = useWatch({ control, name: "typeActive" });
 
   return (
@@ -29,7 +30,7 @@ const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials }) => {
       )}
 
       <hr className="divider" />
-      <SuggestedVehicleSection control={control} />
+      <SuggestedVehicleSection control={control} setValue={setValue} />
       <hr className="divider" />
       <OtherServicesSection control={control} />
     </Flex>
