@@ -439,6 +439,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
           duration={tripInfoMap?.duration}
           selectedTripType={typeActive}
           durationBasedOnSelects={timeBasedOnSelectedDateTimeHours}
+          isFixRate={isFixRate}
         />
       </Flex>
 
