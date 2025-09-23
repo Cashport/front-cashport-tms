@@ -1,21 +1,6 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/modules/chat/ui/button";
-import { Textarea } from "@/modules/chat/ui/textarea";
-import { ScrollArea } from "@/modules/chat/ui/scroll-area";
-import { Separator } from "@/modules/chat/ui/separator";
-import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
-import { Badge } from "@/modules/chat/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
-import { Input } from "@/modules/chat/ui/input";
-import type { Conversation } from "@/modules/chat/lib/mock-data";
-import { formatRelativeTime, conversationsMock } from "@/modules/chat/lib/mock-data";
-import { IMessage, IChatData } from "@/types/chat/IChat";
-import TemplateDialog from "./template-dialog";
-import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
-import { useToast } from "@/modules/chat/hooks/use-toast";
-import { cn } from "@/utils/utils";
+import Image from "next/image";
 import {
   ArrowsOut,
   CaretDown,
@@ -28,15 +13,30 @@ import {
   Square,
   X
 } from "@phosphor-icons/react";
+
 import { getOneTicket } from "@/services/chat/chat";
+
+import { Button } from "@/modules/chat/ui/button";
+import { Textarea } from "@/modules/chat/ui/textarea";
+import { ScrollArea } from "@/modules/chat/ui/scroll-area";
+import { Separator } from "@/modules/chat/ui/separator";
+import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
+import { Badge } from "@/modules/chat/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
+import { Input } from "@/modules/chat/ui/input";
+import type { Conversation } from "@/modules/chat/lib/mock-data";
+import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
+import { IMessage, IChatData } from "@/types/chat/IChat";
+import TemplateDialog from "./template-dialog";
+import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
+import { useToast } from "@/modules/chat/hooks/use-toast";
+
+import { cn } from "@/utils/utils";
 
 type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
-  onSend?: (message: string) => void;
-  onSendAudio?: (audioUrl: string) => void;
-  onSendEmail?: (subject: string, body: string, files?: FileItem[], images?: string[]) => void;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
 };
@@ -54,14 +54,7 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({
-  conversation,
-  onSend,
-  onSendAudio,
-  onSendEmail,
-  onShowDetails,
-  detailsOpen
-}: Props) {
+export default function ChatThread({ conversation, onShowDetails, detailsOpen }: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -76,7 +69,6 @@ export default function ChatThread({
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [ticketMessages, setTicketMessages] = useState<IMessage[]>([]);
-  const [pagination, setPagination] = useState<any>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -95,7 +87,6 @@ export default function ChatThread({
       try {
         const ticketData: IChatData = await getOneTicket(conversation.id);
         setTicketMessages(ticketData.messages);
-        setPagination(ticketData.pagination);
         console.log("Fetched ticket details:", ticketData);
       } catch (error) {
         console.error("Error fetching ticket details:", error);
@@ -136,7 +127,6 @@ export default function ChatThread({
       // if (!res.ok || !data?.ok) {
       //   throw new Error(typeof data?.error === "string" ? data.error : "Fallo en el envío");
       // }
-      onSend?.(text);
       setMessage("");
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       requestAnimationFrame(() => {
@@ -166,24 +156,7 @@ export default function ChatThread({
     const images = emailImages.map((i) => i.url);
     const files = emailFiles.map((f) => ({ url: f.url, name: f.name, size: f.size }));
 
-    if (onSendEmail) {
-      onSendEmail(s, b, files, images);
-    } else {
-      const conv = conversationsMock.find((c) => c.id === conversation.id);
-      if (conv) {
-        conv.messages.push({
-          id: String(Date.now()),
-          from: "agent",
-          channel: "email",
-          email: { subject: s, body: b },
-          attachments: files,
-          imageUrls: images,
-          timestamp: new Date().toISOString()
-        });
-        conv.lastMessage = `Email: ${s}`;
-        conv.updatedAt = new Date().toISOString();
-      }
-    }
+    console.info("Sending email:", { subject: s, body: b, images, files });
 
     setSubject("");
     setBody("");
@@ -206,9 +179,8 @@ export default function ChatThread({
         if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
       mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
-        onSendAudio?.(url);
+        //const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        //const url = URL.createObjectURL(blob);
         stream.getTracks().forEach((t) => t.stop());
         requestAnimationFrame(() => {
           const el = viewportRef.current;
@@ -302,7 +274,7 @@ export default function ChatThread({
                 className="group relative block overflow-hidden rounded-lg"
                 aria-label="Ver imagen"
               >
-                <img
+                <Image
                   src={m.mediaUrl || "/placeholder.svg"}
                   alt="Imagen enviada"
                   className="max-h-72 rounded-lg object-cover"
@@ -514,7 +486,7 @@ export default function ChatThread({
                         className="relative overflow-hidden rounded-md border"
                         style={{ borderColor: "#DDDDDD" }}
                       >
-                        <img
+                        <Image
                           src={img.url || "/placeholder.svg"}
                           alt={"Adjunto " + img.name}
                           className="h-20 w-full object-cover"
@@ -638,7 +610,7 @@ export default function ChatThread({
       <Dialog open={!!previewImage} onOpenChange={(o) => !o && setPreviewImage(null)}>
         <DialogContent className="max-w-3xl">
           {previewImage && (
-            <img
+            <Image
               src={previewImage || "/placeholder.svg"}
               alt="Vista previa"
               className="max-h-[70dvh] w-auto rounded-xl object-contain"

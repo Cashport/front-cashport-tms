@@ -276,18 +276,6 @@ export default function ChatInbox() {
             <ChatThread
               key={active.id}
               conversation={active}
-              onSend={(msg) => {
-                // TODO: Implement message sending with actual API
-                console.log("Sending message:", msg, "to ticket:", active.id);
-              }}
-              onSendAudio={(audioUrl) => {
-                // TODO: Implement audio message sending with actual API
-                console.log("Sending audio:", audioUrl, "to ticket:", active.id);
-              }}
-              onSendEmail={(subject, body) => {
-                // TODO: Implement email sending with actual API
-                console.log("Sending email:", { subject, body }, "to ticket:", active.id);
-              }}
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
             />
