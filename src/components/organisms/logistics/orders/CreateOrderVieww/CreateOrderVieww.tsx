@@ -53,6 +53,9 @@ export type IPeopleForm = {
 type ISuggestedVehicleForm = {
   [K in keyof ISuggestedVehicle]?: ISuggestedVehicle[K];
 } & {
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
   quantity: number;
   usedPercentage?: number;
 };
