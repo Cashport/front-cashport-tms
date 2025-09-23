@@ -9,8 +9,9 @@ import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
-import type { Conversation, Message } from "@/modules/chat/lib/mock-data";
+import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime, conversationsMock } from "@/modules/chat/lib/mock-data";
+import { IMessage, IChatData } from "@/types/chat/IChat";
 import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
@@ -19,9 +20,7 @@ import {
   ArrowsOut,
   CaretDown,
   CodesandboxLogo,
-  EnvelopeSimple,
   FileArrowDown,
-  FileText,
   Microphone,
   Paperclip,
   PaperPlaneRight,
@@ -29,6 +28,7 @@ import {
   Square,
   X
 } from "@phosphor-icons/react";
+import { getOneTicket } from "@/services/chat/chat";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -75,6 +75,8 @@ export default function ChatThread({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [ticketMessages, setTicketMessages] = useState<IMessage[]>([]);
+  const [pagination, setPagination] = useState<any>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -86,6 +88,20 @@ export default function ChatThread({
   useEffect(() => {
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
+  }, [conversation.id]);
+
+  useEffect(() => {
+    const fetchTicketDetails = async () => {
+      try {
+        const ticketData: IChatData = await getOneTicket(conversation.id);
+        setTicketMessages(ticketData.messages);
+        setPagination(ticketData.pagination);
+        console.log("Fetched ticket details:", ticketData);
+      } catch (error) {
+        console.error("Error fetching ticket details:", error);
+      }
+    };
+    fetchTicketDetails();
   }, [conversation.id]);
 
   useEffect(() => {
@@ -111,15 +127,15 @@ export default function ChatThread({
     }
     try {
       setIsSendingWA(true);
-      const res = await fetch("/api/whatsapp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to, text, preview_url: false })
-      });
-      const data = await res.json();
-      if (!res.ok || !data?.ok) {
-        throw new Error(typeof data?.error === "string" ? data.error : "Fallo en el envío");
-      }
+      // const res = await fetch("/api/whatsapp/send", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ to, text, preview_url: false })
+      // });
+      // const data = await res.json();
+      // if (!res.ok || !data?.ok) {
+      //   throw new Error(typeof data?.error === "string" ? data.error : "Fallo en el envío");
+      // }
       onSend?.(text);
       setMessage("");
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
@@ -267,8 +283,8 @@ export default function ChatThread({
     });
   }
 
-  function renderBubble(m: Message) {
-    const mine = m.from === "agent";
+  function renderBubble(m: IMessage) {
+    const mine = m.direction === "OUTBOUND";
     const wrapper = "max-w-[80%] md:max-w-[70%]";
     const bubble =
       "rounded-2xl border px-3 py-2 text-sm " +
@@ -276,18 +292,18 @@ export default function ChatThread({
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
-    if (m.imageUrl) {
+    if (m.type === "MEDIA" && m.mediaUrl) {
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
             <div className={bubble + " p-2"}>
               <button
-                onClick={() => setPreviewImage(m.imageUrl!)}
+                onClick={() => setPreviewImage(m.mediaUrl!)}
                 className="group relative block overflow-hidden rounded-lg"
                 aria-label="Ver imagen"
               >
                 <img
-                  src={m.imageUrl || "/placeholder.svg"}
+                  src={m.mediaUrl || "/placeholder.svg"}
                   alt="Imagen enviada"
                   className="max-h-72 rounded-lg object-cover"
                 />
@@ -304,124 +320,12 @@ export default function ChatThread({
       );
     }
 
-    if (m.fileUrl) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble}>
-              <a href={m.fileUrl} className="flex items-center gap-2 hover:underline" download>
-                <FileArrowDown className="h-4 w-4" />
-                <span className="font-medium">{m.fileName ?? "Archivo"}</span>
-                <span className="text-xs opacity-80">· {formatBytes(m.fileSize)}</span>
-              </a>
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.audioUrl) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble}>
-              <audio controls src={m.audioUrl} className="w-full" aria-label="Nota de voz" />
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.email) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-3"}>
-              <div className="mb-1 flex items-center gap-2 text-xs opacity-90">
-                <EnvelopeSimple className="h-3.5 w-3.5" />
-                <span>Correo</span>
-              </div>
-              <div className="font-semibold">{m.email.subject}</div>
-              <div className="mt-2 whitespace-pre-wrap">{m.email.body}</div>
-
-              {m.imageUrls && m.imageUrls.length > 0 && (
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {m.imageUrls.map((url, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setPreviewImage(url)}
-                      className="group relative overflow-hidden rounded-md"
-                      aria-label="Ver imagen adjunta"
-                    >
-                      <img
-                        src={url || "/placeholder.svg"}
-                        alt="Imagen adjunta"
-                        className="h-32 w-full object-cover"
-                      />
-                      <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
-                        <ArrowsOut className="h-4 w-4" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {m.attachments && m.attachments.length > 0 && (
-                <div className="mt-3 space-y-1">
-                  {m.attachments.map((a, idx) => (
-                    <a
-                      key={idx}
-                      href={a.url}
-                      download
-                      className="flex items-center gap-2 text-sm hover:underline"
-                    >
-                      <FileArrowDown className="h-4 w-4" />
-                      <span className="font-medium">{a.name}</span>
-                      <span className="text-xs opacity-80">· {formatBytes(a.size)}</span>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.template) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-3"}>
-              <div className="mb-1 flex items-center gap-2 text-xs opacity-90">
-                <FileText className="h-3.5 w-3.5" />
-                <span>{"Plantilla: " + m.template.name}</span>
-              </div>
-              <div className="whitespace-pre-wrap">{m.text ?? m.template.content ?? ""}</div>
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     // Texto por defecto
     return (
-      <div className={"flex " + (m.from === "agent" ? "justify-end" : "justify-start")}>
+      <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
         <div className={wrapper}>
-          <div className={bubble}>{m.text}</div>
-          <div className={"mt-1 text-[11px] " + (m.from === "agent" ? "text-right" : "text-left")}>
+          <div className={bubble}>{m.content}</div>
+          <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
             {formatRelativeTime(m.timestamp)}
           </div>
         </div>
@@ -475,7 +379,7 @@ export default function ChatThread({
       {/* History */}
       <ScrollArea className="flex-1 min-h-0" ref={viewportRef}>
         <div className="space-y-6 px-4 py-6">
-          {conversation.messages.map((m) => (
+          {ticketMessages.map((m) => (
             <div key={m.id}>{renderBubble(m)}</div>
           ))}
         </div>
