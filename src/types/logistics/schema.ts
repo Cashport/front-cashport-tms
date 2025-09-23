@@ -3903,6 +3903,9 @@ export interface IAddTransferOrderProduct {
 
 export interface IAddTransferOrderVehicle {
   id_vehicle_type: string;
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
   quantity: string;
 }
 

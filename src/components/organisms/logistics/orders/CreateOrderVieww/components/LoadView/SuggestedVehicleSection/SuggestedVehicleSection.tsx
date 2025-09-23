@@ -20,7 +20,10 @@ interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
   usedPercentage?: number;
 }
 
-const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control, setValue }) => {
+const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({
+  control,
+  setValue
+}) => {
   const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,6 +49,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   const selectedVehiclesInfo = useWatch({ control, name: "selectedVehiclesInfo" }) || [];
 
+  const handleAddVehicleRow = () => {
+    append({ quantity: 1, ocupationKg: 0, ocupationM3: 0, ocupationPassengers: 0 });
+  };
+
   //  useMemo para estabilizar el objeto de request
   const requestData = useMemo(() => {
     if (
@@ -67,10 +74,11 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
       return {
         id: material.id ?? 0,
-        weight: weight * quantity,
-        length: length * quantity,
-        width: width * quantity,
-        height: height * quantity
+        weight,
+        length,
+        width,
+        height,
+        quantity
       };
     });
 
@@ -227,7 +235,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                         usedPercentage: occupationPercentage,
                         id: found.id,
                         ID: found.id
-                      }
+                      },
+                      ocupationKg: found.ocupationKg || 0,
+                      ocupationM3: found.ocupationM3 || 0,
+                      ocupationPassengers: found.ocupationPassengers || 0
                     });
                   } else {
                     update(index, {
@@ -342,7 +353,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
           loading={isLoading}
         />
 
-        <Button className="addButton" onClick={() => append({ quantity: 1 })}>
+        <Button className="addButton" onClick={handleAddVehicleRow} icon={<Plus size={16} />}>
           Agregar
           <Plus size={16} />
         </Button>

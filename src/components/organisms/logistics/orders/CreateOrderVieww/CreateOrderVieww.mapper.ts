@@ -141,6 +141,9 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
 
   // Mapear vehículos
   const vehicles: IAddTransferOrderVehicle[] = (formData.suggestedVehicle || []).map((vehicle) => ({
+    ocupationM3: vehicle.ocupationM3 || 0,
+    ocupationKg: vehicle.ocupationKg || 0,
+    ocupationPassengers: vehicle.ocupationPassengers || null,
     id_vehicle_type: vehicle.id?.toString() || "",
     quantity: (vehicle.quantity || 0).toString()
   }));
