@@ -375,6 +375,9 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
   const handleOrderTypeChange = (id: "1" | "2" | "3") => {
     setValue("typeActive", id);
     const emptyValue = [{ id: undefined, quantity: 1 }];
+    const emptyVehicle = [
+      { id: undefined, quantity: 1, ocupationM3: 0, ocupationKg: 0, ocupationPassengers: null }
+    ];
     resetField("material", {
       defaultValue: emptyValue
     });
@@ -382,7 +385,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
       defaultValue: emptyValue
     });
     resetField("suggestedVehicle", {
-      defaultValue: emptyValue
+      defaultValue: emptyVehicle
     });
     resetField("otherServices", {
       defaultValue: undefined
