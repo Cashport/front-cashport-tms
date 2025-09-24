@@ -38,11 +38,15 @@ interface SocketContextType {
     activeTickets: number;
     totalMessages: number;
   };
+  // eslint-disable-next-line no-unused-vars
   connect: (config: SocketConfig) => Promise<void>;
   disconnect: () => void;
+  // eslint-disable-next-line no-unused-vars
   connectTicketRoom: (ticketId: string) => Promise<void>;
-  // Nuevas funciones para actualizar estados
+  // Functions to make something when a new message or ticket arrives
+  // eslint-disable-next-line no-unused-vars
   subscribeToMessages: (callback: (message: Message) => void) => () => void;
+  // eslint-disable-next-line no-unused-vars
   subscribeToTickets: (callback: (ticket: any) => void) => () => void;
 }
 
@@ -59,6 +63,7 @@ export const useSocket = () => {
 };
 
 // Hook especializado para mensajes con callback personalizado
+// eslint-disable-next-line no-unused-vars
 export const useSocketMessages = (onNewMessage?: (message: Message) => void) => {
   const { messages, subscribeToMessages } = useSocket();
 
@@ -74,7 +79,9 @@ export const useSocketMessages = (onNewMessage?: (message: Message) => void) => 
 // Socket Manager optimizado
 class SocketManager {
   private socket: Socket | null = null;
+  // eslint-disable-next-line no-unused-vars
   private messageCallbacks = new Set<(message: Message) => void>();
+  // eslint-disable-next-line no-unused-vars
   private ticketCallbacks = new Set<(ticket: any) => void>();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -128,11 +135,13 @@ class SocketManager {
     });
   }
 
+  // eslint-disable-next-line no-unused-vars
   subscribeToMessages(callback: (message: Message) => void): () => void {
     this.messageCallbacks.add(callback);
     return () => this.messageCallbacks.delete(callback);
   }
 
+  // eslint-disable-next-line no-unused-vars
   subscribeToTickets(callback: (ticket: any) => void): () => void {
     this.ticketCallbacks.add(callback);
     return () => this.ticketCallbacks.delete(callback);
@@ -208,6 +217,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   // Optimized ticket handler
+  // eslint-disable-next-line no-unused-vars
   const handleNewTicket = useCallback((data: any) => {
     setStats((prev) => ({ ...prev, activeTickets: prev.activeTickets + 1 }));
   }, []);
@@ -246,10 +256,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   // Subscription functions for external components
+  // eslint-disable-next-line no-unused-vars
   const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
     return socketManager.current?.subscribeToMessages(callback) ?? (() => {});
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const subscribeToTickets = useCallback((callback: (ticket: any) => void) => {
     return socketManager.current?.subscribeToTickets(callback) ?? (() => {});
   }, []);
