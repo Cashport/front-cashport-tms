@@ -1,5 +1,5 @@
 import React from "react";
-import { Control, useWatch, UseFormSetValue } from "react-hook-form";
+import { Control, useWatch, UseFormSetValue, UseFormTrigger } from "react-hook-form";
 import { Flex } from "antd";
 
 import MaterialSection from "./MaterialSection/MaterialSection";
@@ -16,15 +16,16 @@ interface ILoadViewProps {
   control: Control<IFormCreateOrder, any>;
   allMaterials: IMaterialStepOne[] | undefined;
   setValue: UseFormSetValue<IFormCreateOrder>;
+  trigger: UseFormTrigger<IFormCreateOrder>;
 }
 
-const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials, setValue }) => {
+const LoadView: React.FC<ILoadViewProps> = ({ control, allMaterials, setValue, trigger }) => {
   const typeActive = useWatch({ control, name: "typeActive" });
 
   return (
     <Flex vertical gap={"1.5rem"} style={{ marginBottom: "2rem" }} className="loadView">
       {typeActive !== "3" ? (
-        <MaterialSection control={control} allMaterials={allMaterials} />
+        <MaterialSection control={control} allMaterials={allMaterials} trigger={trigger} />
       ) : (
         <PersonalSection control={control} />
       )}

@@ -57,7 +57,7 @@ export const ModalVehicleOccupation = ({ isOpen, onClose, onOk, selectedVehicles
               <Flex key={vehicle.id} vertical gap={"0.5rem"}>
                 <p className="modalVehicleOccupation__vehicleDescription">{vehicle.description}</p>
                 <Flex className="modalVehicleOccupation__occupationByVehicle" gap={"1rem"}>
-                  {vehicle.ocupationKg && vehicle.ocupationKg <= 50 && (
+                  {vehicle.ocupationKg !== null && vehicle.ocupationKg <= 50 ? (
                     <Flex className="occupationCard" justify="space-between" align="center">
                       <Flex vertical>
                         <p className="occupationCard__label">PESO</p>
@@ -65,8 +65,8 @@ export const ModalVehicleOccupation = ({ isOpen, onClose, onOk, selectedVehicles
                       </Flex>
                       <Barbell size={32} color="#FF9947" weight="duotone" />
                     </Flex>
-                  )}
-                  {vehicle.ocupationM3 && vehicle.ocupationM3 <= 50 && (
+                  ) : null}
+                  {vehicle.ocupationM3 !== null && vehicle.ocupationM3 <= 50 ? (
                     <Flex className="occupationCard" justify="space-between" align="center">
                       <Flex vertical>
                         <p className="occupationCard__label">VOLUMEN</p>
@@ -74,7 +74,7 @@ export const ModalVehicleOccupation = ({ isOpen, onClose, onOk, selectedVehicles
                       </Flex>
                       <CubeTransparent size={32} color="#FF9947" weight="duotone" />
                     </Flex>
-                  )}
+                  ) : null}
                 </Flex>
               </Flex>
             ))}

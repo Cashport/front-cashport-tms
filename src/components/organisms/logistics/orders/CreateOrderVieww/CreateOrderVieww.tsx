@@ -139,39 +139,41 @@ export const CreateOrderVieww: React.FC = () => {
 
   const emptyValue = [{ id: undefined, quantity: 1 }];
 
-  const { control, handleSubmit, setValue, watch, resetField } = useForm<IFormCreateOrder>({
-    defaultValues: {
-      typeActive: "1",
-      TripDetails: [
-        {
-          placeId: undefined,
-          date: undefined,
-          time: undefined,
-          requiresRaising: false,
-          raisingNum: 0
-        }, // Origen
-        {
-          placeId: undefined,
-          date: undefined,
-          time: undefined,
-          requiresRaising: false,
-          raisingNum: 0
-        } // Destino
-      ],
-      material: emptyValue,
-      suggestedVehicle: emptyValue,
-      people: emptyValue,
-      productServiceLine: {
-        productServiceLine: [
+  const { control, handleSubmit, setValue, watch, resetField, trigger } = useForm<IFormCreateOrder>(
+    {
+      defaultValues: {
+        typeActive: "1",
+        TripDetails: [
           {
-            selectedPSL: undefined,
-            percentagePSL: 100,
-            costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
-          }
-        ]
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          }, // Origen
+          {
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          } // Destino
+        ],
+        material: emptyValue,
+        suggestedVehicle: emptyValue,
+        people: emptyValue,
+        productServiceLine: {
+          productServiceLine: [
+            {
+              selectedPSL: undefined,
+              percentagePSL: 100,
+              costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
+            }
+          ]
+        }
       }
     }
-  });
+  );
 
   const tripType = watch("typeActive");
   const tripDetails = watch("TripDetails");
@@ -194,7 +196,14 @@ export const CreateOrderVieww: React.FC = () => {
       case "scheduling":
         return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
-        return <LoadView control={control} allMaterials={allMaterials} setValue={setValue} />;
+        return (
+          <LoadView
+            control={control}
+            allMaterials={allMaterials}
+            setValue={setValue}
+            trigger={trigger}
+          />
+        );
       case "additionalInfo":
         return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
@@ -208,12 +217,9 @@ export const CreateOrderVieww: React.FC = () => {
         setView("load");
         break;
       case "load":
-        // Check if any occupation percentage is below 50%
+        // Check if occupation Kg or M3 percentage is below 50%
         const shouldShowModal = selectedVehiclesInfo?.some((vehicle) => {
-          const guideValue =
-            vehicle.ocupationPassengers !== null
-              ? vehicle.ocupationPassengers
-              : Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
+          const guideValue = Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
           return guideValue <= MINIMUM_OCCUPATION;
         });
 

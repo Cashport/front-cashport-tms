@@ -1,5 +1,5 @@
 import React from "react";
-import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
+import { Control, Controller, useFieldArray, UseFormTrigger, useWatch } from "react-hook-form";
 import { Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber, Select } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
@@ -11,9 +11,10 @@ import { IFormCreateOrder } from "../../../CreateOrderVieww";
 interface IMaterialSectionProps {
   control: Control<IFormCreateOrder, any>;
   allMaterials: IMaterialStepOne[] | undefined;
+  trigger: UseFormTrigger<IFormCreateOrder>;
 }
 
-const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterials }) => {
+const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterials, trigger }) => {
   const width = useScreenWidth();
 
   const matchiWidthNameColumn = React.useMemo(() => {
@@ -122,6 +123,18 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     // Calcular el volumen inicial si tiene dimensiones
                     m3_volume: calculateVolume(found.mt_height, found.mt_width, found.mt_length)
                   });
+
+                  // Trigger validation for numeric fields after update
+                  if (trigger) {
+                    setTimeout(() => {
+                      trigger([
+                        `material.${index}.kg_weight`,
+                        `material.${index}.mt_height`,
+                        `material.${index}.mt_width`,
+                        `material.${index}.mt_length`
+                      ]);
+                    }, 0);
+                  }
                 } else {
                   // Limpia la fila si se deselecciona
                   update(index, {
@@ -129,6 +142,18 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     id: undefined,
                     m3_volume: 0
                   });
+
+                  // Clear validation errors for numeric fields
+                  if (trigger) {
+                    setTimeout(() => {
+                      trigger([
+                        `material.${index}.kg_weight`,
+                        `material.${index}.mt_height`,
+                        `material.${index}.mt_width`,
+                        `material.${index}.mt_length`
+                      ]);
+                    }, 0);
+                  }
                 }
               }}
               className="inputSelect -ellipsis"
@@ -167,33 +192,38 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
         <Controller
           control={control}
           name={`material.${index}.kg_weight`}
-          render={({ field: { value, onChange, ...field } }) => (
-            <InputNumber
-              {...field}
-              value={value}
-              onChange={(val) => {
-                // Aseguramos que siempre sea algo valido
-                const numericValue = val === null || val === undefined ? 0 : Number(val);
-                onChange(numericValue);
-              }}
-              min={0}
-              step={0.1}
-              placeholder="1"
-              className="inputNumberMaterial"
-              formatter={(value?: number | string) => {
-                if (value === null || value === undefined || value === "") {
-                  return "--";
-                }
-                return `${value} Kg`;
-              }}
-              parser={(value) => {
-                // Extrae solo el número del string formateado
-                if (!value) return 0;
-                const parsed = value.replace(/[^\d.]/g, "");
-                return parsed === "" ? 0 : Number(parsed);
-              }}
-              precision={2}
-            />
+          rules={errorValidationNumericInput}
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
+            <>
+              <InputNumber
+                {...field}
+                value={value}
+                onChange={(val) => {
+                  // Aseguramos que siempre sea algo valido
+                  const numericValue = val === null || val === undefined ? 0 : Number(val);
+                  onChange(numericValue);
+                }}
+                min={0}
+                step={0.1}
+                placeholder="1"
+                className="inputNumberMaterial"
+                status={error ? "error" : ""}
+                formatter={(value?: number | string) => {
+                  if (value === null || value === undefined || value === "") {
+                    return "--";
+                  }
+                  return `${value} Kg`;
+                }}
+                parser={(value) => {
+                  // Extrae solo el número del string formateado
+                  if (!value) return 0;
+                  const parsed = value.replace(/[^\d.]/g, "");
+                  return parsed === "" ? 0 : Number(parsed);
+                }}
+                precision={2}
+              />
+              {error && <ErrorText message={error.message || ""} />}
+            </>
           )}
         />
       )
@@ -206,48 +236,53 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
         <Controller
           control={control}
           name={`material.${index}.mt_height`}
-          render={({ field: { value, onChange, ...field } }) => (
-            <InputNumber
-              {...field}
-              value={value}
-              onChange={(val) => {
-                // Aseguramos que siempre sea algo valido
-                const numericValue = val === null || val === undefined ? 0 : Number(val);
-                onChange(numericValue);
+          rules={errorValidationNumericInput}
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
+            <>
+              <InputNumber
+                {...field}
+                value={value}
+                onChange={(val) => {
+                  // Aseguramos que siempre sea algo valido
+                  const numericValue = val === null || val === undefined ? 0 : Number(val);
+                  onChange(numericValue);
 
-                // Actualizar el volumen cuando cambia el alto
-                const currentRow = selectedMaterials[index];
-                if (currentRow) {
-                  const newVolume = calculateVolume(
-                    numericValue,
-                    currentRow.mt_width,
-                    currentRow.mt_length
-                  );
-                  update(index, {
-                    ...currentRow,
-                    mt_height: numericValue,
-                    m3_volume: newVolume
-                  });
-                }
-              }}
-              min={0}
-              step={0.01}
-              placeholder="0"
-              className="inputNumberMaterial"
-              formatter={(value?: number | string) => {
-                if (value === null || value === undefined || value === "") {
-                  return "--";
-                }
-                return `${value} m`;
-              }}
-              parser={(value) => {
-                // Extrae solo el número del string formateado
-                if (!value) return 0;
-                const parsed = value.replace(/[^\d.]/g, "");
-                return parsed === "" ? 0 : Number(parsed);
-              }}
-              precision={2}
-            />
+                  // Actualizar el volumen cuando cambia el alto
+                  const currentRow = selectedMaterials[index];
+                  if (currentRow) {
+                    const newVolume = calculateVolume(
+                      numericValue,
+                      currentRow.mt_width,
+                      currentRow.mt_length
+                    );
+                    update(index, {
+                      ...currentRow,
+                      mt_height: numericValue,
+                      m3_volume: newVolume
+                    });
+                  }
+                }}
+                min={0}
+                step={0.01}
+                placeholder="0"
+                className="inputNumberMaterial"
+                status={error ? "error" : ""}
+                formatter={(value?: number | string) => {
+                  if (value === null || value === undefined || value === "") {
+                    return "--";
+                  }
+                  return `${value} m`;
+                }}
+                parser={(value) => {
+                  // Extrae solo el número del string formateado
+                  if (!value) return 0;
+                  const parsed = value.replace(/[^\d.]/g, "");
+                  return parsed === "" ? 0 : Number(parsed);
+                }}
+                precision={2}
+              />
+              {error && <ErrorText message={error.message || ""} />}
+            </>
           )}
         />
       )
@@ -260,48 +295,53 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
         <Controller
           control={control}
           name={`material.${index}.mt_width`}
-          render={({ field: { value, onChange, ...field } }) => (
-            <InputNumber
-              {...field}
-              value={value}
-              onChange={(val) => {
-                // Aseguramos que siempre sea algo valido
-                const numericValue = val === null || val === undefined ? 0 : Number(val);
-                onChange(numericValue);
+          rules={errorValidationNumericInput}
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
+            <>
+              <InputNumber
+                {...field}
+                value={value}
+                onChange={(val) => {
+                  // Aseguramos que siempre sea algo valido
+                  const numericValue = val === null || val === undefined ? 0 : Number(val);
+                  onChange(numericValue);
 
-                // Actualizar el volumen cuando cambia el ancho
-                const currentRow = selectedMaterials[index];
-                if (currentRow) {
-                  const newVolume = calculateVolume(
-                    currentRow.mt_height,
-                    numericValue,
-                    currentRow.mt_length
-                  );
-                  update(index, {
-                    ...currentRow,
-                    mt_width: numericValue,
-                    m3_volume: newVolume
-                  });
-                }
-              }}
-              min={0}
-              step={0.01}
-              placeholder="0"
-              className="inputNumberMaterial"
-              formatter={(value?: number | string) => {
-                if (value === null || value === undefined || value === "") {
-                  return "--";
-                }
-                return `${value} m`;
-              }}
-              parser={(value) => {
-                // Extrae solo el número del string formateado
-                if (!value) return 0;
-                const parsed = value.replace(/[^\d.]/g, "");
-                return parsed === "" ? 0 : Number(parsed);
-              }}
-              precision={2}
-            />
+                  // Actualizar el volumen cuando cambia el ancho
+                  const currentRow = selectedMaterials[index];
+                  if (currentRow) {
+                    const newVolume = calculateVolume(
+                      currentRow.mt_height,
+                      numericValue,
+                      currentRow.mt_length
+                    );
+                    update(index, {
+                      ...currentRow,
+                      mt_width: numericValue,
+                      m3_volume: newVolume
+                    });
+                  }
+                }}
+                min={0}
+                step={0.01}
+                placeholder="0"
+                className="inputNumberMaterial"
+                status={error ? "error" : ""}
+                formatter={(value?: number | string) => {
+                  if (value === null || value === undefined || value === "") {
+                    return "--";
+                  }
+                  return `${value} m`;
+                }}
+                parser={(value) => {
+                  // Extrae solo el número del string formateado
+                  if (!value) return 0;
+                  const parsed = value.replace(/[^\d.]/g, "");
+                  return parsed === "" ? 0 : Number(parsed);
+                }}
+                precision={2}
+              />
+              {error && <ErrorText message={error.message || ""} />}
+            </>
           )}
         />
       )
@@ -314,48 +354,53 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
         <Controller
           control={control}
           name={`material.${index}.mt_length`}
-          render={({ field: { value, onChange, ...field } }) => (
-            <InputNumber
-              {...field}
-              value={value}
-              onChange={(val) => {
-                // Aseguramos que siempre sea algo valido
-                const numericValue = val === null || val === undefined ? 0 : Number(val);
-                onChange(numericValue);
+          rules={errorValidationNumericInput}
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
+            <>
+              <InputNumber
+                {...field}
+                value={value}
+                onChange={(val) => {
+                  // Aseguramos que siempre sea algo valido
+                  const numericValue = val === null || val === undefined ? 0 : Number(val);
+                  onChange(numericValue);
 
-                // Actualizar el volumen cuando cambia el largo
-                const currentRow = selectedMaterials[index];
-                if (currentRow) {
-                  const newVolume = calculateVolume(
-                    currentRow.mt_height,
-                    currentRow.mt_width,
-                    numericValue
-                  );
-                  update(index, {
-                    ...currentRow,
-                    mt_length: numericValue,
-                    m3_volume: newVolume
-                  });
-                }
-              }}
-              min={0}
-              step={0.01}
-              placeholder="0"
-              className="inputNumberMaterial"
-              formatter={(value?: number | string) => {
-                if (value === null || value === undefined || value === "") {
-                  return "--";
-                }
-                return `${value} m`;
-              }}
-              parser={(value) => {
-                // Extrae solo el número del string formateado
-                if (!value) return 0;
-                const parsed = value.replace(/[^\d.]/g, "");
-                return parsed === "" ? 0 : Number(parsed);
-              }}
-              precision={2}
-            />
+                  // Actualizar el volumen cuando cambia el largo
+                  const currentRow = selectedMaterials[index];
+                  if (currentRow) {
+                    const newVolume = calculateVolume(
+                      currentRow.mt_height,
+                      currentRow.mt_width,
+                      numericValue
+                    );
+                    update(index, {
+                      ...currentRow,
+                      mt_length: numericValue,
+                      m3_volume: newVolume
+                    });
+                  }
+                }}
+                min={0}
+                step={0.01}
+                placeholder="0"
+                className="inputNumberMaterial"
+                status={error ? "error" : ""}
+                formatter={(value?: number | string) => {
+                  if (value === null || value === undefined || value === "") {
+                    return "--";
+                  }
+                  return `${value} m`;
+                }}
+                parser={(value) => {
+                  // Extrae solo el número del string formateado
+                  if (!value) return 0;
+                  const parsed = value.replace(/[^\d.]/g, "");
+                  return parsed === "" ? 0 : Number(parsed);
+                }}
+                precision={2}
+              />
+              {error && <ErrorText message={error.message || ""} />}
+            </>
           )}
         />
       )
@@ -418,3 +463,25 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
 };
 
 export default MaterialSection;
+
+const errorValidationNumericInput = {
+  validate: (value: any) => {
+    if (value === 0) {
+      return "*No puede ser 0";
+    }
+    return true;
+  }
+};
+const ErrorText: React.FC<{ message: string }> = ({ message }) => (
+  <div
+    style={{
+      color: "#ff4d4f",
+      fontSize: "10px",
+      marginTop: "1px",
+      textWrap: "nowrap",
+      position: "absolute"
+    }}
+  >
+    {message}
+  </div>
+);
