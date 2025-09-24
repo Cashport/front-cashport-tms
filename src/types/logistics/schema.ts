@@ -1115,15 +1115,7 @@ export interface IFormLocation {
 
 export interface IGroupLocation {
   id: number;
-  description: string;
-  city_id: string;
-  geoJSON: string;
-  active: boolean;
-  created_at: Date;
-  created_by: string;
-  modified_at: Date;
-  modified_by: string;
-  locations: Location[];
+  name: string;
 }
 
 export interface IRouteSecure {
@@ -1180,8 +1172,8 @@ export interface ILocation {
   contact_name: string;
   contact_number: string;
   user: string;
-  is_community?: boolean;
-  community_name?: string;
+  is_community: boolean;
+  community_name: string;
   documents?: any[];
 }
 
@@ -1308,7 +1300,7 @@ export interface ICarrier {
   active: any;
   vehicles: any;
   drivers: any;
-  carrier_type: string;
+  carrier_type: number;
   created_at: Date;
   created_by: string;
   modified_at?: Date | null;
@@ -1316,6 +1308,7 @@ export interface ICarrier {
   photo?: string;
   trip_type: { label: string; value: number }[];
   status: IStatus;
+  group_location_ids: number[];
 }
 export interface IAPICarrier {
   id: number;
@@ -1650,9 +1643,11 @@ export interface ITrackingResponse extends ITrackingPartial {
   start_location_desc: string;
   end_location_desc: string;
   type_service_desc: string;
-  is_community?: 0 | 1;
-  community_name?: string;
+  is_community: 0 | 1;
+  community_name: string;
   id?: number;
+  start_group_location_desc: string | null;
+  end_group_location_desc: string | null;
 }
 
 /**
@@ -2013,11 +2008,16 @@ export interface ITransferRequestJourneyInfo {
   end_location_desc: string;
   trips: IVehiclesPricingTrips[];
   otherRequirements: IRequirement[];
-  is_community?: 0 | 1;
-  community_name?: string;
+  is_community: 0 | 1;
+  community_name: string;
   end_date_flexible: number;
   start_date_flexible: number;
   route: any;
+  distance: number;
+  id_route_backup: string | null;
+  fixed_rate: number;
+  start_group_location_desc: string | null;
+  end_group_location_desc: string | null;
 }
 /**
  * Exposes all fields present in transfer_request_journey_review as a typescript
@@ -2030,8 +2030,12 @@ export interface ITransferRequestJourneyReview {
   start_location_desc: string;
   end_location_desc: string;
   service_type: number;
+  is_community: 0 | 1;
+  community_name: string;
   trips: TripCarriersPricing[];
   otherRequirements: TripCarriersPricing[];
+  start_group_location_desc?: string | null;
+  end_group_location_desc?: string | null;
 }
 export interface TripCarriersPricing {
   id_trip: number;
@@ -2057,6 +2061,7 @@ export interface CarriersPricing {
   driver_delay: number;
   diver_trips: number;
   driver_score: number;
+  driver_id: number;
   id: number;
   id_carrier: number;
   id_service_type: number;
@@ -3307,6 +3312,7 @@ export interface IFormCarrier extends ICarrier {
   // TEMPORARY - MADE UP:`
   phone?: string;
   email?: string;
+  group_location_select: { label: string; value: number }[];
 }
 export interface Ifeature {
   description: string;
@@ -3852,7 +3858,7 @@ export interface IGetAllPeople {
 }
 
 export interface IAddTransferOrderContact {
-  id_contact?: string;
+  id_contact: string;
   contact_type: string;
   name: string;
   contact_number: string;
@@ -3873,6 +3879,11 @@ export interface IAddTransferOrderDocument {
 export interface IAddTransferOrderMaterial {
   id_material: string;
   quantity: string;
+  weight: number;
+  height: number;
+  width: number;
+  length: number;
+  is_controlled_substance: number;
 }
 
 export interface IAddTransferOrderOtherRequirements {
@@ -3892,13 +3903,16 @@ export interface IAddTransferOrderProduct {
 
 export interface IAddTransferOrderVehicle {
   id_vehicle_type: string;
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
   quantity: string;
 }
 
 export interface IAddTransferOrder {
-  id?: string;
+  id: number;
   id_user: string;
-  user?: string;
+  user: string;
   id_start_location: string;
   id_end_location: string;
   start_date: string; // formato: "YYYY-MM-DD HH:mm:ss"
@@ -3912,7 +3926,7 @@ export interface IAddTransferOrder {
   end_date_flexible: string;
   id_route?: string;
   id_company: string;
-  isFixedRate: number; // 0 o 1
+  isFixedRate: string;
   status?: string;
   active?: string;
   created_at?: string;
@@ -3928,6 +3942,14 @@ export interface IAddTransferOrder {
   transfer_order_products: IAddTransferOrderProduct[];
   transfer_order_vehicles: IAddTransferOrderVehicle[];
   geometry: IRoute[]; // JSON string del array de rutas
+  id_service_type: string;
+  id_client: number;
+  observation: string | null;
+  service_type_desc: string;
+  client_desc: string;
+  contractNumber: string;
+  declaredCargoValue: number;
+  files: any[];
 }
 
 export interface IGetFrequentRoutes {
@@ -3957,4 +3979,69 @@ interface IStatusWithStyling {
   id: string;
   name: string;
   subjectId: number;
+}
+
+export interface IMaterialInput {
+  id: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+}
+
+export interface ISuggestedVehiclesByMaterialsRequest {
+  serviceTypeId: number;
+  vehiclesSelected?: {
+    id?: number;
+    quantity: number;
+  }[];
+  // load and hoisting Types
+  materials?: IMaterialInput[];
+  requireLift?: boolean;
+  // people Types
+  passengers?: number;
+}
+
+interface ITotalMaterials {
+  volume: number;
+  kg: number;
+}
+
+export interface IVehicleWithOccupation {
+  id: number;
+  description: string;
+  vehicle_subtype: number;
+  kg_capacity: number;
+  m3_volume: number;
+  width: number;
+  height: number;
+  aditional_info: string | null;
+  length: number;
+  passenger_capacity: number;
+  speed_multiple: number;
+  active: boolean;
+  icon: string;
+  image: string;
+  id_service_type: number;
+  available: number;
+  price: number;
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
+}
+
+interface IMaterialCalculated {
+  id: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  volume: number;
+}
+
+export interface ISuggestedVehiclesByMaterials {
+  totalMaterials: ITotalMaterials;
+  vehiclesWithOcupation: IVehicleWithOccupation[];
+  materialCalculated: IMaterialCalculated[];
+  vehiclesSelectedWithOcupation: IVehicleWithOccupation[];
 }

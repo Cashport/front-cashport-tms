@@ -28,7 +28,6 @@ export interface CarrierFormTabProps {
 export type CarrierData = IFormCarrier & { documents?: ICertificates[] };
 
 export const dataToProjectFormData = (data: ICarrierById): IFormCarrier => {
-  console.log("data dataToProjectFormData ", data);
   return {
     id: data.id,
     description: data.description,
@@ -37,7 +36,7 @@ export const dataToProjectFormData = (data: ICarrierById): IFormCarrier => {
     active: data.active,
     vehicles: "",
     drivers: "",
-    carrier_type: "",
+    carrier_type: data.id_carrier_type ?? 0,
     created_at: new Date(data.created_at),
     created_by: data.created_by,
     photo: "",
@@ -49,7 +48,12 @@ export const dataToProjectFormData = (data: ICarrierById): IFormCarrier => {
     status: {
       description: data.status.name,
       color: data.status.color
-    }
+    },
+    group_location_ids: data.group_location_ids,
+    group_location_select: data.group_location_ids.map((id) => ({
+      label: ``, // Assuming a placeholder label, adjust as needed
+      value: id
+    }))
   };
 };
 

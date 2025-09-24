@@ -1,6 +1,6 @@
 import React from "react";
 import { Flex } from "antd";
-import { Clock, Path } from "@phosphor-icons/react";
+import { CalendarDots, Clock, Path } from "@phosphor-icons/react";
 
 import { getTravelDuration } from "@/utils/logistics/maps";
 
@@ -9,18 +9,20 @@ import "./summaryCard.scss";
 interface ISummaryCardProps {
   distance?: number; // in meters
   duration?: number; // in seconds, optional for now
-  selectedTripType: string;
+  selectedTripType?: "1" | "2" | "3";
   durationBasedOnSelects?: {
     days: number;
     hours: number;
   };
+  isFixRate?: boolean;
 }
 
 const SummaryCard: React.FC<ISummaryCardProps> = ({
   distance,
   duration,
   selectedTripType,
-  durationBasedOnSelects
+  durationBasedOnSelects,
+  isFixRate
 }) => {
   const hours = getTravelDuration(duration ?? 0);
 
@@ -33,11 +35,19 @@ const SummaryCard: React.FC<ISummaryCardProps> = ({
     <div className="summaryCard">
       <h2>Resumen del servicio</h2>
       <Flex gap={"1rem"}>
-        {selectedTripType === "2" || selectedTripType === "4" ? (
+        {isFixRate ? (
+          <Flex className="summaryCard__item">
+            <CalendarDots className="summaryCard__icon" size={32} />
+            <Flex vertical>
+              <p>Tiempo de renta</p>
+              <strong>{days > 0 ? `${days} días` : `${rentingHours} horas`}</strong>
+            </Flex>
+          </Flex>
+        ) : selectedTripType === "2" ? (
           <Flex className="summaryCard__item">
             <Path className="summaryCard__icon" size={32} />
             <Flex vertical>
-              <p>{selectedTripType === "2" ? "Tiempo de izaje" : "Tiempo de renta"}</p>
+              <p>Tiempo de izaje</p>
               <strong>{days > 0 ? `${days} días` : `${rentingHours} horas`}</strong>
             </Flex>
           </Flex>

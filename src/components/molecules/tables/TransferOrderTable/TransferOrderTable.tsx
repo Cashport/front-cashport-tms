@@ -30,6 +30,8 @@ export interface DataTypeForTransferOrderTable {
   carriers: string;
   statusId: string;
   TOs?: string;
+  start_group_location: string | null;
+  end_group_location: string | null;
 }
 
 interface ITransferOrdersTable {
@@ -95,7 +97,9 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
       },
       carriers: item.carriers ?? "",
       statusId: item.statusId,
-      TOs: item?.TOs
+      TOs: item?.TOs,
+      start_group_location: item.start_group_location,
+      end_group_location: item.end_group_location
     }));
     setDataSource(mappedData);
   }, [items]);

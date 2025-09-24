@@ -1,8 +1,9 @@
 import { ITrackingResponse } from "@/types/logistics/schema";
-import { Card, Col, Row } from "antd";
+import { Card, Col, Flex, Row } from "antd";
 import { DotsSixVertical } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { Users, WarningCircle } from "@phosphor-icons/react";
 dayjs.extend(utc);
 
 export default function TrackingDrawer({
@@ -25,9 +26,34 @@ export default function TrackingDrawer({
           <DotsSixVertical style={{ fontSize: "20px" }} />
         </Col>
         <Col span={18}>
-          <p>{trip.type_service_desc}</p>
-          <p>{trip.start_location_desc}</p>
-          {trip.end_location_desc !== trip.start_location_desc && <p>{trip.end_location_desc}</p>}
+          <Flex align="center" gap={"0.25rem"}>
+            <p>{trip.type_service_desc}</p>
+            {trip.is_community ? (
+              <Users
+                color="#F62A2A"
+                style={{ backgroundColor: "#fedfdf", borderRadius: "4px", padding: "4px" }}
+                size={24}
+                weight="bold"
+              />
+            ) : null}
+          </Flex>
+          <Flex>
+            <p>{trip.start_location_desc}</p>
+
+            {trip.start_group_location_desc ? (
+              <WarningCircle size={16} style={{ minWidth: "16px" }} />
+            ) : null}
+          </Flex>
+
+          {trip.end_location_desc !== trip.start_location_desc && (
+            <Flex>
+              <p>{trip.end_location_desc}</p>{" "}
+              {trip.end_group_location_desc ? (
+                <WarningCircle size={16} style={{ minWidth: "16px" }} />
+              ) : null}
+            </Flex>
+          )}
+
           <p>
             <b>Inicio</b> {dayjs.utc(trip.start_date).format("DD MMM YYYY - HH:mm")}
           </p>

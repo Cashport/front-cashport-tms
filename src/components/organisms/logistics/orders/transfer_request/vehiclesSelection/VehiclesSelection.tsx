@@ -29,14 +29,8 @@ export interface SelectOption {
 interface VehiclesSelectionProps {
   transferRequest: ITransferRequestCreation | undefined;
   index: number;
-  id_journey: number;
-  start_location_desc: string;
-  end_location_desc: string;
-  id_type_service: number;
   journey: ITransferRequestJourneyInfo;
   setIsNextStepActive: React.Dispatch<React.SetStateAction<boolean>>;
-  is_community?: 0 | 1;
-  community_name?: string;
 }
 
 interface FormValues {
@@ -56,15 +50,19 @@ interface FormValues {
 const VehiclesSelection: FC<VehiclesSelectionProps> = ({
   transferRequest,
   index,
-  id_journey,
-  start_location_desc,
-  end_location_desc,
-  id_type_service,
   journey,
-  setIsNextStepActive,
-  is_community = 0,
-  community_name
+  setIsNextStepActive
 }) => {
+  const {
+    id_journey,
+    id_type_service,
+    start_location_desc,
+    end_location_desc,
+    is_community,
+    community_name,
+    start_group_location_desc,
+    end_group_location_desc
+  } = journey;
   const { data, isLoading: isLoadingVehicles } = useSWR(
     { id_journey },
     ({ id_journey }) => getTransferRequestVehicles(id_journey),
@@ -459,6 +457,8 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
         setOpenTabs={setOpenTabs}
         is_community={is_community}
         community_name={community_name}
+        start_group_location_desc={start_group_location_desc}
+        end_group_location_desc={end_group_location_desc}
       />
       <AddRequirementModal
         isModalOpen={isModalAddRequirementOpen}

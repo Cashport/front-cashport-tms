@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Dayjs } from "dayjs";
@@ -6,13 +6,15 @@ import { Button, Flex, message } from "antd";
 
 import { mapFormToTransferOrder } from "./CreateOrderVieww.mapper";
 import { addTransferOrderNew } from "@/services/logistics/transfer-orders";
+import { getAllMaterials } from "@/services/logistics/materials";
 
 import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
-import SchedulingView from "./components/SchedulingView/SchedulingView";
+import SchedulingView, { ITripInfoMap } from "./components/SchedulingView/SchedulingView";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
 import AdditionalInfoView from "./components/ResponsiblesView/AdditionalInfoView";
+import { ModalVehicleOccupation } from "./components/LoadView/ModalVehicleOccupation/ModalVehicleOccupation";
 
 import {
   IClient,
@@ -22,7 +24,8 @@ import {
   IGetPSL,
   IMaterialStepOne,
   IRoute,
-  ISuggestedVehicle
+  ISuggestedVehicle,
+  IVehicleWithOccupation
 } from "@/types/logistics/schema";
 import { IOtherRequirement } from "@/services/logistics/other-requirements";
 
@@ -50,6 +53,9 @@ export type IPeopleForm = {
 type ISuggestedVehicleForm = {
   [K in keyof ISuggestedVehicle]?: ISuggestedVehicle[K];
 } & {
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
   quantity: number;
   usedPercentage?: number;
 };
@@ -77,6 +83,8 @@ interface IAdditionalInfoForm {
 interface IBillingForm {
   companyCode?: ICompanyCode;
   endClient?: IClient;
+  contractNumber?: string;
+  declaredCargoValue?: number;
 }
 
 export type ICostCenterForm = {
@@ -94,16 +102,19 @@ interface IProductServiceLineForm {
 }
 
 export interface IFormCreateOrder {
-  typeActive?: string; // "1" | "2" | "3" | "4"
+  typeActive: "1" | "2" | "3";
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
+  isFixRate: boolean;
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
   people?: IPeopleForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
+  selectedVehiclesInfo?: IVehicleWithOccupation[];
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;
   billing?: IBillingForm;
   productServiceLine?: IProductServiceLineForm;
+  infoMap: ITripInfoMap;
 }
 
 export type IViewOption = "scheduling" | "load" | "additionalInfo";
@@ -111,72 +122,88 @@ export type IViewOption = "scheduling" | "load" | "additionalInfo";
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
   const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
+
+  const MINIMUM_OCCUPATION = 50;
 
   const { push } = useRouter();
 
-  const { control, handleSubmit, setValue, watch } = useForm<IFormCreateOrder>({
-    defaultValues: {
-      TripDetails: [
-        {
-          placeId: undefined,
-          date: undefined,
-          time: undefined,
-          requiresRaising: false,
-          raisingNum: 0
-        }, // Origen
-        {
-          placeId: undefined,
-          date: undefined,
-          time: undefined,
-          requiresRaising: false,
-          raisingNum: 0
-        } // Destino
-      ],
-      material: [
-        {
-          id: undefined,
-          quantity: 1
-        }
-      ],
-      suggestedVehicle: [
-        {
-          id: undefined,
-          quantity: 1
-        }
-      ],
-      productServiceLine: {
-        productServiceLine: [
+  useEffect(() => {
+    (async () => {
+      if (allMaterials.length > 0) return;
+      const res = await getAllMaterials();
+      setAllMaterials(res.data ?? []);
+    })();
+  }, []);
+
+  const emptyValue = [{ id: undefined, quantity: 1 }];
+
+  const { control, handleSubmit, setValue, watch, resetField, trigger } = useForm<IFormCreateOrder>(
+    {
+      defaultValues: {
+        typeActive: "1",
+        TripDetails: [
           {
-            selectedPSL: undefined,
-            percentagePSL: 0,
-            costCenters: [{ selectedCostCenter: undefined }]
-          }
-        ]
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          }, // Origen
+          {
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          } // Destino
+        ],
+        material: emptyValue,
+        suggestedVehicle: emptyValue,
+        people: emptyValue,
+        productServiceLine: {
+          productServiceLine: [
+            {
+              selectedPSL: undefined,
+              percentagePSL: 100,
+              costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
+            }
+          ]
+        }
       }
     }
-  });
+  );
 
-  // watchTripType
   const tripType = watch("typeActive");
-  // Watch the TripDetails to see if any changes are made
   const tripDetails = watch("TripDetails");
+  const isFixRate = watch("isFixRate");
 
   // watch Load form values
   const materialDetails = watch("material");
   const suggestedVehicles = watch("suggestedVehicle");
+  const selectedVehiclesInfo = watch("selectedVehiclesInfo");
   const otherServices = watch("otherServices");
   const additionalInfo = watch("additionalInfo");
   const billing = watch("billing");
   const productServiceLine = watch("productServiceLine");
+  const people = watch("people");
 
   const currentStepIndex = stepIndexMap[view] ?? stepIndexMap.default;
 
   const renderView = (currentView: IViewOption) => {
     switch (currentView) {
       case "scheduling":
-        return <SchedulingView control={control} setValue={setValue} />;
+        return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
-        return <LoadView control={control} />;
+        return (
+          <LoadView
+            control={control}
+            allMaterials={allMaterials}
+            setValue={setValue}
+            trigger={trigger}
+          />
+        );
       case "additionalInfo":
         return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
@@ -185,38 +212,41 @@ export const CreateOrderVieww: React.FC = () => {
   };
 
   const onSubmit = async (data: IFormCreateOrder) => {
-    console.info("Submitting data:", data);
     switch (view) {
       case "scheduling":
         setView("load");
         break;
       case "load":
-        setView("additionalInfo");
+        // Check if occupation Kg or M3 percentage is below 50%
+        const shouldShowModal = selectedVehiclesInfo?.some((vehicle) => {
+          const guideValue = Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
+          return guideValue <= MINIMUM_OCCUPATION;
+        });
 
+        if (shouldShowModal) {
+          setIsModalOpen(true);
+          return;
+        }
+
+        setView("additionalInfo");
         break;
       case "additionalInfo":
-        // TO DO: Determine wheter an api call is needed here or not
-        // Also, we need to leave the data in the zustand store to be used later
-        // setLoadingRequest(true);
-        // const modeledData = mapFormToTransferOrder(data);
-        // console.log("Modeled data for transfer order:", modeledData);
-
-        // try {
-        //   const res = await addTransferOrderNew(modeledData, []);
-        //   console.log("Response from addTransferOrderNew:", res);
-
-        //   message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
-        //     push("/logistics/orders/details/" + res.id)
-        //   );
-        // } catch (error) {
-        //   message.error("Error al crear la orden de transferencia", 2);
-        //   console.error("Error adding transfer order:", error);
-        // }
-        // setLoadingRequest(false);
-
         setLoadingRequest(true);
+        const modeledData = mapFormToTransferOrder(data);
+        try {
+          const res = await addTransferOrderNew(modeledData, []);
+          message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
+            push("/logistics/orders/details/" + res.id)
+          );
+        } catch (error) {
+          message.error("Error al crear la orden de transferencia", 2);
+          console.error("Error adding transfer order:", error);
+        }
+        setLoadingRequest(false);
+
         // Change route to the details page
-        push("/logistics/orders/milkyWIP");
+        // TO DO: Uncomment this when implemented
+        // push("/logistics/orders/milkyWIP");
         break;
       default:
         console.error("Unknown view:", view);
@@ -227,35 +257,56 @@ export const CreateOrderVieww: React.FC = () => {
     // for every view we check if the next button should be disabled
     switch (view) {
       case "scheduling":
-        const isDestinationDateAndTimeMandatory = tripType === "4";
-
-        if (isDestinationDateAndTimeMandatory) {
+        if (isFixRate) {
           const isValid = tripDetails.every(
             (detail) => detail.placeId && detail.date && detail.time
           );
           return !isValid;
         }
+
+        if (tripType === "2") {
+          const isValid =
+            tripDetails[0]?.placeId &&
+            tripDetails[0]?.date &&
+            tripDetails[0]?.time &&
+            tripDetails[0]?.raisingNum;
+
+          return !isValid;
+        }
         // aca solo verificamos que la primera ubicación tenga todo y haya un destino
         const isValid =
-          tripDetails[0].placeId &&
-          tripDetails[0].date &&
-          tripDetails[0].time &&
-          tripDetails[1].placeId;
+          tripDetails[0]?.placeId &&
+          tripDetails[0]?.date &&
+          tripDetails[0]?.time &&
+          tripDetails[1]?.placeId;
         return !isValid;
       case "load":
-        // at least one material and vehicle must be selected
-        // if there is a row should have something selected, an id
-        const validMaterial =
-          materialDetails &&
-          materialDetails?.length > 0 &&
-          materialDetails?.every((detail) => detail.id !== undefined);
-
         const validVehicles =
           suggestedVehicles &&
           suggestedVehicles?.length > 0 &&
           suggestedVehicles?.every((vehicle) => vehicle.id !== undefined);
 
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
+
+        // If fix rateneeds vehicle validation
+        if (isFixRate) {
+          return !validVehicles || !validOtherServices;
+        }
+
+        // Type 3 requires people selection
+        if (tripType === "3") {
+          const validPeople =
+            people !== undefined &&
+            people.length > 0 &&
+            people.every((person) => person.id !== undefined);
+          return !validPeople || !validVehicles || !validOtherServices;
+        }
+
+        // Type 1 and 2 require material selection
+        const validMaterial =
+          materialDetails &&
+          materialDetails?.length > 0 &&
+          materialDetails?.every((detail) => detail.id !== undefined);
 
         return !validMaterial || !validVehicles || !validOtherServices;
       case "additionalInfo":
@@ -296,15 +347,16 @@ export const CreateOrderVieww: React.FC = () => {
 
     // Forces React to recalculate useMemo whenever any data changes, even if the reference doesn't.
   }, [
-    JSON.stringify(tripDetails),
+    tripType,
     view,
+    JSON.stringify(tripDetails),
     JSON.stringify(materialDetails),
     JSON.stringify(suggestedVehicles),
     JSON.stringify(otherServices),
     JSON.stringify(additionalInfo),
     JSON.stringify(billing),
     JSON.stringify(productServiceLine),
-    tripType
+    JSON.stringify(people)
   ]);
 
   const getPreviousView = (currentView: IViewOption): IViewOption | null => {
@@ -321,7 +373,11 @@ export const CreateOrderVieww: React.FC = () => {
       <Container customStyles={{ height: "auto" }}>
         <Flex vertical>
           {/* ------------Main Info Order-------------- */}
-          <CustomStepper steps={steps} currentStepIndex={currentStepIndex} />
+          <CustomStepper
+            steps={steps}
+            currentStepIndex={currentStepIndex}
+            customClassName="createOrderView__stepper"
+          />
           <hr className="separator" />
           {renderView(view)}
         </Flex>
@@ -343,6 +399,16 @@ export const CreateOrderVieww: React.FC = () => {
           Siguiente
         </PrincipalButton>
       </div>
+
+      <ModalVehicleOccupation
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onOk={() => {
+          setIsModalOpen(false);
+          setView("additionalInfo");
+        }}
+        selectedVehiclesInfo={selectedVehiclesInfo}
+      />
     </div>
   );
 };

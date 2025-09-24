@@ -24,7 +24,7 @@ const CommunityIcon: React.FC<CommunityIconProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 8,
+        padding: 6,
         borderRadius: 4,
         background: backgroundColor,
         cursor: "pointer"
