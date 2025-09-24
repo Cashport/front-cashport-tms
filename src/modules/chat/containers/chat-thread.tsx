@@ -83,10 +83,17 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom } = useSocket();
 
   useEffect(() => {
+    // Connect to current ticket room and subscribe to messages
     connectTicketRoom(conversation.id);
     subscribeToMessages((msg) => {
       console.log("New message received via socket:", msg);
     });
+
+    // Cleanup function: runs when conversation.id changes or component unmounts
+    // This ensures we unsubscribe from the previous room before connecting to the new one
+    return () => {
+      desubscribeTicketRoom(conversation.id);
+    };
   }, [conversation.id]);
 
   useEffect(() => {
