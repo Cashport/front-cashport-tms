@@ -78,15 +78,13 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { connect, connectTicketRoom } = useSocket();
+  const { connect } = useSocket();
 
   useEffect(() => {
     connect({
       ticketId: conversation.id,
       customerId: conversation.customerId
     });
-
-    //connectTicketRoom(conversation.id);
   }, []);
 
   useEffect(() => {

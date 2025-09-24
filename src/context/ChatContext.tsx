@@ -6,8 +6,8 @@ import * as globalConfig from "@/config";
 
 // Types
 interface SocketConfig {
+  customerId: string;
   ticketId?: string;
-  customerId?: string;
 }
 
 interface Message {
@@ -98,9 +98,7 @@ const createEventHandlers = (
       setIsConnected(true);
       showToast("Conectado al servidor", "success");
 
-      if (config.customerId) {
-        socket.emit("join-user-room", config.customerId);
-      }
+      socket.emit("join-user-room", config.customerId);
     },
 
     onDisconnect: () => (reason: string) => {
@@ -275,7 +273,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const connectTicketRoom = useCallback(
     (ticketId: string) => {
       if (socket?.connected) {
-        socket.emit('join-ticket-room', ticketId);
+        socket.emit("join-ticket-room", ticketId);
       }
     },
     [socket]
