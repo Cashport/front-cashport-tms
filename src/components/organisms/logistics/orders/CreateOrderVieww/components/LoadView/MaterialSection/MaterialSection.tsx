@@ -1,5 +1,5 @@
 import React from "react";
-import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
+import { Control, Controller, useFieldArray, UseFormTrigger, useWatch } from "react-hook-form";
 import { Table, Button, Popconfirm, Flex, Checkbox, TableProps, InputNumber, Select } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash } from "@phosphor-icons/react";
 
@@ -11,9 +11,10 @@ import { IFormCreateOrder } from "../../../CreateOrderVieww";
 interface IMaterialSectionProps {
   control: Control<IFormCreateOrder, any>;
   allMaterials: IMaterialStepOne[] | undefined;
+  trigger: UseFormTrigger<IFormCreateOrder>;
 }
 
-const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterials }) => {
+const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterials, trigger }) => {
   const width = useScreenWidth();
 
   const matchiWidthNameColumn = React.useMemo(() => {
@@ -122,6 +123,18 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     // Calcular el volumen inicial si tiene dimensiones
                     m3_volume: calculateVolume(found.mt_height, found.mt_width, found.mt_length)
                   });
+
+                  // Trigger validation for numeric fields after update
+                  if (trigger) {
+                    setTimeout(() => {
+                      trigger([
+                        `material.${index}.kg_weight`,
+                        `material.${index}.mt_height`,
+                        `material.${index}.mt_width`,
+                        `material.${index}.mt_length`
+                      ]);
+                    }, 0);
+                  }
                 } else {
                   // Limpia la fila si se deselecciona
                   update(index, {
@@ -129,6 +142,18 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     id: undefined,
                     m3_volume: 0
                   });
+
+                  // Clear validation errors for numeric fields
+                  if (trigger) {
+                    setTimeout(() => {
+                      trigger([
+                        `material.${index}.kg_weight`,
+                        `material.${index}.mt_height`,
+                        `material.${index}.mt_width`,
+                        `material.${index}.mt_length`
+                      ]);
+                    }, 0);
+                  }
                 }
               }}
               className="inputSelect -ellipsis"
@@ -168,7 +193,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
           control={control}
           name={`material.${index}.kg_weight`}
           rules={errorValidationNumericInput}
-          render={({ field: { value, onChange, onBlur, ...field }, fieldState: { error } }) => (
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
             <>
               <InputNumber
                 {...field}
@@ -178,7 +203,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                   const numericValue = val === null || val === undefined ? 0 : Number(val);
                   onChange(numericValue);
                 }}
-                onBlur={onBlur}
                 min={0}
                 step={0.1}
                 placeholder="1"
@@ -213,7 +237,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
           control={control}
           name={`material.${index}.mt_height`}
           rules={errorValidationNumericInput}
-          render={({ field: { value, onChange, onBlur, ...field }, fieldState: { error } }) => (
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
             <>
               <InputNumber
                 {...field}
@@ -238,7 +262,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     });
                   }
                 }}
-                onBlur={onBlur}
                 min={0}
                 step={0.01}
                 placeholder="0"
@@ -273,7 +296,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
           control={control}
           name={`material.${index}.mt_width`}
           rules={errorValidationNumericInput}
-          render={({ field: { value, onChange, onBlur, ...field }, fieldState: { error } }) => (
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
             <>
               <InputNumber
                 {...field}
@@ -298,7 +321,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     });
                   }
                 }}
-                onBlur={onBlur}
                 min={0}
                 step={0.01}
                 placeholder="0"
@@ -333,7 +355,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
           control={control}
           name={`material.${index}.mt_length`}
           rules={errorValidationNumericInput}
-          render={({ field: { value, onChange, onBlur, ...field }, fieldState: { error } }) => (
+          render={({ field: { value, onChange, ...field }, fieldState: { error } }) => (
             <>
               <InputNumber
                 {...field}
@@ -358,7 +380,6 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                     });
                   }
                 }}
-                onBlur={onBlur}
                 min={0}
                 step={0.01}
                 placeholder="0"
