@@ -15,7 +15,6 @@ import * as globalConfig from "@/config";
 // Types
 interface SocketConfig {
   customerId: string;
-  ticketId?: string;
 }
 
 interface Message {
@@ -153,20 +152,6 @@ class SocketManager {
         reject(new Error("Socket not connected"));
         return;
       }
-
-      const timeout = setTimeout(() => {
-        reject(new Error("Timeout joining ticket room"));
-      }, 5000);
-
-      this.socket.once("joined-ticket-room", () => {
-        clearTimeout(timeout);
-        resolve();
-      });
-
-      this.socket.once("join-ticket-room-error", (error: any) => {
-        clearTimeout(timeout);
-        reject(new Error(error.message));
-      });
 
       this.socket.emit("join-ticket-room", ticketId);
     });

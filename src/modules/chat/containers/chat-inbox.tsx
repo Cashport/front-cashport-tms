@@ -19,6 +19,7 @@ import { Chat, Funnel, MagnifyingGlass, Users } from "@phosphor-icons/react";
 import { getTickets } from "@/services/chat/chat";
 
 import "@/modules/chat/styles/chatStyles.css";
+import { useSocket } from "@/context/ChatContext";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -78,6 +79,15 @@ export default function ChatInbox() {
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [ticketsData, setTicketsData] = useState<ITicket[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { connect } = useSocket();
+
+  useEffect(() => {
+    console.log("Active ticket changed:", activeId);
+    connect({
+      customerId: filtered.find((c) => c.id === activeId)?.customerId || ""
+    });
+  }, [activeId]);
 
   useEffect(() => {
     const fetchTickets = async () => {
