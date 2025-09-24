@@ -1,6 +1,14 @@
 "use client";
 import { getIdToken } from "@/utils/api/api";
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo
+} from "react";
 import { io, Socket } from "socket.io-client";
 import * as globalConfig from "@/config";
 
@@ -30,26 +38,18 @@ interface SocketContextType {
     activeTickets: number;
     totalMessages: number;
   };
-  activities: Activity[];
-
-  // eslint-disable-next-line no-unused-vars
-  connect: (config: SocketConfig) => void;
+  connect: (config: SocketConfig) => Promise<void>;
   disconnect: () => void;
-  // eslint-disable-next-line no-unused-vars
-  connectTicketRoom: (ticketId: string) => void;
-}
-
-interface Activity {
-  id: string;
-  message: string;
-  type: "new-message" | "new-ticket" | "customer-update" | "ticket-update";
-  timestamp: Date;
+  connectTicketRoom: (ticketId: string) => Promise<void>;
+  // Nuevas funciones para actualizar estados
+  subscribeToMessages: (callback: (message: Message) => void) => () => void;
+  subscribeToTickets: (callback: (ticket: any) => void) => () => void;
 }
 
 // Socket Context
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
-// Custom Hook
+// Custom Hook optimizado
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (!context) {
@@ -58,264 +58,233 @@ export const useSocket = () => {
   return context;
 };
 
-// Functional Socket Manager Factory
-const createSocketConnection = async (): Promise<Socket> => {
-  const token = (await getIdToken(false)) as string;
+// Hook especializado para mensajes con callback personalizado
+export const useSocketMessages = (onNewMessage?: (message: Message) => void) => {
+  const { messages, subscribeToMessages } = useSocket();
 
-  if (!token) {
-    throw new Error("Authentication token is required to connect to the socket server");
+  useEffect(() => {
+    if (!onNewMessage) return;
+
+    return subscribeToMessages(onNewMessage);
+  }, [onNewMessage, subscribeToMessages]);
+
+  return messages;
+};
+
+// Socket Manager optimizado
+class SocketManager {
+  private socket: Socket | null = null;
+  private messageCallbacks = new Set<(message: Message) => void>();
+  private ticketCallbacks = new Set<(ticket: any) => void>();
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+
+  async connect(config: SocketConfig): Promise<Socket> {
+    if (this.socket?.connected) {
+      return this.socket;
+    }
+
+    const token = (await getIdToken(false)) as string;
+    if (!token) {
+      throw new Error("Authentication token required");
+    }
+
+    this.socket = io(globalConfig.default.API_CHAT, {
+      timeout: 20000,
+      forceNew: false, // Reusar conexión si es posible
+      reconnection: true,
+      reconnectionDelay: Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000), // Backoff exponencial
+      reconnectionAttempts: this.maxReconnectAttempts,
+      auth: { token },
+      extraHeaders: { Authorization: `Bearer ${token}` }
+    });
+
+    this.setupEventListeners(config);
+    return this.socket;
   }
 
-  return io(globalConfig.default.API_CHAT, {
-    timeout: 20000,
-    forceNew: true,
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: 5,
-    auth: {
-      token: token
-    },
-    extraHeaders: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-};
+  private setupEventListeners(config: SocketConfig) {
+    if (!this.socket) return;
 
-// Event Handler Factory - Pure Functions
-const createEventHandlers = (
-  setIsConnected: React.Dispatch<React.SetStateAction<boolean>>,
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-  setStats: React.Dispatch<React.SetStateAction<{ activeTickets: number; totalMessages: number }>>,
-  // eslint-disable-next-line no-unused-vars
-  addActivity: (message: string, type: Activity["type"]) => void,
-  // eslint-disable-next-line no-unused-vars
-  showToast: (message: string, type: "success" | "error" | "info") => void,
-  config: SocketConfig
-) => {
-  return {
-    onConnect: (socket: Socket) => () => {
-      console.log("Connected to server");
-      setIsConnected(true);
-      showToast("Conectado al servidor", "success");
+    // Eventos de conexión
+    this.socket.on("connect", () => {
+      console.info("Connected to chat socket server");
+      this.reconnectAttempts = 0; // Reset counter on successful connection
+      this.socket?.emit("join-user-room", config.customerId);
+    });
 
-      socket.emit("join-user-room", config.customerId);
-    },
+    // Eventos de mensajes - usar callbacks optimizados
+    this.socket.on("newMessage", (data: Message) => {
+      this.messageCallbacks.forEach((callback) => callback(data));
+    });
 
-    onDisconnect: () => (reason: string) => {
-      console.log("Disconnected from server:", reason);
-      setIsConnected(false);
-      showToast("Desconectado del servidor", "error");
+    this.socket.on("new-ticket", (data: any) => {
+      this.ticketCallbacks.forEach((callback) => callback(data));
+    });
 
-      if (reason === "io server disconnect") {
-        showToast("Desconectado por el servidor. Verifique su token de autenticación.", "error");
+    // Manejar errores de reconexión
+    this.socket.on("reconnect_failed", () => {
+      this.reconnectAttempts = this.maxReconnectAttempts;
+    });
+  }
+
+  subscribeToMessages(callback: (message: Message) => void): () => void {
+    this.messageCallbacks.add(callback);
+    return () => this.messageCallbacks.delete(callback);
+  }
+
+  subscribeToTickets(callback: (ticket: any) => void): () => void {
+    this.ticketCallbacks.add(callback);
+    return () => this.ticketCallbacks.delete(callback);
+  }
+
+  async joinTicketRoom(ticketId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket?.connected) {
+        reject(new Error("Socket not connected"));
+        return;
       }
-    },
 
-    onConnectError: () => (error: Error) => {
-      console.error("Connection error:", error);
-      setIsConnected(false);
+      const timeout = setTimeout(() => {
+        reject(new Error("Timeout joining ticket room"));
+      }, 5000);
 
-      if (error.message?.includes("Authentication") || error.message?.includes("Unauthorized")) {
-        showToast("Error de autenticación. Por favor, verifique su token.", "error");
-      } else {
-        showToast(`Error de conexión: ${error.message || "Error desconocido"}`, "error");
-      }
-    },
+      this.socket.once("joined-ticket-room", () => {
+        clearTimeout(timeout);
+        resolve();
+      });
 
-    onReconnect: () => (attemptNumber: number) => {
-      console.log("Reconnected after", attemptNumber, "attempts");
-      showToast("Reconectado al servidor", "success");
-      setIsConnected(true);
-    },
+      this.socket.once("join-ticket-room-error", (error: any) => {
+        clearTimeout(timeout);
+        reject(new Error(error.message));
+      });
 
-    onReconnectFailed: () => () => {
-      console.error("Failed to reconnect");
-      showToast("No se pudo reconectar al servidor", "error");
-      setIsConnected(false);
-    },
+      this.socket.emit("join-ticket-room", ticketId);
+    });
+  }
 
-    onNewMessage: () => (data: Message) => {
-      console.log("New message received:", data);
-      setMessages((prev) => [...prev, data]);
-      setStats((prev) => ({ ...prev, totalMessages: prev.totalMessages + 1 }));
-      addActivity(`Nuevo mensaje de ${data.customer?.name || data.from}`, "new-message");
-      showToast(`Nuevo mensaje de ${data.customer?.name || data.from}`, "success");
-    },
-
-    onMessageStatusUpdate: () => (data: any) => {
-      console.log("Message status update:", data);
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === data.messageId ? { ...msg, status: data.status } : msg))
-      );
-    },
-
-    onCustomerUpdate: () => (data: any) => {
-      console.log("Customer update:", data);
-      addActivity(`Cliente actualizado: ${data.name || data.phone}`, "customer-update");
-    },
-
-    onTicketUpdate: () => (data: any) => {
-      console.log("Ticket update:", data);
-      addActivity("Ticket actualizado", "ticket-update");
-    },
-
-    onNewTicket: () => (data: any) => {
-      console.log("New ticket:", data);
-      setStats((prev) => ({ ...prev, activeTickets: prev.activeTickets + 1 }));
-      addActivity(
-        `Nuevo ticket creado para ${data.customer?.name || data.customer?.phone}`,
-        "new-ticket"
-      );
-      showToast(`Nuevo ticket para ${data.customer?.name || data.customer?.phone}`, "success");
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
     }
-  };
-};
+    // Limpiar callbacks
+    this.messageCallbacks.clear();
+    this.ticketCallbacks.clear();
+  }
 
-// Attach event listeners - Pure function
-const attachSocketListeners = (
-  socket: Socket,
-  handlers: ReturnType<typeof createEventHandlers>
-) => {
-  socket.on("connect", handlers.onConnect(socket));
-  socket.on("disconnect", handlers.onDisconnect());
-  socket.on("connect_error", handlers.onConnectError());
-  socket.on("reconnect", handlers.onReconnect());
-  socket.on("reconnect_failed", handlers.onReconnectFailed());
-  socket.on("newMessage", handlers.onNewMessage());
-  socket.on("messageStatusUpdate", handlers.onMessageStatusUpdate());
-  socket.on("customerUpdate", handlers.onCustomerUpdate());
-  socket.on("ticketUpdate", handlers.onTicketUpdate());
-  socket.on("new-ticket", handlers.onNewTicket());
+  getSocket(): Socket | null {
+    return this.socket;
+  }
 
-  // Return cleanup function
-  return () => {
-    socket.off("connect");
-    socket.off("disconnect");
-    socket.off("connect_error");
-    socket.off("reconnect");
-    socket.off("reconnect_failed");
-    socket.off("newMessage");
-    socket.off("messageStatusUpdate");
-    socket.off("customerUpdate");
-    socket.off("ticketUpdate");
-    socket.off("new-ticket");
-  };
-};
+  isConnected(): boolean {
+    return this.socket?.connected ?? false;
+  }
+}
 
-// Socket Provider Component - Fully Functional
+// Socket Provider optimizado
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  // Estados optimizados con lazy initialization
   const [isConnected, setIsConnected] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [stats, setStats] = useState({ activeTickets: 0, totalMessages: 0 });
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => []);
+  const [stats, setStats] = useState(() => ({ activeTickets: 0, totalMessages: 0 }));
 
-  // Store cleanup functions
-  const cleanupRef = useRef<(() => void) | null>(null);
-  const ticketCleanupRef = useRef<(() => void) | null>(null);
+  // Socket manager singleton
+  const socketManager = useRef<SocketManager | null>(null);
 
-  // Utility functions
-  const addActivity = useCallback((message: string, type: Activity["type"]) => {
-    const activity: Activity = {
-      id: `${Date.now()}-${Math.random()}`,
-      message,
-      type,
-      timestamp: new Date()
-    };
-    setActivities((prev) => [activity, ...prev].slice(0, 50));
+  // Initialize socket manager only once
+  if (!socketManager.current) {
+    socketManager.current = new SocketManager();
+  }
+
+  // Optimized message handler
+  const handleNewMessage = useCallback((data: Message) => {
+    setMessages((prev) => {
+      // Evitar duplicados
+      if (prev.some((msg) => msg.id === data.id)) return prev;
+      return [...prev, data];
+    });
+    setStats((prev) => ({ ...prev, totalMessages: prev.totalMessages + 1 }));
   }, []);
 
-  const showToast = useCallback((message: string, type: "success" | "error" | "info") => {
-    // Integration point for your toast library
-    console.log(`[${type.toUpperCase()}]: ${message}`);
+  // Optimized ticket handler
+  const handleNewTicket = useCallback((data: any) => {
+    setStats((prev) => ({ ...prev, activeTickets: prev.activeTickets + 1 }));
   }, []);
 
-  // Connect function
   const connect = useCallback(
-    (config: SocketConfig) => {
-      // Disconnect existing socket if any
-      if (socket?.connected) {
-        socket.disconnect();
-      }
+    async (config: SocketConfig) => {
+      try {
+        const socket = await socketManager.current!.connect(config);
 
-      // Clean up previous listeners
-      if (cleanupRef.current) {
-        cleanupRef.current();
-      }
+        // Subscribe to events only once
+        socketManager.current!.subscribeToMessages(handleNewMessage);
+        socketManager.current!.subscribeToTickets(handleNewTicket);
 
-      // Create new socket connection
-      createSocketConnection()
-        .then((newSocket) => {
-          // Create and attach event handlers
-          const handlers = createEventHandlers(
-            setIsConnected,
-            setMessages,
-            setStats,
-            addActivity,
-            showToast,
-            config
-          );
-
-          const cleanup = attachSocketListeners(newSocket, handlers);
-          cleanupRef.current = cleanup;
-
-          setSocket(newSocket);
-        })
-        .catch((error) => {
-          console.error("Failed to create socket connection:", error);
-          showToast("Error al conectar con el servidor de sockets", "error");
-        });
-    },
-    [socket, addActivity, showToast]
-  );
-
-  // Connect to ticket room function
-  const connectTicketRoom = useCallback(
-    (ticketId: string) => {
-      if (socket?.connected) {
-        socket.emit("join-ticket-room", ticketId);
+        // Monitor connection status
+        socket.on("connect", () => setIsConnected(true));
+        socket.on("disconnect", () => setIsConnected(false));
+      } catch (error) {
+        console.error("Failed to connect:", error);
+        throw error;
       }
     },
-    [socket]
+    [handleNewMessage, handleNewTicket]
   );
 
-  // Disconnect function
+  // Optimized ticket room connection
+  const connectTicketRoom = useCallback(async (ticketId: string) => {
+    if (!socketManager.current) {
+      throw new Error("Socket manager not initialized");
+    }
+    return socketManager.current.joinTicketRoom(ticketId);
+  }, []);
+
   const disconnect = useCallback(() => {
-    if (cleanupRef.current) {
-      cleanupRef.current();
-      cleanupRef.current = null;
-    }
-
-    if (ticketCleanupRef.current) {
-      ticketCleanupRef.current();
-      ticketCleanupRef.current = null;
-    }
-
-    if (socket) {
-      socket.disconnect();
-      setSocket(null);
-    }
-
+    socketManager.current?.disconnect();
     setIsConnected(false);
-  }, [socket]);
+  }, []);
 
-  // Clean up on unmount
+  // Subscription functions for external components
+  const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
+    return socketManager.current?.subscribeToMessages(callback) ?? (() => {});
+  }, []);
+
+  const subscribeToTickets = useCallback((callback: (ticket: any) => void) => {
+    return socketManager.current?.subscribeToTickets(callback) ?? (() => {});
+  }, []);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      disconnect();
+      socketManager.current?.disconnect();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  const value: SocketContextType = {
-    socket,
-    isConnected,
-    messages,
-    stats,
-    activities,
-    connect,
-    disconnect,
-    connectTicketRoom
-  };
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    (): SocketContextType => ({
+      socket: socketManager.current?.getSocket() ?? null,
+      isConnected,
+      messages,
+      stats,
+      connect,
+      disconnect,
+      connectTicketRoom,
+      subscribeToMessages,
+      subscribeToTickets
+    }),
+    [
+      isConnected,
+      messages,
+      stats,
+      connect,
+      disconnect,
+      connectTicketRoom,
+      subscribeToMessages,
+      subscribeToTickets
+    ]
+  );
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 };

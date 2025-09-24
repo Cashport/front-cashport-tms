@@ -14,7 +14,7 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { getOneTicket } from "@/services/chat/chat";
+import { getOneTicket, sendMessage } from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -127,15 +127,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     }
     try {
       setIsSendingWA(true);
-      // const res = await fetch("/api/whatsapp/send", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ to, text, preview_url: false })
-      // });
-      // const data = await res.json();
-      // if (!res.ok || !data?.ok) {
-      //   throw new Error(typeof data?.error === "string" ? data.error : "Fallo en el envío");
-      // }
+      await sendMessage(conversation.customerId, text);
       setMessage("");
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       requestAnimationFrame(() => {
@@ -266,6 +258,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
   function renderBubble(m: IMessage) {
     const mine = m.direction === "OUTBOUND";
+    const status = m.status;
     const wrapper = "max-w-[80%] md:max-w-[70%]";
     const bubble =
       "rounded-2xl border px-3 py-2 text-sm " +
@@ -305,7 +298,16 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     return (
       <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
         <div className={wrapper}>
-          <div className={bubble}>{m.content}</div>
+          <div className="flex items-center gap-1">
+            <div className={bubble}>{m.content}</div>
+            {mine && status === "DELIVERED" && (
+              <div className="text-[10px] text-muted-foreground self-end">✓</div>
+            )}
+            {mine && status === "READ" && (
+              <div className="text-[10px] text-muted-foreground self-end">✓✓</div>
+            )}
+            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+          </div>
           <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
             {formatRelativeTime(m.timestamp)}
           </div>

@@ -29,3 +29,18 @@ export const getOneTicket = async (ticketId: string): Promise<IChatData> => {
     throw error;
   }
 };
+
+export const sendMessage = async (customerId: string, message: string): Promise<void> => {
+  try {
+    const body = {
+      customerId,
+      message
+    };
+    await API.post(`/whatsapp-messages`, body, {
+      baseURL: config.API_CHAT
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    throw error;
+  }
+};
