@@ -32,6 +32,7 @@ import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
 import { cn } from "@/utils/utils";
+import { useSocket } from "@/context/ChatContext";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -77,6 +78,17 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const { connect, connectTicketRoom } = useSocket();
+
+  useEffect(() => {
+    connect({
+      ticketId: conversation.id,
+      customerId: conversation.customerId
+    });
+
+    //connectTicketRoom(conversation.id);
+  }, []);
+
   useEffect(() => {
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -87,7 +99,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       try {
         const ticketData: IChatData = await getOneTicket(conversation.id);
         setTicketMessages(ticketData.messages);
-        console.log("Fetched ticket details:", ticketData);
       } catch (error) {
         console.error("Error fetching ticket details:", error);
       }

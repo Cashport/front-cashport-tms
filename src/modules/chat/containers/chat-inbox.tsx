@@ -51,6 +51,7 @@ function ticketToConversation(ticket: ITicket): Conversation {
   return {
     id: ticket.id,
     customer: ticket.customer.name,
+    customerId: ticket.customer.id,
     initials: getInitials(ticket.customer.name),
     phone: ticket.customer.phoneNumber,
     email: ticket.agent?.email || "",
