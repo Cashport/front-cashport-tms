@@ -208,12 +208,9 @@ export const CreateOrderVieww: React.FC = () => {
         setView("load");
         break;
       case "load":
-        // Check if any occupation percentage is below 50%
+        // Check if occupation Kg or M3 percentage is below 50%
         const shouldShowModal = selectedVehiclesInfo?.some((vehicle) => {
-          const guideValue =
-            vehicle.ocupationPassengers !== null
-              ? vehicle.ocupationPassengers
-              : Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
+          const guideValue = Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
           return guideValue <= MINIMUM_OCCUPATION;
         });
 
