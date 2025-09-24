@@ -47,6 +47,8 @@ interface SocketContextType {
   subscribeToMessages: (callback: (message: Message) => void) => () => void;
   // eslint-disable-next-line no-unused-vars
   subscribeToTickets: (callback: (ticket: any) => void) => () => void;
+  // eslint-disable-next-line no-unused-vars
+  desubscribeTicketRoom: (ticketRoomId: string) => void;
 }
 
 // Socket Context
@@ -85,6 +87,8 @@ class SocketManager {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
+  private isConnect = false;
+
   async connect(config: SocketConfig): Promise<Socket> {
     if (this.socket?.connected) {
       return this.socket;
@@ -95,7 +99,7 @@ class SocketManager {
       throw new Error("Authentication token required");
     }
 
-    this.socket = io(globalConfig.default.API_CHAT, {
+    this.socket = io(globalConfig.default.API_CHAT?.slice(0, -3), {
       timeout: 20000,
       forceNew: false, // Reusar conexión si es posible
       reconnection: true,
@@ -105,22 +109,25 @@ class SocketManager {
       extraHeaders: { Authorization: `Bearer ${token}` }
     });
 
+    this.isConnect = true;
+
     this.setupEventListeners(config);
     return this.socket;
   }
 
   private setupEventListeners(config: SocketConfig) {
-    if (!this.socket) return;
+    if (!this.socket || !this.isConnect) return;
 
     // Eventos de conexión
     this.socket.on("connect", () => {
       console.info("Connected to chat socket server");
       this.reconnectAttempts = 0; // Reset counter on successful connection
+
       this.socket?.emit("join-user-room", config.customerId);
     });
 
     // Eventos de mensajes - usar callbacks optimizados
-    this.socket.on("newMessage", (data: Message) => {
+    this.socket.on("new-message", (data: Message) => {
       this.messageCallbacks.forEach((callback) => callback(data));
     });
 
@@ -146,13 +153,18 @@ class SocketManager {
     return () => this.ticketCallbacks.delete(callback);
   }
 
+  desubscribeToTicketRoom(ticketRoomId: string) {
+    if (this.socket?.connected) {
+      console.info("Desubscribed from ticket room TOP:", ticketRoomId);
+      this.socket.emit("leave-ticket-room", ticketRoomId);
+    }
+  }
+
   async joinTicketRoom(ticketId: string): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(() => {
       if (!this.socket?.connected) {
-        reject(new Error("Socket not connected"));
         return;
       }
-
       this.socket.emit("join-ticket-room", ticketId);
     });
   }
@@ -218,7 +230,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         // Monitor connection status
         socket.on("connect", () => setIsConnected(true));
-        socket.on("disconnect", () => setIsConnected(false));
+        socket.on("disconnect", () => {
+          console.warn("Disconnected from chat socket server");
+          setIsConnected(false);
+        });
       } catch (error) {
         console.error("Failed to connect:", error);
         throw error;
@@ -251,6 +266,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return socketManager.current?.subscribeToTickets(callback) ?? (() => {});
   }, []);
 
+  const desubscribeTicketRoom = useCallback((ticketRoomId: string) => {
+    return socketManager.current?.desubscribeToTicketRoom(ticketRoomId);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -269,7 +288,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       disconnect,
       connectTicketRoom,
       subscribeToMessages,
-      subscribeToTickets
+      subscribeToTickets,
+      desubscribeTicketRoom
     }),
     [
       isConnected,
@@ -279,7 +299,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       disconnect,
       connectTicketRoom,
       subscribeToMessages,
-      subscribeToTickets
+      subscribeToTickets,
+      desubscribeTicketRoom
     ]
   );
 

@@ -83,7 +83,6 @@ export default function ChatInbox() {
   const { connect } = useSocket();
 
   useEffect(() => {
-    console.log("Active ticket changed:", activeId);
     connect({
       customerId: filtered.find((c) => c.id === activeId)?.customerId || ""
     });
@@ -129,7 +128,7 @@ export default function ChatInbox() {
     });
   }, [conversations, query, activeTab]);
 
-  const active = useMemo<Conversation | undefined>(
+  const activeConversation = useMemo<Conversation | undefined>(
     () => filtered.find((c) => c.id === activeId) ?? filtered[0],
     [filtered, activeId]
   );
@@ -218,7 +217,7 @@ export default function ChatInbox() {
                 </div>
               ) : (
                 filtered.map((c) => {
-                  const isActive = c.id === active?.id;
+                  const isActive = c.id === activeConversation?.id;
                   const isSelected = selectedIds.includes(c.id);
                   const risk = riskColors(c.overdueDays);
                   return (
@@ -283,10 +282,10 @@ export default function ChatInbox() {
         <section
           className={cn(detailsOpen ? "md:col-span-6" : "md:col-span-9", "min-h-0 flex flex-col")}
         >
-          {active ? (
+          {activeConversation ? (
             <ChatThread
-              key={active.id}
-              conversation={active}
+              key={activeConversation.id}
+              conversation={activeConversation}
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
             />
@@ -304,7 +303,9 @@ export default function ChatInbox() {
           )}
           style={{ borderColor: "#DDDDDD" }}
         >
-          {active && <ChatDetails conversation={active} onClose={() => setDetailsOpen(false)} />}
+          {activeConversation && (
+            <ChatDetails conversation={activeConversation} onClose={() => setDetailsOpen(false)} />
+          )}
         </aside>
       </div>
 

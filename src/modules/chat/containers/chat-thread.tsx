@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import {
   ArrowsOut,
@@ -14,7 +14,7 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { getOneTicket, sendMessage } from "@/services/chat/chat";
+import { sendMessage } from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -26,13 +26,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
-import { IMessage, IChatData } from "@/types/chat/IChat";
+import { IMessage } from "@/types/chat/IChat";
 import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
 import { cn } from "@/utils/utils";
 import { useSocket } from "@/context/ChatContext";
+import useTicketMessages from "@/hooks/useTicketMessages";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -69,7 +70,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [ticketMessages, setTicketMessages] = useState<IMessage[]>([]);
+  const { data: ticketData, mutate } = useTicketMessages(conversation.id);
+  const ticketMessages = useMemo(() => ticketData?.messages || [], [ticketData?.messages]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -78,27 +80,18 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { connectTicketRoom } = useSocket();
+  const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom } = useSocket();
 
   useEffect(() => {
     connectTicketRoom(conversation.id);
+    subscribeToMessages((msg) => {
+      console.log("New message received via socket:", msg);
+    });
   }, [conversation.id]);
 
   useEffect(() => {
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [conversation.id]);
-
-  useEffect(() => {
-    const fetchTicketDetails = async () => {
-      try {
-        const ticketData: IChatData = await getOneTicket(conversation.id);
-        setTicketMessages(ticketData.messages);
-      } catch (error) {
-        console.error("Error fetching ticket details:", error);
-      }
-    };
-    fetchTicketDetails();
   }, [conversation.id]);
 
   useEffect(() => {
@@ -126,6 +119,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       setIsSendingWA(true);
       await sendMessage(conversation.customerId, text);
       setMessage("");
+      mutate();
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       requestAnimationFrame(() => {
         const el = viewportRef.current;
@@ -316,6 +310,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* Header */}
+      <button onClick={() => desubscribeTicketRoom(conversation.id)}>AAAAAAAAAAAA</button>
       <div
         className="flex items-center justify-between border-b px-4 py-3"
         style={{ borderColor: "#DDDDDD" }}
