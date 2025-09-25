@@ -86,8 +86,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     // Connect to current ticket room and subscribe to messages
     connectTicketRoom(conversation.id);
     subscribeToMessages((msg: IMessageSocket) => {
-      console.log("New message received via socket:", msg);
-
       // Transform socket message to IMessage format
       const newMessage: IMessage = {
         id: msg.id,
@@ -172,7 +170,28 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       setIsSendingWA(true);
       await sendMessage(conversation.customerId, text);
       setMessage("");
-      mutate();
+
+      // Create a temporary message for immediate UI feedback
+      const tempMessage: IMessage = {
+        id: `temp_${Date.now()}_${Math.random()}`, // Temporary ID until we get the real one from socket
+        content: text,
+        type: "TEXT",
+        direction: "OUTBOUND",
+        status: "SENT",
+        timestamp: new Date().toISOString(),
+        mediaUrl: null
+      };
+
+      // Add the sent message immediately to ticketMessages
+      mutate((currentData) => {
+        if (!currentData) return currentData;
+        return {
+          ...currentData,
+          messages: [...currentData.messages, tempMessage]
+        };
+      }, false);
+
+      // mutate(); // Commented out for now
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       scrollToBottom();
     } catch (err: any) {
