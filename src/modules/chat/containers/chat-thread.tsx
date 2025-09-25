@@ -71,7 +71,10 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const { data: ticketData, mutate } = useTicketMessages(conversation.id);
-  const ticketMessages = useMemo(() => ticketData?.messages || [], [ticketData?.messages]);
+  const ticketMessages = useMemo(
+    () => ticketData?.messages?.slice().reverse() || [],
+    [ticketData?.messages]
+  );
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -80,10 +83,16 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom } = useSocket();
+  const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom, isConnected } =
+    useSocket();
+
+  useEffect(() => {
+    console.log("isConnected changed:", isConnected);
+  }, [isConnected]);
 
   useEffect(() => {
     // Connect to current ticket room and subscribe to messages
+    if (!conversation.id || !isConnected) return;
     connectTicketRoom(conversation.id);
     subscribeToMessages((msg: IMessageSocket) => {
       // Transform socket message to IMessage format
@@ -113,7 +122,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
         return {
           ...currentData,
-          messages: [...currentData.messages, newMessage]
+          messages: [newMessage, ...currentData.messages]
         };
       }, false);
 
@@ -126,7 +135,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     return () => {
       desubscribeTicketRoom(conversation.id);
     };
-  }, [conversation.id, mutate]);
+  }, [conversation.id, mutate, isConnected]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -182,16 +191,15 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         mediaUrl: null
       };
 
-      // Add the sent message immediately to ticketMessages
+      // Add the sent message immediately to ticketMessages (at beginning of array since we reverse it)
       mutate((currentData) => {
         if (!currentData) return currentData;
         return {
           ...currentData,
-          messages: [...currentData.messages, tempMessage]
+          messages: [tempMessage, ...currentData.messages]
         };
       }, false);
 
-      // mutate(); // Commented out for now
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       scrollToBottom();
     } catch (err: any) {
