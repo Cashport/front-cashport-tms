@@ -83,9 +83,11 @@ export default function ChatInbox() {
   const { connect } = useSocket();
 
   useEffect(() => {
-    connect({
-      customerId: filtered.find((c) => c.id === activeId)?.customerId || ""
-    });
+    if (activeId) {
+      connect({
+        customerId: filtered.find((c) => c.id === activeId)?.customerId || ""
+      });
+    }
   }, [activeId]);
 
   useEffect(() => {
