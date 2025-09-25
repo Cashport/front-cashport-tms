@@ -11,28 +11,17 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import * as globalConfig from "@/config";
+import { IMessageSocket } from "@/types/chat/IChat";
 
 // Types
 interface SocketConfig {
   customerId: string;
 }
 
-interface Message {
-  id: string;
-  from: string;
-  content: string;
-  customer?: {
-    name?: string;
-    phone?: string;
-  };
-  timestamp: Date;
-  status?: string;
-}
-
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  messages: Message[];
+  messages: IMessageSocket[];
   stats: {
     activeTickets: number;
     totalMessages: number;
@@ -44,7 +33,7 @@ interface SocketContextType {
   connectTicketRoom: (ticketId: string) => Promise<void>;
   // Functions to make something when a new message or ticket arrives
   // eslint-disable-next-line no-unused-vars
-  subscribeToMessages: (callback: (message: Message) => void) => () => void;
+  subscribeToMessages: (callback: (message: IMessageSocket) => void) => () => void;
   // eslint-disable-next-line no-unused-vars
   subscribeToTickets: (callback: (ticket: any) => void) => () => void;
   // eslint-disable-next-line no-unused-vars
@@ -65,7 +54,7 @@ export const useSocket = () => {
 
 // Hook especializado para mensajes con callback personalizado
 // eslint-disable-next-line no-unused-vars
-export const useSocketMessages = (onNewMessage?: (message: Message) => void) => {
+export const useSocketMessages = (onNewMessage?: (message: IMessageSocket) => void) => {
   const { messages, subscribeToMessages } = useSocket();
 
   useEffect(() => {
@@ -81,7 +70,7 @@ export const useSocketMessages = (onNewMessage?: (message: Message) => void) => 
 class SocketManager {
   private socket: Socket | null = null;
   // eslint-disable-next-line no-unused-vars
-  private messageCallbacks = new Set<(message: Message) => void>();
+  private messageCallbacks = new Set<(message: IMessageSocket) => void>();
   // eslint-disable-next-line no-unused-vars
   private ticketCallbacks = new Set<(ticket: any) => void>();
   private reconnectAttempts = 0;
@@ -127,7 +116,7 @@ class SocketManager {
     });
 
     // Eventos de mensajes - usar callbacks optimizados
-    this.socket.on("new-message", (data: Message) => {
+    this.socket.on("new-message", (data: IMessageSocket) => {
       this.messageCallbacks.forEach((callback) => callback(data));
     });
 
@@ -142,7 +131,7 @@ class SocketManager {
   }
 
   // eslint-disable-next-line no-unused-vars
-  subscribeToMessages(callback: (message: Message) => void): () => void {
+  subscribeToMessages(callback: (message: IMessageSocket) => void): () => void {
     this.messageCallbacks.add(callback);
     return () => this.messageCallbacks.delete(callback);
   }
@@ -192,7 +181,7 @@ class SocketManager {
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Estados optimizados con lazy initialization
   const [isConnected, setIsConnected] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(() => []);
+  const [messages, setMessages] = useState<IMessageSocket[]>(() => []);
   const [stats, setStats] = useState(() => ({ activeTickets: 0, totalMessages: 0 }));
 
   // Socket manager singleton
@@ -204,7 +193,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   // Optimized message handler
-  const handleNewMessage = useCallback((data: Message) => {
+  const handleNewMessage = useCallback((data: IMessageSocket) => {
     setMessages((prev) => {
       // Evitar duplicados
       if (prev.some((msg) => msg.id === data.id)) return prev;
@@ -257,7 +246,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Subscription functions for external components
   // eslint-disable-next-line no-unused-vars
-  const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
+  const subscribeToMessages = useCallback((callback: (message: IMessageSocket) => void) => {
     return socketManager.current?.subscribeToMessages(callback) ?? (() => {});
   }, []);
 

@@ -26,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
-import { IMessage } from "@/types/chat/IChat";
+import { IMessage, IMessageSocket } from "@/types/chat/IChat";
 import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
@@ -85,8 +85,40 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   useEffect(() => {
     // Connect to current ticket room and subscribe to messages
     connectTicketRoom(conversation.id);
-    subscribeToMessages((msg) => {
+    subscribeToMessages((msg: IMessageSocket) => {
       console.log("New message received via socket:", msg);
+
+      // Transform socket message to IMessage format
+      const newMessage: IMessage = {
+        id: msg.id,
+        content: msg.content,
+        type: msg.type,
+        direction: msg.direction,
+        status: msg.status as "DELIVERED" | "SENT" | "FAILED" | "READ",
+        timestamp: msg.timestamp,
+        mediaUrl: msg.mediaUrl
+      };
+
+      // Update the SWR cache by adding the new message only if it doesn't exist
+      mutate((currentData) => {
+        if (!currentData) return currentData;
+
+        // Check if message with same ID already exists
+        const messageExists = currentData.messages.some(
+          (existingMsg) => existingMsg.id === newMessage.id
+        );
+
+        if (messageExists) {
+          console.info("Message with ID already exists, skipping:", newMessage.id);
+          return currentData;
+        }
+
+        return {
+          ...currentData,
+          messages: [...currentData.messages, newMessage]
+        };
+      }, false);
+
       // Auto-scroll when new messages arrive via socket
       setTimeout(scrollToBottom, 100);
     });
@@ -96,7 +128,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     return () => {
       desubscribeTicketRoom(conversation.id);
     };
-  }, [conversation.id]);
+  }, [conversation.id, mutate]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
