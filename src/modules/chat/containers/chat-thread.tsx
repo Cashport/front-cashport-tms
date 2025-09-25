@@ -86,9 +86,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom, isConnected } =
     useSocket();
 
-  useEffect(() => {
-    console.log("isConnected changed:", isConnected);
-  }, [isConnected]);
 
   useEffect(() => {
     // Connect to current ticket room and subscribe to messages
