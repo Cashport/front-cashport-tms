@@ -138,7 +138,7 @@ export default function ChatInbox() {
   }
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="flex h-full flex-col">
       <header className="flex items-center gap-2 border-b" style={{ borderColor: "#DDDDDD" }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <Chat className="h-5 w-5" />

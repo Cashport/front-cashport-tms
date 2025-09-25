@@ -87,6 +87,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     connectTicketRoom(conversation.id);
     subscribeToMessages((msg) => {
       console.log("New message received via socket:", msg);
+      // Auto-scroll when new messages arrive via socket
+      setTimeout(scrollToBottom, 100);
     });
 
     // Cleanup function: runs when conversation.id changes or component unmounts
@@ -96,10 +98,22 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     };
   }, [conversation.id]);
 
+  const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+      const el = viewportRef.current;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  };
+
   useEffect(() => {
-    const el = viewportRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    scrollToBottom();
   }, [conversation.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [ticketMessages.length]);
 
   useEffect(() => {
     // Cleanup ObjectURLs en unmount
@@ -128,10 +142,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       setMessage("");
       mutate();
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
-      requestAnimationFrame(() => {
-        const el = viewportRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
-      });
+      scrollToBottom();
     } catch (err: any) {
       toast({
         title: "Error al enviar",
@@ -163,10 +174,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     setEmailImages([]);
     setEmailFiles([]);
     setChannel("whatsapp");
-    requestAnimationFrame(() => {
-      const el = viewportRef.current;
-      if (el) el.scrollTop = el.scrollHeight;
-    });
+    scrollToBottom();
   }
 
   async function startRecording() {
@@ -181,10 +189,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         //const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         //const url = URL.createObjectURL(blob);
         stream.getTracks().forEach((t) => t.stop());
-        requestAnimationFrame(() => {
-          const el = viewportRef.current;
-          if (el) el.scrollTop = el.scrollHeight;
-        });
+        scrollToBottom();
       };
       mediaRecorderRef.current = mr;
       mr.start();
@@ -317,7 +322,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* Header */}
-      <button onClick={() => desubscribeTicketRoom(conversation.id)}>AAAAAAAAAAAA</button>
       <div
         className="flex items-center justify-between border-b px-4 py-3"
         style={{ borderColor: "#DDDDDD" }}
