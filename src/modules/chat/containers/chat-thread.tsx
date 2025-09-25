@@ -70,7 +70,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const { data: ticketData, mutate } = useTicketMessages(conversation.id);
+  const { data: ticketData, mutate } = useTicketMessages({ ticketId: conversation.id,page: 1 });
   const ticketMessages = useMemo(
     () => ticketData?.messages?.slice().reverse() || [],
     [ticketData?.messages]

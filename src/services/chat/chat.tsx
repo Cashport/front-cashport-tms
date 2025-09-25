@@ -15,10 +15,16 @@ export const getTickets = async (): Promise<ITicket[]> => {
   }
 };
 
-export const getOneTicket = async (ticketId: string): Promise<IChatData> => {
+export const getOneTicket = async (ticketId: string, limit: number = 20, page?: number): Promise<IChatData> => {
   try {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    if (page !== undefined) {
+      params.append('page', page.toString());
+    }
+    
     const response: GenericResponse<IChatData> = await API.get(
-      `/whatsapp-messages/ticket/${ticketId}`,
+      `/whatsapp-messages/ticket/${ticketId}?${params.toString()}`,
       {
         baseURL: config.API_CHAT
       }
