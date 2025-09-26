@@ -1,13 +1,14 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { Flex } from "antd";
+import { Flex, message } from "antd";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import styles from "./restartPassword.module.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { sendEmailResetPassword } from "../../../../../firebase-utils";
+import { sendEmailResetPassword } from "@/services/users/users";
+import { isAxiosError } from "axios";
 
 interface IAuthLogin {
   email: string;
@@ -33,10 +34,20 @@ export const RestartPassword = ({ setResetPassword }: RestartFormProps) => {
   });
 
   const onSubmitHandler = async ({ email }: IAuthLogin) => {
-    setIsLoading(true);
-    await sendEmailResetPassword(email);
-    setEmail(email);
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+      await sendEmailResetPassword(email);
+      setEmail(email);
+      setIsLoading(false);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data?.message) {
+        message.error(error.response?.data?.message);
+      } else {
+        message.error("Error al enviar el correo");
+      }
+      console.error("Error al enviar el correo", error);
+      setIsLoading(false);
+    }
   };
 
   const handleUnderstood = () => {
