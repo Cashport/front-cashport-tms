@@ -1,0 +1,39 @@
+@import "@styles/variables.scss";
+
+.container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #fafafa;
+    width: fit-content;
+    border-radius: 4px;
+    border: 1px solid #dddfe8;
+}
+
+.barsContainer {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
+.bar {
+    width: 7px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+}
+
+.filled {
+    background-color: #fe7a01;
+}
+
+.empty {
+    background-color: #ffffff;
+}
+
+.percentage {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $black;
+}

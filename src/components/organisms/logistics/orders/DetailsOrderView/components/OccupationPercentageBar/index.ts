@@ -1,0 +1,1 @@
+export { OccupationPercentageBar } from "./OccupationPercentageBar";

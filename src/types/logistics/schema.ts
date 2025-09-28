@@ -1588,6 +1588,10 @@ export interface ITransferOrderVehicle {
   modified_at: Date;
   modified_by: string;
   vehicle_type_desc: string;
+  id_journey: number | null;
+  ocupation_kg: number;
+  ocupation_m3: number;
+  ocupation_passengers: number;
 }
 
 export interface ITransferOrderMaterial {
