@@ -30,13 +30,11 @@ import styles from "./DetailsOrderView.module.scss";
 import { useMapbox } from "@/utils/logistics/useMapBox";
 import Persons from "../../acept_carrier/detail/components/Persons/Persons";
 import { DataCarga } from "@/types/logistics/carrier/carrier";
-import Link from "next/link";
-import { CaretLeft } from "phosphor-react";
 import { BackButton } from "./components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
-import VehicleChips from "./components/ChipsRow";
-import ChipsRow from "./components/ChipsRow";
+
+import SuggestedVehiclesTable from "./components/SuggestedVehiclesTable/SuggestedVehiclesTable";
 
 interface Props {
   idOrder: string;
@@ -49,6 +47,8 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
   const [tripType, setTripType] = useState<TripType>(TripType.Carga);
   const [materialsTotalWeight, setMaterialsTotalWeight] = useState<number>(0);
   const [materialsTotalVolume, setMaterialsTotalVolume] = useState<number>(0);
+
+  console.log("transferOrder", transferOrder);
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -217,6 +217,7 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
 
             <Flex vertical gap={"0.5rem"}>
               <p className={styles.title}>Vehículos sugeridos</p>
+              {/*               
               {transferOrder?.transfer_order_vehicles &&
                 transferOrder?.transfer_order_vehicles?.length > 0 && (
                   <ChipsRow
@@ -226,7 +227,8 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
                       id: vehicle.id
                     }))}
                   />
-                )}
+                )} */}
+              <SuggestedVehiclesTable vehicles={transferOrder?.transfer_order_vehicles ?? []} />
             </Flex>
           </Flex>
           <Flex>

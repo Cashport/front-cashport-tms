@@ -1430,7 +1430,11 @@ export const CreateOrderView = () => {
         created_by: cuser?.email,
         modified_at: new Date(),
         modified_by: "",
-        vehicle_type_desc: ""
+        vehicle_type_desc: "",
+        id_journey: 0,
+        ocupation_kg: 0,
+        ocupation_m3: 0,
+        ocupation_passengers: 0
       });
     });
 

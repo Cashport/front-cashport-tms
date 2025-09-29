@@ -115,15 +115,21 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
   });
 
   // Mapear materiales
-  const materials: IAddTransferOrderMaterial[] = (formData.material || []).map((mat) => ({
-    id_material: mat.id?.toString() || "",
-    quantity: (mat.quantity || 0).toString(),
-    weight: mat.kg_weight || 0,
-    height: mat.mt_height || 0,
-    width: mat.mt_width || 0,
-    length: mat.mt_length || 0,
-    is_controlled_substance: mat.restriction ? 1 : 0
-  }));
+  const materials: IAddTransferOrderMaterial[] = [];
+  if (formData.typeActive !== "3") {
+    // solo no tiene materiales el tipo de servicio "Pasajeros"
+    materials.push(
+      ...(formData.material || []).map((mat) => ({
+        id_material: mat.id?.toString() || "",
+        quantity: (mat.quantity || 0).toString(),
+        weight: mat.kg_weight || 0,
+        height: mat.mt_height || 0,
+        width: mat.mt_width || 0,
+        length: mat.mt_length || 0,
+        is_controlled_substance: mat.restriction ? 1 : 0
+      }))
+    );
+  }
 
   // Mapear otros requerimientos
   const otherRequirements: IAddTransferOrderOtherRequirements[] = (
