@@ -91,12 +91,13 @@ export default function Trip(props: TripProps) {
     onChange: onSelectChange
   };
   useEffect(() => {
-    transferRequest?.stepOne.transferRequest?.forEach(async (mat) => {
-      mat?.transfer_request_material?.forEach(async (m) => {
-        const newvalue: ITransferRequestStepOneMaterial = m;
-        setDataCarga((dataCarga) => [...dataCarga, newvalue]);
+    const materials: ITransferRequestStepOneMaterial[] = [];
+    transferRequest?.stepOne.transferRequest?.forEach((mat) => {
+      mat?.transfer_request_material?.forEach((m) => {
+        materials.push(m);
       });
     });
+    setDataCarga(materials);
     const p = transferRequest?.stepOne.transferRequest?.flatMap(
       (a) => a.transfer_request_persons?.map((p) => ({ ...p, key: p.id })) || []
     );
@@ -166,7 +167,8 @@ export default function Trip(props: TripProps) {
       render: (total) => <Text>{total}</Text>,
       sorter: (a, b) => a.units - b.units,
       showSorterTooltip: false,
-      align: "center"
+      align: "center",
+      width: 50
     },
     {
       title: "Cantidad en el trayecto",
@@ -189,15 +191,6 @@ export default function Trip(props: TripProps) {
       width: "10%"
     },
     {
-      title: "SKU",
-      key: "sku",
-      dataIndex: "id_material",
-      render: (text) => <Text>00000</Text>,
-      sorter: (a, b) => a.id_material - b.id_material,
-      showSorterTooltip: false,
-      align: "center"
-    },
-    {
       title: "Nombre",
       key: "name",
       dataIndex: "material",
@@ -206,47 +199,63 @@ export default function Trip(props: TripProps) {
       showSorterTooltip: false
     },
     {
-      title: "Dimensiones",
-      key: "dimensions",
-      dataIndex: "material",
-      render: (materials) => (
-        <Flex gap={4}>
-          <Text>W {materials[0]?.mt_width}</Text>
-          <Text>H {materials[0]?.mt_height}</Text>
-          <Text>D {materials[0]?.mt_length}</Text>
-        </Flex>
-      ),
-      sorter: (a, b) => a.material[0].mt_width - b.material[0].mt_width,
-      showSorterTooltip: false,
-      align: "center"
-    },
-    {
-      title: "Volumen",
-      key: "m3_volume",
-      dataIndex: "material",
-      render: (materials) => <Text>{formatNumber(materials[0]?.m3_volume)}</Text>,
-      sorter: (a, b) => Number(a.material[0].m3_volume) - Number(b.material[0].m3_volume),
-      showSorterTooltip: false,
-      align: "center"
-    },
-    {
       title: "Peso",
       key: "kg_weight",
       dataIndex: "material",
-      render: (materials) => <Text>{formatNumber(materials[0]?.kg_weight)}</Text>,
+      render: (materials) => <Text>{formatNumber(materials[0]?.kg_weight)} kg</Text>,
       sorter: (a, b) => a.material[0].kg_weight - b.material[0].kg_weight,
       showSorterTooltip: false,
       align: "center"
     },
     {
-      title: "Alertas",
+      title: "Alto",
+      key: "mt_height",
+      dataIndex: "material",
+      render: (materials) => <Text>{materials[0]?.mt_height} m</Text>,
+      sorter: (a, b) => a.material[0].mt_height - b.material[0].mt_height,
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "Ancho",
+      key: "mt_width",
+      dataIndex: "material",
+      render: (materials) => <Text>{materials[0]?.mt_width} m</Text>,
+      sorter: (a, b) => a.material[0].mt_width - b.material[0].mt_width,
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "Largo",
+      key: "mt_length",
+      dataIndex: "material",
+      render: (materials) => <Text>{materials[0]?.mt_length} m</Text>,
+      sorter: (a, b) => a.material[0].mt_length - b.material[0].mt_length,
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "Volumen",
+      key: "volume",
+      dataIndex: "volume",
+      render: (volume) => <Text>{volume} m³</Text>,
+      sorter: (a, b) => Number(a.material[0].volume) - Number(b.material[0].volume),
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "",
       key: "buttonSee",
       width: 64,
       dataIndex: "id",
-      render: (id) => (
-        <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
-          <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Warning size={"1.3rem"} />} />
-        </Flex>
+      render: (_, material) => (
+        <>
+          {material.is_controlled_substance ? (
+            <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
+              <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Warning size={"1.3rem"} />} />
+            </Flex>
+          ) : null}
+        </>
       ),
       align: "center"
     }
@@ -380,7 +389,7 @@ export default function Trip(props: TripProps) {
         {id_type_service !== 3 ? (
           <Table
             columns={columnsVehiclesMaterial}
-            dataSource={dataCarga}
+            dataSource={dataCarga.map((item) => ({ ...item, key: item.id }))}
             pagination={false}
             rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
           />
