@@ -1,16 +1,18 @@
 /* eslint-disable no-unused-vars */
 import { Button, Flex, Table, TableProps, Typography } from "antd";
 import VehiclesSelect from "../../vehiclesSelect/VehiclesSelect";
-import { CaretLeft, CaretRight, Circle, Eye, Trash, Warning } from "phosphor-react";
+import { CaretLeft, CaretRight, Trash, Warning } from "phosphor-react";
 import {
   ITransferOrderRequestContacts,
   ITransferRequestCreation,
   ITransferRequestStepOneMaterial,
   IVehiclesPricing
 } from "@/types/logistics/schema";
-import { useEffect, useState } from "react";
-import { formatMoney, formatNumber } from "@/utils/utils";
-import RadioButtonIcon from "@/components/atoms/RadioButton/RadioButton";
+import { useEffect, useMemo, useState } from "react";
+import { formatNumber } from "@/utils/utils";
+import { FieldArrayWithId } from "react-hook-form";
+import { FormValues } from "../../vehiclesSelection/VehiclesSelection";
+import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 
 const { Text } = Typography;
 
@@ -26,7 +28,7 @@ type TripProps = {
   handleAddMaterialByTrip: (id_material: number) => void;
   handleRemoveMaterialByTrip: (id_material: number) => void;
   handleSelectVehicle: (id_vehicle_type: number) => void;
-  section: any;
+  section: FieldArrayWithId<FormValues, "trips", "_id">;
   handleSelectPerson: (persons: any[]) => void;
 };
 
@@ -44,7 +46,6 @@ export default function Trip(props: TripProps) {
     section,
     handleSelectPerson
   } = props;
-  const [optionsVehicles, setOptionsVehicles] = useState<any[]>([]);
   const [dataCarga, setDataCarga] = useState<ITransferRequestStepOneMaterial[]>([]);
   const [persons, setPersons] = useState<ITransferOrderRequestContacts[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -85,11 +86,8 @@ export default function Trip(props: TripProps) {
       showSorterTooltip: false
     }
   ];
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange
-  };
+  const [suggestedVehicles, setSuggestedVehicles] = useState<any[]>([]);
+  const [isLoadingSuggested, setIsLoadingSuggested] = useState(false);
   useEffect(() => {
     const materials: ITransferRequestStepOneMaterial[] = [];
     transferRequest?.stepOne.transferRequest?.forEach((mat) => {
@@ -261,48 +259,66 @@ export default function Trip(props: TripProps) {
     }
   ];
 
-  useEffect(() => {
-    const result: any = [];
-    sugestedVehicles?.forEach((item) => {
-      const active = section.id_vehicle_type !== 0 && section.id_vehicle_type === item.id;
-      const strlabel = (
-        <Flex align="center" gap={12}>
-          {active ? (
-            <RadioButtonIcon size={24} weight="fill" style={{ color: "var(--green)" }} />
-          ) : (
-            <Circle size={24} style={{ color: "var(--dark-grey)" }} />
-          )}
-          <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "4px" }}>
-            <Flex justify="space-between">
-              <Text>
-                <b>{item.description}</b>
-              </Text>
-              <div>{formatMoney(item.price)}</div>
-            </Flex>
-            <Text>
-              Ocupación Volumen {formatNumber(item.m3_volume)} - Peso{" "}
-              {formatNumber(item.kg_capacity)}
-            </Text>
-            <Text>
-              Vehiculos {item.disponibility || 0} | Tarifas {item.rates || 0}
-            </Text>
-          </div>
-        </Flex>
-      );
 
-      result.push({
-        value: item.description,
-        label: strlabel,
-        key: item.id,
-        searchParam: item.description,
-        disabled:
-          item.disponibility === 0 ||
-          item.disponibility === undefined ||
-          item.disponibility === null
-      });
-    });
-    setOptionsVehicles(result);
-  }, [sugestedVehicles, section.id_vehicle_type]);
+  console.log("section", section);
+
+  const requestData = useMemo(() => {
+    if (!section.materialByTrip.length || !id_type_service) {
+      return null;
+    }
+
+    const materials = section.materialByTrip.map((material) => ({
+      id: material.id_material,
+      weight: material.kg_weight ?? 0,
+      length: material.length_m ?? 0,
+      width: material.width_m ?? 0,
+      height: material.height_m ?? 0,
+      quantity: material.units ?? 1
+    }));
+
+    const vehiclesSelected = section.id_vehicle_type
+      ? [
+          {
+            id: section.id_vehicle_type,
+            quantity: 1
+          }
+        ]
+      : [];
+
+    return {
+      serviceTypeId: id_type_service,
+      ...(vehiclesSelected.length > 0 ? { vehiclesSelected } : {}),
+      materials
+    };
+  }, [section, id_type_service]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (!requestData) return;
+
+      try {
+        setIsLoadingSuggested(true);
+        const res = await getSuggestedVehiclesByMaterials(requestData);
+
+        if (!cancelled) {
+          setSuggestedVehicles(res.vehiclesWithOcupation ?? []);
+          console.log("res", res);
+        }
+      } catch (error) {
+        console.error("Error fetching suggested vehicles:", error);
+      } finally {
+        if (!cancelled) {
+          setIsLoadingSuggested(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [requestData]);
 
   return (
     <div className="collapseInformationContainer">
@@ -313,8 +329,9 @@ export default function Trip(props: TripProps) {
             vehiclesSelected={
               sugestedVehicles?.find((v) => v.id === section.id_vehicle_type)?.description
             }
-            optionsVehicles={optionsVehicles}
-            isLoadingVehicles={isLoadingVehicles}
+            selectedVehicleId={section.id_vehicle_type}
+            vehicles={suggestedVehicles}
+            isLoadingVehicles={isLoadingVehicles || isLoadingSuggested}
             selectVehicle={handleSelectVehicle}
           />
           <Trash size={18} onClick={onRemove} style={{ cursor: "pointer" }} />
@@ -399,8 +416,8 @@ export default function Trip(props: TripProps) {
             dataSource={persons}
             pagination={false}
             rowSelection={{
-              onChange: (a, b, c) => {
-                handleSelectPerson(b);
+              onChange: (_, selectedRows) => {
+                handleSelectPerson(selectedRows);
               },
               selectedRowKeys: section?.personByTrip?.map((p: any) => p.id_person_transfer_request)
             }}

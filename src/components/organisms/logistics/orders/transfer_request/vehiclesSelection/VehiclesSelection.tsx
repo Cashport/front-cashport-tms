@@ -33,7 +33,7 @@ interface VehiclesSelectionProps {
   setIsNextStepActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-interface FormValues {
+export interface FormValues {
   trips: {
     id: number;
     id_vehicle_type: number;
