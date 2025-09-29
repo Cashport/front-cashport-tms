@@ -1751,6 +1751,12 @@ export interface ITransferOrderRequestMaterials {
   units?: number;
   id_trip?: number;
   id_transfer_request?: number;
+  weight?: number;
+  height?: number;
+  width?: number;
+  length?: number;
+  is_controlled_substance?: boolean;
+  volume: number;
   material: IMaterial[];
 }
 /**
@@ -1887,6 +1893,12 @@ export interface ITransferRequestStepOneMaterial {
   modified_at: string | null;
   modified_by: string | null;
   material: IMaterialStepOne[];
+  weight?: number;
+  height?: number;
+  width?: number;
+  length?: number;
+  volume: number;
+  is_controlled_substance?: boolean;
 }
 /**
  * Exposes all fields present in material_step_one as a typescript

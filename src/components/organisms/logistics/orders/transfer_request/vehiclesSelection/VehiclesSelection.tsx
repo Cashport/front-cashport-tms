@@ -40,6 +40,11 @@ interface FormValues {
     materialByTrip: {
       id_material: number;
       units: number;
+      kg_weight?: number;
+      height_m?: number;
+      width_m?: number;
+      length_m?: number;
+      volume_m3?: number;
     }[];
     personByTrip: {
       id_person_transfer_request: number;
@@ -78,10 +83,20 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
         id: s.id,
         id_vehicle_type: s.id_vehicle_type,
         materialByTrip:
-          s.material?.map((m) => ({
-            id_material: m.id_material,
-            units: m.units
-          })) || [],
+          s.material?.map((m) => {
+            const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
+            return {
+              id_material: m.id_material,
+              units: m.units,
+              ...(fullMaterial && {
+                kg_weight: fullMaterial.weight,
+                height_m: fullMaterial.height,
+                width_m: fullMaterial.width,
+                length_m: fullMaterial.length,
+                volume_m3: fullMaterial.volume
+              })
+            };
+          }) || [],
         personByTrip:
           s.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
           []
@@ -90,16 +105,32 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
     });
   }, [sugestedVehicles]);
 
+  const fullMaterialInfo = useMemo(() => {
+    const transferRequests = transferRequest?.stepOne?.transferRequest || [];
+    const materialList = transferRequests.flatMap((tr) => tr.transfer_request_material || []);
+    return materialList;
+  }, [transferRequest]);
+
   const { handleSubmit, control, reset, formState, watch } = useForm<FormValues>({
     defaultValues: {
       trips: journey.trips.map((t) => ({
         id: t.id,
         id_vehicle_type: t.id_vehicle_type,
         materialByTrip:
-          t?.material?.map((m) => ({
-            id_material: m.id_material,
-            units: m.units
-          })) || [],
+          t?.material?.map((m) => {
+            const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
+            return {
+              id_material: m.id_material,
+              units: m.units,
+              ...(fullMaterial && {
+                kg_weight: fullMaterial.weight,
+                height_m: fullMaterial.height,
+                width_m: fullMaterial.width,
+                length_m: fullMaterial.length,
+                volume_m3: fullMaterial.volume
+              })
+            };
+          }) || [],
         personByTrip:
           t?.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
           []
@@ -118,6 +149,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
     keyName: "_id",
     name: "trips"
   });
+  console.log("tripsFields", tripsFields);
 
   //    Otros requirimientos
   const [isModalAddRequirementOpen, setIsModalAddRequirementOpen] = useState(false);
@@ -201,7 +233,10 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
 
   const handleAddMaterialByTrip = (index: number, id_material: number) => {
     const trip = tripsFields[index];
+    console.log("trip", trip);
     const exist = trip.materialByTrip?.find((m) => m.id_material === id_material);
+    const fullMaterial = fullMaterialInfo.find((fm) => fm.id === id_material);
+
     if (exist) {
       updateTrip(index, {
         ...trip,
@@ -210,7 +245,14 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
           ...trip.materialByTrip.filter((m) => m.id_material !== id_material),
           {
             id_material,
-            units: (trip.materialByTrip.find((m) => m.id_material === id_material)?.units || 0) + 1
+            units: (trip.materialByTrip.find((m) => m.id_material === id_material)?.units || 0) + 1,
+            ...(fullMaterial && {
+              kg_weight: fullMaterial.weight,
+              height_m: fullMaterial.height,
+              width_m: fullMaterial.width,
+              length_m: fullMaterial.length,
+              volume_m3: fullMaterial.volume
+            })
           }
         ]
       });
@@ -218,7 +260,20 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
       updateTrip(index, {
         ...trip,
         personByTrip: [],
-        materialByTrip: [...trip.materialByTrip, { id_material, units: 1 }]
+        materialByTrip: [
+          ...trip.materialByTrip,
+          {
+            id_material,
+            units: 1,
+            ...(fullMaterial && {
+              kg_weight: fullMaterial.weight,
+              height_m: fullMaterial.height,
+              width_m: fullMaterial.width,
+              length_m: fullMaterial.length,
+              volume_m3: fullMaterial.volume
+            })
+          }
+        ]
       });
   };
 
@@ -296,10 +351,20 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
           id: t.id,
           id_vehicle_type: t.id_vehicle_type,
           materialByTrip:
-            t.material?.map((m) => ({
-              id_material: m.id_material,
-              units: m.units
-            })) || [],
+            t.material?.map((m) => {
+              const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
+              return {
+                id_material: m.id_material,
+                units: m.units,
+                ...(fullMaterial && {
+                  kg_weight: fullMaterial.weight,
+                  height_m: fullMaterial.height,
+                  width_m: fullMaterial.width,
+                  length_m: fullMaterial.length,
+                  volume_m3: fullMaterial.volume
+                })
+              };
+            }) || [],
           personByTrip:
             t.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
             []
