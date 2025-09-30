@@ -1,18 +1,18 @@
 "use client";
 import { Table, TableProps, Typography } from "antd";
-import { ITransferOrderVehicle } from "@/types/logistics/schema";
+import { ITransferOrderRequestVehicles, ITransferOrderVehicle } from "@/types/logistics/schema";
 import { OccupationPercentageBar } from "../OccupationPercentageBar";
 
 const { Text } = Typography;
 
 interface SuggestedVehiclesTableProps {
-  vehicles?: ITransferOrderVehicle[];
+  vehicles?: ITransferOrderVehicle[] | ITransferOrderRequestVehicles[];
 }
 
 export default function SuggestedVehiclesTable({
   vehicles
 }: Readonly<SuggestedVehiclesTableProps>) {
-  const columns: TableProps<ITransferOrderVehicle>["columns"] = [
+  const columns: TableProps<ITransferOrderVehicle | ITransferOrderRequestVehicles>["columns"] = [
     {
       title: "Cantidad",
       dataIndex: "quantity",

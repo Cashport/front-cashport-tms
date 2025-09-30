@@ -1787,8 +1787,11 @@ export interface ITransferOrderRequestVehicles {
   created_by: string;
   modified_at: string;
   modified_by: string;
-  id_journey: number | string | null | undefined;
+  id_journey: number | null;
   vehicle_type_desc: string;
+  ocupation_kg: number;
+  ocupation_m3: number;
+  ocupation_passengers: number;
 }
 /**
  * Exposes all fields present in transfer_order_request_journey as a typescript
