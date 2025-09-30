@@ -1,16 +1,19 @@
 /* eslint-disable no-unused-vars */
 import { Button, Flex, Table, TableProps, Typography } from "antd";
 import VehiclesSelect from "../../vehiclesSelect/VehiclesSelect";
-import { CaretLeft, CaretRight, Circle, Eye, Trash, Warning } from "phosphor-react";
+import { CaretLeft, CaretRight, Trash, Warning } from "phosphor-react";
 import {
   ITransferOrderRequestContacts,
   ITransferRequestCreation,
   ITransferRequestStepOneMaterial,
-  IVehiclesPricing
+  IVehiclesPricing,
+  ISuggestedVehiclesByMaterials
 } from "@/types/logistics/schema";
-import { useEffect, useState } from "react";
-import { formatMoney, formatNumber } from "@/utils/utils";
-import RadioButtonIcon from "@/components/atoms/RadioButton/RadioButton";
+import { useEffect, useMemo, useState } from "react";
+import { formatNumber } from "@/utils/utils";
+import { FieldArrayWithId, UseFormSetValue } from "react-hook-form";
+import { FormValues } from "../../vehiclesSelection/VehiclesSelection";
+import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 
 const { Text } = Typography;
 
@@ -26,8 +29,9 @@ type TripProps = {
   handleAddMaterialByTrip: (id_material: number) => void;
   handleRemoveMaterialByTrip: (id_material: number) => void;
   handleSelectVehicle: (id_vehicle_type: number) => void;
-  section: any;
+  section: FieldArrayWithId<FormValues, "trips", "_id">;
   handleSelectPerson: (persons: any[]) => void;
+  setValue: UseFormSetValue<FormValues>;
 };
 
 export default function Trip(props: TripProps) {
@@ -42,9 +46,9 @@ export default function Trip(props: TripProps) {
     handleRemoveMaterialByTrip,
     handleSelectVehicle,
     section,
-    handleSelectPerson
+    handleSelectPerson,
+    setValue
   } = props;
-  const [optionsVehicles, setOptionsVehicles] = useState<any[]>([]);
   const [dataCarga, setDataCarga] = useState<ITransferRequestStepOneMaterial[]>([]);
   const [persons, setPersons] = useState<ITransferOrderRequestContacts[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -85,79 +89,23 @@ export default function Trip(props: TripProps) {
       showSorterTooltip: false
     }
   ];
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange
-  };
+  const [suggestedVehiclesData, setSuggestedVehiclesData] =
+    useState<ISuggestedVehiclesByMaterials | null>(null);
+  const [isLoadingSuggested, setIsLoadingSuggested] = useState(false);
   useEffect(() => {
-    transferRequest?.stepOne.transferRequest?.forEach(async (mat) => {
-      mat?.transfer_request_material?.forEach(async (m) => {
-        const newvalue: ITransferRequestStepOneMaterial = m;
-        setDataCarga((dataCarga) => [...dataCarga, newvalue]);
+    const materials: ITransferRequestStepOneMaterial[] = [];
+    transferRequest?.stepOne.transferRequest?.forEach((mat) => {
+      mat?.transfer_request_material?.forEach((m) => {
+        materials.push(m);
       });
     });
+    setDataCarga(materials);
     const p = transferRequest?.stepOne.transferRequest?.flatMap(
       (a) => a.transfer_request_persons?.map((p) => ({ ...p, key: p.id })) || []
     );
     setPersons(p || []);
   }, [transferRequest]);
 
-  const calculateTotalCapacities = () => {
-    const vehiclesSelected = sugestedVehicles?.find((v) => v.id === section.id_vehicle_type);
-    const totalVolume = vehiclesSelected?.m3_volume || 0;
-    const totalWeight = vehiclesSelected?.kg_capacity || 0;
-    const totalPersons = vehiclesSelected?.passenger_capacity || 0;
-
-    let volumeUsed = 0;
-    let weightUsed = 0;
-    let volumeUsedPercentage = 0;
-    let weightUsedPercentage = 0;
-    let quantity = 0;
-
-    if (vehiclesSelected) {
-      section.materialByTrip.forEach(
-        ({ id_material, units }: { id_material: number; units: number }) => {
-          const mat = dataCarga.find((m) => m.id === id_material);
-          vehiclesSelected.m3_volume &&
-            (volumeUsedPercentage += ((mat?.material[0].m3_volume || 0) * units) / totalVolume);
-          vehiclesSelected.kg_capacity &&
-            (weightUsedPercentage += ((mat?.material[0].kg_weight || 0) * units) / totalWeight);
-        }
-      );
-    }
-    section.materialByTrip.forEach(
-      ({ id_material, units }: { id_material: number; units: number }) => {
-        const mat = dataCarga.find((m) => m.id === id_material);
-        if (mat) {
-          volumeUsed += mat.material[0].m3_volume * units;
-          weightUsed += mat.material[0].kg_weight * units;
-          quantity += units;
-        }
-      }
-    );
-    return {
-      totalVolume,
-      totalWeight,
-      totalPersons,
-      volumeUsed,
-      weightUsed,
-      volumeUsedPercentage,
-      weightUsedPercentage,
-      quantity
-    };
-  };
-
-  const {
-    totalVolume,
-    totalWeight,
-    totalPersons,
-    volumeUsed,
-    weightUsed,
-    volumeUsedPercentage,
-    weightUsedPercentage,
-    quantity
-  } = calculateTotalCapacities();
   const columnsVehiclesMaterial: TableProps<any>["columns"] = [
     {
       title: "Total",
@@ -166,7 +114,8 @@ export default function Trip(props: TripProps) {
       render: (total) => <Text>{total}</Text>,
       sorter: (a, b) => a.units - b.units,
       showSorterTooltip: false,
-      align: "center"
+      align: "center",
+      width: 50
     },
     {
       title: "Cantidad en el trayecto",
@@ -189,15 +138,6 @@ export default function Trip(props: TripProps) {
       width: "10%"
     },
     {
-      title: "SKU",
-      key: "sku",
-      dataIndex: "id_material",
-      render: (text) => <Text>00000</Text>,
-      sorter: (a, b) => a.id_material - b.id_material,
-      showSorterTooltip: false,
-      align: "center"
-    },
-    {
       title: "Nombre",
       key: "name",
       dataIndex: "material",
@@ -206,94 +146,148 @@ export default function Trip(props: TripProps) {
       showSorterTooltip: false
     },
     {
-      title: "Dimensiones",
-      key: "dimensions",
-      dataIndex: "material",
-      render: (materials) => (
-        <Flex gap={4}>
-          <Text>W {materials[0]?.mt_width}</Text>
-          <Text>H {materials[0]?.mt_height}</Text>
-          <Text>D {materials[0]?.mt_length}</Text>
-        </Flex>
-      ),
-      sorter: (a, b) => a.material[0].mt_width - b.material[0].mt_width,
-      showSorterTooltip: false,
-      align: "center"
-    },
-    {
-      title: "Volumen",
-      key: "m3_volume",
-      dataIndex: "material",
-      render: (materials) => <Text>{formatNumber(materials[0]?.m3_volume)}</Text>,
-      sorter: (a, b) => Number(a.material[0].m3_volume) - Number(b.material[0].m3_volume),
-      showSorterTooltip: false,
-      align: "center"
-    },
-    {
       title: "Peso",
       key: "kg_weight",
       dataIndex: "material",
-      render: (materials) => <Text>{formatNumber(materials[0]?.kg_weight)}</Text>,
+      render: (materials) => <Text>{formatNumber(materials[0]?.kg_weight)} kg</Text>,
       sorter: (a, b) => a.material[0].kg_weight - b.material[0].kg_weight,
       showSorterTooltip: false,
       align: "center"
     },
     {
-      title: "Alertas",
+      title: "Alto",
+      key: "mt_height",
+      dataIndex: "material",
+      render: (materials) => <Text>{materials[0]?.mt_height} m</Text>,
+      sorter: (a, b) => a.material[0].mt_height - b.material[0].mt_height,
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "Ancho",
+      key: "mt_width",
+      dataIndex: "material",
+      render: (materials) => <Text>{materials[0]?.mt_width} m</Text>,
+      sorter: (a, b) => a.material[0].mt_width - b.material[0].mt_width,
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "Largo",
+      key: "mt_length",
+      dataIndex: "material",
+      render: (materials) => <Text>{materials[0]?.mt_length} m</Text>,
+      sorter: (a, b) => a.material[0].mt_length - b.material[0].mt_length,
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "Volumen",
+      key: "volume",
+      dataIndex: "volume",
+      render: (volume) => <Text>{volume} m³</Text>,
+      sorter: (a, b) => Number(a.material[0].volume) - Number(b.material[0].volume),
+      showSorterTooltip: false,
+      align: "center"
+    },
+    {
+      title: "",
       key: "buttonSee",
       width: 64,
       dataIndex: "id",
-      render: (id) => (
-        <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
-          <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Warning size={"1.3rem"} />} />
-        </Flex>
+      render: (_, material) => (
+        <>
+          {material.is_controlled_substance ? (
+            <Flex style={{ gap: "6px", justifyContent: "flex-end" }}>
+              <Button style={{ backgroundColor: "#F7F7F7" }} icon={<Warning size={"1.3rem"} />} />
+            </Flex>
+          ) : null}
+        </>
       ),
       align: "center"
     }
   ];
 
+  const requestData = useMemo(() => {
+    if (!id_type_service) {
+      return null;
+    }
+
+    const materials = section.materialByTrip.map((material) => ({
+      id: material.id_material,
+      weight: material.kg_weight ?? 0,
+      length: material.length_m ?? 0,
+      width: material.width_m ?? 0,
+      height: material.height_m ?? 0,
+      quantity: material.units ?? 1
+    }));
+
+    const passengers = section.personByTrip.map((person) => ({
+      id: person.id_person_transfer_request,
+      quantity: 1
+    }));
+
+    const vehiclesSelected = section.id_vehicle_type
+      ? [
+          {
+            id: section.id_vehicle_type,
+            quantity: 1
+          }
+        ]
+      : [];
+
+    return {
+      serviceTypeId: id_type_service,
+      ...(vehiclesSelected.length > 0 ? { vehiclesSelected } : {}),
+      materials,
+      ...(id_type_service === 3 ? { passengers: passengers.length } : {})
+    };
+  }, [section, id_type_service]);
+
   useEffect(() => {
-    const result: any = [];
-    sugestedVehicles?.forEach((item) => {
-      const active = section.id_vehicle_type !== 0 && section.id_vehicle_type === item.id;
-      const strlabel = (
-        <Flex align="center" gap={12}>
-          {active ? (
-            <RadioButtonIcon size={24} weight="fill" style={{ color: "var(--green)" }} />
-          ) : (
-            <Circle size={24} style={{ color: "var(--dark-grey)" }} />
-          )}
-          <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "4px" }}>
-            <Flex justify="space-between">
-              <Text>
-                <b>{item.description}</b>
-              </Text>
-              <div>{formatMoney(item.price)}</div>
-            </Flex>
-            <Text>
-              Ocupación Volumen {formatNumber(item.m3_volume)} - Peso{" "}
-              {formatNumber(item.kg_capacity)}
-            </Text>
-            <Text>
-              Vehiculos {item.disponibility || 0} | Tarifas {item.rates || 0}
-            </Text>
-          </div>
-        </Flex>
+    let cancelled = false;
+
+    (async () => {
+      if (!requestData) return;
+
+      try {
+        setIsLoadingSuggested(true);
+        const res = await getSuggestedVehiclesByMaterials(requestData);
+
+        if (!cancelled) {
+          setSuggestedVehiclesData(res);
+        }
+      } catch (error) {
+        console.error("Error fetching suggested vehicles:", error);
+      } finally {
+        if (!cancelled) {
+          setIsLoadingSuggested(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [requestData]);
+
+  useEffect(() => {
+    if (suggestedVehiclesData && section.id_vehicle_type) {
+      const selectedVehicle = suggestedVehiclesData.vehiclesWithOcupation?.find(
+        (v) => v.id === section.id_vehicle_type
       );
 
-      result.push({
-        value: item.description,
-        label: strlabel,
-        key: item.id,
-        searchParam: item.description,
-        disabled:
-          item.disponibility === 0 ||
-          item.disponibility === undefined ||
-          item.disponibility === null
-      });
-    });
-    setOptionsVehicles(result);
-  }, [sugestedVehicles, section.id_vehicle_type]);
+      if (selectedVehicle) {
+        setValue(`trips.${props.index}.ocupationKg`, selectedVehicle.ocupationKg);
+        setValue(`trips.${props.index}.ocupationM3`, selectedVehicle.ocupationM3);
+        setValue(`trips.${props.index}.ocupationPassengers`, selectedVehicle.ocupationPassengers);
+      }
+    }
+  }, [suggestedVehiclesData, section.id_vehicle_type, setValue, props.index]);
+
+  const currentSelectedVehicle = useMemo(() => {
+    return suggestedVehiclesData?.vehiclesSelectedWithOcupation[0];
+  }, [suggestedVehiclesData]);
 
   return (
     <div className="collapseInformationContainer">
@@ -302,10 +296,13 @@ export default function Trip(props: TripProps) {
           <VehiclesSelect
             id_journey={id_journey}
             vehiclesSelected={
-              sugestedVehicles?.find((v) => v.id === section.id_vehicle_type)?.description
+              suggestedVehiclesData?.vehiclesWithOcupation?.find(
+                (v) => v.id === section.id_vehicle_type
+              )?.description
             }
-            optionsVehicles={optionsVehicles}
-            isLoadingVehicles={isLoadingVehicles}
+            selectedVehicleId={section.id_vehicle_type}
+            vehicles={suggestedVehiclesData?.vehiclesWithOcupation || []}
+            isLoadingVehicles={isLoadingVehicles || isLoadingSuggested}
             selectVehicle={handleSelectVehicle}
           />
           <Trash size={18} onClick={onRemove} style={{ cursor: "pointer" }} />
@@ -317,22 +314,26 @@ export default function Trip(props: TripProps) {
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Volumen utilizado</Text>
                   <Text className="collapseText collapseBold">
-                    {formatNumber(volumeUsedPercentage)} %
+                    {currentSelectedVehicle?.ocupationM3} %
                   </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Volumen máximo</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(totalVolume)} m3</Text>
+                  <Text className="collapseText collapseBold">
+                    {currentSelectedVehicle?.m3_volume} m3
+                  </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Peso utilizado</Text>
                   <Text className="collapseText collapseBold">
-                    {formatNumber(weightUsedPercentage)} %
+                    {currentSelectedVehicle?.ocupationKg} %
                   </Text>
                 </div>
                 <div className="collapseResumItem">
                   <Text className="collapseText">Peso máximo</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(totalWeight)} kg</Text>
+                  <Text className="collapseText collapseBold">
+                    {currentSelectedVehicle?.kg_capacity} kg
+                  </Text>
                 </div>
               </div>
             </div>
@@ -340,16 +341,23 @@ export default function Trip(props: TripProps) {
               <div className="collapseResum">
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Volumen productos</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(volumeUsed)} m3</Text>
+                  <Text className="collapseText collapseBold">
+                    {suggestedVehiclesData?.totalMaterials.volume.toFixed(2)} m3
+                  </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Peso productos</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(weightUsed)} kg</Text>
+                  <Text className="collapseText collapseBold">
+                    {suggestedVehiclesData?.totalMaterials.kg} kg
+                  </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Productos</Text>
                   <Text className="collapseText collapseBold">
-                    {quantity}/{dataCarga.reduce((total, item) => total + item.units, 0)}
+                    {section.materialByTrip
+                      .flatMap((item) => item.units)
+                      .reduce((total, item) => total + item, 0)}
+                    /{dataCarga.reduce((total, item) => total + item.units, 0)}
                   </Text>
                 </div>
                 <div className="collapseResumItem">
@@ -365,12 +373,13 @@ export default function Trip(props: TripProps) {
             <div className="collapsePersonsResum">
               <div className="collapsePersonsResumItem collapsePersonsBorder">
                 <Text className="collapsePersonsText">Personas</Text>
-                <Text className="collapsePersonsText collapsePersonsBold">{`${section.personByTrip.length}/${totalPersons}`}</Text>
+                <Text className="collapsePersonsText collapsePersonsBold">{`${section.personByTrip.length}/${persons.length}`}</Text>
               </div>
               <div className="collapsePersonsResumItem">
-                <Button disabled className="collapsePersonsAcomodationButton">
-                  Acomodación
-                </Button>
+                <Text className="collapsePersonsText">% de Ocupación</Text>
+                <Text className="collapsePersonsText collapsePersonsBold">
+                  {currentSelectedVehicle?.ocupationPassengers}%
+                </Text>
               </div>
             </div>
           </div>
@@ -380,7 +389,7 @@ export default function Trip(props: TripProps) {
         {id_type_service !== 3 ? (
           <Table
             columns={columnsVehiclesMaterial}
-            dataSource={dataCarga}
+            dataSource={dataCarga.map((item) => ({ ...item, key: item.id }))}
             pagination={false}
             rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
           />
@@ -390,8 +399,8 @@ export default function Trip(props: TripProps) {
             dataSource={persons}
             pagination={false}
             rowSelection={{
-              onChange: (a, b, c) => {
-                handleSelectPerson(b);
+              onChange: (_, selectedRows) => {
+                handleSelectPerson(selectedRows);
               },
               selectedRowKeys: section?.personByTrip?.map((p: any) => p.id_person_transfer_request)
             }}

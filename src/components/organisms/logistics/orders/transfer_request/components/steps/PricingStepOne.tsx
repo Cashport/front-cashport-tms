@@ -13,7 +13,7 @@ import { Responsibles } from "../../../DetailsOrderView/components/Responsibles/
 import AditionalInfo from "@/components/organisms/logistics/acept_carrier/detail/components/AditionalInfo/AditionalInfo";
 import { formatNumber } from "@/utils/utils";
 import MaterialTableFooter from "../../../CreateOrderView/components/MaterialTableFooter/MaterialTableFooter";
-import VehicleSuggestedTag from "@/components/atoms/VehicleSuggestedTag/VehicleSuggestedTag";
+import SuggestedVehiclesTable from "../../../DetailsOrderView/components/SuggestedVehiclesTable/SuggestedVehiclesTable";
 
 const { Title, Text } = Typography;
 
@@ -210,46 +210,43 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
         </div>
       ),
       children: (
-        <div>
+        <Flex vertical gap={"1rem"}>
           <div>
             <label className="locationLabels" style={{ display: "flex" }}>
-              <text>Vehículo Sugerido</text>
+              <text style={{ fontWeight: 600 }}>Materiales</text>
             </label>
-            {orderRequest?.transfer_order_vehicles ? (
-              <Flex gap={10}>
-                {orderRequest?.transfer_order_vehicles.map((a) => (
-                  <VehicleSuggestedTag
-                    units={a.quantity}
-                    vehicle_type_desc={a.vehicle_type_desc}
-                    key={a.id}
-                  />
-                ))}
-              </Flex>
-            ) : (
-              <p></p>
+
+            {(orderRequest?.id_service_type == 1 || orderRequest?.id_service_type == 2) && (
+              <Table
+                columns={columnsCarga}
+                dataSource={orderRequest?.transfer_order_material?.map((tm) => ({
+                  ...tm.material[0],
+                  quantity: tm.quantity
+                }))}
+                pagination={false}
+                footer={() => {
+                  let totalVolume = 0;
+                  let totalWeight = 0;
+
+                  orderRequest?.transfer_order_material?.forEach((item) => {
+                    const material = item.material[0]; // Obtener el primer material
+                    totalVolume += material.m3_volume * item.quantity;
+                    totalWeight += material.kg_weight * item.quantity;
+                  });
+                  return (
+                    <MaterialTableFooter totalVolume={totalVolume} totalWeight={totalWeight} />
+                  );
+                }}
+              />
             )}
           </div>
-          {(orderRequest?.id_service_type == 1 || orderRequest?.id_service_type == 2) && (
-            <Table
-              columns={columnsCarga}
-              dataSource={orderRequest?.transfer_order_material?.map((tm) => ({
-                ...tm.material[0],
-                quantity: tm.quantity
-              }))}
-              pagination={false}
-              footer={() => {
-                let totalVolume = 0;
-                let totalWeight = 0;
 
-                orderRequest?.transfer_order_material?.forEach((item) => {
-                  const material = item.material[0]; // Obtener el primer material
-                  totalVolume += material.m3_volume * item.quantity;
-                  totalWeight += material.kg_weight * item.quantity;
-                });
-                return <MaterialTableFooter totalVolume={totalVolume} totalWeight={totalWeight} />;
-              }}
-            />
-          )}
+          <div>
+            <label className="locationLabels" style={{ display: "flex" }}>
+              <text style={{ fontWeight: 600 }}>Vehículo Sugerido</text>
+            </label>
+            <SuggestedVehiclesTable vehicles={orderRequest?.transfer_order_vehicles ?? []} />
+          </div>
           {orderRequest?.id_service_type == 3 && (
             <>
               {console.log(orderRequest.transfer_order_persons)}
@@ -261,7 +258,7 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
               />
             </>
           )}
-        </div>
+        </Flex>
       )
     }
   ];

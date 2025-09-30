@@ -217,17 +217,6 @@ export const DetailsOrderView = ({ idOrder = "" }: Props) => {
 
             <Flex vertical gap={"0.5rem"}>
               <p className={styles.title}>Vehículos sugeridos</p>
-              {/*               
-              {transferOrder?.transfer_order_vehicles &&
-                transferOrder?.transfer_order_vehicles?.length > 0 && (
-                  <ChipsRow
-                    chips={transferOrder?.transfer_order_vehicles?.map((vehicle) => ({
-                      name: vehicle.vehicle_type_desc,
-                      quantity: vehicle.quantity,
-                      id: vehicle.id
-                    }))}
-                  />
-                )} */}
               <SuggestedVehiclesTable vehicles={transferOrder?.transfer_order_vehicles ?? []} />
             </Flex>
           </Flex>
