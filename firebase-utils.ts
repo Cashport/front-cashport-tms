@@ -68,7 +68,7 @@ const getAuth = async (
           api: api,
           type: "error",
           title: "Error",
-          message: "Usuario o contraseña incorrectos"
+          message: "Usuario/contraseña incorrectos o vencidos, revisa tu correo"
         });
       });
   }

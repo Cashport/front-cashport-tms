@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   //TODO: logic to return us to projects if we log in if we are logged in and with a tokenos logeados y con token
 
   const { pathname } = request.nextUrl;
-  const noAuthRoutes = ["/auth/login"];
+  const noAuthRoutes = ["/auth/login", "/auth/changePass", "/auth/accept-invitation"];
   //Return to /login if there is no session cookie
   if (noAuthRoutes.some((route) => pathname.startsWith(route))) {
     const res = NextResponse.next({
