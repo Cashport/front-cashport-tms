@@ -240,7 +240,6 @@ export default function PricingTransferRequest({
   const addVehicle = (index: number, selectedOption: any) => {
     // Find the actual vehicle object from the selected option
     const vehicle = sugestedVehicles.find((v) => v.description === selectedOption.value);
-    console.log(vehicle);
 
     if (vehicle) {
       const newVehicle: IVehicleType = {
@@ -844,14 +843,6 @@ export default function PricingTransferRequest({
       )
     }
   ];
-
-  const handleComplete = () => {
-    // Handle form completion logic here
-  };
-  const tabChanged = ({ prevIndex, nextIndex }: { prevIndex: number; nextIndex: number }) => {
-    console.log("prevIndex", prevIndex);
-    console.log("nextIndex", nextIndex);
-  };
 
   interface GroupedOtherRequirements {
     id_other_requeriments: number;

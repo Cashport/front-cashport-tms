@@ -152,8 +152,6 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
     keyName: "_id",
     name: "trips"
   });
-  console.log("tripsFields", tripsFields);
-
   //    Otros requirimientos
   const [isModalAddRequirementOpen, setIsModalAddRequirementOpen] = useState(false);
   const [selectedRequirement, setSelectedRequirement] = useState<SelectOption | null>(null);
@@ -225,7 +223,6 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
       "otherRequirementsFields",
       otherRequirementsFields
     );
-    console.log("formState.dirtyFields", formState.dirtyFields);
   }, [tripsFields, otherRequirementsFields, formState.dirtyFields]);
 
   const [openTabs, setOpenTabs] = useState<number[]>([index]);
@@ -362,7 +359,6 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
         formatTrips,
         data.otherRequirements
       );
-      console.log("RES", res);
       reset({
         trips: res.trips.map((t) => ({
           id: t.id,
