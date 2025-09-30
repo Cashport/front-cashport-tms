@@ -4021,6 +4021,7 @@ export interface ISuggestedVehiclesByMaterialsRequest {
 interface ITotalMaterials {
   volume: number;
   kg: number;
+  passengers: number;
 }
 
 export interface IVehicleWithOccupation {

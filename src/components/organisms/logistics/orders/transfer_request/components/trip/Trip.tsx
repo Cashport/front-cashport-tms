@@ -6,7 +6,8 @@ import {
   ITransferOrderRequestContacts,
   ITransferRequestCreation,
   ITransferRequestStepOneMaterial,
-  IVehiclesPricing
+  IVehiclesPricing,
+  ISuggestedVehiclesByMaterials
 } from "@/types/logistics/schema";
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber } from "@/utils/utils";
@@ -86,7 +87,8 @@ export default function Trip(props: TripProps) {
       showSorterTooltip: false
     }
   ];
-  const [suggestedVehicles, setSuggestedVehicles] = useState<any[]>([]);
+  const [suggestedVehiclesData, setSuggestedVehiclesData] =
+    useState<ISuggestedVehiclesByMaterials | null>(null);
   const [isLoadingSuggested, setIsLoadingSuggested] = useState(false);
   useEffect(() => {
     const materials: ITransferRequestStepOneMaterial[] = [];
@@ -102,61 +104,6 @@ export default function Trip(props: TripProps) {
     setPersons(p || []);
   }, [transferRequest]);
 
-  const calculateTotalCapacities = () => {
-    const vehiclesSelected = sugestedVehicles?.find((v) => v.id === section.id_vehicle_type);
-    const totalVolume = vehiclesSelected?.m3_volume || 0;
-    const totalWeight = vehiclesSelected?.kg_capacity || 0;
-    const totalPersons = vehiclesSelected?.passenger_capacity || 0;
-
-    let volumeUsed = 0;
-    let weightUsed = 0;
-    let volumeUsedPercentage = 0;
-    let weightUsedPercentage = 0;
-    let quantity = 0;
-
-    if (vehiclesSelected) {
-      section.materialByTrip.forEach(
-        ({ id_material, units }: { id_material: number; units: number }) => {
-          const mat = dataCarga.find((m) => m.id === id_material);
-          vehiclesSelected.m3_volume &&
-            (volumeUsedPercentage += ((mat?.material[0].m3_volume || 0) * units) / totalVolume);
-          vehiclesSelected.kg_capacity &&
-            (weightUsedPercentage += ((mat?.material[0].kg_weight || 0) * units) / totalWeight);
-        }
-      );
-    }
-    section.materialByTrip.forEach(
-      ({ id_material, units }: { id_material: number; units: number }) => {
-        const mat = dataCarga.find((m) => m.id === id_material);
-        if (mat) {
-          volumeUsed += mat.material[0].m3_volume * units;
-          weightUsed += mat.material[0].kg_weight * units;
-          quantity += units;
-        }
-      }
-    );
-    return {
-      totalVolume,
-      totalWeight,
-      totalPersons,
-      volumeUsed,
-      weightUsed,
-      volumeUsedPercentage,
-      weightUsedPercentage,
-      quantity
-    };
-  };
-
-  const {
-    totalVolume,
-    totalWeight,
-    totalPersons,
-    volumeUsed,
-    weightUsed,
-    volumeUsedPercentage,
-    weightUsedPercentage,
-    quantity
-  } = calculateTotalCapacities();
   const columnsVehiclesMaterial: TableProps<any>["columns"] = [
     {
       title: "Total",
@@ -259,11 +206,8 @@ export default function Trip(props: TripProps) {
     }
   ];
 
-
-  console.log("section", section);
-
   const requestData = useMemo(() => {
-    if (!section.materialByTrip.length || !id_type_service) {
+    if (!id_type_service) {
       return null;
     }
 
@@ -303,8 +247,7 @@ export default function Trip(props: TripProps) {
         const res = await getSuggestedVehiclesByMaterials(requestData);
 
         if (!cancelled) {
-          setSuggestedVehicles(res.vehiclesWithOcupation ?? []);
-          console.log("res", res);
+          setSuggestedVehiclesData(res);
         }
       } catch (error) {
         console.error("Error fetching suggested vehicles:", error);
@@ -320,6 +263,10 @@ export default function Trip(props: TripProps) {
     };
   }, [requestData]);
 
+  const currentSelectedVehicle = useMemo(() => {
+    return suggestedVehiclesData?.vehiclesSelectedWithOcupation[0];
+  }, [suggestedVehiclesData]);
+
   return (
     <div className="collapseInformationContainer">
       <div className="collapseResumeWrapper">
@@ -327,10 +274,12 @@ export default function Trip(props: TripProps) {
           <VehiclesSelect
             id_journey={id_journey}
             vehiclesSelected={
-              sugestedVehicles?.find((v) => v.id === section.id_vehicle_type)?.description
+              suggestedVehiclesData?.vehiclesWithOcupation?.find(
+                (v) => v.id === section.id_vehicle_type
+              )?.description
             }
             selectedVehicleId={section.id_vehicle_type}
-            vehicles={suggestedVehicles}
+            vehicles={suggestedVehiclesData?.vehiclesWithOcupation || []}
             isLoadingVehicles={isLoadingVehicles || isLoadingSuggested}
             selectVehicle={handleSelectVehicle}
           />
@@ -343,22 +292,26 @@ export default function Trip(props: TripProps) {
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Volumen utilizado</Text>
                   <Text className="collapseText collapseBold">
-                    {formatNumber(volumeUsedPercentage)} %
+                    {currentSelectedVehicle?.ocupationM3} %
                   </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Volumen máximo</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(totalVolume)} m3</Text>
+                  <Text className="collapseText collapseBold">
+                    {currentSelectedVehicle?.m3_volume} m3
+                  </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Peso utilizado</Text>
                   <Text className="collapseText collapseBold">
-                    {formatNumber(weightUsedPercentage)} %
+                    {currentSelectedVehicle?.ocupationKg} %
                   </Text>
                 </div>
                 <div className="collapseResumItem">
                   <Text className="collapseText">Peso máximo</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(totalWeight)} kg</Text>
+                  <Text className="collapseText collapseBold">
+                    {currentSelectedVehicle?.kg_capacity} kg
+                  </Text>
                 </div>
               </div>
             </div>
@@ -366,16 +319,23 @@ export default function Trip(props: TripProps) {
               <div className="collapseResum">
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Volumen productos</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(volumeUsed)} m3</Text>
+                  <Text className="collapseText collapseBold">
+                    {suggestedVehiclesData?.totalMaterials.volume.toFixed(2)} m3
+                  </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Peso productos</Text>
-                  <Text className="collapseText collapseBold">{formatNumber(weightUsed)} kg</Text>
+                  <Text className="collapseText collapseBold">
+                    {suggestedVehiclesData?.totalMaterials.kg} kg
+                  </Text>
                 </div>
                 <div className="collapseResumItem collapseBorder">
                   <Text className="collapseText">Productos</Text>
                   <Text className="collapseText collapseBold">
-                    {quantity}/{dataCarga.reduce((total, item) => total + item.units, 0)}
+                    {section.materialByTrip
+                      .flatMap((item) => item.units)
+                      .reduce((total, item) => total + item, 0)}
+                    /{dataCarga.reduce((total, item) => total + item.units, 0)}
                   </Text>
                 </div>
                 <div className="collapseResumItem">
@@ -391,7 +351,7 @@ export default function Trip(props: TripProps) {
             <div className="collapsePersonsResum">
               <div className="collapsePersonsResumItem collapsePersonsBorder">
                 <Text className="collapsePersonsText">Personas</Text>
-                <Text className="collapsePersonsText collapsePersonsBold">{`${section.personByTrip.length}/${totalPersons}`}</Text>
+                <Text className="collapsePersonsText collapsePersonsBold">{`${section.personByTrip.length}/${22}`}</Text>
               </div>
               <div className="collapsePersonsResumItem">
                 <Button disabled className="collapsePersonsAcomodationButton">
