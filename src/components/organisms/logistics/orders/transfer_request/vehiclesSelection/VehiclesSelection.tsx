@@ -341,43 +341,57 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
         message.error("Debe agregar al menos una sección de vehículos o requerimientos");
         return;
       }
-      console.log("data save", data);
-      // const res = await submitTrips(
-      //   journey.id_transfer_request,
-      //   journey.id,
-      //   data.trips,
-      //   data.otherRequirements
-      // );
-      // console.log("RES", res);
-      // reset({
-      //   trips: res.trips.map((t) => ({
-      //     id: t.id,
-      //     id_vehicle_type: t.id_vehicle_type,
-      //     materialByTrip:
-      //       t.material?.map((m) => {
-      //         const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
-      //         return {
-      //           id_material: m.id_material,
-      //           units: m.units,
-      //           ...(fullMaterial && {
-      //             kg_weight: fullMaterial.weight,
-      //             height_m: fullMaterial.height,
-      //             width_m: fullMaterial.width,
-      //             length_m: fullMaterial.length,
-      //             volume_m3: fullMaterial.volume
-      //           })
-      //         };
-      //       }) || [],
-      //     personByTrip:
-      //       t.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
-      //       []
-      //   })),
-      //   otherRequirements: res.otherRequirements.map((req) => ({
-      //     idRequirement: req.idRequirement,
-      //     units: req.units,
-      //     description: req.description
-      //   }))
-      // });
+
+      const formatTrips = data.trips.map((t) => ({
+        id: t.id,
+        id_vehicle_type: t.id_vehicle_type,
+        occupation_kg: t.ocupationKg,
+        occupation_m3: t.ocupationM3,
+        occupation_passengers: t.ocupationPassengers,
+        materialByTrip: t.materialByTrip.map((m) => ({
+          id_material: m.id_material,
+          units: m.units
+        })),
+        personByTrip: t.personByTrip.map((p) => ({
+          id_person_transfer_request: p.id_person_transfer_request
+        }))
+      }));
+      const res = await submitTrips(
+        journey.id_transfer_request,
+        journey.id,
+        formatTrips,
+        data.otherRequirements
+      );
+      console.log("RES", res);
+      reset({
+        trips: res.trips.map((t) => ({
+          id: t.id,
+          id_vehicle_type: t.id_vehicle_type,
+          materialByTrip:
+            t.material?.map((m) => {
+              const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
+              return {
+                id_material: m.id_material,
+                units: m.units,
+                ...(fullMaterial && {
+                  kg_weight: fullMaterial.weight,
+                  height_m: fullMaterial.height,
+                  width_m: fullMaterial.width,
+                  length_m: fullMaterial.length,
+                  volume_m3: fullMaterial.volume
+                })
+              };
+            }) || [],
+          personByTrip:
+            t.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
+            []
+        })),
+        otherRequirements: res.otherRequirements.map((req) => ({
+          idRequirement: req.idRequirement,
+          units: req.units,
+          description: req.description
+        }))
+      });
     } catch (error) {
       console.error(error);
     }

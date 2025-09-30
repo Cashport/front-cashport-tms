@@ -222,6 +222,11 @@ export default function Trip(props: TripProps) {
       quantity: material.units ?? 1
     }));
 
+    const passengers = section.personByTrip.map((person) => ({
+      id: person.id_person_transfer_request,
+      quantity: 1
+    }));
+
     const vehiclesSelected = section.id_vehicle_type
       ? [
           {
@@ -234,7 +239,8 @@ export default function Trip(props: TripProps) {
     return {
       serviceTypeId: id_type_service,
       ...(vehiclesSelected.length > 0 ? { vehiclesSelected } : {}),
-      materials
+      materials,
+      ...(id_type_service === 3 ? { passengers: passengers.length } : {})
     };
   }, [section, id_type_service]);
 
@@ -367,12 +373,13 @@ export default function Trip(props: TripProps) {
             <div className="collapsePersonsResum">
               <div className="collapsePersonsResumItem collapsePersonsBorder">
                 <Text className="collapsePersonsText">Personas</Text>
-                <Text className="collapsePersonsText collapsePersonsBold">{`${section.personByTrip.length}/${22}`}</Text>
+                <Text className="collapsePersonsText collapsePersonsBold">{`${section.personByTrip.length}/${persons.length}`}</Text>
               </div>
               <div className="collapsePersonsResumItem">
-                <Button disabled className="collapsePersonsAcomodationButton">
-                  Acomodación
-                </Button>
+                <Text className="collapsePersonsText">% de Ocupación</Text>
+                <Text className="collapsePersonsText collapsePersonsBold">
+                  {currentSelectedVehicle?.ocupationPassengers}%
+                </Text>
               </div>
             </div>
           </div>
