@@ -37,6 +37,9 @@ export interface FormValues {
   trips: {
     id: number;
     id_vehicle_type: number;
+    ocupationKg?: number;
+    ocupationM3?: number;
+    ocupationPassengers?: number | null;
     materialByTrip: {
       id_material: number;
       units: number;
@@ -111,7 +114,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
     return materialList;
   }, [transferRequest]);
 
-  const { handleSubmit, control, reset, formState, watch } = useForm<FormValues>({
+  const { handleSubmit, control, reset, formState, watch, setValue } = useForm<FormValues>({
     defaultValues: {
       trips: journey.trips.map((t) => ({
         id: t.id,
@@ -233,7 +236,6 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
 
   const handleAddMaterialByTrip = (index: number, id_material: number) => {
     const trip = tripsFields[index];
-    console.log("trip", trip);
     const exist = trip.materialByTrip?.find((m) => m.id_material === id_material);
     const fullMaterial = fullMaterialInfo.find((fm) => fm.id === id_material);
 
@@ -333,48 +335,49 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
     });
   };
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: FormValues) => {
     try {
       if (tripsFields.length === 0 && otherRequirementsFields.length === 0) {
         message.error("Debe agregar al menos una sección de vehículos o requerimientos");
         return;
       }
-      const res = await submitTrips(
-        journey.id_transfer_request,
-        journey.id,
-        data.trips,
-        data.otherRequirements
-      );
-      console.log("RES", res);
-      reset({
-        trips: res.trips.map((t) => ({
-          id: t.id,
-          id_vehicle_type: t.id_vehicle_type,
-          materialByTrip:
-            t.material?.map((m) => {
-              const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
-              return {
-                id_material: m.id_material,
-                units: m.units,
-                ...(fullMaterial && {
-                  kg_weight: fullMaterial.weight,
-                  height_m: fullMaterial.height,
-                  width_m: fullMaterial.width,
-                  length_m: fullMaterial.length,
-                  volume_m3: fullMaterial.volume
-                })
-              };
-            }) || [],
-          personByTrip:
-            t.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
-            []
-        })),
-        otherRequirements: res.otherRequirements.map((req) => ({
-          idRequirement: req.idRequirement,
-          units: req.units,
-          description: req.description
-        }))
-      });
+      console.log("data save", data);
+      // const res = await submitTrips(
+      //   journey.id_transfer_request,
+      //   journey.id,
+      //   data.trips,
+      //   data.otherRequirements
+      // );
+      // console.log("RES", res);
+      // reset({
+      //   trips: res.trips.map((t) => ({
+      //     id: t.id,
+      //     id_vehicle_type: t.id_vehicle_type,
+      //     materialByTrip:
+      //       t.material?.map((m) => {
+      //         const fullMaterial = fullMaterialInfo.find((fm) => fm.id === m.id_material);
+      //         return {
+      //           id_material: m.id_material,
+      //           units: m.units,
+      //           ...(fullMaterial && {
+      //             kg_weight: fullMaterial.weight,
+      //             height_m: fullMaterial.height,
+      //             width_m: fullMaterial.width,
+      //             length_m: fullMaterial.length,
+      //             volume_m3: fullMaterial.volume
+      //           })
+      //         };
+      //       }) || [],
+      //     personByTrip:
+      //       t.persons?.map((p) => ({ id_person_transfer_request: p.id_person_transfer_request })) ||
+      //       []
+      //   })),
+      //   otherRequirements: res.otherRequirements.map((req) => ({
+      //     idRequirement: req.idRequirement,
+      //     units: req.units,
+      //     description: req.description
+      //   }))
+      // });
     } catch (error) {
       console.error(error);
     }
@@ -460,6 +463,7 @@ const VehiclesSelection: FC<VehiclesSelectionProps> = ({
           }
           handleSelectPerson={(id: any) => handleSelectPerson(index, id)}
           section={section}
+          setValue={setValue}
         />
       ))}
       {requirements?.length > 0 && (

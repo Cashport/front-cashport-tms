@@ -11,7 +11,7 @@ import {
 } from "@/types/logistics/schema";
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber } from "@/utils/utils";
-import { FieldArrayWithId } from "react-hook-form";
+import { FieldArrayWithId, UseFormSetValue } from "react-hook-form";
 import { FormValues } from "../../vehiclesSelection/VehiclesSelection";
 import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 
@@ -31,6 +31,7 @@ type TripProps = {
   handleSelectVehicle: (id_vehicle_type: number) => void;
   section: FieldArrayWithId<FormValues, "trips", "_id">;
   handleSelectPerson: (persons: any[]) => void;
+  setValue: UseFormSetValue<FormValues>;
 };
 
 export default function Trip(props: TripProps) {
@@ -45,7 +46,8 @@ export default function Trip(props: TripProps) {
     handleRemoveMaterialByTrip,
     handleSelectVehicle,
     section,
-    handleSelectPerson
+    handleSelectPerson,
+    setValue
   } = props;
   const [dataCarga, setDataCarga] = useState<ITransferRequestStepOneMaterial[]>([]);
   const [persons, setPersons] = useState<ITransferOrderRequestContacts[]>([]);
@@ -262,6 +264,20 @@ export default function Trip(props: TripProps) {
       cancelled = true;
     };
   }, [requestData]);
+
+  useEffect(() => {
+    if (suggestedVehiclesData && section.id_vehicle_type) {
+      const selectedVehicle = suggestedVehiclesData.vehiclesWithOcupation?.find(
+        (v) => v.id === section.id_vehicle_type
+      );
+
+      if (selectedVehicle) {
+        setValue(`trips.${props.index}.ocupationKg`, selectedVehicle.ocupationKg);
+        setValue(`trips.${props.index}.ocupationM3`, selectedVehicle.ocupationM3);
+        setValue(`trips.${props.index}.ocupationPassengers`, selectedVehicle.ocupationPassengers);
+      }
+    }
+  }, [suggestedVehiclesData, section.id_vehicle_type, setValue, props.index]);
 
   const currentSelectedVehicle = useMemo(() => {
     return suggestedVehiclesData?.vehiclesSelectedWithOcupation[0];
