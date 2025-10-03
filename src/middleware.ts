@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
   // content-security-policy
   const apiHost = process.env.NEXT_PUBLIC_API_HOST?.slice(0, -4) ?? "https://api.example.com/";
+  const apin8nHost = process.env.NEXT_PUBLIC_API_AUDIT_AI?.slice(0, -45) ?? "";
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
@@ -10,7 +11,7 @@ export async function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com;
     img-src 'self' https://*.amazonaws.com https://api.mapbox.com data: blob: https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost};
+    connect-src 'self' https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost};
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com;
     object-src 'none';
     frame-ancestors 'self';
