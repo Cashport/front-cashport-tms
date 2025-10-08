@@ -85,14 +85,9 @@ export const updateUser = async (
   generalData: IFormGeneralUser,
   logo: FileObject[]
 ): Promise<AxiosResponse<any, any>> => {
-  try {
-    const form = createUserForm(generalData, logo);
-    const response = await API.put(`/logistic-user/update`, form);
-    return response;
-  } catch (error) {
-    console.log("Error update User: ", error);
-    return error as any;
-  }
+  const form = createUserForm(generalData, logo);
+  const response = await API.put(`/logistic-user/update`, form);
+  return response;
 };
 
 export const addUser = async (
