@@ -28,6 +28,7 @@ import { IGroupByUser } from "@/types/clientsGroups/IClientsGroups";
 import { useMessageApi } from "@/context/MessageContext";
 
 import "./userprojectform.scss";
+import { isAxiosError } from "axios";
 const { Title } = Typography;
 
 interface Props {
@@ -116,36 +117,47 @@ export const UserProjectForm = ({
   }, [ID, isViewDetailsUser]);
 
   const onSubmitHandler = async (data: IUserForm) => {
-    setLoading(true);
-    setCustomFieldsError({
-      zone: zones.length === 0,
-      channel: selectedBusinessRules?.channels.length === 0
-    });
-    if (zones.length === 0 || selectedBusinessRules?.channels.length === 0) return;
+    try {
+      setLoading(true);
+      setCustomFieldsError({
+        zone: zones.length === 0,
+        channel: selectedBusinessRules?.channels.length === 0
+      });
+      if (zones.length === 0 || selectedBusinessRules?.channels.length === 0) return;
 
-    const response = isViewDetailsUser?.id
-      ? await updateUser(
-          data,
-          selectedBusinessRules,
-          assignedGroups,
-          zones,
-          isViewDetailsUser?.id,
-          ID,
-          dataUser.data?.ACTIVE === 1
-        )
-      : await inviteUser(data, selectedBusinessRules, assignedGroups, zones, ID);
+      const response = isViewDetailsUser?.id
+        ? await updateUser(
+            data,
+            selectedBusinessRules,
+            assignedGroups,
+            zones,
+            isViewDetailsUser?.id,
+            ID,
+            dataUser.data?.ACTIVE === 1
+          )
+        : await inviteUser(data, selectedBusinessRules, assignedGroups, zones, ID);
 
-    setIsEditAvailable(false);
-    if (response.status === 200 || response.status === 202) {
-      const isEdit = isViewDetailsUser?.id ? "editado" : "creado";
-      showMessage("success", `El usuario fue ${isEdit} exitosamente.`);
-      !isViewDetailsUser?.id && setIsCreateUser(false);
-    } else if (response.response.status === 409) {
-      showMessage("error", "Este email ya esta en uso, prueba otro.");
-    } else {
-      showMessage("error", "Oops ocurrio un error.");
+      setIsEditAvailable(false);
+      if (response.status === 200 || response.status === 202) {
+        const isEdit = isViewDetailsUser?.id ? "editado" : "creado";
+        showMessage("success", `El usuario fue ${isEdit} exitosamente.`);
+        !isViewDetailsUser?.id && setIsCreateUser(false);
+      } else if (response.response.status === 409) {
+        showMessage("error", "Este email ya esta en uso, prueba otro.");
+      } else {
+        showMessage("error", "Oops ocurrio un error.");
+      }
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data.message) {
+        showMessage("error", error.response.data.message);
+      } else if (error instanceof Error) {
+        showMessage("error", error.message);
+      } else {
+        showMessage("error", "Oops ocurrio un error.");
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   const onRemoveUser = async () =>
     await onRemoveUserById(dataUser.data.ID, ID, showMessage, () =>
