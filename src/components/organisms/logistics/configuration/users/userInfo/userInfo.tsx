@@ -9,6 +9,7 @@ import useSWR from "swr";
 import { UserFormTab } from "@/components/molecules/tabs/logisticsForms/userForm/userFormTab";
 import { getUserById, updateUser, updateUserStatus } from "@/services/logistics/users";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 interface Props {
   params: {
     id: string;
@@ -52,9 +53,14 @@ export const UserInfoView = ({ params }: Props) => {
         });
       }
     } catch (error) {
-      setIsLoadingSubmit(false);
-      message.error("Error al editar usuario", 2);
+      console.error("Error al editar usuario: ", error);
+      if (isAxiosError(error)) {
+        message.error(error.response?.data?.message, 2);
+      } else {
+        message.error("Error al editar usuario", 2);
+      }
     }
+    setIsLoadingSubmit(false);
   };
 
   const handleChangeStatus = async (newStatus: boolean) => {
