@@ -1172,8 +1172,8 @@ export interface ILocation {
   contact_name: string;
   contact_number: string;
   user: string;
-  is_community?: boolean;
-  community_name?: string;
+  is_community: boolean;
+  community_name: string;
   documents?: any[];
 }
 
@@ -1643,9 +1643,11 @@ export interface ITrackingResponse extends ITrackingPartial {
   start_location_desc: string;
   end_location_desc: string;
   type_service_desc: string;
-  is_community?: 0 | 1;
-  community_name?: string;
+  is_community: 0 | 1;
+  community_name: string;
   id?: number;
+  start_group_location_desc: string | null;
+  end_group_location_desc: string | null;
 }
 
 /**
@@ -2006,11 +2008,16 @@ export interface ITransferRequestJourneyInfo {
   end_location_desc: string;
   trips: IVehiclesPricingTrips[];
   otherRequirements: IRequirement[];
-  is_community?: 0 | 1;
-  community_name?: string;
+  is_community: 0 | 1;
+  community_name: string;
   end_date_flexible: number;
   start_date_flexible: number;
   route: any;
+  distance: number;
+  id_route_backup: string | null;
+  fixed_rate: number;
+  start_group_location_desc: string | null;
+  end_group_location_desc: string | null;
 }
 /**
  * Exposes all fields present in transfer_request_journey_review as a typescript
@@ -2023,8 +2030,12 @@ export interface ITransferRequestJourneyReview {
   start_location_desc: string;
   end_location_desc: string;
   service_type: number;
+  is_community: 0 | 1;
+  community_name: string;
   trips: TripCarriersPricing[];
   otherRequirements: TripCarriersPricing[];
+  start_group_location_desc?: string | null;
+  end_group_location_desc?: string | null;
 }
 export interface TripCarriersPricing {
   id_trip: number;
@@ -2050,6 +2061,7 @@ export interface CarriersPricing {
   driver_delay: number;
   diver_trips: number;
   driver_score: number;
+  driver_id: number;
   id: number;
   id_carrier: number;
   id_service_type: number;
@@ -3891,6 +3903,9 @@ export interface IAddTransferOrderProduct {
 
 export interface IAddTransferOrderVehicle {
   id_vehicle_type: string;
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
   quantity: string;
 }
 
@@ -4012,7 +4027,7 @@ export interface IVehicleWithOccupation {
   price: number;
   ocupationM3: number;
   ocupationKg: number;
-  ocupationPassengers: number;
+  ocupationPassengers: number | null;
 }
 
 interface IMaterialCalculated {

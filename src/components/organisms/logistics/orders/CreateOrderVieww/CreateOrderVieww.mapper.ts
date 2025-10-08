@@ -34,28 +34,34 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     return combined.toISOString();
   };
 
+  const formatDateTime = (date?: Dayjs, time?: Dayjs): string => {
+    if (!date || !time) return "";
+    const combined = date
+      .hour(time.hour())
+      .minute(time.minute())
+      .second(time.second())
+      .millisecond(0);
+    return combined.format("YYYY-MM-DD HH:mm:ss");
+  };
+
   // Función para calcular endDate basado en duración
   const calculateEndDate = (startDate: string, durationInSeconds?: number): string => {
     if (!startDate || !durationInSeconds) return startDate;
 
-    // Parsear la fecha de inicio usando dayjs
     const start = dayjs(startDate);
-
-    // Agregar la duración en segundos
     const end = start.add(durationInSeconds, "second");
 
-    // Retornar en formato ISO 8601
-    return end.toISOString();
+    return end.format("YYYY-MM-DD HH:mm:ss");
   };
 
   // Formatear fecha de inicio
-  const startDate = formatDateTimeISO(originTrip.date, originTrip.time);
+  const startDate = formatDateTime(originTrip.date, originTrip.time);
 
   // Calcular fecha de fin
   let endDate = "";
   if (destinationTrip.date && destinationTrip.time) {
     // Si hay fecha y hora de destino, usarlas
-    endDate = formatDateTimeISO(destinationTrip.date, destinationTrip.time);
+    endDate = formatDateTime(destinationTrip.date, destinationTrip.time);
   } else if (startDate && formData.infoMap?.duration) {
     // Si no hay fecha/hora de destino pero sí duración, calcular basado en la duración
     endDate = calculateEndDate(startDate, formData.infoMap.duration);
@@ -109,15 +115,21 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
   });
 
   // Mapear materiales
-  const materials: IAddTransferOrderMaterial[] = (formData.material || []).map((mat) => ({
-    id_material: mat.id?.toString() || "",
-    quantity: (mat.quantity || 0).toString(),
-    weight: mat.kg_weight || 0,
-    height: mat.mt_height || 0,
-    width: mat.mt_width || 0,
-    length: mat.mt_length || 0,
-    is_controlled_substance: mat.restriction ? 1 : 0
-  }));
+  const materials: IAddTransferOrderMaterial[] = [];
+  if (formData.typeActive !== "3") {
+    // solo no tiene materiales el tipo de servicio "Pasajeros"
+    materials.push(
+      ...(formData.material || []).map((mat) => ({
+        id_material: mat.id?.toString() || "",
+        quantity: (mat.quantity || 0).toString(),
+        weight: mat.kg_weight || 0,
+        height: mat.mt_height || 0,
+        width: mat.mt_width || 0,
+        length: mat.mt_length || 0,
+        is_controlled_substance: mat.restriction ? 1 : 0
+      }))
+    );
+  }
 
   // Mapear otros requerimientos
   const otherRequirements: IAddTransferOrderOtherRequirements[] = (
@@ -135,6 +147,9 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
 
   // Mapear vehículos
   const vehicles: IAddTransferOrderVehicle[] = (formData.suggestedVehicle || []).map((vehicle) => ({
+    ocupationM3: vehicle.ocupationM3 || 0,
+    ocupationKg: vehicle.ocupationKg || 0,
+    ocupationPassengers: vehicle.ocupationPassengers || null,
     id_vehicle_type: vehicle.id?.toString() || "",
     quantity: (vehicle.quantity || 0).toString()
   }));
@@ -165,7 +180,7 @@ export const mapFormToTransferOrder = (formData: IFormCreateOrder): IAddTransfer
     end_date_flexible: "0",
     id_route: "", // Vacío por defecto
     id_company: formData.billing?.companyCode?.id?.toString() || "1",
-    isFixedRate: formData.typeActive === "4" ? "1" : "0",
+    isFixedRate: formData.isFixRate ? "1" : "0",
     status: "",
     active: "true",
     created_at: new Date().toISOString(),

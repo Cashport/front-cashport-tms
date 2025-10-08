@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Dayjs } from "dayjs";
@@ -6,6 +6,7 @@ import { Button, Flex, message } from "antd";
 
 import { mapFormToTransferOrder } from "./CreateOrderVieww.mapper";
 import { addTransferOrderNew } from "@/services/logistics/transfer-orders";
+import { getAllMaterials } from "@/services/logistics/materials";
 
 import Container from "@/components/atoms/Container/Container";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
@@ -13,6 +14,7 @@ import SchedulingView, { ITripInfoMap } from "./components/SchedulingView/Schedu
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LoadView from "./components/LoadView/LoadView";
 import AdditionalInfoView from "./components/ResponsiblesView/AdditionalInfoView";
+import { ModalVehicleOccupation } from "./components/LoadView/ModalVehicleOccupation/ModalVehicleOccupation";
 
 import {
   IClient,
@@ -22,7 +24,8 @@ import {
   IGetPSL,
   IMaterialStepOne,
   IRoute,
-  ISuggestedVehicle
+  ISuggestedVehicle,
+  IVehicleWithOccupation
 } from "@/types/logistics/schema";
 import { IOtherRequirement } from "@/services/logistics/other-requirements";
 
@@ -50,6 +53,9 @@ export type IPeopleForm = {
 type ISuggestedVehicleForm = {
   [K in keyof ISuggestedVehicle]?: ISuggestedVehicle[K];
 } & {
+  ocupationM3: number;
+  ocupationKg: number;
+  ocupationPassengers: number | null;
   quantity: number;
   usedPercentage?: number;
 };
@@ -96,12 +102,14 @@ interface IProductServiceLineForm {
 }
 
 export interface IFormCreateOrder {
-  typeActive: string; // "1" | "2" | "3" | "4"
+  typeActive: "1" | "2" | "3";
   TripDetails: ITripForm[]; // [Origen, ...paradas, Destino]
+  isFixRate: boolean;
   geometry: IRoute[]; // en el submit se manda  todo esto
   material?: IMaterialForm[];
   people?: IPeopleForm[];
   suggestedVehicle?: ISuggestedVehicleForm[];
+  selectedVehiclesInfo?: IVehicleWithOccupation[];
   otherServices?: IOtherServicesForm[];
   additionalInfo?: IAdditionalInfoForm;
   billing?: IBillingForm;
@@ -114,53 +122,67 @@ export type IViewOption = "scheduling" | "load" | "additionalInfo";
 export const CreateOrderVieww: React.FC = () => {
   const [view, setView] = useState<IViewOption>("scheduling");
   const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [allMaterials, setAllMaterials] = useState<IMaterialStepOne[]>([]);
+
+  const MINIMUM_OCCUPATION = 50;
 
   const { push } = useRouter();
 
+  useEffect(() => {
+    (async () => {
+      if (allMaterials.length > 0) return;
+      const res = await getAllMaterials();
+      setAllMaterials(res.data ?? []);
+    })();
+  }, []);
+
   const emptyValue = [{ id: undefined, quantity: 1 }];
 
-  const { control, handleSubmit, setValue, watch, resetField } = useForm<IFormCreateOrder>({
-    defaultValues: {
-      typeActive: "1",
-      TripDetails: [
-        {
-          placeId: undefined,
-          date: undefined,
-          time: undefined,
-          requiresRaising: false,
-          raisingNum: 0
-        }, // Origen
-        {
-          placeId: undefined,
-          date: undefined,
-          time: undefined,
-          requiresRaising: false,
-          raisingNum: 0
-        } // Destino
-      ],
-      material: emptyValue,
-      suggestedVehicle: emptyValue,
-      people: emptyValue,
-      productServiceLine: {
-        productServiceLine: [
+  const { control, handleSubmit, setValue, watch, resetField, trigger } = useForm<IFormCreateOrder>(
+    {
+      defaultValues: {
+        typeActive: "1",
+        TripDetails: [
           {
-            selectedPSL: undefined,
-            percentagePSL: 100,
-            costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
-          }
-        ]
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          }, // Origen
+          {
+            placeId: undefined,
+            date: undefined,
+            time: undefined,
+            requiresRaising: false,
+            raisingNum: 0
+          } // Destino
+        ],
+        material: emptyValue,
+        suggestedVehicle: emptyValue,
+        people: emptyValue,
+        productServiceLine: {
+          productServiceLine: [
+            {
+              selectedPSL: undefined,
+              percentagePSL: 100,
+              costCenters: [{ selectedCostCenter: undefined, percentage: 100 }]
+            }
+          ]
+        }
       }
     }
-  });
+  );
 
-  // watchTripType
   const tripType = watch("typeActive");
-  // Watch the TripDetails to see if any changes are made
   const tripDetails = watch("TripDetails");
+  const isFixRate = watch("isFixRate");
 
   // watch Load form values
   const materialDetails = watch("material");
   const suggestedVehicles = watch("suggestedVehicle");
+  const selectedVehiclesInfo = watch("selectedVehiclesInfo");
   const otherServices = watch("otherServices");
   const additionalInfo = watch("additionalInfo");
   const billing = watch("billing");
@@ -174,7 +196,14 @@ export const CreateOrderVieww: React.FC = () => {
       case "scheduling":
         return <SchedulingView control={control} setValue={setValue} resetField={resetField} />;
       case "load":
-        return <LoadView control={control} />;
+        return (
+          <LoadView
+            control={control}
+            allMaterials={allMaterials}
+            setValue={setValue}
+            trigger={trigger}
+          />
+        );
       case "additionalInfo":
         return <AdditionalInfoView control={control} setValue={setValue} />;
       default:
@@ -188,8 +217,18 @@ export const CreateOrderVieww: React.FC = () => {
         setView("load");
         break;
       case "load":
-        setView("additionalInfo");
+        // Check if occupation Kg or M3 percentage is below 50%
+        const shouldShowModal = selectedVehiclesInfo?.some((vehicle) => {
+          const guideValue = Math.max(vehicle.ocupationKg, vehicle.ocupationM3);
+          return guideValue <= MINIMUM_OCCUPATION;
+        });
 
+        if (shouldShowModal) {
+          setIsModalOpen(true);
+          return;
+        }
+
+        setView("additionalInfo");
         break;
       case "additionalInfo":
         setLoadingRequest(true);
@@ -218,9 +257,7 @@ export const CreateOrderVieww: React.FC = () => {
     // for every view we check if the next button should be disabled
     switch (view) {
       case "scheduling":
-        const isDestinationDateAndTimeMandatory = tripType === "4";
-
-        if (isDestinationDateAndTimeMandatory) {
+        if (isFixRate) {
           const isValid = tripDetails.every(
             (detail) => detail.placeId && detail.date && detail.time
           );
@@ -251,8 +288,8 @@ export const CreateOrderVieww: React.FC = () => {
 
         const validOtherServices = otherServices?.every((service) => service.id !== undefined);
 
-        // Type 4 only needs vehicle validation
-        if (tripType === "4") {
+        // If fix rateneeds vehicle validation
+        if (isFixRate) {
           return !validVehicles || !validOtherServices;
         }
 
@@ -362,6 +399,16 @@ export const CreateOrderVieww: React.FC = () => {
           Siguiente
         </PrincipalButton>
       </div>
+
+      <ModalVehicleOccupation
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onOk={() => {
+          setIsModalOpen(false);
+          setView("additionalInfo");
+        }}
+        selectedVehiclesInfo={selectedVehiclesInfo}
+      />
     </div>
   );
 };

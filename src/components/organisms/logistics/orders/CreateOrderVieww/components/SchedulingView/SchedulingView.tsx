@@ -57,6 +57,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
   const [locationOptions, setLocationOptions] = useState<ISelectLocation[]>([]);
   const typeActive = useWatch({ control, name: "typeActive" });
   const tripDetails = useWatch({ control, name: "TripDetails" }) ?? [];
+  const [isFixRate, setIsFixRate] = useState(false);
 
   const timeBasedOnSelectedDateTimeHours = useMemo(() => {
     if (typeActive === "2") {
@@ -371,9 +372,12 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
     }
   };
 
-  const handleOrderTypeChange = (id: string) => {
+  const handleOrderTypeChange = (id: "1" | "2" | "3") => {
     setValue("typeActive", id);
     const emptyValue = [{ id: undefined, quantity: 1 }];
+    const emptyVehicle = [
+      { id: undefined, quantity: 1, ocupationM3: 0, ocupationKg: 0, ocupationPassengers: null }
+    ];
     resetField("material", {
       defaultValue: emptyValue
     });
@@ -381,7 +385,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
       defaultValue: emptyValue
     });
     resetField("suggestedVehicle", {
-      defaultValue: emptyValue
+      defaultValue: emptyVehicle
     });
     resetField("otherServices", {
       defaultValue: undefined
@@ -392,11 +396,34 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
     <div className="schedulingView">
       {/* Form */}
       <Flex vertical gap={"1.5rem"} style={{ paddingLeft: "1rem" }}>
-        <SelectableIconButtons
-          options={tripTypeOptions}
-          activeId={typeActive}
-          onChange={handleOrderTypeChange}
-        />
+        <Flex gap="1rem" align="center">
+          <SelectableIconButtons
+            options={tripTypeOptions}
+            activeId={typeActive}
+            onChange={handleOrderTypeChange}
+            disabled={isFixRate}
+            allInactive={isFixRate}
+          />
+          <button
+            type="button"
+            className={`iconButton ${isFixRate ? "active" : ""}`}
+            onClick={() => {
+              setIsFixRate(!isFixRate);
+              setValue("isFixRate", !isFixRate);
+            }}
+          >
+            <Calendar size={24} />
+            <div className="text">Renta fija</div>
+          </button>
+        </Flex>
+
+        {isFixRate && (
+          <SelectableIconButtons
+            options={tripTypeOptions}
+            activeId={typeActive}
+            onChange={handleOrderTypeChange}
+          />
+        )}
 
         <SelectLocationAndTime
           selectedType={typeActive}
@@ -415,6 +442,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
           duration={tripInfoMap?.duration}
           selectedTripType={typeActive}
           durationBasedOnSelects={timeBasedOnSelectedDateTimeHours}
+          isFixRate={isFixRate}
         />
       </Flex>
 
@@ -449,10 +477,5 @@ const tripTypeOptions: TripTypeOption[] = [
     id: "3",
     title: "Personal",
     icon: <User size={24} />
-  },
-  {
-    id: "4",
-    title: "Renta fija",
-    icon: <Calendar size={24} />
   }
 ];

@@ -1,17 +1,20 @@
+import Link from "next/link";
 import { Button, Flex, TableColumnsType, Tooltip, Typography } from "antd";
-import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
-import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
-import { Eye, Warning, WarningOctagon } from "phosphor-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { Eye, Radioactive, Warning, WarningCircle, WarningOctagon } from "@phosphor-icons/react";
+
+import { calculateMinutesDifference } from "@/utils/logistics/calculateMinutesDifference";
 import { formatMoney, formatTimeAgo } from "@/utils/utils";
-import { Radioactive, WarningCircle } from "@phosphor-icons/react";
+import { STATUS } from "@/utils/constants/globalConstants";
+
+import { DataTypeForTransferOrderTable } from "../TransferOrderTable";
+
 import "./transferOrderTable.scss";
-import Link from "next/link";
+const { Text } = Typography;
+import CommunityIcon from "@/components/organisms/logistics/orders/transfer_request/components/communityIcon/CommunityIcon";
 
 dayjs.extend(utc);
-
-const { Text } = Typography;
 
 export const columns = (
   showColumn: boolean,
@@ -122,15 +125,31 @@ export const columns = (
     {
       title: "Origen y destino",
       dataIndex: "origendestino",
-      render: (text: { origin: string; destination: string }) => (
+      render: (text: { origin: string; destination: string }, row: any) => (
         <div className="titleContainer">
           <div className="textContainer">
             <Text className="title">Origen</Text>
             <Text className="title">Destino</Text>
           </div>
           <div className="textContainer">
-            <Text className="row-text">{text.origin}</Text>
-            <Text className="row-text">{text.destination}</Text>
+            <Flex gap={"0.5rem"} align="center">
+              <Text className="row-text">{text.origin}</Text>
+
+              {row.start_group_location ? (
+                <Tooltip title={row.start_group_location}>
+                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
+                </Tooltip>
+              ) : null}
+            </Flex>
+
+            <Flex gap={"0.5rem"} align="center">
+              <Text className="row-text">{text.destination}</Text>
+              {row.end_group_location ? (
+                <Tooltip title={row.end_group_location}>
+                  <WarningCircle size={16} style={{ minWidth: "16px" }} />
+                </Tooltip>
+              ) : null}
+            </Flex>
           </div>
         </div>
       ),
@@ -211,11 +230,22 @@ export const columns = (
         },
         row: DataTypeForTransferOrderTable
       ) => {
-        const hoursUntilTrip = dayjs(row.fechas.origin).diff(dayjs(), "hour");
+        const tripDate = dayjs(row.fechas.origin);
+        const now = dayjs();
+
+        const isSameDay = tripDate.isSame(now, "day");
+        const hoursUntilTrip = tripDate.diff(now, "hour");
         const is24HoursOrLessToTrip = hoursUntilTrip >= 0 && hoursUntilTrip <= 24;
+        const isCommunity = row.start_group_location && row.end_group_location;
+        // warning only appear in certain states
+        const showWarning =
+          (isSameDay || is24HoursOrLessToTrip) &&
+          allowedStatesForWarningTrips.includes(row.statusId);
 
         return (
           <div className="btnContainer">
+            {isCommunity && <CommunityIcon withTooltip={false} iconSize={20} />}
+
             {text.isRejected && (
               <Button
                 className="btn"
@@ -235,7 +265,7 @@ export const columns = (
               <Button className="btn" type="text" size="middle" icon={<Warning size={24} />} />
             )}
 
-            {is24HoursOrLessToTrip && (
+            {showWarning && (
               <Tooltip title="Este viaje inicia en menos de 24 horas">
                 <Button
                   className="btn"
@@ -255,3 +285,9 @@ export const columns = (
     }
   ].filter(Boolean) as TableColumnsType<DataTypeForTransferOrderTable>;
 };
+
+const allowedStatesForWarningTrips = [
+  STATUS.TO.SIN_PROCESAR,
+  STATUS.TR.ESPERANDO_PROVEEDOR,
+  STATUS.TR.ASIGNANDO_VEHICULO
+];

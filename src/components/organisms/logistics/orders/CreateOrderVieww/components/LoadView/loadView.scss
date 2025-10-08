@@ -48,46 +48,6 @@
     .restrictionColumn {
         padding-right: 0 !important;
     }
-
-    // suggested vehicle styles section
-    .usedPercentage {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 1rem;
-        font-weight: 600;
-        background-color: $secondary;
-        width: fit-content;
-        margin: 0 auto;
-    }
-}
-
-// more vehicle styles section
-.vehicleOption {
-    display: grid;
-    grid-template-columns: 6fr 4fr;
-    border-radius: 8px;
-    gap: 1px;
-    border: 2px solid transparent;
-
-    &:hover {
-        gap: 1px;
-        border: 2px solid $black;
-    }
-
-    .vehicleDetails {
-        background-color: $background;
-        border: 1px solid transparent;
-        padding: 8px 16px;
-
-        &.left {
-            padding-right: 1rem;
-            border-radius: 8px 0px 0px 8px;
-            border-right: 1px solid $white !important;
-        }
-        &.right {
-            border-radius: 0px 8px 8px 0px;
-        }
-    }
 }
 
 // more material styles section

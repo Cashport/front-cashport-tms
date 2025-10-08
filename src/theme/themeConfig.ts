@@ -45,6 +45,11 @@ const theme: ThemeConfig = {
     DatePicker: {
       colorBgElevated: "#FFFFFF",
       controlHeight: 47
+    },
+     Notification: {
+      colorBgElevated: "#141414",
+      colorText: "#FFFFFF",
+      colorError: "#CBE71E"
     }
   }
 };

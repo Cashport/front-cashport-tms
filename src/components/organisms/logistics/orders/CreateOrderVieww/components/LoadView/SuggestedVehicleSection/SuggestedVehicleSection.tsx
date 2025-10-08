@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
+import { Control, Controller, useFieldArray, useWatch, UseFormSetValue } from "react-hook-form";
 import { Select, Table, Button, Popconfirm, Flex, TableProps, Slider, ConfigProvider } from "antd";
 import { CaretLeft, CaretRight, Plus, Trash, Truck } from "@phosphor-icons/react";
 
@@ -9,17 +9,22 @@ import { getSuggestedVehiclesByMaterials } from "@/services/logistics/vehicles";
 import { IFormCreateOrder } from "../../../CreateOrderVieww";
 import { IVehicleWithOccupation } from "@/types/logistics/schema";
 
+import "./suggestedVehicleSection.scss";
+
 interface ISuggestedVehicleSectionProps {
   control: Control<IFormCreateOrder, any>;
+  setValue: UseFormSetValue<IFormCreateOrder>;
 }
 
 interface ISuggestedVehicleOptions extends IVehicleWithOccupation {
   usedPercentage?: number;
 }
 
-const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ control }) => {
+const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({
+  control,
+  setValue
+}) => {
   const [vehicles, setVehicles] = useState<ISuggestedVehicleOptions[]>([]);
-  const [selectedVehiclesInfo, setSelectedVehiclesInfo] = useState<IVehicleWithOccupation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { fields, append, remove, update } = useFieldArray({
@@ -42,7 +47,13 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
   const selectedPeople = useWatch({ control, name: "people" }) || [];
 
-  // Solución 1: Usar useMemo para estabilizar el objeto de request
+  const selectedVehiclesInfo = useWatch({ control, name: "selectedVehiclesInfo" }) || [];
+
+  const handleAddVehicleRow = () => {
+    append({ quantity: 1, ocupationKg: 0, ocupationM3: 0, ocupationPassengers: 0 });
+  };
+
+  //  useMemo para estabilizar el objeto de request
   const requestData = useMemo(() => {
     if (
       !typeActive ||
@@ -63,10 +74,11 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
       return {
         id: material.id ?? 0,
-        weight: weight * quantity,
-        length: length * quantity,
-        width: width * quantity,
-        height: height * quantity
+        weight,
+        length,
+        width,
+        height,
+        quantity
       };
     });
 
@@ -113,7 +125,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         // Solo actualizar si el componente sigue montado
         if (!cancelled) {
           setVehicles(res.vehiclesWithOcupation ?? []);
-          setSelectedVehiclesInfo(res.vehiclesSelectedWithOcupation ?? []);
+          setValue("selectedVehiclesInfo", res.vehiclesSelectedWithOcupation ?? []);
         }
       } catch (error) {
         console.error("Error fetching suggested vehicles:", error);
@@ -136,8 +148,10 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
 
     switch (typeActive) {
       case "1":
-      case "4":
-        return vehicle.ocupationM3 || 0;
+        return (
+          (vehicle.ocupationM3 > vehicle.ocupationKg ? vehicle.ocupationM3 : vehicle.ocupationKg) ||
+          0
+        );
       case "2":
         return vehicle.ocupationKg || 0;
       case "3":
@@ -195,6 +209,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                 style={{ width: 520 }}
                 allowClear
                 className="inputSelect"
+                popupClassName="vehicleSelectPopup"
                 loading={isLoading}
                 disabled={isLoading}
                 value={
@@ -219,9 +234,11 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                         aditional_info: found.aditional_info ?? undefined,
                         usedPercentage: occupationPercentage,
                         id: found.id,
-                        HEEEEELP: "ASDASDASD",
                         ID: found.id
-                      }
+                      },
+                      ocupationKg: found.ocupationKg || 0,
+                      ocupationM3: found.ocupationM3 || 0,
+                      ocupationPassengers: found.ocupationPassengers || 0
                     });
                   } else {
                     update(index, {
@@ -249,17 +266,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
                             className="vehicleDetails left"
                             justify="space-between"
                           >
-                            <strong
-                              style={{
-                                fontWeight: 600,
-                                maxWidth: "255px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {vehicle.description}
-                            </strong>
+                            <strong className="vehicleDescription">{vehicle.description}</strong>
                             <span>
                               Largo: {vehicle.length}m • Ancho: {vehicle.width}m • Alto:{" "}
                               {vehicle.height}m
@@ -335,7 +342,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
         }
       }}
     >
-      <Flex vertical gap={"1.5rem"} className="suggestedVehicleSection">
+      <Flex vertical gap={"1.5rem"}>
         <h3 className="subTitle">Vehículo sugerido</h3>
 
         <Table
@@ -346,7 +353,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({ cont
           loading={isLoading}
         />
 
-        <Button className="addButton" onClick={() => append({ quantity: 1 })}>
+        <Button className="addButton" onClick={handleAddVehicleRow} icon={<Plus size={16} />}>
           Agregar
           <Plus size={16} />
         </Button>

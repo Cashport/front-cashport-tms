@@ -1,8 +1,7 @@
 import { TripCarriersPricing } from "@/types/logistics/schema";
-import { Flex, Radio, Space, Typography } from "antd";
+import { Flex, Radio, Typography } from "antd";
 import style from "./TripCarrierPricing.module.scss";
 import CarrierRequestProposal from "../carrierRequest/CarrierRequestProposal";
-import { useState } from "react";
 import { CarrierPricingFinish } from "@/types/logistics/transferRequest/transferRequest";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";

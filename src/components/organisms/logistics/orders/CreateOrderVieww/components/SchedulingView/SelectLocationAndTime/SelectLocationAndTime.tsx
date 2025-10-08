@@ -39,13 +39,18 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
     name: "TripDetails"
   });
 
-  const showRaisingCheckbox = selectedType === "1";
-  const showRaisingHours = selectedType === "1" || selectedType === "2";
+  const isFixRate = useWatch({
+    control,
+    name: "isFixRate"
+  });
 
-  const destinationAvailable = selectedType == "4";
+  const showRaisingCheckbox = selectedType === "1" && !isFixRate;
+  const showRaisingHours = (selectedType === "1" || selectedType === "2") && !isFixRate;
+
+  const destinationAvailable = isFixRate;
 
   useEffect(() => {
-    if (selectedType === "2") {
+    if (selectedType === "2" && !isFixRate) {
       // When selectedType is "2", remove the last field (destination)
       if (fields.length > 1) {
         remove(fields.length - 1);
@@ -71,7 +76,7 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
         ]);
       }
     }
-  }, [selectedType]);
+  }, [selectedType, isFixRate]);
 
   const disabledDate = (current: dayjs.Dayjs) => {
     // Deshabilita todas las fechas antes de hoy
@@ -186,16 +191,22 @@ const SelectLocationAndTime: React.FC<SelectLocationAndTimeProps> = ({
                     <Controller
                       control={control}
                       name={`TripDetails.${i}.raisingNum`}
-                      render={({ field }) => (
-                        <InputNumber
-                          {...field}
-                          className="inputNumber"
-                          placeholder="0 Hrs"
-                          min={0}
-                          style={{ gridColumn: "11 / -1" }}
-                          formatter={(value) => `${value} Hrs`}
-                        />
-                      )}
+                      render={({ field }) => {
+                        const shouldDisable =
+                          !tripDetails[i]?.requiresRaising && selectedType !== "2";
+
+                        return (
+                          <InputNumber
+                            disabled={shouldDisable}
+                            {...field}
+                            className="inputNumber"
+                            placeholder="0 Hrs"
+                            min={0}
+                            style={{ gridColumn: "11 / -1" }}
+                            formatter={(value) => `${value} Hrs`}
+                          />
+                        );
+                      }}
                     />
                   )}
 
