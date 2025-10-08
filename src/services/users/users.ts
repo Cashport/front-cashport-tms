@@ -46,16 +46,11 @@ export const inviteUser = async (
     groups_id: selectedGroups
   };
   const endpointRole = data.info.rol?.value === 2 ? "admin" : "user";
-  try {
-    const response: GenericResponse = await API.post(
-      `/user/invitation/${endpointRole}/email`,
-      modelData
-    );
-    return response;
-  } catch (error) {
-    console.warn("error inviting user: ", error);
-    return error as any;
-  }
+  const response: GenericResponse = await API.post(
+    `/user/invitation/${endpointRole}/email`,
+    modelData
+  );
+  return response;
 };
 //update
 export const updateUser = async (
@@ -83,13 +78,8 @@ export const updateUser = async (
     groups_id: selectedGroups
   };
 
-  try {
-    const response: GenericResponse = await API.put(`/user`, modelData);
-    return response;
-  } catch (error) {
-    console.warn("error updating user: ", error);
-    return error as any;
-  }
+  const response: GenericResponse = await API.put(`/user`, modelData);
+  return response;
 };
 
 export const onChangeStatusById = async (
@@ -213,6 +203,9 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
 };
 
 export const sendEmailResetPassword = async (email: string) => {
-  const response: GenericResponse = await axios.post(`${config.API_HOST}/logistic-user/resetpassword`, { email });
+  const response: GenericResponse = await axios.post(
+    `${config.API_HOST}/logistic-user/resetpassword`,
+    { email }
+  );
   return response;
 };
