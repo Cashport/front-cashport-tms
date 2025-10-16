@@ -1,5 +1,16 @@
-import { Flex, Typography, message, Select, Table, TableProps, Button, Drawer } from "antd";
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import {
+  Flex,
+  Typography,
+  message,
+  Select,
+  Table,
+  TableProps,
+  Button,
+  Drawer,
+  MenuProps,
+  Dropdown
+} from "antd";
+import React, { useRef, useEffect, useState, useMemo, ReactNode } from "react";
 
 // dayjs locale
 import dayjs, { Dayjs } from "dayjs";
@@ -34,7 +45,9 @@ import {
   User,
   CaretLeft,
   CaretRight,
-  Circle
+  Circle,
+  TruckTrailer,
+  TipJar
 } from "@phosphor-icons/react";
 
 import "../../../../../styles/_variables_logistics.css";
@@ -62,7 +75,7 @@ import TrackingDrawer from "./components/tracking/TrackingDrawer";
 import { BackButton } from "../DetailsOrderView/components/BackButton/BackButton";
 import { TabEnum } from "../../transfer-orders/TransferOrders";
 import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney/ModalCreateJourney";
-import { CalendarX } from "phosphor-react";
+import { CalendarX, DotsThree, ListChecks } from "phosphor-react";
 import ChipsRow from "../DetailsOrderView/components/ChipsRow";
 import { ModalModifyTrip } from "@/components/molecules/modals/ModalModifyTrip/ModalModifyTrip";
 
@@ -888,6 +901,28 @@ export default function PricingTransferRequest({
     return Object.values(groupedRequirements);
   }
   const otherRequirements = orders && groupOtherRequirementsById(orders);
+
+  const customDropdown = (menu: ReactNode) => <div className="dropdownGenerateAction">{menu}</div>;
+
+  const generateActionOptions: MenuProps["items"] = [
+    {
+      key: "Proveedores",
+      icon: <TruckTrailer size={12} />,
+      label: "Proveedores",
+      onClick: () => setModalCarrier(true)
+    },
+    {
+      key: "Enviar licitación",
+      icon: <TipJar size={12} />,
+      label: "Enviar licitación"
+    },
+    {
+      key: "Solicitar aprobación",
+      icon: <ListChecks size={12} />,
+      label: "Solicitar aprobación"
+    }
+  ];
+
   return (
     <>
       {contextHolder}
@@ -967,9 +1002,16 @@ export default function PricingTransferRequest({
                   }}
                 >
                   {view === "carrier" && (
-                    <PrincipalButton type="default" onClick={() => setModalCarrier(true)}>
-                      Proveedores
-                    </PrincipalButton>
+                    <Dropdown
+                      dropdownRender={customDropdown}
+                      menu={{ items: generateActionOptions }}
+                      trigger={["click"]}
+                    >
+                      <Button className="generateActionBtn">
+                        <DotsThree size={20} weight="bold" />
+                        Generar acción
+                      </Button>
+                    </Dropdown>
                   )}
                   <PrincipalButton
                     className="active"
