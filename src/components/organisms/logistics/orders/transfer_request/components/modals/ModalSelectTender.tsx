@@ -34,18 +34,14 @@ const { Text } = Typography;
 type Props = {
   open: boolean;
   // eslint-disable-next-line no-unused-vars
-  handleModalCarrier: (value: boolean) => void;
+  handleModalTender: (value: boolean) => void;
   // eslint-disable-next-line no-unused-vars
-  mutateStepthree: (journey: ITransferRequestJourneyReview[]) => void;
   view: string;
-  setView: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
 };
 export default function ModalSelectCarrierPricing({
   open,
-  handleModalCarrier,
-  mutateStepthree,
-  view,
-  setView
+  handleModalTender,
+  view
 }: Readonly<Props>) {
   const params = useParams();
   const id = parseInt(params.id as string);
@@ -142,10 +138,8 @@ export default function ModalSelectCarrierPricing({
       const response = await sendCarrierRequest(formatedData);
 
       if (response) {
-        handleModalCarrier(false);
+        handleModalTender(false);
         message.success("Solicitudes enviadas");
-        mutateStepthree(response.journey);
-        if (view === "vehicles") setView("carrier");
       }
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
@@ -166,8 +160,7 @@ export default function ModalSelectCarrierPricing({
       if (hasPricingsSelected()) {
         await postCarrierRequest(tripsList, id, showAll);
       } else {
-        setView("carrier");
-        handleModalCarrier(false);
+        handleModalTender(false);
       }
       return;
     }
@@ -275,18 +268,18 @@ export default function ModalSelectCarrierPricing({
     <Modal
       title={
         <Header
-          title="Proveedores"
-          description="Seleccione los proveedores a los que les enviará la solicitud de los viajes creados"
+          title="Licitación"
+          description="Selecciones los proveedores a los que les enviará la solicitud para licitar"
         />
       }
       open={open}
-      onCancel={() => handleModalCarrier(false)}
+      onCancel={() => handleModalTender(false)}
       width={686}
       centered
       footer={
         <Footer
           view={view}
-          handleCancel={() => handleModalCarrier(false)}
+          handleCancel={() => handleModalTender(false)}
           handleSubmit={handleSubmitForm}
           isSubmitting={isSubmitting}
           disabledContinue={!isConfirmEnabled()}
@@ -370,45 +363,6 @@ export default function ModalSelectCarrierPricing({
             initialTabIndex={0}
             className={styles.scrollableTabsUI}
           />
-          <Flex gap={20} style={{ marginTop: "1rem", marginBottom: "1.5rem" }}>
-            <UiSearchInput
-              className={styles.searchBar}
-              placeholder="Buscar"
-              onChange={handleSearchChange}
-            />
-            <Flex align="center" gap={8}>
-              <Switch
-                className={styles.switchShowAll}
-                style={{ width: "3rem" }}
-                checked={showAll}
-                checkedChildren={<Check style={{ paddingTop: "5px" }} size={16} />}
-                unCheckedChildren={<X style={{ paddingTop: "5px" }} size={16} />}
-                onChange={handleShowAll}
-              />
-              <Text style={{ fontWeight: "400", fontSize: "0.875rem" }}>Mostrar todos</Text>
-            </Flex>
-          </Flex>
-          <Flex vertical gap={8} className={styles.tripCarrierPricing} key={selectedTripId ?? 0}>
-            <Checkbox
-              style={{ marginLeft: "0.5rem" }}
-              onChange={(e) => handleMasiveCheck(e.target.checked)}
-              checked={checkAll}
-              indeterminate={indeterminate}
-            >
-              <Text style={{ fontWeight: "500" }}>Seleccionar todos</Text>
-            </Checkbox>
-            {filteredPricing?.map((carrier, index) => (
-              <CarrierPriceCard
-                key={`trip-${selectedTripId}-carrier-${carrier?.id_carrier_pricing}-${index}`}
-                carrier={carrier}
-                currentTripId={selectedTripId}
-                isChecked={carrier?.checked ?? false}
-                handleCheck={handleCheck}
-                type={selectedTrip.service.type}
-                journey={journey}
-              />
-            ))}
-          </Flex>
         </div>
       )}
     </Modal>

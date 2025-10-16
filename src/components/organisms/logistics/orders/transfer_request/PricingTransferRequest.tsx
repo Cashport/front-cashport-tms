@@ -78,6 +78,7 @@ import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney
 import { CalendarX, DotsThree, ListChecks } from "phosphor-react";
 import ChipsRow from "../DetailsOrderView/components/ChipsRow";
 import { ModalModifyTrip } from "@/components/molecules/modals/ModalModifyTrip/ModalModifyTrip";
+import ModalSelectTender from "./components/modals/ModalSelectTender";
 
 const { Title, Text } = Typography;
 
@@ -147,6 +148,7 @@ export default function PricingTransferRequest({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
   const [modalCarrier, setModalCarrier] = useState(false);
+  const [modalTender, setModalTender] = useState(false);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
   const [isModalModifyTripOpen, setIsModalModifyTripOpen] = useState<{
     open: boolean;
@@ -914,7 +916,8 @@ export default function PricingTransferRequest({
     {
       key: "Enviar licitación",
       icon: <TipJar size={12} />,
-      label: "Enviar licitación"
+      label: "Enviar licitación",
+      onClick: () => setModalTender(true)
     },
     {
       key: "Solicitar aprobación",
@@ -1151,6 +1154,11 @@ export default function PricingTransferRequest({
         mutateStepthree={mutateStepthree}
         view={view}
         setView={setView}
+      />
+      <ModalSelectTender
+        open={modalTender}
+        handleModalTender={(val: boolean) => setModalTender(val)}
+        view={view}
       />
       <ModalCreateJourney
         visible={isModalMultiStepOpen}
