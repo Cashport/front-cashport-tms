@@ -150,6 +150,7 @@ export interface IAceptCarrierAPI {
   declared_cargo_value?: number;
   entity: "otherRequirement" | "trip";
   other_requirement?: OtherReq;
+  isAuction: boolean;
 }
 
 export interface Data {

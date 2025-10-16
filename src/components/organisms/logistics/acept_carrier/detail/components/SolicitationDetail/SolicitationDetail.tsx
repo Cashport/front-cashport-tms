@@ -1,5 +1,7 @@
 "use client";
-import { Col, Flex } from "antd";
+import { Col, Flex, Input, Button, Upload } from "antd";
+import { Money, Files } from "@phosphor-icons/react";
+import { NumericFormat } from "react-number-format";
 import AditionalInfo from "../AditionalInfo/AditionalInfo";
 import Materials from "../Materials/Materials";
 import styles from "./solicitationDetail.module.scss";
@@ -31,6 +33,16 @@ interface SolicitationDetailProps {
   showRejectButton: boolean;
   handleReject: () => Promise<void>;
   entityType?: "otherRequirement" | "trip";
+  quote: {
+    amount: number;
+    files: File[];
+  };
+  setQuote: Dispatch<
+    SetStateAction<{
+      amount: number;
+      files: File[];
+    }>
+  >;
 }
 
 export default function SolicitationDetail({
@@ -44,12 +56,81 @@ export default function SolicitationDetail({
   setView,
   showRejectButton,
   handleReject,
-  entityType = "trip"
+  entityType = "trip",
+  quote,
+  setQuote
 }: Readonly<SolicitationDetailProps>) {
   const router = useRouter();
 
+  const handleQuoteAmountChange = (value: number | undefined) => {
+    const amount = value || 0;
+    setQuote({
+      amount,
+      files: quote.files
+    });
+  };
+
+  const handleFileChange = (file: File) => {
+    setQuote({
+      amount: quote.amount,
+      files: [file]
+    });
+    return false; // Prevent automatic upload
+  };
+
   return (
     <Flex className={styles.wrapper}>
+      {providerDetail?.isAuction ? (
+        <Flex gap="3.125rem" align="center" justify="space-between">
+          {/* Cost input section */}
+          <Flex align="center" gap="0.5rem" style={{ flex: 1 }}>
+            <Flex align="center" gap="0.8rem" style={{ color: "#666666" }}>
+              <Money size={20} />
+              <p style={{ fontWeight: 400 }}>Costo</p>
+            </Flex>
+            <div style={{ flex: 1 }}>
+              <NumericFormat
+                value={quote.amount}
+                onValueChange={(values) => {
+                  handleQuoteAmountChange(values.floatValue);
+                }}
+                thousandSeparator="."
+                decimalSeparator=","
+                prefix="$ "
+                placeholder="$0"
+                customInput={Input}
+                style={{ width: "100%" }}
+                allowNegative={false}
+                decimalScale={0}
+              />
+            </div>
+          </Flex>
+
+          {/* Document upload section */}
+          <Flex align="center" gap="0.5rem" style={{ flex: 1 }}>
+            <Flex align="center" gap="0.8rem" style={{ color: "#666666" }}>
+              <Files size={20} />
+              <p style={{ fontWeight: 400 }}>PDF Cotización</p>
+            </Flex>
+            <div style={{ flex: 1 }}>
+              <Flex gap="0.5rem" align="center" vertical>
+                {quote.files[0] && (
+                  <span style={{ fontSize: "0.875rem", color: "#666" }}>{quote.files[0].name}</span>
+                )}
+                <Upload
+                  accept=".pdf"
+                  showUploadList={false}
+                  beforeUpload={handleFileChange}
+                  maxCount={1}
+                >
+                  <Button type="default">Agregar soporte</Button>
+                </Upload>
+              </Flex>
+            </div>
+          </Flex>
+        </Flex>
+      ) : null}
+
       <Flex className={styles.sectionWrapper} vertical>
         <Flex>
           <p className={styles.sectionTitle} style={{ marginLeft: "1.5rem" }}>

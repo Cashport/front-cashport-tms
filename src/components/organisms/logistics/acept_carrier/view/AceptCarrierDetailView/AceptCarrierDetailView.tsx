@@ -53,6 +53,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [quote, setQuote] = useState({
+    amount: 0,
+    files: [] as File[]
+  });
   const router = useRouter();
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
@@ -285,6 +289,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             showRejectButton={canBeRejected}
             handleReject={handleOpenRejectModal}
             entityType={entityType}
+            quote={quote}
+            setQuote={setQuote}
           />
         );
       case "asignation":

@@ -1,7 +1,7 @@
 import { API } from "@/utils/api/api";
 import { Data, ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
+import { CarrierCollapseAPI, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 
 export const getAllTransferRequestList = async (): Promise<Data> => {
   try {
@@ -38,10 +38,10 @@ export const getAceptCarrierRequestList = async ({
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };
 
-export const getAceptCarrierRequestById = async (id: string): Promise<any> => {
+export const getAceptCarrierRequestById = async (id: string): Promise<IAceptCarrierAPI> => {
   const form = new FormData();
   form.append("id", id);
-  const response: GenericResponse = await API.post(`/carrier/request/id`, form);
+  const response: GenericResponse<IAceptCarrierAPI> = await API.post(`/carrier/request/id`, form);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };

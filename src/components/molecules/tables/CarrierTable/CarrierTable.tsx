@@ -32,8 +32,6 @@ export default function CarrierTable({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(data.page?.actualPage || 1);
 
-  console.log("CarrierTable data:", data);
-
   const handleTableChange = (page: number) => {
     setCurrentPage(page);
     fetchData(page);
