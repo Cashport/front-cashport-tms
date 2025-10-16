@@ -4,11 +4,12 @@ import useSWR from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
-import { Flex, Modal, Select, Spin, Tag, Typography } from "antd";
+import { Flex, message, Modal, Select, Spin, Tag, Typography } from "antd";
 import { Trash } from "@phosphor-icons/react";
 
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
 import { getAllCarriers } from "@/services/logistics/users";
+import { sendTenderProposalToCarriers } from "@/services/logistics/carrier-request";
 import { getServiceType } from "./utils/utils";
 
 import CommunityIcon from "../communityIcon/CommunityIcon";
@@ -18,7 +19,7 @@ import { Header } from "./components/Header/Header";
 import CommunityTag from "../communityTag/communityTag";
 
 import { JourneyTripPricing, ServiceTab, serviceType } from "@/types/logistics/trips/TripsSchema";
-import { CreateCarrierRequestAuctionBody } from "@/types/logistics/carrier/carrier";
+import { ICreateCarrierRequestAuctionBody } from "@/types/logistics/carrier/carrier";
 
 import styles from "./ModalSelectCarrierPricing.module.scss";
 
@@ -179,7 +180,7 @@ export default function ModalSelectTender({ open, handleModalTender }: Readonly<
     setIsSubmitting(true);
 
     // Build the auction body
-    const auctions: CreateCarrierRequestAuctionBody["auctions"] = [];
+    const auctions: ICreateCarrierRequestAuctionBody["auctions"] = [];
 
     Object.entries(selectedCarriersByTrip).forEach(([tripId, carriers]) => {
       carriers.forEach((carrier) => {
@@ -191,15 +192,19 @@ export default function ModalSelectTender({ open, handleModalTender }: Readonly<
       });
     });
 
-    const auctionBody: CreateCarrierRequestAuctionBody = {
+    const auctionBody: ICreateCarrierRequestAuctionBody = {
       auctions,
       transferRequestId: id
     };
 
-    console.log("Auction Body:", auctionBody);
-
+    try {
+      await sendTenderProposalToCarriers(auctionBody);
+      handleModalTender(false);
+      message.success("Solicitudes enviadas");
+    } catch (error) {
+      message.error("Error al enviar solicitudes");
+    }
     setIsSubmitting(false);
-    handleModalTender(false);
   };
 
   const currentTripSelections = selectedTrip
