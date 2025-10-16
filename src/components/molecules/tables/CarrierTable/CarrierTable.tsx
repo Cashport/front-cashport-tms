@@ -10,7 +10,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { formatMoney } from "@/utils/utils";
 import { useProjects } from "@/hooks/useProjects";
 
-import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
+import { CarrierCollapseAPI, CarrierRequestAPI } from "@/types/logistics/carrier/carrier";
 
 dayjs.extend(customParseFormat);
 const { Text } = Typography;
@@ -31,6 +31,8 @@ export default function CarrierTable({
 }: PropsCarrierTable) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(data.page?.actualPage || 1);
+
+  console.log("CarrierTable data:", data);
 
   const handleTableChange = (page: number) => {
     setCurrentPage(page);
@@ -57,7 +59,7 @@ export default function CarrierTable({
     return diffInMinutes;
   };
 
-  const columns: TableProps<ICarrierRequestsListDetail>["columns"] = [
+  const columns: TableProps<CarrierRequestAPI>["columns"] = [
     {
       title: "TR",
       dataIndex: "id",
@@ -137,7 +139,11 @@ export default function CarrierTable({
       title: "Valor",
       key: "value",
       dataIndex: "amount",
-      render: (amount) => <Text>{amount ? formatMoney(amount) : "$ 0"}</Text>,
+      render: (amount, row) => (
+        <Text style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+          {!row.isAuction ? (amount ? formatMoney(amount) : "$ 0") : "Cotización"}
+        </Text>
+      ),
       sorter: (a, b) => a.amount - b.amount,
       showSorterTooltip: false,
       align: "right"
