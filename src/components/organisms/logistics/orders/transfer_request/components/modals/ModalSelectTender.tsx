@@ -8,6 +8,7 @@ import { Flex, Modal, Select, Spin, Tag, Typography } from "antd";
 import { Trash } from "@phosphor-icons/react";
 
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
+import { getAllCarriers } from "@/services/logistics/users";
 import { getServiceType } from "./utils/utils";
 
 import CommunityIcon from "../communityIcon/CommunityIcon";
@@ -20,7 +21,6 @@ import { JourneyTripPricing, ServiceTab, serviceType } from "@/types/logistics/t
 import { CreateCarrierRequestAuctionBody } from "@/types/logistics/carrier/carrier";
 
 import styles from "./ModalSelectCarrierPricing.module.scss";
-import { getAllCarriers } from "@/services/logistics/users";
 
 const { Text } = Typography;
 
@@ -308,11 +308,11 @@ export default function ModalSelectTender({ open, handleModalTender, view }: Rea
             initialTabIndex={0}
             className={styles.scrollableTabsUI}
           />
-          <Flex vertical gap={16} style={{ marginTop: "1.5rem", padding: "0 1rem" }}>
+          <Flex vertical gap={16} style={{ margin: "1.5rem 0" }}>
             <Select
               placeholder="Seleccionar Proveedor"
-              style={{ width: "100%" }}
               size="large"
+              className={styles.selectCarrier}
               onChange={handleSelectCarrier}
               value={null}
               options={getAvailableCarriers().map((carrier) => ({
@@ -330,19 +330,19 @@ export default function ModalSelectTender({ open, handleModalTender, view }: Rea
                     align="center"
                     justify="space-between"
                     style={{
-                      padding: "12px 16px",
-                      border: "1px solid #d9d9d9",
-                      borderRadius: "8px",
-                      backgroundColor: "#fafafa"
+                      padding: "8px",
+                      borderRadius: "4px",
+                      backgroundColor: "#F7F7F7",
+                      minHeight: "45px"
                     }}
                   >
                     <Flex align="center" gap={8}>
                       <Text strong>{carrier.carrierName}</Text>
-                      <Tag color="blue">Nacional</Tag>
                     </Flex>
                     <Trash
+                      color="#141414"
                       size={20}
-                      style={{ cursor: "pointer", color: "#ff4d4f" }}
+                      style={{ cursor: "pointer", marginRight: "4px", flexShrink: 0 }}
                       onClick={() =>
                         handleRemoveCarrier(selectedTrip.service.id, carrier.carrierId)
                       }

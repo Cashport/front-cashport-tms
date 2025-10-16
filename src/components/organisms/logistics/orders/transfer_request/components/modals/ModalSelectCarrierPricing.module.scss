@@ -15,7 +15,7 @@
         border-radius: 10px;
         width: 5px;
         height: 5px;
-      }
+    }
 }
 
 .checks {
@@ -36,7 +36,6 @@
         font-weight: bold !important;
     }
 }
-
 
 .stBox {
     display: flex;
@@ -61,25 +60,30 @@
     display: flex;
     overflow-x: auto;
     white-space: nowrap; // Evita el salto de línea
-  
+
     &::-webkit-scrollbar {
-      height: 4px;
+        height: 4px;
     }
-  
+
     &::-webkit-scrollbar-thumb {
-      background-color: darkgrey;
-      border-radius: 10px;
+        background-color: darkgrey;
+        border-radius: 10px;
     }
-  
+
     .tab {
-      flex-shrink: 0;
-      padding: 10px 20px; // Ajusta el padding según la necesidad
-      cursor: pointer; // Hace que el ratón cambie a mano cuando se pasa sobre las pestañas
-      box-sizing: border-box; // Incluye el padding en el cálculo del ancho del elemento
-      border: 1px solid transparent;
-  
-      &:hover {
-        border-color: rgba(0, 0, 0, 0.1);
-      }
+        flex-shrink: 0;
+        padding: 10px 20px; // Ajusta el padding según la necesidad
+        cursor: pointer; // Hace que el ratón cambie a mano cuando se pasa sobre las pestañas
+        box-sizing: border-box; // Incluye el padding en el cálculo del ancho del elemento
+        border: 1px solid transparent;
+
+        &:hover {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
     }
-  }
+}
+
+.selectCarrier {
+    width: 100%;
+    height: 42px !important;
+}
