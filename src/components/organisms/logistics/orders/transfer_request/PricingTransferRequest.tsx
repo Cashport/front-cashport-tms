@@ -389,8 +389,8 @@ export default function PricingTransferRequest({
       if (
         transferRequest?.stepThree?.journey?.some(
           (j) =>
-            j.trips.some((t) => t.carriers_pricing.some(() => true)) ||
-            j.otherRequirements.some((o) => o.carriers_pricing.some(() => true))
+            j.trips?.some((t) => t.carriers_pricing?.some(() => true)) ||
+            j.otherRequirements?.some((o) => o.carriers_pricing?.some(() => true))
         )
       ) {
         setView("carrier");
@@ -472,7 +472,7 @@ export default function PricingTransferRequest({
     } else if (view === "vehicles") {
       if (
         transferRequest?.stepThree?.journey?.some((j) =>
-          j.trips.some((t) => t.carriers_pricing.length)
+          j.trips?.some((t) => t?.carriers_pricing?.length)
         )
       )
         setView("carrier");

@@ -68,7 +68,7 @@ export default function TripCarrierPricing({ trip, handleSelectCarrier, fields, 
         }
       >
         <Flex vertical gap={10}>
-          {trip.carriers_pricing.map((carrier, index) => (
+          {trip?.carriers_pricing?.map((carrier, index) => (
             <CarrierRequestProposal
               key={`proposal-${index}-${trip.id}-${entity}`}
               carrier={carrier}
