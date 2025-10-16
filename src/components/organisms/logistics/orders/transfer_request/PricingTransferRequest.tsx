@@ -65,6 +65,8 @@ import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney
 import { CalendarX } from "phosphor-react";
 import ChipsRow from "../DetailsOrderView/components/ChipsRow";
 import { ModalModifyTrip } from "@/components/molecules/modals/ModalModifyTrip/ModalModifyTrip";
+import ModalSelectTender from "./components/modals/ModalSelectTender";
+import GenerateActionButton from "./components/atoms/GenerateActionButton/GenerateActionButton";
 
 const { Title, Text } = Typography;
 
@@ -134,6 +136,7 @@ export default function PricingTransferRequest({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
   const [modalCarrier, setModalCarrier] = useState(false);
+  const [modalTender, setModalTender] = useState(false);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
   const [isModalModifyTripOpen, setIsModalModifyTripOpen] = useState<{
     open: boolean;
@@ -386,8 +389,8 @@ export default function PricingTransferRequest({
       if (
         transferRequest?.stepThree?.journey?.some(
           (j) =>
-            j.trips.some((t) => t.carriers_pricing.some(() => true)) ||
-            j.otherRequirements.some((o) => o.carriers_pricing.some(() => true))
+            j.trips?.some((t) => t.carriers_pricing?.some(() => true)) ||
+            j.otherRequirements?.some((o) => o.carriers_pricing?.some(() => true))
         )
       ) {
         setView("carrier");
@@ -469,7 +472,7 @@ export default function PricingTransferRequest({
     } else if (view === "vehicles") {
       if (
         transferRequest?.stepThree?.journey?.some((j) =>
-          j.trips.some((t) => t.carriers_pricing.length)
+          j.trips?.some((t) => t?.carriers_pricing?.length)
         )
       )
         setView("carrier");
@@ -888,6 +891,7 @@ export default function PricingTransferRequest({
     return Object.values(groupedRequirements);
   }
   const otherRequirements = orders && groupOtherRequirementsById(orders);
+
   return (
     <>
       {contextHolder}
@@ -967,9 +971,10 @@ export default function PricingTransferRequest({
                   }}
                 >
                   {view === "carrier" && (
-                    <PrincipalButton type="default" onClick={() => setModalCarrier(true)}>
-                      Proveedores
-                    </PrincipalButton>
+                    <GenerateActionButton
+                      onProvidersClick={() => setModalCarrier(true)}
+                      onTenderClick={() => setModalTender(true)}
+                    />
                   )}
                   <PrincipalButton
                     className="active"
@@ -1109,6 +1114,10 @@ export default function PricingTransferRequest({
         mutateStepthree={mutateStepthree}
         view={view}
         setView={setView}
+      />
+      <ModalSelectTender
+        open={modalTender}
+        handleModalTender={(val: boolean) => setModalTender(val)}
       />
       <ModalCreateJourney
         visible={isModalMultiStepOpen}

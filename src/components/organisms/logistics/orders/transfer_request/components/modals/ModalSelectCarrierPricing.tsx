@@ -121,7 +121,6 @@ export default function ModalSelectCarrierPricing({
       );
     }
   }, [data]);
-  console.log("TRIP LIST", tripsList);
   const selectedTrip = tripsList[selectedTabIndex];
 
   const journey = selectedTrip?.journey;
@@ -136,23 +135,44 @@ export default function ModalSelectCarrierPricing({
       );
     }) || [];
 
-  const handleSubmitForm = async () => {
+  const postCarrierRequest = async (trips: ServiceTab[], id: number, showAll: boolean) => {
     try {
       setIsSubmitting(true);
-      const formatedData = convertToSendCarrierRequest(tripsList, id, showAll);
+      const formatedData = convertToSendCarrierRequest(trips, id, showAll);
       const response = await sendCarrierRequest(formatedData);
+
       if (response) {
-        setIsSubmitting(false);
         handleModalCarrier(false);
         message.success("Solicitudes enviadas");
         mutateStepthree(response.journey);
         if (view === "vehicles") setView("carrier");
       }
     } catch (error) {
-      setIsSubmitting(false);
       if (error instanceof Error) message.error(error.message);
       else message.error("Error al enviar solicitud");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const hasPricingsSelected = () => {
+    return tripsList.some((t) =>
+      t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
+    );
+  };
+
+  const handleSubmitForm = async () => {
+    if (view === "vehicles") {
+      if (hasPricingsSelected()) {
+        await postCarrierRequest(tripsList, id, showAll);
+      } else {
+        setView("carrier");
+        handleModalCarrier(false);
+      }
+      return;
+    }
+
+    await postCarrierRequest(tripsList, id, showAll);
   };
 
   const handleCheck = (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
@@ -234,9 +254,7 @@ export default function ModalSelectCarrierPricing({
   };
   const isConfirmEnabled = () => {
     if (view === "vehicles") {
-      return tripsList.every((t) =>
-        t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
-      );
+      return true;
     } else
       return tripsList.some((t) =>
         t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
@@ -255,7 +273,12 @@ export default function ModalSelectCarrierPricing({
 
   return (
     <Modal
-      title={<Header />}
+      title={
+        <Header
+          title="Proveedores"
+          description="Seleccione los proveedores a los que les enviará la solicitud de los viajes creados"
+        />
+      }
       open={open}
       onCancel={() => handleModalCarrier(false)}
       width={686}
