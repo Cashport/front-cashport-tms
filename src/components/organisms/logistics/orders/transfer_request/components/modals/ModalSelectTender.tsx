@@ -32,13 +32,10 @@ interface SelectedCarrier {
 
 type Props = {
   open: boolean;
-  // eslint-disable-next-line no-unused-vars
   handleModalTender: (value: boolean) => void;
-  // eslint-disable-next-line no-unused-vars
-  view: string;
 };
 
-export default function ModalSelectTender({ open, handleModalTender, view }: Readonly<Props>) {
+export default function ModalSelectTender({ open, handleModalTender }: Readonly<Props>) {
   const params = useParams();
   const id = parseInt(params.id as string);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -223,7 +220,7 @@ export default function ModalSelectTender({ open, handleModalTender, view }: Rea
       centered
       footer={
         <Footer
-          view={view}
+          view={"carrier"}
           handleCancel={() => handleModalTender(false)}
           handleSubmit={handleSubmitForm}
           isSubmitting={isSubmitting}
@@ -320,6 +317,10 @@ export default function ModalSelectTender({ open, handleModalTender, view }: Rea
                 value: carrier.id
               }))}
               disabled={getAvailableCarriers().length === 0 || isLoadingCarriers}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
             />
 
             {currentTripSelections.length > 0 && (

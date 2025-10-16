@@ -1,13 +1,4 @@
-import {
-  Flex,
-  Typography,
-  message,
-  Select,
-  Table,
-  TableProps,
-  Button,
-  Drawer
-} from "antd";
+import { Flex, Typography, message, Select, Table, TableProps, Button, Drawer } from "antd";
 import React, { useRef, useEffect, useState, useMemo } from "react";
 
 // dayjs locale
@@ -1127,7 +1118,6 @@ export default function PricingTransferRequest({
       <ModalSelectTender
         open={modalTender}
         handleModalTender={(val: boolean) => setModalTender(val)}
-        view={view}
       />
       <ModalCreateJourney
         visible={isModalMultiStepOpen}
