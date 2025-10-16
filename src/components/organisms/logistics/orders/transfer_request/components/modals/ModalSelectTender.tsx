@@ -334,7 +334,7 @@ export default function ModalSelectTender({ open, handleModalTender }: Readonly<
                       padding: "8px",
                       borderRadius: "4px",
                       backgroundColor: "#F7F7F7",
-                      minHeight: "45px"
+                      minHeight: "40px"
                     }}
                   >
                     <Flex align="center" gap={8}>
