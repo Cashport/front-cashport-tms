@@ -134,22 +134,17 @@ export default function ModalSelectTender({ open, handleModalTender, view }: Rea
     return tab.service?.service_description;
   });
 
-  // Get all selected carrier IDs across all trips
-  const getAllSelectedCarrierIds = (): number[] => {
-    const allSelectedIds: number[] = [];
-    Object.values(selectedCarriersByTrip).forEach((carriers) => {
-      carriers.forEach((carrier) => {
-        if (!allSelectedIds.includes(carrier.carrierId)) {
-          allSelectedIds.push(carrier.carrierId);
-        }
-      });
-    });
-    return allSelectedIds;
+  // Get selected carrier IDs for the current trip only
+  const getCurrentTripSelectedCarrierIds = (): number[] => {
+    if (!selectedTrip) return [];
+    const tripId = selectedTrip.service.id;
+    const currentSelections = selectedCarriersByTrip[tripId] || [];
+    return currentSelections.map((carrier) => carrier.carrierId);
   };
 
-  // Filter available carriers for current trip (excluding already selected ones)
+  // Filter available carriers for current trip (excluding already selected ones in this tab)
   const getAvailableCarriers = () => {
-    const selectedIds = getAllSelectedCarrierIds();
+    const selectedIds = getCurrentTripSelectedCarrierIds();
     return carriersData?.data?.filter((carrier) => !selectedIds.includes(carrier.id)) || [];
   };
 
