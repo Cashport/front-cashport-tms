@@ -16,25 +16,13 @@ import { Footer } from "./components/Footer/Footer";
 import { Header } from "./components/Header/Header";
 import CommunityTag from "../communityTag/communityTag";
 
-import {
-  JourneyTripPricing,
-  ServiceTab,
-  serviceType
-} from "@/types/logistics/trips/TripsSchema";
+import { JourneyTripPricing, ServiceTab, serviceType } from "@/types/logistics/trips/TripsSchema";
 import { CreateCarrierRequestAuctionBody } from "@/types/logistics/carrier/carrier";
 
 import styles from "./ModalSelectCarrierPricing.module.scss";
+import { getAllCarriers } from "@/services/logistics/users";
 
 const { Text } = Typography;
-
-// Mock data for carriers
-const MOCK_CARRIERS = [
-  { id: 1, name: "COLTANQUES SAS", vehicleTypeId: 350 },
-  { id: 2, name: "ENTRAPETROL", vehicleTypeId: 350 },
-  { id: 3, name: "TRANSPORTES ABC", vehicleTypeId: 350 },
-  { id: 4, name: "LOGÍSTICA DEL SUR", vehicleTypeId: 350 },
-  { id: 5, name: "RUTAS COLOMBIANAS", vehicleTypeId: 350 }
-];
 
 interface SelectedCarrier {
   carrierId: number;
@@ -50,11 +38,7 @@ type Props = {
   view: string;
 };
 
-export default function ModalSelectTender({
-  open,
-  handleModalTender,
-  view
-}: Readonly<Props>) {
+export default function ModalSelectTender({ open, handleModalTender, view }: Readonly<Props>) {
   const params = useParams();
   const id = parseInt(params.id as string);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -63,6 +47,16 @@ export default function ModalSelectTender({
   const [selectedCarriersByTrip, setSelectedCarriersByTrip] = useState<
     Record<number, SelectedCarrier[]>
   >({});
+
+  const { data: carriersData, isLoading: isLoadingCarriers } = useSWR(
+    "getAllCarriers",
+    getAllCarriers,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   const { data, isLoading, isValidating } = useSWR(
     { idTransferRequest: id, open },
@@ -131,9 +125,7 @@ export default function ModalSelectTender({
   const journey = selectedTrip?.journey;
 
   const isConfirmEnabled = () => {
-    return Object.values(selectedCarriersByTrip).some(
-      (carriers) => carriers.length > 0
-    );
+    return Object.values(selectedCarriersByTrip).some((carriers) => carriers.length > 0);
   };
 
   const tabsTitles = tripsList.map((tab) => {
@@ -158,14 +150,15 @@ export default function ModalSelectTender({
   // Filter available carriers for current trip (excluding already selected ones)
   const getAvailableCarriers = () => {
     const selectedIds = getAllSelectedCarrierIds();
-    return MOCK_CARRIERS.filter((carrier) => !selectedIds.includes(carrier.id));
+    return carriersData?.data?.filter((carrier) => !selectedIds.includes(carrier.id)) || [];
   };
 
   const handleSelectCarrier = (carrierId: number) => {
-    const carrier = MOCK_CARRIERS.find((c) => c.id === carrierId);
+    const carrier = carriersData?.data?.find((c) => c.id === carrierId);
     if (!carrier || !selectedTrip) return;
 
     const tripId = selectedTrip.service.id;
+    const vehicleTypeId = selectedTrip.service.service_id;
     const currentSelections = selectedCarriersByTrip[tripId] || [];
 
     setSelectedCarriersByTrip({
@@ -174,8 +167,8 @@ export default function ModalSelectTender({
         ...currentSelections,
         {
           carrierId: carrier.id,
-          carrierName: carrier.name,
-          vehicleTypeId: carrier.vehicleTypeId
+          carrierName: carrier.business_name,
+          vehicleTypeId: vehicleTypeId
         }
       ]
     });
@@ -328,10 +321,10 @@ export default function ModalSelectTender({
               onChange={handleSelectCarrier}
               value={null}
               options={getAvailableCarriers().map((carrier) => ({
-                label: carrier.name,
+                label: carrier.business_name,
                 value: carrier.id
               }))}
-              disabled={getAvailableCarriers().length === 0}
+              disabled={getAvailableCarriers().length === 0 || isLoadingCarriers}
             />
 
             {currentTripSelections.length > 0 && (
