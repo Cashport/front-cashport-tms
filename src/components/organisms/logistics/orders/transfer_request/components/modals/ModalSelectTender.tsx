@@ -4,33 +4,44 @@ import useSWR from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
-import { Check } from "phosphor-react";
-import { Checkbox, Flex, message, Modal, Spin, Switch, Typography } from "antd";
-import { X } from "@phosphor-icons/react";
+import { Flex, Modal, Select, Spin, Tag, Typography } from "antd";
+import { Trash } from "@phosphor-icons/react";
 
-import { sendCarrierRequest } from "@/services/logistics/carrier-request";
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
-import { convertToSendCarrierRequest, getServiceType } from "./utils/utils";
+import { getServiceType } from "./utils/utils";
 
 import CommunityIcon from "../communityIcon/CommunityIcon";
-import UiSearchInput from "@/components/ui/search-input";
 import UiTabs from "@/components/ui/ui-tabs";
-import CarrierPriceCard from "./components/CarrierPriceCard/CarrierPriceCard";
 import { Footer } from "./components/Footer/Footer";
 import { Header } from "./components/Header/Header";
 import CommunityTag from "../communityTag/communityTag";
 
-import { ITransferRequestJourneyReview } from "@/types/logistics/schema";
 import {
-  CarriersPricingModal,
   JourneyTripPricing,
   ServiceTab,
   serviceType
 } from "@/types/logistics/trips/TripsSchema";
+import { CreateCarrierRequestAuctionBody } from "@/types/logistics/carrier/carrier";
 
 import styles from "./ModalSelectCarrierPricing.module.scss";
 
 const { Text } = Typography;
+
+// Mock data for carriers
+const MOCK_CARRIERS = [
+  { id: 1, name: "COLTANQUES SAS", vehicleTypeId: 350 },
+  { id: 2, name: "ENTRAPETROL", vehicleTypeId: 350 },
+  { id: 3, name: "TRANSPORTES ABC", vehicleTypeId: 350 },
+  { id: 4, name: "LOGÍSTICA DEL SUR", vehicleTypeId: 350 },
+  { id: 5, name: "RUTAS COLOMBIANAS", vehicleTypeId: 350 }
+];
+
+interface SelectedCarrier {
+  carrierId: number;
+  carrierName: string;
+  vehicleTypeId: number;
+}
+
 type Props = {
   open: boolean;
   // eslint-disable-next-line no-unused-vars
@@ -38,7 +49,8 @@ type Props = {
   // eslint-disable-next-line no-unused-vars
   view: string;
 };
-export default function ModalSelectCarrierPricing({
+
+export default function ModalSelectTender({
   open,
   handleModalTender,
   view
@@ -46,16 +58,16 @@ export default function ModalSelectCarrierPricing({
   const params = useParams();
   const id = parseInt(params.id as string);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [tripsList, setTripsList] = useState<ServiceTab[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showAll, setShowAll] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [selectedCarriersByTrip, setSelectedCarriersByTrip] = useState<
+    Record<number, SelectedCarrier[]>
+  >({});
 
   const { data, isLoading, isValidating } = useSWR(
-    { idTransferRequest: id, open, showAll },
+    { idTransferRequest: id, open },
     ({ idTransferRequest, open }) =>
-      open ? getTransferRequestPricing({ idTransferRequest, showAll }) : undefined,
+      open ? getTransferRequestPricing({ idTransferRequest }) : undefined,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -65,25 +77,15 @@ export default function ModalSelectCarrierPricing({
   );
 
   useEffect(() => {
-    if (tripsList && tripsList.length > 0) {
-      setSelectedTripId(tripsList?.[selectedTabIndex]?.service?.id);
-    }
-  }, [selectedTabIndex, tripsList]);
-
-  useEffect(() => {
-    setSearchTerm("");
-  }, [open]);
-
-  useEffect(() => {
     if (data && data.length > 0) {
       setTripsList(
         data.flatMap((journey) => {
-          // Clonar el journey y eliminar las propiedades trips y other_requirements
+          // Clone journey and remove trips and other_requirements properties
           const j = { ...journey, trips: undefined, other_requirements: undefined };
           delete j.trips;
           delete j.other_requirements;
 
-          // Combinar trips y other_requirements en un solo array con distinción de tipo
+          // Combine trips and other_requirements into a single array with type distinction
           const tripsData = journey.trips.map((trip) => ({
             service: {
               id: trip.id_trip,
@@ -111,158 +113,113 @@ export default function ModalSelectCarrierPricing({
             journey: j as Omit<JourneyTripPricing, "trips" | "other_requirements">
           }));
 
-          // Combinar ambos arrays
+          // Combine both arrays
           return [...tripsData, ...otherRequirementsData];
         })
       );
     }
   }, [data]);
-  const selectedTrip = tripsList[selectedTabIndex];
 
+  useEffect(() => {
+    if (!open) {
+      setSelectedCarriersByTrip({});
+      setSelectedTabIndex(0);
+    }
+  }, [open]);
+
+  const selectedTrip = tripsList[selectedTabIndex];
   const journey = selectedTrip?.journey;
 
-  const filteredPricing =
-    selectedTrip?.service?.carriers_pricing?.filter((pricing) => {
-      const { description, fee_description, price } = pricing;
-      return (
-        (description && description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (fee_description && fee_description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (price && price.toString().includes(searchTerm))
-      );
-    }) || [];
-
-  const postCarrierRequest = async (trips: ServiceTab[], id: number, showAll: boolean) => {
-    try {
-      setIsSubmitting(true);
-      const formatedData = convertToSendCarrierRequest(trips, id, showAll);
-      const response = await sendCarrierRequest(formatedData);
-
-      if (response) {
-        handleModalTender(false);
-        message.success("Solicitudes enviadas");
-      }
-    } catch (error) {
-      if (error instanceof Error) message.error(error.message);
-      else message.error("Error al enviar solicitud");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const hasPricingsSelected = () => {
-    return tripsList.some((t) =>
-      t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
-    );
-  };
-
-  const handleSubmitForm = async () => {
-    if (view === "vehicles") {
-      if (hasPricingsSelected()) {
-        await postCarrierRequest(tripsList, id, showAll);
-      } else {
-        handleModalTender(false);
-      }
-      return;
-    }
-
-    await postCarrierRequest(tripsList, id, showAll);
-  };
-
-  const handleCheck = (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
-    setTripsList((prev) =>
-      prev.map((tab) => {
-        if (tab.service.id === selectedTripId) {
-          return {
-            ...tab,
-            service: {
-              ...tab.service,
-              carriers_pricing: tab.service.carriers_pricing.map((carrier) => {
-                if (
-                  carrier.id_carrier_pricing === id_carrier_pricing &&
-                  carrier.id_carrier === id_carrier
-                ) {
-                  return {
-                    ...carrier,
-                    checked: !isChecked
-                  };
-                }
-                return carrier;
-              })
-            }
-          };
-        }
-        return tab;
-      })
-    );
-  };
-
-  const handleMasiveCheck = (newState: boolean) => {
-    setTripsList((prev) =>
-      prev.map((tab) => {
-        if (tab.service.id === selectedTripId) {
-          return {
-            ...tab,
-            service: {
-              ...tab.service,
-              carriers_pricing: tab.service.carriers_pricing.map((carrier) => {
-                if (searchTerm !== "") {
-                  const isFiltered = filteredPricing.some(
-                    (filteredCarrier) =>
-                      filteredCarrier.id_carrier_pricing === carrier.id_carrier_pricing
-                  );
-                  return {
-                    ...carrier,
-                    checked: isFiltered && newState
-                  };
-                } else {
-                  return {
-                    ...carrier,
-                    checked: newState
-                  };
-                }
-              })
-            }
-          };
-        }
-        return tab;
-      })
-    );
-  };
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearchTerm(value);
-  };
-
-  const handleShowAll = (checked: boolean) => {
-    setShowAll(checked);
-  };
-
-  const allSelected = (): boolean => {
-    const currentTrip = selectedTrip?.service;
-    return currentTrip?.carriers_pricing?.every((carrier) => carrier.checked);
-  };
-  const allSelectedInFiltered = (): boolean => {
-    return filteredPricing.every((fp) => fp.checked);
-  };
   const isConfirmEnabled = () => {
-    if (view === "vehicles") {
-      return true;
-    } else
-      return tripsList.some((t) =>
-        t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
-      );
+    return Object.values(selectedCarriersByTrip).some(
+      (carriers) => carriers.length > 0
+    );
   };
-
-  const indeterminate = filteredPricing.filter((fp) => fp.checked).length > 0 && !allSelected();
-
-  const checkAll = searchTerm === "" ? allSelected() : allSelectedInFiltered();
 
   const tabsTitles = tripsList.map((tab) => {
     if (tab.service.type === "other_requirement")
       return `${tab.service?.service_description} (${tab.service?.units})`;
     return tab.service?.service_description;
   });
+
+  // Get all selected carrier IDs across all trips
+  const getAllSelectedCarrierIds = (): number[] => {
+    const allSelectedIds: number[] = [];
+    Object.values(selectedCarriersByTrip).forEach((carriers) => {
+      carriers.forEach((carrier) => {
+        if (!allSelectedIds.includes(carrier.carrierId)) {
+          allSelectedIds.push(carrier.carrierId);
+        }
+      });
+    });
+    return allSelectedIds;
+  };
+
+  // Filter available carriers for current trip (excluding already selected ones)
+  const getAvailableCarriers = () => {
+    const selectedIds = getAllSelectedCarrierIds();
+    return MOCK_CARRIERS.filter((carrier) => !selectedIds.includes(carrier.id));
+  };
+
+  const handleSelectCarrier = (carrierId: number) => {
+    const carrier = MOCK_CARRIERS.find((c) => c.id === carrierId);
+    if (!carrier || !selectedTrip) return;
+
+    const tripId = selectedTrip.service.id;
+    const currentSelections = selectedCarriersByTrip[tripId] || [];
+
+    setSelectedCarriersByTrip({
+      ...selectedCarriersByTrip,
+      [tripId]: [
+        ...currentSelections,
+        {
+          carrierId: carrier.id,
+          carrierName: carrier.name,
+          vehicleTypeId: carrier.vehicleTypeId
+        }
+      ]
+    });
+  };
+
+  const handleRemoveCarrier = (tripId: number, carrierId: number) => {
+    const currentSelections = selectedCarriersByTrip[tripId] || [];
+    setSelectedCarriersByTrip({
+      ...selectedCarriersByTrip,
+      [tripId]: currentSelections.filter((c) => c.carrierId !== carrierId)
+    });
+  };
+
+  const handleSubmitForm = async () => {
+    if (!data) return;
+    setIsSubmitting(true);
+
+    // Build the auction body
+    const auctions: CreateCarrierRequestAuctionBody["auctions"] = [];
+
+    Object.entries(selectedCarriersByTrip).forEach(([tripId, carriers]) => {
+      carriers.forEach((carrier) => {
+        auctions.push({
+          carrierId: carrier.carrierId,
+          vehicleTypeId: carrier.vehicleTypeId,
+          tripId: parseInt(tripId)
+        });
+      });
+    });
+
+    const auctionBody: CreateCarrierRequestAuctionBody = {
+      auctions,
+      transferRequestId: id
+    };
+
+    console.log("Auction Body:", auctionBody);
+
+    setIsSubmitting(false);
+    handleModalTender(false);
+  };
+
+  const currentTripSelections = selectedTrip
+    ? selectedCarriersByTrip[selectedTrip.service.id] || []
+    : [];
 
   return (
     <Modal
@@ -363,6 +320,50 @@ export default function ModalSelectCarrierPricing({
             initialTabIndex={0}
             className={styles.scrollableTabsUI}
           />
+          <Flex vertical gap={16} style={{ marginTop: "1.5rem", padding: "0 1rem" }}>
+            <Select
+              placeholder="Seleccionar Proveedor"
+              style={{ width: "100%" }}
+              size="large"
+              onChange={handleSelectCarrier}
+              value={null}
+              options={getAvailableCarriers().map((carrier) => ({
+                label: carrier.name,
+                value: carrier.id
+              }))}
+              disabled={getAvailableCarriers().length === 0}
+            />
+
+            {currentTripSelections.length > 0 && (
+              <Flex vertical gap={8}>
+                {currentTripSelections.map((carrier) => (
+                  <Flex
+                    key={`${selectedTrip?.service.id}-${carrier.carrierId}`}
+                    align="center"
+                    justify="space-between"
+                    style={{
+                      padding: "12px 16px",
+                      border: "1px solid #d9d9d9",
+                      borderRadius: "8px",
+                      backgroundColor: "#fafafa"
+                    }}
+                  >
+                    <Flex align="center" gap={8}>
+                      <Text strong>{carrier.carrierName}</Text>
+                      <Tag color="blue">Nacional</Tag>
+                    </Flex>
+                    <Trash
+                      size={20}
+                      style={{ cursor: "pointer", color: "#ff4d4f" }}
+                      onClick={() =>
+                        handleRemoveCarrier(selectedTrip.service.id, carrier.carrierId)
+                      }
+                    />
+                  </Flex>
+                ))}
+              </Flex>
+            )}
+          </Flex>
         </div>
       )}
     </Modal>

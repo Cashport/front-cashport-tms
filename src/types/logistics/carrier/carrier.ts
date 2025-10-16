@@ -193,3 +193,14 @@ export interface CarrierCollapseAPI {
   carrierrequests: CarrierRequestAPI[];
   page: Pagination;
 }
+
+export interface CreateCarrierRequestAuction {
+  carrierId: number;
+  vehicleTypeId: number;
+  tripId: number;
+}
+
+export interface CreateCarrierRequestAuctionBody {
+  auctions: CreateCarrierRequestAuction[];
+  transferRequestId: number;
+}
