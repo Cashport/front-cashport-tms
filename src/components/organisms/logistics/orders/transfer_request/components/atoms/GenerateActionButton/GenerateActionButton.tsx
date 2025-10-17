@@ -7,11 +7,13 @@ import "./generateActionButton.scss";
 interface GenerateActionButtonProps {
   onProvidersClick: () => void;
   onTenderClick: () => void;
+  onApprovalClick: () => void;
 }
 
 export default function GenerateActionButton({
   onProvidersClick,
-  onTenderClick
+  onTenderClick,
+  onApprovalClick
 }: GenerateActionButtonProps) {
   const customDropdown = (menu: ReactNode) => <div className="dropdownGenerateAction">{menu}</div>;
 
@@ -31,7 +33,8 @@ export default function GenerateActionButton({
     {
       key: "Solicitar aprobación",
       icon: <ListChecks size={12} />,
-      label: "Solicitar aprobación"
+      label: "Solicitar aprobación",
+      onClick: onApprovalClick
     }
   ];
 

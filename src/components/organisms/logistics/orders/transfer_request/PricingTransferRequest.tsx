@@ -892,6 +892,11 @@ export default function PricingTransferRequest({
   }
   const otherRequirements = orders && groupOtherRequirementsById(orders);
 
+  const handleSendCarriersToApproval = () => {
+    // Navigate to approval creation page
+    router.push("/logistics/approval/new");
+  };
+
   return (
     <>
       {contextHolder}
@@ -974,6 +979,7 @@ export default function PricingTransferRequest({
                     <GenerateActionButton
                       onProvidersClick={() => setModalCarrier(true)}
                       onTenderClick={() => setModalTender(true)}
+                      onApprovalClick={handleSendCarriersToApproval}
                     />
                   )}
                   <PrincipalButton
