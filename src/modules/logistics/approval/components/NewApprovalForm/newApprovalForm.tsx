@@ -4,6 +4,10 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store/store";
+import useSWR from "swr";
+import { Select as AntSelect } from "antd";
+import { getTypes } from "@/services/logistics/pricingApprovals/pricingApprovals";
+import { IApprovalType } from "@/types/logistics/schema";
 
 import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
@@ -23,6 +27,15 @@ import { Checkbox } from "@/modules/chat/ui/checkbox";
 
 import "@/modules/chat/styles/chatStyles.css";
 import { useRouter } from "next/navigation";
+
+// Helper function to normalize approval type names to kebab-case
+const normalizeToKebabCase = (name: string): string => {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/\s+/g, "-"); // Replace spaces with hyphens
+};
 
 interface ForecastItem {
   id: string;
@@ -60,6 +73,17 @@ export function NewApprovalForm() {
   const clearCarrierForApproval = useAppStore((state) => state.clearCarrierForApproval);
 
   const router = useRouter();
+
+  // Fetch approval types from API
+  const { data: approvalTypes, isLoading: isLoadingTypes } = useSWR<IApprovalType[]>(
+    "pricing-approval-types",
+    getTypes,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   const [tipoAprobacion, setTipoAprobacion] = useState<string>("");
   const [validadoCoordinador, setValidadoCoordinador] = useState<string>("");
@@ -587,19 +611,20 @@ export function NewApprovalForm() {
               <Label htmlFor="tipoAprobacion" className="text-sm font-medium text-gray-700">
                 Solicitud de aprobación para
               </Label>
-              <Select value={tipoAprobacion} onValueChange={setTipoAprobacion} required>
-                <SelectTrigger
-                  id="tipoAprobacion"
-                  className="max-w-md border-2 focus:ring-2 focus:ring-blue-500"
-                >
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="viaje-especifico">Viaje específico</SelectItem>
-                  <SelectItem value="tarifa-recurrente">Tarifa recurrente</SelectItem>
-                  <SelectItem value="tercerizacion">Tercerización</SelectItem>
-                </SelectContent>
-              </Select>
+              <AntSelect
+                id="tipoAprobacion"
+                value={tipoAprobacion}
+                onChange={setTipoAprobacion}
+                placeholder="Seleccionar tipo"
+                className="max-w-md"
+                style={{ width: "100%" }}
+                size="large"
+                loading={isLoadingTypes}
+                options={approvalTypes?.map((type) => ({
+                  label: type.name,
+                  value: normalizeToKebabCase(type.name)
+                }))}
+              />
             </div>
 
             {tipoAprobacion && <div className="space-y-6 pt-6">{renderValidationQuestions()}</div>}
