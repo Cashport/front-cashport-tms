@@ -297,6 +297,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             entityType={entityType}
             quote={quote}
             setQuote={setQuote}
+            formMode={formMode}
           />
         );
       case "asignation":

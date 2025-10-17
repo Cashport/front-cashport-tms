@@ -16,6 +16,7 @@ import { DataCarga, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 import Buttons from "../Buttons/Buttons";
 import { useRouter } from "next/navigation";
 import { RequirementSummaryData } from "@/components/organisms/logistics/orders/DetailsOrderView/components/RequirementSummaryData.tsx/RequirementSummaryData";
+import { FormMode } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 
 dayjs.locale("es");
 dayjs.extend(utc);
@@ -43,6 +44,7 @@ interface SolicitationDetailProps {
       files: File[];
     }>
   >;
+  formMode: FormMode;
 }
 
 export default function SolicitationDetail({
@@ -58,7 +60,8 @@ export default function SolicitationDetail({
   handleReject,
   entityType = "trip",
   quote,
-  setQuote
+  setQuote,
+  formMode
 }: Readonly<SolicitationDetailProps>) {
   const router = useRouter();
 
@@ -80,6 +83,7 @@ export default function SolicitationDetail({
 
   return (
     <Flex className={styles.wrapper}>
+      {/* If its auction */}
       {providerDetail?.isAuction ? (
         <Flex
           gap="3.125rem"
@@ -116,6 +120,7 @@ export default function SolicitationDetail({
                 allowNegative={false}
                 decimalScale={0}
                 className={styles.inputCost}
+                disabled={formMode !== FormMode.CREATE}
               />
             </div>
           </Flex>
@@ -149,7 +154,11 @@ export default function SolicitationDetail({
                 beforeUpload={handleFileChange}
                 maxCount={1}
               >
-                <Button type="text" className={styles.addSupportBtn}>
+                <Button
+                  type="text"
+                  className={styles.addSupportBtn}
+                  disabled={formMode !== FormMode.CREATE}
+                >
                   <PlusCircle size={20} />
                   Agregar soporte
                 </Button>
