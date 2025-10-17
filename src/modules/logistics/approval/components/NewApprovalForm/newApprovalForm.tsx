@@ -5,8 +5,13 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
-import { Select as AntSelect } from "antd";
-import { getApprovers, getTypes } from "@/services/logistics/pricingApprovals/pricingApprovals";
+import { Select as AntSelect, message } from "antd";
+import {
+  createApproval,
+  getApprovers,
+  getTypes,
+  type IApprovalRequest
+} from "@/services/logistics/pricingApprovals/pricingApprovals";
 import { IApprovalType, IApprover } from "@/types/logistics/schema";
 
 import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
@@ -214,24 +219,174 @@ export function NewApprovalForm() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitting new approval:", {
-      tipoAprobacion,
-      validadoCoordinador,
-      proveedorRecomendado,
-      existenProveedoresZona,
-      motivoTercerizacion,
-      proveedorSinDisponibilidad,
-      aseguroHabilitar,
-      emailConfirmacionFile,
-      forecastItems,
-      comparisonRates,
-      isSingleSource,
-      observaciones,
-      approvers,
-      total: calculateGrandTotal()
+  /**
+   * Validate required fields before submission
+   */
+  const validateForm = (): string | null => {
+    // Validate approval type
+    if (!tipoAprobacion) {
+      return "Debe seleccionar un tipo de aprobación";
+    }
+
+    // Validate type-specific questions
+    switch (tipoAprobacion) {
+      case "viaje-especifico":
+      case "tarifa-recurrente":
+        if (!validadoCoordinador) {
+          return "Debe responder si validó con el coordinador de la zona";
+        }
+        if (!proveedorRecomendado) {
+          return "Debe indicar si el proveedor es recomendado por sostenibilidad";
+        }
+        if (proveedorRecomendado === "si" && !emailConfirmacionFile) {
+          return "Debe adjuntar el correo de confirmación del departamento de sostenibilidad";
+        }
+        break;
+
+      case "tercerizacion":
+        if (!motivoTercerizacion) {
+          return "Debe seleccionar el motivo de tercerización";
+        }
+        if (!existenProveedoresZona) {
+          return "Debe indicar si existen proveedores en la zona";
+        }
+        if (existenProveedoresZona === "si" && !proveedorSinDisponibilidad) {
+          return "Debe seleccionar el proveedor local que no presentó disponibilidad";
+        }
+        if (!aseguroHabilitar) {
+          return "Debe confirmar que habilitará como subcontratista ante Halliburton";
+        }
+        break;
+    }
+
+    // Validate forecast items have quantity
+    if (forecastItems.length === 0) {
+      return "Debe tener al menos una tarifa en el forecast";
+    }
+
+    for (const item of forecastItems) {
+      if (item.cantidadUsos <= 0) {
+        return "Todas las tarifas deben tener una cantidad de usos mayor a 0";
+      }
+    }
+
+    // Validate comparison rates for high amounts
+    const grandTotal = calculateGrandTotal();
+    if (grandTotal > 100000000 && !isSingleSource) {
+      const hasAllComparisons = forecastItems.every((item) => {
+        const comparisons = comparisonRates[item.id] || [];
+        return comparisons.length > 0;
+      });
+
+      if (!hasAllComparisons) {
+        return "Para montos superiores a 100 millones USD, debe agregar tarifas comparativas o marcar como Single source";
+      }
+    }
+
+    // Validate at least one approver with valid data
+    if (approvers.length === 0) {
+      return "Debe agregar al menos un aprobador";
+    }
+
+    const hasValidApprover = approvers.some((approver) => approver.name && approver.email);
+    if (!hasValidApprover) {
+      return "Debe seleccionar al menos un aprobador válido";
+    }
+
+    return null; // All validations passed
+  };
+
+  /**
+   * Prepare approval data by transforming form state into API-compatible format
+   */
+  const prepareApprovalData = (): IApprovalRequest => {
+    // Find the approval type ID from the selected kebab-case string
+    const approvalType = approvalTypes?.find(
+      (type) => normalizeToKebabCase(type.name) === tipoAprobacion
+    );
+
+    if (!approvalType) {
+      throw new Error("Tipo de aprobación no válido");
+    }
+
+    // Transform forecastItems to pricings array
+    const pricings = forecastItems.map((item) => {
+      // Get comparison pricing IDs for this forecast item
+      const comparationPricings = (comparisonRates[item.id] || [])
+        .map((rate) => {
+          // If comparison rates have IDs that are numeric, extract them
+          // Otherwise, they might need to be created first or this field might accept different data
+          const numericId = Number.parseInt(rate.id.replace(/\D/g, ""));
+          return isNaN(numericId) ? 0 : numericId;
+        })
+        .filter((id) => id > 0);
+
+      return {
+        carrier_request_id: Number.parseInt(item.id),
+        quantity: item.cantidadUsos,
+        comparation_pricings: comparationPricings
+      };
     });
+
+    // Transform approvers to get user IDs
+    const approversData = approvers
+      .map((approver) => {
+        const approverOption = approverOptions?.find((opt) => opt.name === approver.name);
+        return approverOption ? { id_user: approverOption.id } : null;
+      })
+      .filter((approver): approver is { id_user: number } => approver !== null);
+
+    // Build the request object
+    const requestData: IApprovalRequest = {
+      id_approval_type: approvalType.id,
+      pricings,
+      approvers: approversData,
+      send_single_source: isSingleSource,
+      is_another_contract_active: validadoCoordinador === "si",
+      is_provider_recommended_by_sustainability: proveedorRecomendado === "si",
+      tercerization_motive: motivoTercerizacion || "",
+      exists_another_provider_in_zone: existenProveedoresZona === "si",
+      subcontractor_ensure: aseguroHabilitar,
+      observations: observaciones || ""
+    };
+
+    return requestData;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate form before submission
+    const validationError = validateForm();
+    if (validationError) {
+      message.error(validationError);
+      return;
+    }
+
+    try {
+      // Prepare the structured data for API submission
+      const requestData = prepareApprovalData();
+
+      console.log("Submitting new approval:", {
+        requestData,
+        emailConfirmacionFile,
+        total: calculateGrandTotal()
+      });
+
+      // Submit the approval request with optional file
+      await createApproval(requestData, emailConfirmacionFile || undefined);
+
+      message.success("Solicitud de aprobación creada exitosamente.");
+
+      // Navigate back to transfer request detail after successful creation
+      router.push(`/logistics/transfer-request/${transferRequestId}`);
+      clearCarrierForApproval();
+    } catch (error) {
+      console.error("Error creating approval:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al crear la solicitud de aprobación.";
+      message.error(errorMessage);
+    }
   };
 
   const renderValidationQuestions = () => {

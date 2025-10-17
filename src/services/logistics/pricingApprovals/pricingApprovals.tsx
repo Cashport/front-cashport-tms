@@ -48,7 +48,12 @@ export const createApproval = async (requestData: IApprovalRequest, file?: File)
     form.append("files", file);
   }
   try {
-    const response: GenericResponse<void> = await API.post(`/pricing-approval/create-approval`);
+    const response: GenericResponse<void> = await API.post(`/pricing-approval`, form, {
+      headers: {
+        "content-type": "multipart/form-data",
+        Accept: "application/json, text/plain, */*"
+      }
+    });
     return response.data;
   } catch (error) {
     console.error("Error creating pricing approval: ", error);
