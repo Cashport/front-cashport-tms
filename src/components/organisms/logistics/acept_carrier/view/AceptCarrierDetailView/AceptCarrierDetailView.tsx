@@ -142,10 +142,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   };
 
   const handleAcceptCR = async (
-    carrierId: string,
-    requestId: string,
-    vehicleId: string,
-    driverIds: string[],
+    carrierId: number,
+    requestId: number,
+    vehicleId: number,
+    driverIds: number[],
     status: string,
     observation: string
   ) => {
@@ -154,15 +154,21 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         ...isLoading,
         generalView: true
       });
-      await postCarrierRequest(carrierId, requestId, vehicleId, driverIds, status, observation);
-      messageApi.open({
-        content: "Aceptado"
-      });
+      await postCarrierRequest(
+        carrierId,
+        requestId,
+        vehicleId,
+        driverIds,
+        status,
+        observation,
+        quote.amount,
+        quote.files[0]
+      );
+      message.success(" Aceptado");
+
       router.push("/logistics/acept_carrier");
     } catch (error) {
-      messageApi.open({
-        content: "Hubo un problema aceptando la orden"
-      });
+      message.error("Hubo un problema aceptando la orden");
     } finally {
       setIsLoading({
         ...isLoading,
@@ -201,10 +207,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const handleSubmit = async () => {
     if (formMode === FormMode.CREATE) {
       await handleAcceptCR(
-        String(carrier?.id_carrier),
-        params.id,
-        String(vehicleSelected),
-        driversSelected.map(String),
+        carrier?.id_carrier!,
+        Number(params.id),
+        vehicleSelected!,
+        driversSelected as number[],
         "1",
         observation
       );
