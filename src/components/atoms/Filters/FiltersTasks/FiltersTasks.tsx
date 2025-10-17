@@ -30,12 +30,12 @@ export default function FiltersTasks({ setSelectedFilters }: Props) {
       try {
         const [statusesData, taskTypesData] = await Promise.all([getTasksStatus(), getTaskTypes()]);
 
-        const statuses = statusesData.map((status: ITaskStatus) => ({
+        const statuses = statusesData.data.map((status: ITaskStatus) => ({
           value: status.id,
           label: status.name
         }));
 
-        const taskTypes = taskTypesData.map((type: ITaskTypes) => ({
+        const taskTypes = taskTypesData.data.map((type: ITaskTypes) => ({
           value: type.ID,
           label: type.NAME
         }));
