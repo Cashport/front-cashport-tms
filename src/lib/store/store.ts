@@ -1,12 +1,21 @@
 import { UserSlice, createUserSlice } from "@/lib/slices/createProductSlice";
 import { ProjectSlice, createProjectSlice } from "@/lib/slices/createProjectSlice";
+import {
+  CarrierForApprovalSlice,
+  createCarrierForApprovalSlice
+} from "@/lib/slices/createCarrierForApprovalSlice";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { formatMoneySlice, IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 import { createHidrationSlice, Hidration } from "../slices/hidratationSlice";
 import { setProjectInApi } from "@/utils/api/api";
 
-interface AppStore extends ProjectSlice, UserSlice, Hidration, IFormatMoneyStore {
+interface AppStore
+  extends ProjectSlice,
+    UserSlice,
+    Hidration,
+    IFormatMoneyStore,
+    CarrierForApprovalSlice {
   resetStore: () => void;
 }
 
@@ -17,6 +26,7 @@ export const useAppStore = create<AppStore>()(
       ...createProjectSlice(set),
       ...formatMoneySlice(set, get),
       ...createHidrationSlice(set),
+      ...createCarrierForApprovalSlice(set),
       resetStore: () => {
         // Clear the session storage
         localStorage.removeItem("project");
@@ -25,7 +35,8 @@ export const useAppStore = create<AppStore>()(
           ...createUserSlice(set),
           ...createProjectSlice(set),
           ...formatMoneySlice(set, get),
-          ...createHidrationSlice(set)
+          ...createHidrationSlice(set),
+          ...createCarrierForApprovalSlice(set)
         });
       }
     }),

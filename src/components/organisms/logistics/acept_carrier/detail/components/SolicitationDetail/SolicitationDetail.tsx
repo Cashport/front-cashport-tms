@@ -15,7 +15,7 @@ import { DataCarga, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 import Buttons from "../Buttons/Buttons";
 import { useRouter } from "next/navigation";
 import { RequirementSummaryData } from "@/components/organisms/logistics/orders/DetailsOrderView/components/RequirementSummaryData.tsx/RequirementSummaryData";
-import { FormMode } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
+import { FormMode, IQuote } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 
 dayjs.locale("es");
 dayjs.extend(utc);
@@ -33,16 +33,8 @@ interface SolicitationDetailProps {
   showRejectButton: boolean;
   handleReject: () => Promise<void>;
   entityType?: "otherRequirement" | "trip";
-  quote: {
-    amount: number;
-    files: File[];
-  };
-  setQuote: Dispatch<
-    SetStateAction<{
-      amount: number;
-      files: File[];
-    }>
-  >;
+  quote?: IQuote;
+  setQuote: Dispatch<SetStateAction<IQuote | undefined>>;
   formMode: FormMode;
 }
 
@@ -68,13 +60,13 @@ export default function SolicitationDetail({
     const amount = value || 0;
     setQuote({
       amount,
-      files: quote.files
+      files: quote?.files || []
     });
   };
 
   const handleFileChange = (file: File) => {
     setQuote({
-      amount: quote.amount,
+      amount: quote?.amount || 0,
       files: [file]
     });
     return false; // Prevent automatic upload
@@ -83,14 +75,14 @@ export default function SolicitationDetail({
   return (
     <Flex className={styles.wrapper}>
       {/* If its auction */}
-      {providerDetail?.isAuction && formMode === FormMode.CREATE && (
+      {providerDetail?.isAuction && formMode === FormMode.CREATE ? (
         <AuctionForm
           quote={quote}
           onQuoteAmountChange={handleQuoteAmountChange}
           onFileChange={handleFileChange}
           formMode={formMode}
         />
-      )}
+      ) : null}
 
       <Flex className={styles.sectionWrapper} vertical>
         <Flex>
