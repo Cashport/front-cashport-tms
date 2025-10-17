@@ -26,7 +26,7 @@ const TaskTable: React.FC<{
 
   const rowSelection = {
     columnWidth: 30,
-    onChange: onSelectChange,
+    onChange: onSelectChange
   };
 
   const renderProveedores = (proveedores?: string[]) => {
@@ -46,7 +46,7 @@ const TaskTable: React.FC<{
               display: "inline-block",
               whiteSpace: "nowrap",
               overflow: "hidden",
-              textOverflow: "ellipsis",
+              textOverflow: "ellipsis"
             }}
           >
             {first}
@@ -55,39 +55,36 @@ const TaskTable: React.FC<{
 
         {remaining > 0 && (
           <Tooltip title={allNames}>
-            <span
-              className="text-sm font-bold cursor-pointer"
-            >
-              +{remaining}
-            </span>
+            <span className="text-sm font-bold cursor-pointer">+{remaining}</span>
           </Tooltip>
         )}
       </Flex>
     );
   };
 
-
   const columns: ColumnsType<ITask> = [
     {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      sorter: (a, b) => a.autoId - b.autoId,
+      sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false,
+      width: 80
     },
     {
       title: "TO",
-      dataIndex: "to",
-      key: "to",
-      sorter: (a, b) => String(a.to).localeCompare(String(b.to)),
+      dataIndex: "transfer_order_ids",
+      key: "transfer_order_ids",
+      sorter: (a, b) => String(a.transfer_order_ids).localeCompare(String(b.transfer_order_ids)),
       showSorterTooltip: false,
+      width: 130
     },
     {
       title: "TR",
-      dataIndex: "tr",
-      key: "tr",
-      width: 130,
-      sorter: (a, b) => a.tr - b.tr,
+      dataIndex: "transfer_request_id",
+      key: "transfer_request_id",
+      width: 100,
+      sorter: (a, b) => a.transfer_request_id - b.transfer_request_id,
       showSorterTooltip: false,
     },
     {
@@ -97,28 +94,37 @@ const TaskTable: React.FC<{
       render: (_, row) => (
         <div>
           <div>
-            Origen <b>{row.origen}</b>
+            Origen <b>{row.start_location_name}</b>
           </div>
           <div>
-            Destino <b>{row.destino}</b>
+            Destino <b>{row.end_location_name}</b>
           </div>
         </div>
       ),
-      sorter: (a, b) => a.trayecto.localeCompare(b.trayecto),
-      showSorterTooltip: false,
+      sorter: (a, b) => a.start_location_name.localeCompare(b.start_location_name),
+      showSorterTooltip: false
     },
     {
       title: "Inicio del viaje",
-      dataIndex: "fechaEntrega",
-      key: "fechaEntrega",
-      render: (value) => (value ? new Date(value).toLocaleDateString() : "-"),
-      sorter: (a, b) => new Date(a.fechaEntrega ?? 0).getTime() - new Date(b.fechaEntrega ?? 0).getTime(),
-      showSorterTooltip: false,
+      dataIndex: "start_date",
+      key: "start_date",
+      render: (_, row) => (
+        <div>
+          Inicio: <b>{row.start_date}</b>
+          <br />
+          Fin: <b>{row.end_date}</b>
+        </div>
+      ),
+      width: 250,
+      sorter: (a, b) =>
+        new Date(a.start_date ?? 0).getTime() - new Date(b.start_date ?? 0).getTime(),
+      showSorterTooltip: false
     },
     {
       title: "Estado",
       dataIndex: "status",
       key: "status",
+      width: 130,
       render: (status: ITask["status"]) => (
         <Flex>
           <Tag
@@ -129,25 +135,27 @@ const TaskTable: React.FC<{
             withBorder={false}
           />
         </Flex>
-      ),
+      )
     },
     {
       title: "Proveedores",
-      key: "proveedores",
-      render: (_, row) => renderProveedores(row.proveedores),
+      key: "carriers",
+      render: (_, row) => renderProveedores(row.carriers),
+      width: 170
     },
     {
       title: "Costo actual",
-      dataIndex: "monto",
-      key: "monto",
+      dataIndex: "amount",
+      key: "amount",
       align: "right",
+      width: 150,
       render: (value) => (
         <p className="fontMonoSpace" style={{ whiteSpace: "nowrap" }}>
           {formatMoney(value)}
         </p>
       ),
-      sorter: (a, b) => a.monto - b.monto,
-      showSorterTooltip: false,
+      sorter: (a, b) => (a.amount ?? 0) - (b.amount ?? 0),
+      showSorterTooltip: false
     },
     {
       title: "",
@@ -167,8 +175,8 @@ const TaskTable: React.FC<{
             <Eye size={18} color="#555" />
           </Button>
         </Flex>
-      ),
-    },
+      )
+    }
   ];
 
   return (

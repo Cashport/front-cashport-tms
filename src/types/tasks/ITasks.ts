@@ -11,38 +11,19 @@ export interface ITaskTypes {
 }
 
 export interface ITask {
-  autoId: number;
-  id: string;
-  tr: number;
-  to: number | string;
-  trayecto: string;
-  origen: string;
-  destino: string;
-  fechaFactura: string;
-  fechaEntrega?: string;
-  direccion?: string;
-  ciudad?: string;
-  observacion?: string;
-  comprador: string;
-  proveedores?: string[];
-  vendedor: string;
-  estado: "Pendiente asignación" | "En licitación" | "Proveedor aceptó" | "Proveedor rechazó" | "Pendiente" | "Aprobada" | "Rechazada";
-  factura?: string[];
-  cantidad: number;
-  monto: number;
-  numeroFactura: string;
-  fechaVencimiento?: string;
-  productos: Array<{
-    idProducto: string;
-    nombreProducto: string;
-    cantidad: number;
-    precioUnitario: number;
-    iva: number;
-    precioTotal: number;
-  }>;
-  alertas: string[];
-  fechaProcesamiento: string;
-  archivoOriginal: string;
-  pdfUrl?: string;
+  id: number;
+  id_project: number;
+  description: string;
+  related_user_id: number;
+  amount: number | null;
+  task_type_name: string;
+  transfer_request_id: number;
+  carrier_request_id: number;
+  start_location_name: string;
+  end_location_name: string;
+  transfer_order_ids: string;
+  start_date: string;
+  end_date: string;
+  carriers: string[];
   status: ITaskStatus;
 }
