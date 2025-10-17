@@ -22,10 +22,7 @@ import {
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 
 import "@/modules/chat/styles/chatStyles.css";
-
-interface NewApprovalFormProps {
-  onBack?: () => void;
-}
+import { useRouter } from "next/navigation";
 
 interface ForecastItem {
   id: string;
@@ -56,10 +53,13 @@ interface Approver {
   email: string;
 }
 
-export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
+export function NewApprovalForm() {
   // Zustand store - Carrier for Approval slice
   const selectedCarrier = useAppStore((state) => state.selectedCarrier);
   const transferRequestId = useAppStore((state) => state.transferRequestId);
+  const clearCarrierForApproval = useAppStore((state) => state.clearCarrierForApproval);
+
+  const router = useRouter();
 
   const [tipoAprobacion, setTipoAprobacion] = useState<string>("");
   const [validadoCoordinador, setValidadoCoordinador] = useState<string>("");
@@ -76,41 +76,27 @@ export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
 
   const [approvers, setApprovers] = useState<Approver[]>([{ id: "1", name: "", email: "" }]);
 
-  const [forecastItems, setForecastItems] = useState<ForecastItem[]>([
-    {
-      id: "1",
-      proveedor: "COLTANQUES",
-      vendor: "121313551",
-      contrato: "12135158 CAMABAJA",
-      tipoVehiculo: "0 - 100 KM",
-      descripcionTarifa: "0 - 100 KM",
-      tarifa: 1500000,
-      cantidadUsos: 0,
-      cotizacionUrl: "/cotizaciones/coltanques-1.pdf"
-    },
-    {
-      id: "2",
-      proveedor: "COLTANQUES",
-      vendor: "121313551",
-      contrato: "12135158 CAMABAJA",
-      tipoVehiculo: "0 - 100 KM",
-      descripcionTarifa: "0 - 100 KM",
-      tarifa: 1500000,
-      cantidadUsos: 0,
-      cotizacionUrl: "/cotizaciones/coltanques-2.pdf"
-    },
-    {
-      id: "3",
-      proveedor: "COLTANQUES",
-      vendor: "121313551",
-      contrato: "12135158 CAMABAJA",
-      tipoVehiculo: "0 - 100 KM",
-      descripcionTarifa: "0 - 100 KM",
-      tarifa: 1500000,
-      cantidadUsos: 0,
-      cotizacionUrl: "/cotizaciones/coltanques-3.pdf"
+  // Initialize forecastItems with selectedCarrier data if available
+  const [forecastItems, setForecastItems] = useState<ForecastItem[]>(() => {
+    if (selectedCarrier) {
+      return [
+        {
+          id: selectedCarrier.id.toString(),
+          proveedor: selectedCarrier.carrier,
+          vendor: selectedCarrier.id_carrier.toString(),
+          contrato: selectedCarrier.driver_contract,
+          tipoVehiculo: selectedCarrier.vehicles,
+          descripcionTarifa: selectedCarrier.service_type,
+          tarifa: selectedCarrier.amount,
+          cantidadUsos: 0,
+          cotizacionUrl: ""
+        }
+      ];
     }
-  ]);
+
+    // Fallback: empty array if no selectedCarrier
+    return [];
+  });
 
   const [comparisonRates, setComparisonRates] = useState<Record<string, ComparisonRate[]>>({});
   const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
@@ -120,13 +106,6 @@ export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
       setForecastItems(forecastItems.map((item) => ({ ...item, cantidadUsos: 1 })));
     }
   }, [tipoAprobacion]);
-
-  // Log carrier for approval slice values to console
-  useEffect(() => {
-    console.log("=== Carrier For Approval Slice ===");
-    console.log("Selected Carrier:", selectedCarrier);
-    console.log("Transfer Request ID:", transferRequestId);
-  }, [selectedCarrier, transferRequestId]);
 
   const updateCantidadUsos = (id: string, value: string) => {
     if (tipoAprobacion === "viaje-especifico" || tipoAprobacion === "tercerizacion") {
@@ -576,6 +555,11 @@ export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
     );
   };
 
+  const handleGoBack = () => {
+    router.push(`/logistics/transfer-request/${transferRequestId}`);
+    clearCarrierForApproval();
+  };
+
   return (
     <Card
       className="w-full shadow-sm"
@@ -586,7 +570,7 @@ export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={onBack}
+            onClick={handleGoBack}
             className="text-gray-700 hover:bg-gray-100"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -1054,7 +1038,7 @@ export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={onBack}
+              onClick={handleGoBack}
               className="px-8 bg-transparent border-2"
             >
               Cancelar
