@@ -1,9 +1,8 @@
 "use client";
-import { Col, Flex, Input, Button, Upload } from "antd";
-import { Money, Files, PlusCircle } from "@phosphor-icons/react";
-import { NumericFormat } from "react-number-format";
+import { Col, Flex } from "antd";
 import AditionalInfo from "../AditionalInfo/AditionalInfo";
 import Materials from "../Materials/Materials";
+import AuctionForm from "../AuctionForm/AuctionForm";
 import styles from "./solicitationDetail.module.scss";
 import { ICarrierRequestContacts } from "@/types/logistics/schema";
 import { Dispatch, SetStateAction } from "react";
@@ -84,89 +83,14 @@ export default function SolicitationDetail({
   return (
     <Flex className={styles.wrapper}>
       {/* If its auction */}
-      {providerDetail?.isAuction ? (
-        <Flex
-          gap="3.125rem"
-          align="flex-start"
-          justify="space-between"
-          style={{ padding: "2rem 0 3rem 0" }}
-        >
-          {/* Cost input section */}
-          <Flex
-            align="center"
-            justify="space-between"
-            gap="0.5rem"
-            style={{ flex: "1 1 50%", minWidth: 0 }}
-          >
-            <Flex align="center" gap="0.8rem" style={{ color: "#666666" }}>
-              <Money size={20} />
-              <p style={{ fontWeight: 400 }}>Costo</p>
-            </Flex>
-            <div
-              style={{ alignSelf: "flex-end", justifySelf: "flex-end" }}
-              className={styles.inputCostContainer}
-            >
-              <NumericFormat
-                value={quote.amount}
-                onValueChange={(values) => {
-                  handleQuoteAmountChange(values.floatValue);
-                }}
-                thousandSeparator="."
-                decimalSeparator=","
-                prefix="$ "
-                placeholder="$0"
-                customInput={Input}
-                style={{ width: "100%" }}
-                allowNegative={false}
-                decimalScale={0}
-                className={styles.inputCost}
-                disabled={formMode !== FormMode.CREATE}
-              />
-            </div>
-          </Flex>
-
-          {/* Document upload section */}
-          <Flex
-            align="flex-start"
-            gap="0.5rem"
-            className={styles.auctionInfo}
-            style={{ flex: "1 1 50%", minWidth: 0, overflowX: "hidden", textOverflow: "ellipsis" }}
-          >
-            <Flex align="center" gap="0.8rem" style={{ color: "#666666", marginTop: "0.25rem" }}>
-              <Files size={20} />
-              <p style={{ fontWeight: 400 }}>PDF Cotización</p>
-            </Flex>
-            <Flex
-              gap="0.5rem"
-              align="flex-end"
-              justify="space-between"
-              vertical
-              style={{ flex: 1 }}
-            >
-              {quote.files[0] && (
-                <span style={{ fontSize: "0.875rem" }} className={styles.fileName}>
-                  {quote.files[0].name}
-                </span>
-              )}
-              <Upload
-                accept=".pdf"
-                showUploadList={false}
-                beforeUpload={handleFileChange}
-                maxCount={1}
-              >
-                <Button
-                  type="text"
-                  className={styles.addSupportBtn}
-                  disabled={formMode !== FormMode.CREATE}
-                >
-                  <PlusCircle size={20} />
-                  Agregar soporte
-                </Button>
-              </Upload>
-            </Flex>
-          </Flex>
-        </Flex>
-      ) : null}
+      {providerDetail?.isAuction && formMode === FormMode.CREATE && (
+        <AuctionForm
+          quote={quote}
+          onQuoteAmountChange={handleQuoteAmountChange}
+          onFileChange={handleFileChange}
+          formMode={formMode}
+        />
+      )}
 
       <Flex className={styles.sectionWrapper} vertical>
         <Flex>
