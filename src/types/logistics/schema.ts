@@ -4069,3 +4069,15 @@ export interface IGetCarrier {
   vehicles: number;
   status: IStatusWithStyling;
 }
+
+export interface IApprovalType {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface IApprover {
+  id: number;
+  name: string;
+  email: string;
+}
