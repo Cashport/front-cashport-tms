@@ -1,7 +1,7 @@
 import { API } from "@/utils/api/api";
 import { Data, ICarrierRequestDrivers, ICarrierRequestVehicles } from "@/types/logistics/schema";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { CarrierCollapseAPI } from "@/types/logistics/carrier/carrier";
+import { CarrierCollapseAPI, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 
 export const getAllTransferRequestList = async (): Promise<Data> => {
   try {
@@ -38,10 +38,10 @@ export const getAceptCarrierRequestList = async ({
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };
 
-export const getAceptCarrierRequestById = async (id: string): Promise<any> => {
+export const getAceptCarrierRequestById = async (id: string): Promise<IAceptCarrierAPI> => {
   const form = new FormData();
   form.append("id", id);
-  const response: GenericResponse = await API.post(`/carrier/request/id`, form);
+  const response: GenericResponse<IAceptCarrierAPI> = await API.post(`/carrier/request/id`, form);
   if (response.success) return response.data;
   throw new Error(response?.message || "Error al obtener la lista de solicitudes de carga");
 };
@@ -123,28 +123,42 @@ export const getTransferRequestById = async (id: string): Promise<Data> => {
 };
 
 export const postCarrierRequest = async (
-  id_carrier: string,
-  id_carrier_request: string,
-  id_vehicle: string,
-  id_drivers: string[],
+  id_carrier: number,
+  id_carrier_request: number,
+  id_vehicle: number,
+  id_drivers: number[],
   accept_conditions: string,
-  observation: string
+  observation: string,
+  fare: number,
+  file?: File
 ): Promise<Data> => {
   try {
+    const form = new FormData();
     const body = {
       id_carrier: id_carrier,
       id_carrier_request: id_carrier_request,
       id_vehicle: id_vehicle,
       id_drivers: id_drivers,
       accept_conditions: accept_conditions,
-      observation: observation
+      observation: observation,
+      fare: fare
     };
 
-    const response: Data = await API.post(`/carrier/request/accept`, body);
+    form.append("request", JSON.stringify(body));
+    if (file) {
+      form.append("file", file);
+    }
+
+    const response: Data = await API.post(`/carrier/request/accept`, form, {
+      headers: {
+        "content-type": "multipart/form-data",
+        Accept: "application/json, text/plain, */*"
+      }
+    });
     return response;
   } catch (error) {
-    console.log("Error get getTransferRequestById: ", error);
-    return error as any;
+    console.error("Error get getTransferRequestById: ", error);
+    throw error;
   }
 };
 

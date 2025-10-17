@@ -2,6 +2,7 @@
 import { Col, Flex } from "antd";
 import AditionalInfo from "../AditionalInfo/AditionalInfo";
 import Materials from "../Materials/Materials";
+import AuctionForm from "../AuctionForm/AuctionForm";
 import styles from "./solicitationDetail.module.scss";
 import { ICarrierRequestContacts } from "@/types/logistics/schema";
 import { Dispatch, SetStateAction } from "react";
@@ -14,6 +15,7 @@ import { DataCarga, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 import Buttons from "../Buttons/Buttons";
 import { useRouter } from "next/navigation";
 import { RequirementSummaryData } from "@/components/organisms/logistics/orders/DetailsOrderView/components/RequirementSummaryData.tsx/RequirementSummaryData";
+import { FormMode } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 
 dayjs.locale("es");
 dayjs.extend(utc);
@@ -31,6 +33,17 @@ interface SolicitationDetailProps {
   showRejectButton: boolean;
   handleReject: () => Promise<void>;
   entityType?: "otherRequirement" | "trip";
+  quote: {
+    amount: number;
+    files: File[];
+  };
+  setQuote: Dispatch<
+    SetStateAction<{
+      amount: number;
+      files: File[];
+    }>
+  >;
+  formMode: FormMode;
 }
 
 export default function SolicitationDetail({
@@ -44,12 +57,41 @@ export default function SolicitationDetail({
   setView,
   showRejectButton,
   handleReject,
-  entityType = "trip"
+  entityType = "trip",
+  quote,
+  setQuote,
+  formMode
 }: Readonly<SolicitationDetailProps>) {
   const router = useRouter();
 
+  const handleQuoteAmountChange = (value: number | undefined) => {
+    const amount = value || 0;
+    setQuote({
+      amount,
+      files: quote.files
+    });
+  };
+
+  const handleFileChange = (file: File) => {
+    setQuote({
+      amount: quote.amount,
+      files: [file]
+    });
+    return false; // Prevent automatic upload
+  };
+
   return (
     <Flex className={styles.wrapper}>
+      {/* If its auction */}
+      {providerDetail?.isAuction && formMode === FormMode.CREATE && (
+        <AuctionForm
+          quote={quote}
+          onQuoteAmountChange={handleQuoteAmountChange}
+          onFileChange={handleFileChange}
+          formMode={formMode}
+        />
+      )}
+
       <Flex className={styles.sectionWrapper} vertical>
         <Flex>
           <p className={styles.sectionTitle} style={{ marginLeft: "1.5rem" }}>

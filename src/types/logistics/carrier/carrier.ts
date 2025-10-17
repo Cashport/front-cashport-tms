@@ -150,6 +150,7 @@ export interface IAceptCarrierAPI {
   declared_cargo_value?: number;
   entity: "otherRequirement" | "trip";
   other_requirement?: OtherReq;
+  isAuction: boolean;
 }
 
 export interface Data {
@@ -184,6 +185,7 @@ export interface CarrierRequestAPI {
   amount: number; // Monto asociado al servicio
   order_nro: number; // Número de orden
   id_transfer_request: number; // ID de la solicitud de transferencia
+  isAuction: boolean;
 }
 
 export interface CarrierCollapseAPI {
