@@ -2,14 +2,11 @@
 import { Flex, Input, Button, Upload } from "antd";
 import { Money, Files, PlusCircle } from "@phosphor-icons/react";
 import { NumericFormat } from "react-number-format";
-import { FormMode } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
+import { FormMode, IQuote } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 import styles from "./auctionForm.module.scss";
 
 interface AuctionFormProps {
-  quote: {
-    amount: number;
-    files: File[];
-  };
+  quote?: IQuote;
   onQuoteAmountChange: (value: number | undefined) => void;
   onFileChange: (file: File) => boolean;
   formMode: FormMode;
@@ -44,7 +41,7 @@ export default function AuctionForm({
           className={styles.inputCostContainer}
         >
           <NumericFormat
-            value={quote.amount}
+            value={quote?.amount}
             onValueChange={(values) => {
               onQuoteAmountChange(values.floatValue);
             }}
@@ -74,7 +71,7 @@ export default function AuctionForm({
           <p style={{ fontWeight: 400 }}>PDF Cotización</p>
         </Flex>
         <Flex gap="0.5rem" align="flex-end" justify="space-between" vertical style={{ flex: 1 }}>
-          {quote.files[0] && (
+          {quote?.files?.[0] && (
             <span style={{ fontSize: "0.875rem" }} className={styles.fileName}>
               {quote.files[0].name}
             </span>

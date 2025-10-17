@@ -129,7 +129,7 @@ export const postCarrierRequest = async (
   id_drivers: number[],
   accept_conditions: string,
   observation: string,
-  fare: number,
+  fare?: number,
   file?: File
 ): Promise<Data> => {
   try {
@@ -141,7 +141,7 @@ export const postCarrierRequest = async (
       id_drivers: id_drivers,
       accept_conditions: accept_conditions,
       observation: observation,
-      fare: fare
+      ...(fare !== undefined && { fare })
     };
 
     form.append("request", JSON.stringify(body));

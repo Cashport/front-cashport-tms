@@ -37,6 +37,11 @@ export enum FormMode {
   EDIT = "EDIT"
 }
 
+export interface IQuote {
+  amount?: number;
+  files?: File[];
+}
+
 export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrierDetailProps>) {
   const [isLoading, setIsLoading] = useState<{
     generalView: boolean;
@@ -53,10 +58,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [quote, setQuote] = useState({
-    amount: 0,
-    files: [] as File[]
-  });
+  const [quote, setQuote] = useState<IQuote>();
   const router = useRouter();
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
@@ -161,8 +163,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         driverIds,
         status,
         observation,
-        quote.amount,
-        quote.files[0]
+        quote?.amount,
+        quote?.files?.[0]
       );
       message.success(" Aceptado");
 
