@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
+import { useAppStore } from "@/lib/store/store";
 
 import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
@@ -56,6 +57,10 @@ interface Approver {
 }
 
 export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
+  // Zustand store - Carrier for Approval slice
+  const selectedCarrier = useAppStore((state) => state.selectedCarrier);
+  const transferRequestId = useAppStore((state) => state.transferRequestId);
+
   const [tipoAprobacion, setTipoAprobacion] = useState<string>("");
   const [validadoCoordinador, setValidadoCoordinador] = useState<string>("");
   const [proveedorRecomendado, setProveedorRecomendado] = useState<string>("");
@@ -115,6 +120,13 @@ export function NewApprovalForm({ onBack }: NewApprovalFormProps) {
       setForecastItems(forecastItems.map((item) => ({ ...item, cantidadUsos: 1 })));
     }
   }, [tipoAprobacion]);
+
+  // Log carrier for approval slice values to console
+  useEffect(() => {
+    console.log("=== Carrier For Approval Slice ===");
+    console.log("Selected Carrier:", selectedCarrier);
+    console.log("Transfer Request ID:", transferRequestId);
+  }, [selectedCarrier, transferRequestId]);
 
   const updateCantidadUsos = (id: string, value: string) => {
     if (tipoAprobacion === "viaje-especifico" || tipoAprobacion === "tercerizacion") {
