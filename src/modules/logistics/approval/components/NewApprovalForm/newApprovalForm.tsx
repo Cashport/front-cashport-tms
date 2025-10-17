@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
 import { Select as AntSelect } from "antd";
-import { getTypes } from "@/services/logistics/pricingApprovals/pricingApprovals";
-import { IApprovalType } from "@/types/logistics/schema";
+import { getApprovers, getTypes } from "@/services/logistics/pricingApprovals/pricingApprovals";
+import { IApprovalType, IApprover } from "@/types/logistics/schema";
 
 import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
@@ -78,6 +78,17 @@ export function NewApprovalForm() {
   const { data: approvalTypes, isLoading: isLoadingTypes } = useSWR<IApprovalType[]>(
     "pricing-approval-types",
     getTypes,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+
+  // Fetch Approvers from API
+  const { data: approverOptions, isLoading: isLoadingApprovers } = useSWR<IApprover[]>(
+    "pricing-approval-approvers",
+    getApprovers,
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -579,6 +590,23 @@ export function NewApprovalForm() {
     );
   };
 
+  const handleApproverSelect = (approverId: string, approverApiId: number) => {
+    const selectedApprover = approverOptions?.find((opt) => opt.id === approverApiId);
+    if (selectedApprover) {
+      setApprovers(
+        approvers.map((approver) =>
+          approver.id === approverId
+            ? {
+                ...approver,
+                name: selectedApprover.name,
+                email: selectedApprover.email
+              }
+            : approver
+        )
+      );
+    }
+  };
+
   const handleGoBack = () => {
     router.push(`/logistics/transfer-request/${transferRequestId}`);
     clearCarrierForApproval();
@@ -1005,13 +1033,25 @@ export function NewApprovalForm() {
                       >
                         Nombre {index === 0 && <span className="text-red-500">*</span>}
                       </Label>
-                      <Input
+                      <AntSelect
                         id={`approver-name-${approver.id}`}
-                        value={approver.name}
-                        onChange={(e) => updateApprover(approver.id, "name", e.target.value)}
-                        placeholder="Nombre del aprobador"
-                        className="border-2 focus:ring-2 focus:ring-blue-500"
-                        required
+                        value={
+                          approver.name
+                            ? approverOptions?.find((opt) => opt.name === approver.name)?.id
+                            : undefined
+                        }
+                        onChange={(value: number) => handleApproverSelect(approver.id, value)}
+                        placeholder="Seleccionar aprobador"
+                        style={{ width: "100%", height: 36 }}
+                        loading={isLoadingApprovers}
+                        showSearch
+                        filterOption={(input, option) =>
+                          (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={approverOptions?.map((opt) => ({
+                          label: opt.name,
+                          value: opt.id
+                        }))}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1028,6 +1068,7 @@ export function NewApprovalForm() {
                         onChange={(e) => updateApprover(approver.id, "email", e.target.value)}
                         placeholder="correo@ejemplo.com"
                         className="border-2 focus:ring-2 focus:ring-blue-500"
+                        disabled
                         required
                       />
                     </div>
