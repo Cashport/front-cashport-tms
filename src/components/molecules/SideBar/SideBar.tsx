@@ -16,7 +16,8 @@ import {
   Clipboard,
   Bank,
   TrendUp,
-  CurrencyDollar
+  CurrencyDollar,
+  ClipboardText
 } from "phosphor-react";
 
 import "./sidebar.scss";
@@ -281,6 +282,18 @@ export const SideBar = () => {
               }
             >
               {isSideBarLarge && "Ajustes"}
+            </Button>
+          </Link>
+        )}
+        {checkUserViewPermissions(project, "TMS-Tareas") && (
+          <Link href="/gestor-tareas" passHref legacyBehavior>
+            <Button
+              type="primary"
+              size="large"
+              icon={<ClipboardText size={26} />}
+              className={path === "/gestor-tareas" ? "buttonIcon" : "buttonIconActive"}
+            >
+              {isSideBarLarge && "Tareas"}
             </Button>
           </Link>
         )}

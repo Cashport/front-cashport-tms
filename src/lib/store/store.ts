@@ -2,18 +2,20 @@ import { UserSlice, createUserSlice } from "@/lib/slices/createProductSlice";
 import { ProjectSlice, createProjectSlice } from "@/lib/slices/createProjectSlice";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { formatMoneySlice, IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 import { createHidrationSlice, Hidration } from "../slices/hidratationSlice";
 import { setProjectInApi } from "@/utils/api/api";
 
-interface AppStore extends ProjectSlice, UserSlice, Hidration {
+interface AppStore extends ProjectSlice, UserSlice, Hidration, IFormatMoneyStore {
   resetStore: () => void;
 }
 
 export const useAppStore = create<AppStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...createUserSlice(set),
       ...createProjectSlice(set),
+      ...formatMoneySlice(set, get),
       ...createHidrationSlice(set),
       resetStore: () => {
         // Clear the session storage
@@ -22,6 +24,7 @@ export const useAppStore = create<AppStore>()(
         set({
           ...createUserSlice(set),
           ...createProjectSlice(set),
+          ...formatMoneySlice(set, get),
           ...createHidrationSlice(set)
         });
       }
