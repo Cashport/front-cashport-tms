@@ -169,7 +169,7 @@ const TaskTable: React.FC<{
             className="rounded-md border border-gray-300 hover:bg-gray-100 bg-transparent"
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/gestor-tareas/${row.id}`);
+              router.push(`/gestor-tareas/${row.pricing_approval_id}`);
             }}
           >
             <Eye size={18} color="#555" />

@@ -12,6 +12,7 @@ export interface ITaskTypes {
 
 export interface ITask {
   id: number;
+  pricing_approval_id: number;
   id_project: number;
   description: string;
   related_user_id: number;
