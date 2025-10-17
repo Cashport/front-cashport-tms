@@ -67,6 +67,7 @@ import ChipsRow from "../DetailsOrderView/components/ChipsRow";
 import { ModalModifyTrip } from "@/components/molecules/modals/ModalModifyTrip/ModalModifyTrip";
 import ModalSelectTender from "./components/modals/ModalSelectTender";
 import GenerateActionButton from "./components/atoms/GenerateActionButton/GenerateActionButton";
+import { STATUS } from "@/utils/constants/globalConstants";
 
 const { Title, Text } = Typography;
 
@@ -405,14 +406,28 @@ export default function PricingTransferRequest({
     if (view === "carrier") {
       const isValid = transferRequest?.stepThree?.journey?.every(
         (j) =>
-          j.trips.every((t) =>
-            getValues("providers").some((p) => p.idEntity === t.id_trip && p.entity === "trip")
-          ) &&
-          j.otherRequirements.every((ot) =>
-            getValues("providers").some(
+          j.trips.every((t) => {
+            const provider = getValues("providers").find(
+              (p) => p.idEntity === t.id_trip && p.entity === "trip"
+            );
+            if (!provider) return false;
+
+            // Verify that the selected carrier_pricing is in EN_REVISIÓN status
+            return t.carriers_pricing.some(
+              (cp) => cp.id === provider.id_carrier_request && cp.status === STATUS.CR.EN_REVISÓN
+            );
+          }) &&
+          j.otherRequirements.every((ot) => {
+            const provider = getValues("providers").find(
               (p) => p.idEntity === ot.id_tr_other_requirement && p.entity === "otherRequirement"
-            )
-          )
+            );
+            if (!provider) return false;
+
+            // Verify that the selected carrier_pricing is in EN_REVISIÓN status
+            return ot.carriers_pricing.some(
+              (cp) => cp.id === provider.id_carrier_request && cp.status === STATUS.CR.EN_REVISÓN
+            );
+          })
       );
       setIsNextStepActive(!!isValid);
     }
