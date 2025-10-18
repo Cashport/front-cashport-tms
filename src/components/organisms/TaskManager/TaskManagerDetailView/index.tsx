@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Card,
@@ -16,25 +16,27 @@ import {
   Space,
   Flex,
   Tooltip,
-  Divider
+  message
 } from "antd";
 import {
   ArrowLeftOutlined,
   CheckOutlined,
   CloseOutlined,
-  ClockCircleOutlined,
-  EditOutlined,
-  MoreOutlined,
   PaperClipOutlined,
   DownloadOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  FileTextOutlined,
-  DownOutlined,
-  UpOutlined
+  EditOutlined,
+  MoreOutlined
 } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import Container from "@/components/atoms/Container/Container";
 import { CheckCircle, XCircle, Clock } from "phosphor-react";
+import { getTaskDetail, updatePricingApprovalStatus } from "@/services/tasks/tasks";
+import {
+  ITaskDetail,
+  ITaskPricing,
+  ITaskPricingComparation,
+  ITaskApprover
+} from "@/types/tasks/ITasks";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
@@ -42,174 +44,109 @@ const { Option } = Select;
 
 interface TaskManagerDetailViewProps {
   moduleTitle: string;
+  approvalId: number;
   onBack?: () => void;
 }
 
-const TaskManagerDetailView = ({ moduleTitle, onBack }: TaskManagerDetailViewProps) => {
+const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerDetailViewProps) => {
+  const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectObservation, setRejectObservation] = useState("");
-  const [isComparativeAnalysisOpen, setIsComparativeAnalysisOpen] = useState(true);
-  const [isTripInfoOpen, setIsTripInfoOpen] = useState(true);
 
-  // Datos mock
-  const generalInfo = {
-    tipoServicio: "Izaje",
-    vp: "VRO",
-    ubicacion: "POZO CHICHIMENE",
-    ubicacionDetalle: "Santander - Puerto Wilches",
-    solicitudPara: "Viaje puntual",
-    trProyecto: "TO-28268",
-    validadoCoordinador: "Sí",
-    proveedorRecomendado: "Sí",
-    montoTotal: 673000000,
-    alertaMonto: true
-  };
-
-  const travelInfo = {
-    origen: "Bogotá",
-    destino: "Medellín",
-    fechaSalida: "2025-10-20",
-    fechaRegreso: "2025-10-25",
-    pasajeros: 2,
-    clase: "Económica"
-  };
-
-  const forecastData = [
-    {
-      proveedor: "COLTANQUES",
-      vendor: "121313551",
-      contrato: "12135158 CAMABAJA",
-      tipoVehiculo: "0 - 100 KM",
-      descripcionTarifa: "0 - 100 KM",
-      tarifa: 1500000,
-      cantidadUsos: 10,
-      total: 150000000
-    },
-    {
-      proveedor: "ENTRAPETROL",
-      vendor: "111118888",
-      contrato: "55551234 PLANA",
-      tipoVehiculo: "100 - 200 KM",
-      descripcionTarifa: "100 - 200 KM",
-      tarifa: 2200000,
-      cantidadUsos: 5,
-      total: 11000000
-    }
-  ];
-
-  const forecastTotal = forecastData.reduce((sum, item) => sum + item.total, 0);
-
-  const rateComparison = {
-    vehiculo: "TRACTOMULA C3S3 - COLTANQUES",
-    origen: "BASE NEIVA",
-    destino: "CEBU-21",
-    tarifaSeleccionada: 1371192,
-    rangoKm: "Km 0 - 50",
-    proveedores: [
-      {
-        proveedor: "COLTANQUES",
-        tipo: "Nacional",
-        tipoVehiculo: "TRACTOMULA C3S3",
-        tipoTarifa: "C - 50 KM",
-        contrato: "38733773",
-        tarifa: 500000,
-        diferencia: "+10%"
-      },
-      {
-        proveedor: "NG TRANSPORTES",
-        tipo: "Comunidad",
-        tipoVehiculo: "TRACTOMULA C3S3",
-        tipoTarifa: "C - 50 KM",
-        contrato: "98377826",
-        tarifa: 620000,
-        diferencia: "+15%"
-      },
-      {
-        proveedor: "ENTRAPETROL",
-        tipo: "Nacional",
-        tipoVehiculo: "TRACTOMULA C3S3",
-        tipoTarifa: "C - 50 KM",
-        contrato: "28727826",
-        tarifa: 470000,
-        diferencia: "-7%"
+  useEffect(() => {
+    const fetchTaskDetail = async () => {
+      setLoading(true);
+      try {
+        const response = await getTaskDetail(approvalId);
+        if (response?.success && response.data) {
+          setTaskDetail(response.data);
+        } else {
+          console.error("No se encontró detalle de la aprobación");
+        }
+      } catch (error) {
+        console.error("Error cargando detalle de la tarea:", error);
+      } finally {
+        setLoading(false);
       }
-    ]
-  };
+    };
+    fetchTaskDetail();
+  }, [approvalId]);
 
-  const pendingApprovers = [
-    { name: "Miguel Martinez", role: "Coordinador", status: "pending" },
-    { name: "Ana García", role: "Gerente Regional", status: "pending" },
-    { name: "Carlos López", role: "Director Financiero", status: "approved" }
-  ];
-
-  // Helpers
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <CheckCircleOutlined style={{ color: "green" }} />;
-      case "rejected":
-        return <CloseCircleOutlined style={{ color: "red" }} />;
-      default:
-        return <ClockCircleOutlined style={{ color: "gray" }} />;
-    }
-  };
-
-  const getStatusTag = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <Tag color="green">Aprobado</Tag>;
-      case "rejected":
-        return <Tag color="red">Rechazado</Tag>;
-      default:
-        return <Tag color="default">Pendiente</Tag>;
-    }
-  };
-
-  // Handlers
   const handleApprove = () => setShowApproveModal(true);
   const handleReject = () => setShowRejectModal(true);
-  const confirmApprove = () => {
-    console.log("Aprobado");
-    setShowApproveModal(false);
+  const confirmApprove = async () => {
+    try {
+      setShowApproveModal(false);
+      const response = await updatePricingApprovalStatus(approvalId, "APPROVED");
+      if (response.success) {
+        message.success(response.message);
+        const detail = await getTaskDetail(approvalId);
+        if (detail.success && detail.data) setTaskDetail(detail.data);
+      } else {
+        message.error(response.message);
+      }
+    } catch (error) {
+      message.error("Error al aprobar la solicitud");
+      console.error(error);
+    }
   };
-  const confirmReject = () => {
-    console.log("Rechazado con:", rejectReason, rejectObservation);
-    setShowRejectModal(false);
+
+  const confirmReject = async () => {
+    if (!rejectReason) {
+      message.warning("Selecciona un motivo de rechazo");
+      return;
+    }
+
+    try {
+      setShowRejectModal(false);
+      const response = await updatePricingApprovalStatus(approvalId, "REJECTED");
+      if (response.success) {
+        message.success(response.message);
+        const detail = await getTaskDetail(approvalId);
+        if (detail.success && detail.data) setTaskDetail(detail.data);
+      } else {
+        message.error(response.message);
+      }
+    } catch (error) {
+      message.error("Error al rechazar la solicitud");
+      console.error(error);
+    }
   };
+
   const handleDownloadEmail = () => {
     console.log("Downloading sustainability department email confirmation");
     const link = document.createElement("a");
-    link.href = "#";
-    link.download = "confirmacion-sostenibilidad.pdf";
+    link.href = taskDetail?.approval.evidence_file_url || "#";
+    link.download = taskDetail?.approval.evidence_file_name || "confirmacion.pdf";
+    link.click();
   };
-  const promedioTarifa = Math.round(
-    rateComparison.proveedores.reduce((sum, p) => sum + p.tarifa, 0) /
-      rateComparison.proveedores.length
-  );
 
-  const diferenciaPromedio = (() => {
-    const diffs = rateComparison.proveedores.map((p) => parseFloat(p.diferencia.replace("%", "")));
-    const avg = diffs.reduce((sum, d) => sum + d, 0) / diffs.length;
-    return (avg >= 0 ? "+" : "") + avg.toFixed(0) + "%";
-  })();
+  if (loading) return <div>Cargando detalle de la aprobación...</div>;
+  if (!taskDetail) return <div>No se encontró la aprobación.</div>;
+
+  const { approval, pricing, users_approval } = taskDetail;
+
+  const renderStatusTag = (status: string) => {
+    if (status === "approved") return <Tag color="green">Aprobado</Tag>;
+    if (status === "rejected") return <Tag color="red">Rechazado</Tag>;
+    return <Tag color="default">Pendiente</Tag>;
+  };
 
   return (
     <div style={{ overflowY: "auto" }}>
       <Container>
-        {/* ===== HEADER DE ACCIONES ===== */}
         <Flex
           justify="space-between"
           align="center"
-          style={{
-            marginBottom: 24,
-            borderBottom: "1px solid #f0f0f0",
-            paddingBottom: 12
-          }}
+          style={{ marginBottom: 24, borderBottom: "1px solid #f0f0f0", paddingBottom: 12 }}
         >
           <Space>
-            <Button icon={<ArrowLeftOutlined />} onClick={onBack} style={{ fontWeight: 500 }}>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
               Volver
             </Button>
 
@@ -218,159 +155,203 @@ const TaskManagerDetailView = ({ moduleTitle, onBack }: TaskManagerDetailViewPro
                 Generar acción
               </Button>
             </Tooltip>
-
             <Tooltip title="Editar tarea (no disponible)">
               <Button icon={<EditOutlined />} disabled>
                 Editar
               </Button>
             </Tooltip>
           </Space>
-
           <Space>
-            <Button
-              type="primary"
-              icon={<CheckOutlined />}
-              onClick={handleApprove}
-              style={{ fontWeight: 500 }}
-            >
+            <Button type="primary" icon={<CheckOutlined />} onClick={handleApprove}>
               Aprobar
             </Button>
-            <Button
-              danger
-              icon={<CloseOutlined />}
-              onClick={handleReject}
-              style={{ fontWeight: 500 }}
-            >
+            <Button danger icon={<CloseOutlined />} onClick={handleReject}>
               Rechazar
             </Button>
           </Space>
         </Flex>
 
-        {/* ===== CARD PRINCIPAL CON BLOQUES INTERNOS ===== */}
+        {/* ===== INFORMACIÓN DE APROBACIÓN ===== */}
         <Card style={{ marginBottom: 24, padding: 0 }}>
-          {/* ===== INFORMACIÓN DE APROBACIÓN ===== */}
           <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0" }}>
             <Title level={4}>Información de aprobación</Title>
 
             <Row gutter={[16, 16]}>
               <Col xs={24} md={12}>
                 <Text type="secondary">Solicitud de aprobación para</Text>
-                <div>{generalInfo.solicitudPara}</div>
+                <div>{approval.approval_type_name}</div>
               </Col>
 
               <Col xs={24} md={12}>
                 <Text type="secondary">TR o Proyecto asociado a esta solicitud</Text>
-                <div style={{ color: "#1677ff", cursor: "pointer" }}>{generalInfo.trProyecto}</div>
+                <div style={{ color: "#1677ff", fontWeight: 600, cursor: "pointer" }}>
+                  {approval.id_transfer_request ? `TR-${approval.id_transfer_request}` : "-"}
+                </div>
               </Col>
             </Row>
 
             <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
               <Col xs={24} md={12}>
                 <Text type="secondary">
-                  Validado previamente con el coordinador de la zona que no haya un contrato activo
+                  Valido previamente con el coordinador de la zona que no haya un contrato activo
                   para este scope?
                 </Text>
-                <div style={{ color: "green", fontWeight: 600 }}>
-                  {generalInfo.validadoCoordinador}
+                <div
+                  style={{
+                    color: approval.is_another_contract_active ? "green" : "red",
+                    fontWeight: 600
+                  }}
+                >
+                  {approval.is_another_contract_active ? "Sí" : "No"}
                 </div>
               </Col>
+            </Row>
 
+            <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
               <Col xs={24} md={12}>
                 <Text type="secondary">
                   ¿Este proveedor es recomendado por el departamento de sostenibilidad?
                 </Text>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ color: "green", fontWeight: 600 }}>
-                    {generalInfo.proveedorRecomendado}
-                  </div>
-                  <Button
-                    type="link"
-                    icon={<PaperClipOutlined />}
-                    onClick={handleDownloadEmail}
-                    style={{ padding: 0 }}
+                  <div
+                    style={{
+                      color: approval.is_provider_recommended_by_sustainability ? "green" : "red",
+                      fontWeight: 600
+                    }}
                   >
-                    Descargar correo de confirmación <DownloadOutlined />
-                  </Button>
+                    {approval.is_provider_recommended_by_sustainability ? "Sí" : "No"}
+                  </div>
+                  {approval.evidence_file_url && (
+                    <Button
+                      type="link"
+                      icon={<PaperClipOutlined />}
+                      onClick={handleDownloadEmail}
+                      style={{ padding: 0 }}
+                    >
+                      Descargar evidencia <DownloadOutlined />
+                    </Button>
+                  )}
                 </div>
               </Col>
             </Row>
           </div>
 
           {/* ===== INFORMACIÓN DEL VIAJE ===== */}
-          <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
+          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
             <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
               <Panel header="Información del viaje" key="1">
-                <Row gutter={[24, 16]}>
+                <Row gutter={[24, 16]} align="middle">
                   <Col xs={24} md={12}>
                     <Text type="secondary">Origen</Text>
-                    <div style={{ fontWeight: 600 }}>{travelInfo.origen}</div>
+                    <div style={{ fontWeight: 600 }}>{approval.origin}</div>
                   </Col>
 
                   <Col xs={24} md={12}>
                     <Text type="secondary">Destino</Text>
-                    <div style={{ fontWeight: 600 }}>{travelInfo.destino}</div>
+                    <div style={{ fontWeight: 600 }}>{approval.destination}</div>
                   </Col>
 
                   <Col xs={24} md={12}>
-                    <Text type="secondary">Fecha de salida</Text>
-                    <div style={{ fontWeight: 600 }}>{travelInfo.fechaSalida}</div>
+                    <Text type="secondary">Tipo de servicio</Text>
+                    <div style={{ fontWeight: 600 }}>
+                      {pricing.length > 0 && pricing[0].rate_description
+                        ? pricing[0].rate_description
+                        : ""}
+                    </div>
                   </Col>
 
-                  <Col xs={24} md={12}>
-                    <Text type="secondary">Fecha de regreso</Text>
-                    <div style={{ fontWeight: 600 }}>{travelInfo.fechaRegreso}</div>
-                  </Col>
-
-                  <Col xs={24} md={12}>
-                    <Text type="secondary">Número de pasajeros</Text>
-                    <div style={{ fontWeight: 600 }}>{travelInfo.pasajeros}</div>
-                  </Col>
-
-                  <Col xs={24} md={12}>
-                    <Text type="secondary">Clase de viaje</Text>
-                    <div style={{ fontWeight: 600 }}>{travelInfo.clase}</div>
+                  <Col
+                    xs={24}
+                    md={12}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center"
+                    }}
+                  >
+                    <div>
+                      <Text type="secondary">VP</Text>
+                      <div style={{ fontWeight: 600 }}>{approval.vp}</div>
+                    </div>
+                    {approval.id_transfer_request && (
+                      <div>
+                        <a
+                          style={{ fontWeight: 600 }}
+                          onClick={() =>
+                            router.push(
+                              `/logistics/transfer-orders/details/${approval.id_transfer_request}`
+                            )
+                          }
+                        >
+                          Ver detalle de TR →
+                        </a>
+                      </div>
+                    )}
                   </Col>
                 </Row>
               </Panel>
             </Collapse>
           </div>
 
-          {/* ===== FORECAST DE TARIFAS ===== */}
-          <div style={{ padding: "16px 24px" }}>
-            <Title level={4}>Forecast</Title>
+          {/* ===== TARIFAS ===== */}
+          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+            <Title level={4}>Tarifas</Title>
             <Table
-              dataSource={forecastData}
-              rowKey={(record) => record.proveedor + record.contrato}
+              dataSource={pricing}
+              rowKey={(record) => record.id_approval_item.toString()}
               pagination={false}
               bordered
-              summary={() => (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0} colSpan={5}>
-                    <div style={{ textAlign: "right", fontWeight: 600 }}>Total:</div>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={5}>
-                    <div style={{ fontWeight: 600 }}>
-                      {forecastTotal.toLocaleString("es-CO", {
-                        style: "currency",
-                        currency: "COP"
-                      })}
-                    </div>
-                  </Table.Summary.Cell>
-                </Table.Summary.Row>
-              )}
+              summary={(pageData) => {
+                let totalSum = 0;
+                pageData.forEach(({ total }) => {
+                  totalSum += total;
+                });
+                return (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell index={0} colSpan={8}>
+                      <div style={{ textAlign: "right", fontWeight: "bold" }}>Total</div>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={9}>
+                      <div style={{ fontWeight: "bold" }}>
+                        {totalSum.toLocaleString("es-CO", { style: "currency", currency: "COP" })}
+                      </div>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                );
+              }}
             >
-              <Table.Column title="Proveedor" dataIndex="proveedor" key="proveedor" />
-              <Table.Column title="Contrato" dataIndex="contrato" key="contrato" />
-              <Table.Column title="Tipo Vehículo" dataIndex="tipoVehiculo" key="tipoVehiculo" />
+              <Table.Column title="Proveedor" dataIndex="provider" key="provider" />
+              <Table.Column title="Vendor" dataIndex="vendor" key="vendor" />
+              <Table.Column title="Contrato" dataIndex="contract" key="contract" />
+              <Table.Column title="Tipo Vehículo" dataIndex="vehicle_type" key="vehicle_type" />
+              <Table.Column
+                title="Descripción tarifa"
+                dataIndex="rate_description"
+                key="rate_description"
+                render={(value: string | null) => value || "-"}
+              />
+              <Table.Column
+                title="Cotización"
+                key="quotation"
+                render={() => (
+                  <Button type="link" disabled>
+                    PDF
+                  </Button>
+                )}
+              />
               <Table.Column
                 title="Tarifa"
-                dataIndex="tarifa"
-                key="tarifa"
+                dataIndex="rate"
+                key="rate"
                 render={(value: number) =>
                   value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
                 }
               />
-              <Table.Column title="Cantidad de usos" dataIndex="cantidadUsos" key="cantidadUsos" />
+              <Table.Column
+                title="Cantidad de usos"
+                dataIndex="usage_quantity"
+                key="usage_quantity"
+              />
               <Table.Column
                 title="Total"
                 dataIndex="total"
@@ -381,112 +362,78 @@ const TaskManagerDetailView = ({ moduleTitle, onBack }: TaskManagerDetailViewPro
               />
             </Table>
           </div>
+
           {/* ===== ANÁLISIS COMPARATIVO ===== */}
-          <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
-            <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
-              <Panel header="Análisis comparativo" key="1">
-                <div style={{ marginBottom: 16 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: 12
-                    }}
-                  >
-                    <div>
-                      <strong>{rateComparison.proveedores[0].proveedor}</strong>
-                      <div style={{ fontSize: 12, color: "#555" }}>
-                        Vendor: 12135434 Contrato: 101513546
-                      </div>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 24, fontWeight: 700 }}>
-                        $ {rateComparison.tarifaSeleccionada.toLocaleString("es-CO")}
-                      </div>
-                      <div style={{ fontWeight: 600 }}>{rateComparison.vehiculo}</div>
-                      <div style={{ fontSize: 12, color: "#555" }}>{rateComparison.rangoKm}</div>
-                    </div>
-                  </div>
+          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+            <Title level={4}>Análisis comparativo</Title>
+            {pricing.map((p: ITaskPricing) => {
+              if (!p.comparations || p.comparations.length === 0) return null;
 
-                  <Table
-                    dataSource={rateComparison.proveedores}
-                    rowKey={(record) => record.proveedor + record.contrato}
-                    pagination={false}
-                    bordered={false}
-                    size="small"
-                    style={{ margin: 0 }}
-                    rowClassName={(record, index) =>
-                      index === rateComparison.proveedores.length ? "bg-gray-50" : ""
+              // Base + comparaciones
+              const tableData: (ITaskPricing | ITaskPricingComparation)[] = [p, ...p.comparations];
+
+              return (
+                <Table
+                  key={p.id_approval_item}
+                  dataSource={tableData}
+                  rowKey={(record, index) => `${record.id_carrier_request}-${index}`}
+                  pagination={false}
+                  bordered
+                  size="small"
+                  style={{ marginBottom: 24 }}
+                >
+                  <Table.Column
+                    title="Proveedor"
+                    dataIndex="provider"
+                    key="provider"
+                    render={(text) => <strong>{text}</strong>}
+                  />
+                  <Table.Column title="Contrato" dataIndex="contract" key="contract" />
+                  <Table.Column title="Tipo Vehículo" dataIndex="vehicle_type" key="vehicle_type" />
+                  <Table.Column
+                    title="Tarifa"
+                    dataIndex="rate"
+                    key="rate"
+                    render={(value: number) =>
+                      value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
                     }
-                  >
-                    <Table.Column
-                      title="Proveedor"
-                      dataIndex="proveedor"
-                      key="proveedor"
-                      render={(text) => <strong>{text}</strong>}
-                    />
-                    <Table.Column title="Tipo" dataIndex="tipo" key="tipo" />
-                    <Table.Column
-                      title="Tipo vehículo"
-                      dataIndex="tipoVehiculo"
-                      key="tipoVehiculo"
-                    />
-                    <Table.Column title="Tipo tarifa" dataIndex="tipoTarifa" key="tipoTarifa" />
-                    <Table.Column title="Contrato" dataIndex="contrato" key="contrato" />
-                    <Table.Column
-                      title="Tarifa"
-                      dataIndex="tarifa"
-                      key="tarifa"
-                      render={(value: number) => `$ ${value.toLocaleString("es-CO")}`}
-                    />
-                    <Table.Column
-                      title="Diferencia"
-                      dataIndex="diferencia"
-                      key="diferencia"
-                      render={(diff: string) => (
-                        <span
-                          style={{
-                            color: diff.startsWith("+") ? "#f44336" : "#4caf50",
-                            fontWeight: 600
-                          }}
-                        >
-                          {diff}
-                        </span>
-                      )}
-                    />
-                  </Table>
-
-                  {/* Fila de promedio */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      marginTop: 8,
-                      fontWeight: 600
+                  />
+                  <Table.Column
+                    title="Cantidad de usos"
+                    dataIndex="usage_quantity"
+                    key="usage_quantity"
+                  />
+                  <Table.Column
+                    title="Total"
+                    dataIndex="total"
+                    key="total"
+                    render={(value: number) =>
+                      value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
+                    }
+                  />
+                  <Table.Column
+                    title="Diferencia"
+                    key="diferencia"
+                    render={(_, record: ITaskPricing | ITaskPricingComparation, index) => {
+                      if (index === 0) return "-";
+                      const rate = "rate" in record ? record.rate : 0;
+                      const baseRate = p.rate;
+                      const diff = ((rate - baseRate) / baseRate) * 100;
+                      return `${diff >= 0 ? "+" : ""}${diff.toFixed(2)}%`;
                     }}
-                  >
-                    <div style={{ marginRight: 24 }}>Promedio:</div>
-                    <div style={{ marginRight: 24 }}>
-                      $ {promedioTarifa.toLocaleString("es-CO")}
-                    </div>
-                    <div
-                      style={{ color: diferenciaPromedio.startsWith("+") ? "#f44336" : "#4caf50" }}
-                    >
-                      {diferenciaPromedio}
-                    </div>
-                  </div>
-                </div>
-              </Panel>
-            </Collapse>
+                  />
+                </Table>
+              );
+            })}
           </div>
+
           {/* ===== APROBADORES PENDIENTES ===== */}
-          <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
+          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
             <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
               <Panel header="Aprobadores pendientes" key="1">
                 <Table
-                  dataSource={pendingApprovers}
-                  rowKey={(record) => record.name + record.role}
+                  dataSource={users_approval}
+                  rowKey={(record) => record.id_user.toString()}
                   pagination={false}
                   bordered={false}
                   size="small"
@@ -497,7 +444,7 @@ const TaskManagerDetailView = ({ moduleTitle, onBack }: TaskManagerDetailViewPro
                     key="name"
                     render={(text) => <strong>{text}</strong>}
                   />
-                  <Table.Column title="Rol" dataIndex="role" key="role" />
+                  <Table.Column title="Email" dataIndex="email" key="email" />
                   <Table.Column
                     title="Estado"
                     dataIndex="status"
@@ -505,17 +452,17 @@ const TaskManagerDetailView = ({ moduleTitle, onBack }: TaskManagerDetailViewPro
                     render={(status: string) => {
                       let color = "#999";
                       let text = "Pendiente";
-                      if (status === "approved") {
+                      if (status === "Aprobado") {
                         color = "#4caf50";
                         text = "Aprobado";
-                      } else if (status === "rejected") {
+                      } else if (status === "Rechazado") {
                         color = "#f44336";
                         text = "Rechazado";
                       }
                       return (
                         <span style={{ display: "flex", alignItems: "center", gap: 8, color }}>
-                          {status === "approved" && <CheckCircle />}
-                          {status === "rejected" && <XCircle />}
+                          {status === "Aprobado" && <CheckCircle />}
+                          {status === "Rechazado" && <XCircle />}
                           {status === "pending" && <Clock />}
                           {text}
                         </span>
@@ -538,7 +485,6 @@ const TaskManagerDetailView = ({ moduleTitle, onBack }: TaskManagerDetailViewPro
         >
           <Text>¿Estás seguro de aprobar esta solicitud?</Text>
         </Modal>
-
         <Modal
           open={showRejectModal}
           title="Rechazar solicitud"
