@@ -142,10 +142,10 @@ export default function ModalSelectCarrierPricing({
       const response = await sendCarrierRequest(formatedData);
 
       if (response) {
-        onClose();
         message.success("Solicitudes enviadas");
         mutateStepthree && mutateStepthree(response.journey);
         extractCreatedCarriers && extractCreatedCarriers(response);
+        onClose();
         if (view === "vehicles") setView && setView("carrier");
       }
     } catch (error) {

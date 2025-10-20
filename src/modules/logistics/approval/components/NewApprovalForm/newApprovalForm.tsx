@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
 import { Select as AntSelect, message } from "antd";
@@ -177,24 +177,6 @@ export function NewApprovalForm() {
     return forecastItems.reduce((sum, item) => {
       return sum + calculateTotal(item.tarifa, item.cantidadUsos);
     }, 0);
-  };
-
-  const addComparisonRate = (forecastItemId: string) => {
-    const newRate: ComparisonRate = {
-      id: `comp-${Date.now()}`,
-      proveedor: "",
-      tipo: "",
-      tipoVehiculo: "",
-      tipoTarifa: "",
-      contrato: "",
-      tarifa: 0,
-      diferencia: 0
-    };
-
-    setComparisonRates({
-      ...comparisonRates,
-      [forecastItemId]: [...(comparisonRates[forecastItemId] || []), newRate]
-    });
   };
 
   const removeComparisonRate = (forecastItemId: string, rateId: string) => {
@@ -380,13 +362,13 @@ export function NewApprovalForm() {
       });
 
       // Submit the approval request with optional file
-      await createApproval(requestData, emailConfirmacionFile || undefined);
+      // await createApproval(requestData, emailConfirmacionFile || undefined);
 
       message.success("Solicitud de aprobación creada exitosamente.");
 
       // Navigate back to transfer request detail after successful creation
-      router.push(`/logistics/transfer-request/${transferRequestId}`);
-      clearCarrierForApproval();
+      // router.push(`/logistics/transfer-request/${transferRequestId}`);
+      // clearCarrierForApproval();
     } catch (error) {
       console.error("Error creating approval:", error);
       const errorMessage =
@@ -773,54 +755,76 @@ export function NewApprovalForm() {
     clearCarrierForApproval();
   };
 
-  const handleExtractCreatedCarriers = (createdCarriers: {
-    journey: ITransferRequestJourneyReview[];
-  }) => {
-    const tripsCarriers = createdCarriers.journey.flatMap((journey) =>
-      journey.trips.flatMap((trip) => trip.carriers_pricing)
-    );
+  const handleExtractCreatedCarriers = useCallback(
+    (
+      createdCarriers: {
+        journey: ITransferRequestJourneyReview[];
+      },
+      forecastItemId: string
+    ) => {
+      console.log("forecastItemId recibido:", forecastItemId);
+      // Verificar que haya un vendor seleccionado
+      if (!forecastItemId) {
+        console.error("No forecast item selected");
+        return;
+      }
 
-    // Check the ones created in the last minute
-    // const oneMinuteAgo = dayjs.utc().subtract(1, "minute");
-    // const recentlyCreatedCarriers = tripsCarriers.filter((carrier) => {
-    //   const createdAt = dayjs.utc(carrier.created_at);
-    //   return createdAt.isAfter(oneMinuteAgo);
-    // });
-    // const lastTwoCarriers = recentlyCreatedCarriers.slice(-2);
+      // Extraer trips sin aplanar carriers_pricing
+      const allTrips = createdCarriers.journey.flatMap((journey) => journey.trips);
 
-    // Get the last 2 carriers without any filtering
-    const lastTwoCarriers = tripsCarriers.slice(-2);
+      // Obtener el último carrier_pricing de cada trip (los recién creados)
+      const lastCarrierPerTrip = allTrips
+        .map((trip) => {
+          const carriers = trip.carriers_pricing;
+          return carriers.length > 0 ? carriers[carriers.length - 1] : null;
+        })
+        .filter((carrier) => carrier !== null);
 
-    // Set the last two carriers directly to comparisonRates
-    setComparisonRates((prevRates) => {
-      const updatedRates = { ...prevRates };
-      lastTwoCarriers.forEach((carrier) => {
-        const newRate: ComparisonRate = {
-          id: carrier.id.toString(),
-          proveedor: carrier.carrier,
-          tipo: carrier.service_type,
-          tipoVehiculo: carrier.vehicles,
-          tipoTarifa: "-",
-          contrato: carrier.driver_contract,
-          tarifa: carrier.amount,
-          diferencia: 0
-        };
+      // Find the forecast item to calculate price difference
+      const forecastItem = forecastItems.find((item) => item.id === forecastItemId);
+      const baseTarifa = forecastItem?.tarifa || 0;
 
-        // Use carrier id as key
-        const key = carrier.id.toString();
-        if (!updatedRates[key]) {
-          updatedRates[key] = [];
+      console.log("Extracted carriers for comparison:", lastCarrierPerTrip);
+
+      // Set the last carrier of each trip to the selected forecast item's comparisonRates
+      setComparisonRates((prevRates) => {
+        const updatedRates = { ...prevRates };
+
+        // Initialize array if it doesn't exist
+        if (!updatedRates[forecastItemId]) {
+          updatedRates[forecastItemId] = [];
         }
-        updatedRates[key].push(newRate);
-      });
-      return updatedRates;
-    });
-  };
 
-  const handleOpenModalCarrierPricing = () => {
+        lastCarrierPerTrip.forEach((carrier) => {
+          // Calculate percentage difference
+          const diferencia =
+            baseTarifa > 0 ? Math.round(((carrier.amount - baseTarifa) / baseTarifa) * 100) : 0;
+
+          const newRate: ComparisonRate = {
+            id: carrier.id.toString(),
+            proveedor: carrier.carrier,
+            tipo: carrier.service_type,
+            tipoVehiculo: carrier.vehicles,
+            tipoTarifa: "-",
+            contrato: carrier.driver_contract,
+            tarifa: carrier.amount,
+            diferencia: diferencia
+          };
+
+          updatedRates[forecastItemId].push(newRate);
+        });
+
+        return updatedRates;
+      });
+    },
+    [forecastItems]
+  );
+
+  const handleOpenModalCarrierPricing = (forecastItemId: string) => {
     openModal("carrier_pricing_request", {
       transferRequestId: transferRequestId || 0,
-      extractCreatedCarriers: handleExtractCreatedCarriers
+      extractCreatedCarriers: (createdCarriers) =>
+        handleExtractCreatedCarriers(createdCarriers, forecastItemId)
     });
   };
 
@@ -1172,8 +1176,7 @@ export function NewApprovalForm() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            // onClick={() => addComparisonRate(item.id)}
-                            onClick={handleOpenModalCarrierPricing}
+                            onClick={() => handleOpenModalCarrierPricing(item.id)}
                             className="mt-4 border-2 hover:bg-gray-50"
                           >
                             <Plus className="h-4 w-4 mr-2" />
