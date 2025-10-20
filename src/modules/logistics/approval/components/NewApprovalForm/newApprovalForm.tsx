@@ -12,7 +12,7 @@ import {
   getTypes,
   type IApprovalRequest
 } from "@/services/logistics/pricingApprovals/pricingApprovals";
-import { IApprovalType, IApprover } from "@/types/logistics/schema";
+import { IApprovalType, IApprover, ITransferRequestJourneyReview } from "@/types/logistics/schema";
 
 import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
@@ -33,6 +33,10 @@ import { Checkbox } from "@/modules/chat/ui/checkbox";
 import "@/modules/chat/styles/chatStyles.css";
 import { useRouter } from "next/navigation";
 import { useModalDetail } from "@/context/ModalContext";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 // Helper function to normalize approval type names to kebab-case
 const normalizeToKebabCase = (name: string): string => {
@@ -74,7 +78,7 @@ interface Approver {
 
 export function NewApprovalForm() {
   // Zustand store - Carrier for Approval slice
-  const selectedCarrier = useAppStore((state) => state.selectedCarrier);
+  const selectedCarriers = useAppStore((state) => state.selectedCarriers);
   const transferRequestId = useAppStore((state) => state.transferRequestId);
   const clearCarrierForApproval = useAppStore((state) => state.clearCarrierForApproval);
 
@@ -120,25 +124,23 @@ export function NewApprovalForm() {
 
   const [approvers, setApprovers] = useState<Approver[]>([{ id: "1", name: "", email: "" }]);
 
-  // Initialize forecastItems with selectedCarrier data if available
+  // Initialize forecastItems with selectedCarriers data if available
   const [forecastItems, setForecastItems] = useState<ForecastItem[]>(() => {
-    if (selectedCarrier) {
-      return [
-        {
-          id: selectedCarrier.id.toString(),
-          proveedor: selectedCarrier.carrier,
-          vendor: selectedCarrier.id_carrier.toString(),
-          contrato: selectedCarrier.driver_contract,
-          tipoVehiculo: selectedCarrier.vehicles,
-          descripcionTarifa: selectedCarrier.service_type,
-          tarifa: selectedCarrier.amount,
-          cantidadUsos: 0,
-          cotizacionUrl: ""
-        }
-      ];
+    if (selectedCarriers && selectedCarriers.length > 0) {
+      return selectedCarriers.map((carrier) => ({
+        id: carrier.id.toString(),
+        proveedor: carrier.carrier,
+        vendor: carrier.id_carrier.toString(),
+        contrato: carrier.driver_contract,
+        tipoVehiculo: carrier.vehicles,
+        descripcionTarifa: carrier.service_type,
+        tarifa: carrier.amount,
+        cantidadUsos: 0,
+        cotizacionUrl: ""
+      }));
     }
 
-    // Fallback: empty array if no selectedCarrier
+    // Fallback: empty array if no selectedCarriers
     return [];
   });
 
@@ -771,9 +773,54 @@ export function NewApprovalForm() {
     clearCarrierForApproval();
   };
 
+  const handleExtractCreatedCarriers = (createdCarriers: {
+    journey: ITransferRequestJourneyReview[];
+  }) => {
+    const tripsCarriers = createdCarriers.journey.flatMap((journey) =>
+      journey.trips.flatMap((trip) => trip.carriers_pricing)
+    );
+
+    // Check the ones created in the last minute
+    // const oneMinuteAgo = dayjs.utc().subtract(1, "minute");
+    // const recentlyCreatedCarriers = tripsCarriers.filter((carrier) => {
+    //   const createdAt = dayjs.utc(carrier.created_at);
+    //   return createdAt.isAfter(oneMinuteAgo);
+    // });
+    // const lastTwoCarriers = recentlyCreatedCarriers.slice(-2);
+
+    // Get the last 2 carriers without any filtering
+    const lastTwoCarriers = tripsCarriers.slice(-2);
+
+    // Set the last two carriers directly to comparisonRates
+    setComparisonRates((prevRates) => {
+      const updatedRates = { ...prevRates };
+      lastTwoCarriers.forEach((carrier) => {
+        const newRate: ComparisonRate = {
+          id: carrier.id.toString(),
+          proveedor: carrier.carrier,
+          tipo: carrier.service_type,
+          tipoVehiculo: carrier.vehicles,
+          tipoTarifa: "-",
+          contrato: carrier.driver_contract,
+          tarifa: carrier.amount,
+          diferencia: 0
+        };
+
+        // Use carrier id as key
+        const key = carrier.id.toString();
+        if (!updatedRates[key]) {
+          updatedRates[key] = [];
+        }
+        updatedRates[key].push(newRate);
+      });
+      return updatedRates;
+    });
+  };
+
   const handleOpenModalCarrierPricing = () => {
     openModal("carrier_pricing_request", {
-      transferRequestId: transferRequestId || 0
+      transferRequestId: transferRequestId || 0,
+      extractCreatedCarriers: handleExtractCreatedCarriers
     });
   };
 

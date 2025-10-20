@@ -19,7 +19,8 @@ import {
   ITransferOrdersRequest,
   IVehicleType,
   ITransferRequestJourneyReview,
-  ITrackingResponse
+  ITrackingResponse,
+  CarriersPricing
 } from "@/types/logistics/schema";
 
 import {
@@ -96,7 +97,7 @@ export default function PricingTransferRequest({
   const id = parseInt(params.id as string);
 
   // Zustand store for carrier approval
-  const setSelectedCarrier = useAppStore((state) => state.setSelectedCarrier);
+  const setSelectedCarriers = useAppStore((state) => state.setSelectedCarriers);
   const setTransferRequestId = useAppStore((state) => state.setTransferRequestId);
 
   const {
@@ -926,50 +927,55 @@ export default function PricingTransferRequest({
     // Get selected providers from form
     const providers = getValues("providers");
 
-    // Find the first selected carrier's full data from the journeys
+    // Find all selected carriers' full data from the journeys
     if (providers && providers.length > 0) {
-      const firstProvider = providers[0];
+      // Search through all journeys to find the matching CarriersPricing objects
+      const foundCarriers: CarriersPricing[] = [];
 
-      // Search through all journeys to find the matching CarriersPricing object
-      let foundCarrier = null;
+      // Loop through each provider to find its corresponding CarriersPricing object
+      for (const provider of providers) {
+        for (const journey of stepThreeJourneysWithCommunities || []) {
+          let carrierFound = false;
 
-      for (const journey of stepThreeJourneysWithCommunities || []) {
-        // Search in trips
-        for (const trip of journey.trips || []) {
-          const carrier = trip.carriers_pricing?.find(
-            (cp) => cp.id === firstProvider.id_carrier_request
-          );
-          if (carrier) {
-            foundCarrier = carrier;
-            break;
-          }
-        }
-
-        // If not found in trips, search in otherRequirements
-        if (!foundCarrier) {
-          for (const otherReq of journey.otherRequirements || []) {
-            const carrier = otherReq.carriers_pricing?.find(
-              (cp) => cp.id === firstProvider.id_carrier_request
+          // Search in trips
+          for (const trip of journey.trips || []) {
+            const carrier = trip.carriers_pricing?.find(
+              (cp) => cp.id === provider.id_carrier_request
             );
             if (carrier) {
-              foundCarrier = carrier;
+              foundCarriers.push(carrier);
+              carrierFound = true;
               break;
             }
           }
-        }
 
-        if (foundCarrier) break;
+          // If not found in trips, search in otherRequirements
+          if (!carrierFound) {
+            for (const otherReq of journey.otherRequirements || []) {
+              const carrier = otherReq.carriers_pricing?.find(
+                (cp) => cp.id === provider.id_carrier_request
+              );
+              if (carrier) {
+                foundCarriers.push(carrier);
+                carrierFound = true;
+                break;
+              }
+            }
+          }
+
+          if (carrierFound) break;
+        }
       }
 
-      // Store selected carrier and transfer request ID in Zustand
-      if (foundCarrier) {
-        setSelectedCarrier(foundCarrier);
+      // Store selected carriers and transfer request ID in Zustand
+      if (foundCarriers.length > 0) {
+        setSelectedCarriers(foundCarriers);
         setTransferRequestId(id);
 
         // Navigate to approval creation page
         router.push("/logistics/approval/new");
       } else {
-        messageApi.error("No se encontró el proveedor seleccionado");
+        messageApi.error("No se encontraron los proveedores seleccionados");
       }
     } else {
       messageApi.error("Debe seleccionar un proveedor primero");

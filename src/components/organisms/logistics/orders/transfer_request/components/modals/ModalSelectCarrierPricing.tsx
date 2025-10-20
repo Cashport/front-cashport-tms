@@ -40,6 +40,7 @@ type Props = {
   mutateStepthree?: (journey: ITransferRequestJourneyReview[]) => void;
   view?: string;
   setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
+  extractCreatedCarriers?: (_: { journey: ITransferRequestJourneyReview[] }) => void;
 };
 export default function ModalSelectCarrierPricing({
   open,
@@ -47,7 +48,8 @@ export default function ModalSelectCarrierPricing({
   transferRequestId,
   mutateStepthree,
   view,
-  setView
+  setView,
+  extractCreatedCarriers
 }: Readonly<Props>) {
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
@@ -143,6 +145,7 @@ export default function ModalSelectCarrierPricing({
         onClose();
         message.success("Solicitudes enviadas");
         mutateStepthree && mutateStepthree(response.journey);
+        extractCreatedCarriers && extractCreatedCarriers(response);
         if (view === "vehicles") setView && setView("carrier");
       }
     } catch (error) {
