@@ -34,21 +34,21 @@ const { Text } = Typography;
 type Props = {
   open: boolean;
   // eslint-disable-next-line no-unused-vars
-  handleModalCarrier: (value: boolean) => void;
+  onClose: () => void;
   // eslint-disable-next-line no-unused-vars
+  transferRequestId: number;
   mutateStepthree: (journey: ITransferRequestJourneyReview[]) => void;
   view: string;
-  setView: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
+  setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
 };
 export default function ModalSelectCarrierPricing({
   open,
-  handleModalCarrier,
+  onClose,
+  transferRequestId,
   mutateStepthree,
   view,
   setView
 }: Readonly<Props>) {
-  const params = useParams();
-  const id = parseInt(params.id as string);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [tripsList, setTripsList] = useState<ServiceTab[]>([]);
@@ -57,7 +57,7 @@ export default function ModalSelectCarrierPricing({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { data, isLoading, isValidating } = useSWR(
-    { idTransferRequest: id, open, showAll },
+    { idTransferRequest: transferRequestId, open, showAll },
     ({ idTransferRequest, open }) =>
       open ? getTransferRequestPricing({ idTransferRequest, showAll }) : undefined,
     {
@@ -142,10 +142,10 @@ export default function ModalSelectCarrierPricing({
       const response = await sendCarrierRequest(formatedData);
 
       if (response) {
-        handleModalCarrier(false);
+        onClose();
         message.success("Solicitudes enviadas");
         mutateStepthree(response.journey);
-        if (view === "vehicles") setView("carrier");
+        if (view === "vehicles") setView && setView("carrier");
       }
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
@@ -164,15 +164,15 @@ export default function ModalSelectCarrierPricing({
   const handleSubmitForm = async () => {
     if (view === "vehicles") {
       if (hasPricingsSelected()) {
-        await postCarrierRequest(tripsList, id, showAll);
+        await postCarrierRequest(tripsList, transferRequestId, showAll);
       } else {
-        setView("carrier");
-        handleModalCarrier(false);
+        setView && setView("carrier");
+        onClose();
       }
       return;
     }
 
-    await postCarrierRequest(tripsList, id, showAll);
+    await postCarrierRequest(tripsList, transferRequestId, showAll);
   };
 
   const handleCheck = (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
@@ -280,13 +280,13 @@ export default function ModalSelectCarrierPricing({
         />
       }
       open={open}
-      onCancel={() => handleModalCarrier(false)}
+      onCancel={onClose}
       width={686}
       centered
       footer={
         <Footer
           view={view}
-          handleCancel={() => handleModalCarrier(false)}
+          handleCancel={onClose}
           handleSubmit={handleSubmitForm}
           isSubmitting={isSubmitting}
           disabledContinue={!isConfirmEnabled()}

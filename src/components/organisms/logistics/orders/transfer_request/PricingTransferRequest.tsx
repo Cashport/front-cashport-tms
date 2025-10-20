@@ -69,6 +69,7 @@ import ModalSelectTender from "./components/modals/ModalSelectTender";
 import GenerateActionButton from "./components/atoms/GenerateActionButton/GenerateActionButton";
 import { STATUS } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
 
 const { Title, Text } = Typography;
 
@@ -88,6 +89,7 @@ export default function PricingTransferRequest({
   tracking,
   handleRevalidate
 }: PricingTransferOrderRequestProps) {
+  const { openModal } = useModalDetail();
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const params = useParams();
@@ -141,7 +143,6 @@ export default function PricingTransferRequest({
   const [sugestedVehicles, setSugestedVehicles] = useState<IVehicleType[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
-  const [modalCarrier, setModalCarrier] = useState(false);
   const [modalTender, setModalTender] = useState(false);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
   const [isModalModifyTripOpen, setIsModalModifyTripOpen] = useState<{
@@ -482,6 +483,15 @@ export default function PricingTransferRequest({
     setIsLoading(false);
   };
 
+  const handleOpenModalCarrierPricing = () => {
+    openModal("carrier_pricing_request", {
+      transferRequestId: id,
+      mutateStepthree,
+      view,
+      setView
+    });
+  };
+
   const handleNext = async () => {
     if (view === "solicitation") {
       if (mode === MODE_PRICING.TRANSFER_REQUEST) {
@@ -496,7 +506,7 @@ export default function PricingTransferRequest({
         )
       )
         setView("carrier");
-      else setModalCarrier(true);
+      else handleOpenModalCarrierPricing();
     } else if (view === "carrier") {
       if (
         transferRequest?.stepThree?.journey?.every((j) =>
@@ -1046,7 +1056,7 @@ export default function PricingTransferRequest({
                 >
                   {view === "carrier" && (
                     <GenerateActionButton
-                      onProvidersClick={() => setModalCarrier(true)}
+                      onProvidersClick={handleOpenModalCarrierPricing}
                       onTenderClick={() => setModalTender(true)}
                       onApprovalClick={handleSendCarriersToApproval}
                     />
@@ -1183,13 +1193,6 @@ export default function PricingTransferRequest({
           </Flex>
         </Flex>
       </Flex>
-      <ModalSelectCarrierPricing
-        open={modalCarrier}
-        handleModalCarrier={(val: boolean) => setModalCarrier(val)}
-        mutateStepthree={mutateStepthree}
-        view={view}
-        setView={setView}
-      />
       <ModalSelectTender
         open={modalTender}
         handleModalTender={(val: boolean) => setModalTender(val)}

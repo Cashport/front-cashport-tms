@@ -1,8 +1,10 @@
+"use client";
 import { ConfigProvider } from "antd";
 import theme from "@/theme/themeConfig";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Poppins } from "@next/font/google";
 import esES from "antd/locale/es_ES";
+import { ModalProvider } from "@/context/ModalContext";
 import "../styles/globals.scss";
 
 const poppins = Poppins({
@@ -18,7 +20,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <link href="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css" rel="stylesheet" />
         </head>
         <body>
-          <AntdRegistry>{ children }</AntdRegistry>
+          <AntdRegistry>
+            <ModalProvider>{children}</ModalProvider>
+          </AntdRegistry>
           {/* <script
             id="ze-snippet"
             async
