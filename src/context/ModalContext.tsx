@@ -6,17 +6,15 @@ import { ITransferRequestJourneyReview } from "@/types/logistics/schema";
 type ModalType = "carrier_pricing_request" | null;
 
 type ModalSelectCarrierPricingProps = {
-  // eslint-disable-next-line no-unused-vars
-  mutateStepthree: (journey: ITransferRequestJourneyReview[]) => void;
-  view: string;
-  setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
   transferRequestId: number;
+  view?: string;
+  mutateStepthree?: (journey: ITransferRequestJourneyReview[]) => void;
+  setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
 };
 
 type ModalProps = ModalSelectCarrierPricingProps;
 
 interface ModalContextType {
-  // eslint-disable-next-line no-unused-vars
   openModal: (type: ModalType, props: ModalProps) => void;
   closeModal: () => void;
   modalType: ModalType;

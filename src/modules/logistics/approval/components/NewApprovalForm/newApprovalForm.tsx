@@ -32,6 +32,7 @@ import { Checkbox } from "@/modules/chat/ui/checkbox";
 
 import "@/modules/chat/styles/chatStyles.css";
 import { useRouter } from "next/navigation";
+import { useModalDetail } from "@/context/ModalContext";
 
 // Helper function to normalize approval type names to kebab-case
 const normalizeToKebabCase = (name: string): string => {
@@ -100,6 +101,9 @@ export function NewApprovalForm() {
       revalidateOnReconnect: false
     }
   );
+
+  // context for modal carrier pricing request
+  const { openModal } = useModalDetail();
 
   const [tipoAprobacion, setTipoAprobacion] = useState<string>("");
   const [validadoCoordinador, setValidadoCoordinador] = useState<string>("");
@@ -767,6 +771,12 @@ export function NewApprovalForm() {
     clearCarrierForApproval();
   };
 
+  const handleOpenModalCarrierPricing = () => {
+    openModal("carrier_pricing_request", {
+      transferRequestId: transferRequestId || 0
+    });
+  };
+
   return (
     <Card
       className="w-full shadow-sm"
@@ -1115,7 +1125,8 @@ export function NewApprovalForm() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => addComparisonRate(item.id)}
+                            // onClick={() => addComparisonRate(item.id)}
+                            onClick={handleOpenModalCarrierPricing}
                             className="mt-4 border-2 hover:bg-gray-50"
                           >
                             <Plus className="h-4 w-4 mr-2" />

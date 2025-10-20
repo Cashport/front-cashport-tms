@@ -37,8 +37,8 @@ type Props = {
   onClose: () => void;
   // eslint-disable-next-line no-unused-vars
   transferRequestId: number;
-  mutateStepthree: (journey: ITransferRequestJourneyReview[]) => void;
-  view: string;
+  mutateStepthree?: (journey: ITransferRequestJourneyReview[]) => void;
+  view?: string;
   setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
 };
 export default function ModalSelectCarrierPricing({
@@ -57,14 +57,12 @@ export default function ModalSelectCarrierPricing({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { data, isLoading, isValidating } = useSWR(
-    { idTransferRequest: transferRequestId, open, showAll },
-    ({ idTransferRequest, open }) =>
-      open ? getTransferRequestPricing({ idTransferRequest, showAll }) : undefined,
+    { idTransferRequest: transferRequestId, showAll },
+    ({ idTransferRequest, showAll }) => getTransferRequestPricing({ idTransferRequest, showAll }),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      revalidateIfStale: true,
-      revalidateOnMount: false
+      revalidateIfStale: true
     }
   );
 
@@ -144,7 +142,7 @@ export default function ModalSelectCarrierPricing({
       if (response) {
         onClose();
         message.success("Solicitudes enviadas");
-        mutateStepthree(response.journey);
+        mutateStepthree && mutateStepthree(response.journey);
         if (view === "vehicles") setView && setView("carrier");
       }
     } catch (error) {
@@ -285,7 +283,7 @@ export default function ModalSelectCarrierPricing({
       centered
       footer={
         <Footer
-          view={view}
+          view={view || ""}
           handleCancel={onClose}
           handleSubmit={handleSubmitForm}
           isSubmitting={isSubmitting}
