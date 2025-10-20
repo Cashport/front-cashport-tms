@@ -279,7 +279,7 @@ export function NewApprovalForm() {
       });
 
       if (!hasAllComparisons) {
-        return "Para montos superiores a 100 millones USD, debe agregar tarifas comparativas o marcar como Single source";
+        return "Para montos superiores a 25 mil USD, debe agregar tarifas comparativas o marcar como Single source";
       }
     }
 
@@ -817,9 +817,9 @@ export function NewApprovalForm() {
           <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
             <div className="flex items-center gap-3 mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Tarifas</h2>
-              {calculateGrandTotal() > 25000000 && (
+              {calculateGrandTotal() > 100000000 && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                  Alerta: Mayor a 25 mil dls
+                  Alerta: Mayor a 25 mil USD
                 </span>
               )}
             </div>
@@ -915,8 +915,8 @@ export function NewApprovalForm() {
             <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Análisis comparativo</h2>
               <p className="text-sm text-gray-600 mb-6">
-                El monto supera 100 millones de USD. Por favor, agregue tarifas comparativas para
-                cada registro del forecast o marque la opción de Single source.
+                El monto supera 25 mil USD. Por favor, agregue tarifas comparativas para cada
+                registro del forecast o marque la opción de Single source.
               </p>
 
               {!isSingleSource && (
