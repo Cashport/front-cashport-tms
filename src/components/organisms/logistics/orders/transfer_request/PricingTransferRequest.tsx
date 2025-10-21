@@ -19,7 +19,8 @@ import {
   ITransferOrdersRequest,
   IVehicleType,
   ITransferRequestJourneyReview,
-  ITrackingResponse
+  ITrackingResponse,
+  CarriersPricing
 } from "@/types/logistics/schema";
 
 import {
@@ -65,6 +66,11 @@ import ModalCreateJourney from "@/components/molecules/modals/ModalCreateJourney
 import { CalendarX } from "phosphor-react";
 import ChipsRow from "../DetailsOrderView/components/ChipsRow";
 import { ModalModifyTrip } from "@/components/molecules/modals/ModalModifyTrip/ModalModifyTrip";
+import ModalSelectTender from "./components/modals/ModalSelectTender";
+import GenerateActionButton from "./components/atoms/GenerateActionButton/GenerateActionButton";
+import { STATUS } from "@/utils/constants/globalConstants";
+import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
 
 const { Title, Text } = Typography;
 
@@ -84,10 +90,15 @@ export default function PricingTransferRequest({
   tracking,
   handleRevalidate
 }: PricingTransferOrderRequestProps) {
+  const { openModal } = useModalDetail();
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const params = useParams();
   const id = parseInt(params.id as string);
+
+  // Zustand store for carrier approval
+  const setSelectedCarriers = useAppStore((state) => state.setSelectedCarriers);
+  const setTransferRequestId = useAppStore((state) => state.setTransferRequestId);
 
   const {
     control,
@@ -133,7 +144,7 @@ export default function PricingTransferRequest({
   const [sugestedVehicles, setSugestedVehicles] = useState<IVehicleType[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
-  const [modalCarrier, setModalCarrier] = useState(false);
+  const [modalTender, setModalTender] = useState(false);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
   const [isModalModifyTripOpen, setIsModalModifyTripOpen] = useState<{
     open: boolean;
@@ -386,8 +397,8 @@ export default function PricingTransferRequest({
       if (
         transferRequest?.stepThree?.journey?.some(
           (j) =>
-            j.trips.some((t) => t.carriers_pricing.some(() => true)) ||
-            j.otherRequirements.some((o) => o.carriers_pricing.some(() => true))
+            j.trips?.some((t) => t.carriers_pricing?.some(() => true)) ||
+            j.otherRequirements?.some((o) => o.carriers_pricing?.some(() => true))
         )
       ) {
         setView("carrier");
@@ -402,14 +413,28 @@ export default function PricingTransferRequest({
     if (view === "carrier") {
       const isValid = transferRequest?.stepThree?.journey?.every(
         (j) =>
-          j.trips.every((t) =>
-            getValues("providers").some((p) => p.idEntity === t.id_trip && p.entity === "trip")
-          ) &&
-          j.otherRequirements.every((ot) =>
-            getValues("providers").some(
+          j.trips.every((t) => {
+            const provider = getValues("providers").find(
+              (p) => p.idEntity === t.id_trip && p.entity === "trip"
+            );
+            if (!provider) return false;
+
+            // Verify that the selected carrier_pricing is in EN_REVISIÓN status
+            return t.carriers_pricing.some(
+              (cp) => cp.id === provider.id_carrier_request && cp.status === STATUS.CR.EN_REVISÓN
+            );
+          }) &&
+          j.otherRequirements.every((ot) => {
+            const provider = getValues("providers").find(
               (p) => p.idEntity === ot.id_tr_other_requirement && p.entity === "otherRequirement"
-            )
-          )
+            );
+            if (!provider) return false;
+
+            // Verify that the selected carrier_pricing is in EN_REVISIÓN status
+            return ot.carriers_pricing.some(
+              (cp) => cp.id === provider.id_carrier_request && cp.status === STATUS.CR.EN_REVISÓN
+            );
+          })
       );
       setIsNextStepActive(!!isValid);
     }
@@ -459,6 +484,15 @@ export default function PricingTransferRequest({
     setIsLoading(false);
   };
 
+  const handleOpenModalCarrierPricing = () => {
+    openModal("carrier_pricing_request", {
+      transferRequestId: id,
+      mutateStepthree,
+      view,
+      setView
+    });
+  };
+
   const handleNext = async () => {
     if (view === "solicitation") {
       if (mode === MODE_PRICING.TRANSFER_REQUEST) {
@@ -469,11 +503,11 @@ export default function PricingTransferRequest({
     } else if (view === "vehicles") {
       if (
         transferRequest?.stepThree?.journey?.some((j) =>
-          j.trips.some((t) => t.carriers_pricing.length)
+          j.trips?.some((t) => t?.carriers_pricing?.length)
         )
       )
         setView("carrier");
-      else setModalCarrier(true);
+      else handleOpenModalCarrierPricing();
     } else if (view === "carrier") {
       if (
         transferRequest?.stepThree?.journey?.every((j) =>
@@ -888,6 +922,66 @@ export default function PricingTransferRequest({
     return Object.values(groupedRequirements);
   }
   const otherRequirements = orders && groupOtherRequirementsById(orders);
+
+  const handleSendCarriersToApproval = () => {
+    // Get selected providers from form
+    const providers = getValues("providers");
+
+    // Find all selected carriers' full data from the journeys
+    if (providers && providers.length > 0) {
+      // Search through all journeys to find the matching CarriersPricing objects
+      const foundCarriers: CarriersPricing[] = [];
+
+      // Loop through each provider to find its corresponding CarriersPricing object
+      for (const provider of providers) {
+        for (const journey of stepThreeJourneysWithCommunities || []) {
+          let carrierFound = false;
+
+          // Search in trips
+          for (const trip of journey.trips || []) {
+            const carrier = trip.carriers_pricing?.find(
+              (cp) => cp.id === provider.id_carrier_request
+            );
+            if (carrier) {
+              foundCarriers.push(carrier);
+              carrierFound = true;
+              break;
+            }
+          }
+
+          // If not found in trips, search in otherRequirements
+          if (!carrierFound) {
+            for (const otherReq of journey.otherRequirements || []) {
+              const carrier = otherReq.carriers_pricing?.find(
+                (cp) => cp.id === provider.id_carrier_request
+              );
+              if (carrier) {
+                foundCarriers.push(carrier);
+                carrierFound = true;
+                break;
+              }
+            }
+          }
+
+          if (carrierFound) break;
+        }
+      }
+
+      // Store selected carriers and transfer request ID in Zustand
+      if (foundCarriers.length > 0) {
+        setSelectedCarriers(foundCarriers);
+        setTransferRequestId(id);
+
+        // Navigate to approval creation page
+        router.push("/logistics/approval/new");
+      } else {
+        messageApi.error("No se encontraron los proveedores seleccionados");
+      }
+    } else {
+      messageApi.error("Debe seleccionar un proveedor primero");
+    }
+  };
+
   return (
     <>
       {contextHolder}
@@ -967,9 +1061,11 @@ export default function PricingTransferRequest({
                   }}
                 >
                   {view === "carrier" && (
-                    <PrincipalButton type="default" onClick={() => setModalCarrier(true)}>
-                      Proveedores
-                    </PrincipalButton>
+                    <GenerateActionButton
+                      onProvidersClick={handleOpenModalCarrierPricing}
+                      onTenderClick={() => setModalTender(true)}
+                      onApprovalClick={handleSendCarriersToApproval}
+                    />
                   )}
                   <PrincipalButton
                     className="active"
@@ -1103,12 +1199,9 @@ export default function PricingTransferRequest({
           </Flex>
         </Flex>
       </Flex>
-      <ModalSelectCarrierPricing
-        open={modalCarrier}
-        handleModalCarrier={(val: boolean) => setModalCarrier(val)}
-        mutateStepthree={mutateStepthree}
-        view={view}
-        setView={setView}
+      <ModalSelectTender
+        open={modalTender}
+        handleModalTender={(val: boolean) => setModalTender(val)}
       />
       <ModalCreateJourney
         visible={isModalMultiStepOpen}

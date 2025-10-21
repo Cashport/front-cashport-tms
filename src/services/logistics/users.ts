@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { API } from "@/utils/api/api";
-import { IFormGeneralUser } from "@/types/logistics/schema";
+import { IFormGeneralUser, IGetCarrier } from "@/types/logistics/schema";
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { DocumentCompleteType } from "@/types/logistics/certificate/certificate";
 import { GenericResponse } from "@/types/global/IGlobal";
@@ -25,9 +25,9 @@ export const getAllRoles = async (): Promise<GenericResponse> => {
   }
 };
 
-export const getAllCarriers = async (): Promise<GenericResponse> => {
+export const getAllCarriers = async (): Promise<GenericResponse<IGetCarrier[]>> => {
   try {
-    const response: GenericResponse = await API.get(`/logistic-user/all/carriers`);
+    const response: GenericResponse<IGetCarrier[]> = await API.get(`/logistic-user/all/carriers`);
     return response;
   } catch (error) {
     console.log("Error getAllCarriers: ", error);
