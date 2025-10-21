@@ -1,6 +1,6 @@
 import { Pagination } from "@/types/global/IGlobal";
 import { Config, WelcomeHeaders } from "../schema";
-import { IPricingScore } from "../trips/TripsSchema";
+import { ICarriersPricingModalComparison, IPricingScore } from "../trips/TripsSchema";
 
 export interface SendCarrierRequest {
   carrierRequest: CarrierRequest[];
@@ -205,4 +205,9 @@ export interface ICreateCarrierRequestAuction {
 export interface ICreateCarrierRequestAuctionBody {
   auctions: ICreateCarrierRequestAuction[];
   transferRequestId: number;
+}
+
+export interface IGetCarrierRequestsByTransferRequestId {
+  id_carrier_request: number;
+  pricingComparison: ICarriersPricingModalComparison[];
 }

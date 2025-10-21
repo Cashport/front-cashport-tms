@@ -1,6 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ICreateCarrierRequestAuctionBody,
+  IGetCarrierRequestsByTransferRequestId,
   SendCarrierRequest
 } from "@/types/logistics/carrier/carrier";
 import { ITransferRequestJourneyReview } from "@/types/logistics/schema";
@@ -21,6 +22,19 @@ export const sendTenderProposalToCarriers = async (data: ICreateCarrierRequestAu
     if (response.success) return response.data;
   } catch (error) {
     console.error("Error sending tender proposal:", error);
+    throw error;
+  }
+};
+
+export const getPricingComparisonByTransferRequestId = async (carrierRequestIds: number[]) => {
+  try {
+    const response: GenericResponse<IGetCarrierRequestsByTransferRequestId[]> = await API.post(
+      "/carrier/request/get-pricing-comparison",
+      { carrierRequestIds }
+    );
+    if (response.success) return response.data[0];
+  } catch (error) {
+    console.error("Error fetching pricing comparison:", error);
     throw error;
   }
 };

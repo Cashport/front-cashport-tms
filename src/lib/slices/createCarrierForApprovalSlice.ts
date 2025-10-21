@@ -1,19 +1,19 @@
 import { CarriersPricing } from "@/types/logistics/schema";
 
 export interface CarrierForApprovalSlice {
-  selectedCarrier: CarriersPricing | null;
+  selectedCarriers: CarriersPricing[];
   transferRequestId: number | null;
   // eslint-disable-next-line no-unused-vars
-  setSelectedCarrier: (carrier: CarriersPricing | null) => void;
+  setSelectedCarriers: (carriers: CarriersPricing[]) => void;
   // eslint-disable-next-line no-unused-vars
   setTransferRequestId: (id: number | null) => void;
   clearCarrierForApproval: () => void;
 }
 
 export const createCarrierForApprovalSlice = (set: any): CarrierForApprovalSlice => ({
-  selectedCarrier: null,
+  selectedCarriers: [],
   transferRequestId: null,
-  setSelectedCarrier: (carrier: CarriersPricing | null) => set({ selectedCarrier: carrier }),
+  setSelectedCarriers: (carriers: CarriersPricing[]) => set({ selectedCarriers: carriers }),
   setTransferRequestId: (id: number | null) => set({ transferRequestId: id }),
-  clearCarrierForApproval: () => set({ selectedCarrier: null, transferRequestId: null })
+  clearCarrierForApproval: () => set({ selectedCarriers: [], transferRequestId: null })
 });
