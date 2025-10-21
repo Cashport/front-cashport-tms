@@ -16,6 +16,7 @@ export interface ITask {
   id_project: number;
   description: string;
   related_user_id: number;
+  related_user_name: string;
   amount: number | null;
   task_type_name: string;
   transfer_request_id: number;
