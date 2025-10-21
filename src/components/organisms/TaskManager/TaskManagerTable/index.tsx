@@ -11,6 +11,7 @@ import { ITask } from "@/types/tasks/ITasks";
 
 import "./taskManagerTable.scss";
 import { useRouter } from "next/navigation";
+import dayjs from "dayjs";
 
 const TaskTable: React.FC<{
   data: ITask[];
@@ -77,7 +78,18 @@ const TaskTable: React.FC<{
       key: "transfer_order_ids",
       sorter: (a, b) => String(a.transfer_order_ids).localeCompare(String(b.transfer_order_ids)),
       showSorterTooltip: false,
-      width: 130
+      width: 130,
+      render: (value, row) => (
+        <a
+          className="text-blue-600 hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (value) router.push(`/logistics/orders/details/${value}`);
+          }}
+        >
+          {value || "-"}
+        </a>
+      )
     },
     {
       title: "TR",
@@ -86,7 +98,19 @@ const TaskTable: React.FC<{
       width: 100,
       sorter: (a, b) => a.transfer_request_id - b.transfer_request_id,
       showSorterTooltip: false,
+      render: (value, row) => (
+        <a
+          className="text-blue-600 hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (value) router.push(`/logistics/transfer-orders/details/${value}`);
+          }}
+        >
+          {value || "-"}
+        </a>
+      )
     },
+
     {
       title: "Trayecto",
       key: "trayecto",
@@ -94,10 +118,10 @@ const TaskTable: React.FC<{
       render: (_, row) => (
         <div>
           <div>
-            Origen <b>{row.start_location_name}</b>
+            <b>Origen:</b> {row.start_location_name}
           </div>
           <div>
-            Destino <b>{row.end_location_name}</b>
+            <b>Destino:</b> {row.end_location_name}
           </div>
         </div>
       ),
@@ -110,12 +134,11 @@ const TaskTable: React.FC<{
       key: "start_date",
       render: (_, row) => (
         <div>
-          Inicio: <b>{row.start_date}</b>
-          <br />
-          Fin: <b>{row.end_date}</b>
+          <div>{dayjs(row.start_date).format("DD/MM/YYYY HH:mm")}</div>
+          <div>{dayjs(row.end_date).format("DD/MM/YYYY HH:mm")}</div>
         </div>
       ),
-      width: 250,
+      width: 180,
       sorter: (a, b) =>
         new Date(a.start_date ?? 0).getTime() - new Date(b.start_date ?? 0).getTime(),
       showSorterTooltip: false
@@ -124,16 +147,17 @@ const TaskTable: React.FC<{
       title: "Estado",
       dataIndex: "status",
       key: "status",
-      width: 130,
+      width: 150,
       render: (status: ITask["status"]) => (
         <Flex>
+          {" "}
           <Tag
             icon={<Circle color={status.color} weight="fill" size={6} />}
             content={status.name}
             style={{ backgroundColor: status.backgroundColor, textWrap: "nowrap" }}
             color={status.color}
             withBorder={false}
-          />
+          />{" "}
         </Flex>
       )
     },
@@ -142,6 +166,13 @@ const TaskTable: React.FC<{
       key: "carriers",
       render: (_, row) => renderProveedores(row.carriers),
       width: 170
+    },
+    {
+      title: "Aprobador",
+      dataIndex: "related_user_id",
+      key: "related_user_id",
+      width: 170,
+      render: (_, row) => row.related_user_name || "-"
     },
     {
       title: "Costo actual",
