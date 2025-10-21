@@ -26,7 +26,9 @@ import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { ValidationQuestions } from "@/modules/logistics/approval/components/ValidationQuestions";
 import { ComparativeAnalysis } from "@/modules/logistics/approval/components/ComparativeAnalysis/ComparativeAnalysis";
-import ModalSelectCarrierPricingComparison from "@/components/organisms/logistics/orders/transfer_request/components/modals/ModalSelectCarrierPricingComparison";
+import ModalSelectCarrierPricingComparison, {
+  ICarriersPricingWithCheck
+} from "@/components/organisms/logistics/orders/transfer_request/components/modals/ModalSelectCarrierPricingComparison";
 
 import { defaultApprovalFormValues } from "@/types/logistics/approval";
 import type {
@@ -453,6 +455,10 @@ export function NewApprovalForm() {
     setIsModalCarrierComparisonOpen({ open: true, carrierRequestId: Number(forecastItemId) });
   };
 
+  const handleAddCarrierComparison = (selectedCarriers: ICarriersPricingWithCheck[]) => {
+    console.log("Selected carriers from modal:", selectedCarriers);
+  };
+
   return (
     <Card
       className="w-full shadow-sm"
@@ -753,8 +759,8 @@ export function NewApprovalForm() {
       <ModalSelectCarrierPricingComparison
         open={isModalCarrierComparisonOpen.open}
         onClose={() => setIsModalCarrierComparisonOpen({ open: false, carrierRequestId: 0 })}
-        transferRequestId={transferRequestId || 0}
         carrierRequestId={isModalCarrierComparisonOpen.carrierRequestId}
+        handleSuccess={handleAddCarrierComparison}
       />
     </Card>
   );

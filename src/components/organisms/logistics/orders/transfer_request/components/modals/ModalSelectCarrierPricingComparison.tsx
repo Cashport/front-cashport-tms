@@ -15,22 +15,22 @@ import styles from "./ModalSelectCarrierPricing.module.scss";
 
 const { Text } = Typography;
 
-interface CarriersPricingWithCheck extends ICarriersPricingModalComparison {
+export interface ICarriersPricingWithCheck extends ICarriersPricingModalComparison {
   checked?: boolean;
 }
 type Props = {
   open: boolean;
   onClose: () => void;
-  transferRequestId: number;
   carrierRequestId: number;
+  handleSuccess: (selectedCarriers: ICarriersPricingWithCheck[]) => void;
 };
 export default function ModalSelectCarrierPricingComparison({
   open,
   onClose,
-  transferRequestId,
-  carrierRequestId
+  carrierRequestId,
+  handleSuccess
 }: Readonly<Props>) {
-  const [carriersPricing, setCarriersPricing] = useState<CarriersPricingWithCheck[]>([]);
+  const [carriersPricing, setCarriersPricing] = useState<ICarriersPricingWithCheck[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -47,7 +47,7 @@ export default function ModalSelectCarrierPricingComparison({
   useEffect(() => {
     if (data?.pricingComparison && data.pricingComparison.length > 0) {
       // Extract all pricing and add checked property
-      const allPricing: CarriersPricingWithCheck[] = data.pricingComparison.map((pricing) => ({
+      const allPricing: ICarriersPricingWithCheck[] = data.pricingComparison.map((pricing) => ({
         ...pricing,
         checked: false
       }));
@@ -70,15 +70,13 @@ export default function ModalSelectCarrierPricingComparison({
   });
 
   const handleSubmitForm = async () => {
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      // TODO: Implement conversion and submission logic for pricing comparison
-      // Need to adapt convertToSendCarrierRequest or create new conversion function
-      message.success("Solicitudes enviadas");
+      handleSuccess(carriersPricing.filter((carrier) => carrier.checked));
       onClose();
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
-      else message.error("Error al enviar solicitud");
+      else message.error("Error al agregar las tarifas comparativas");
     } finally {
       setIsSubmitting(false);
     }
