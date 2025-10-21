@@ -3,15 +3,11 @@
 import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from "react-hook-form";
 import type { INewApprovalForm } from "@/types/logistics/approval";
 import { Label } from "@/modules/chat/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
+import { Select } from "antd";
 import { RadioGroup, RadioGroupItem } from "@/modules/chat/ui/radio-group";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
+import useSWR from "swr";
+import { getAllCarriers } from "@/services/logistics/users";
 
 interface OutsourcingQuestionsProps {
   control: Control<INewApprovalForm>;
@@ -19,12 +15,18 @@ interface OutsourcingQuestionsProps {
   setValue: UseFormSetValue<INewApprovalForm>;
 }
 
-export function OutsourcingQuestions({
-  control,
-  watch,
-  setValue
-}: OutsourcingQuestionsProps) {
+export function OutsourcingQuestions({ control, watch, setValue }: OutsourcingQuestionsProps) {
   const existenProveedoresZona = watch("existenProveedoresZona");
+
+  const { data: carriersData, isLoading: isLoadingCarriers } = useSWR(
+    "getAllCarriers",
+    getAllCarriers,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
 
   return (
     <>
@@ -36,21 +38,19 @@ export function OutsourcingQuestions({
           name="motivoTercerizacion"
           control={control}
           render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange} required>
-              <SelectTrigger
-                id="motivoTercerizacion"
-                className="border-2 focus:ring-2 focus:ring-blue-500"
-              >
-                <SelectValue placeholder="Seleccionar motivo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no-proveedores">No tenemos proveedores en la zona</SelectItem>
-                <SelectItem value="lineamiento-social">Lineamiento Social</SelectItem>
-                <SelectItem value="falta-disponibilidad">
-                  Falta de disponibilidad con proveedor
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <Select
+              id="motivoTercerizacion"
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="Seleccionar motivo"
+              className="max-w-md"
+              style={{ width: "100%", height: 40 }}
+              options={[
+                { label: "No tenemos proveedores en la zona", value: "no-proveedores" },
+                { label: "Lineamiento Social", value: "lineamiento-social" },
+                { label: "Falta de disponibilidad con proveedor", value: "falta-disponibilidad" }
+              ]}
+            />
           )}
         />
       </div>
@@ -91,31 +91,38 @@ export function OutsourcingQuestions({
 
       {existenProveedoresZona === "si" && (
         <div className="space-y-2">
-          <Label
-            htmlFor="proveedorSinDisponibilidad"
-            className="text-sm font-medium text-gray-700"
-          >
+          <Label htmlFor="proveedorSinDisponibilidad" className="text-sm font-medium text-gray-700">
             Proveedor local que no presento disponibilidad
           </Label>
           <Controller
             name="proveedorSinDisponibilidad"
             control={control}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange} required>
-                <SelectTrigger
-                  id="proveedorSinDisponibilidad"
-                  className="border-2 focus:ring-2 focus:ring-blue-500"
-                >
-                  <SelectValue placeholder="Seleccionar proveedor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="coltanques">COLTANQUES</SelectItem>
-                  <SelectItem value="ng-transportes">NG TRANSPORTES</SelectItem>
-                  <SelectItem value="entrapetrol">ENTRAPETROL</SelectItem>
-                  <SelectItem value="transporte-express">TRANSPORTE EXPRESS</SelectItem>
-                  <SelectItem value="logistica-del-norte">LOGÍSTICA DEL NORTE</SelectItem>
-                </SelectContent>
-              </Select>
+              <Select
+                id="proveedorSinDisponibilidad"
+                value={field.value}
+                onChange={field.onChange}
+                placeholder={
+                  isLoadingCarriers ? "Cargando proveedores..." : "Seleccionar proveedor"
+                }
+                className="max-w-md"
+                style={{ width: "100%", height: 40 }}
+                loading={isLoadingCarriers}
+                disabled={isLoadingCarriers}
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                }
+                options={
+                  carriersData?.data && carriersData.data.length > 0
+                    ? carriersData.data.map((carrier) => ({
+                        label: carrier.description,
+                        value: carrier.id.toString()
+                      }))
+                    : []
+                }
+                notFoundContent="No hay proveedores disponibles"
+              />
             )}
           />
         </div>
