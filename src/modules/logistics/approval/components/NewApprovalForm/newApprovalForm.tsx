@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppStore } from "@/lib/store/store";
@@ -24,13 +24,12 @@ import type {
 import { defaultApprovalFormValues } from "@/types/logistics/approval";
 import { approvalFormSchema } from "@/modules/logistics/approval/schemas/approvalFormSchema";
 
-import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
-import { Checkbox } from "@/modules/chat/ui/checkbox";
 
 import "@/modules/chat/styles/chatStyles.css";
 import { useRouter } from "next/navigation";
@@ -38,6 +37,7 @@ import { useModalDetail } from "@/context/ModalContext";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { ValidationQuestions } from "@/modules/logistics/approval/components/ValidationQuestions";
+import { ComparativeAnalysis } from "@/modules/logistics/approval/components/ComparativeAnalysis/ComparativeAnalysis";
 
 dayjs.extend(utc);
 
@@ -82,9 +82,6 @@ export function NewApprovalForm() {
 
   // context for modal carrier pricing request
   const { openModal } = useModalDetail();
-
-  // UI-only state (not part of form)
-  const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
 
   // Initialize default values with selectedCarriers
   const initialFormValues = useMemo<INewApprovalForm>(() => {
@@ -181,13 +178,6 @@ export function NewApprovalForm() {
       )
     };
     setValue("comparisonRates", updated);
-  };
-
-  const toggleAnalysis = (forecastItemId: string) => {
-    setExpandedAnalysis({
-      ...expandedAnalysis,
-      [forecastItemId]: !expandedAnalysis[forecastItemId]
-    });
   };
 
   /**
@@ -580,17 +570,7 @@ export function NewApprovalForm() {
                     <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
                     <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{item.descripcionTarifa}</td>
-                    <td className="px-4 py-3">
-                      <a
-                        href={item.cotizacionUrl}
-                        className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                        download
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span>PDF</span>
-                        <Download className="h-3 w-3" />
-                      </a>
-                    </td>
+
                     <td className="px-4 py-3 text-sm text-gray-900">
                       $ {item.tarifa.toLocaleString("es-CO")}
                     </td>
@@ -626,245 +606,16 @@ export function NewApprovalForm() {
           </div>
         </div>
 
-        {calculateGrandTotal() > 100000000 && (
-          <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Análisis comparativo</h2>
-            <p className="text-sm text-gray-600 mb-6">
-              El monto supera 25 mil USD. Por favor, agregue tarifas comparativas para cada registro
-              del forecast o marque la opción de Single source.
-            </p>
-
-            {!isSingleSource && (
-              <div className="space-y-6 mb-6">
-                {forecastItems.map((item) => (
-                  <div key={item.id} className="border border-gray-200 rounded-lg shadow-sm">
-                    {/* Header for each forecast item */}
-                    <div
-                      className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => toggleAnalysis(item.id)}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-gray-900">{item.proveedor}</h3>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900">
-                              $ {item.tarifa.toLocaleString("es-CO")}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {item.tipoVehiculo} • Km {item.descripcionTarifa}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          Vendor: {item.vendor} Contrato: {item.contrato}
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        {expandedAnalysis[item.id] ? (
-                          <ChevronUp className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-gray-500" />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Comparison table for this forecast item */}
-                    {expandedAnalysis[item.id] && (
-                      <div className="p-4 bg-white">
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                              <tr>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Proveedor
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Tipo
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Tipo vehículo
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Tipo tarifa
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Contrato
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Tarifa
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                  Diferencia
-                                </th>
-                                <th className="px-4 py-3"></th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                              {(comparisonRates[item.id] || []).map((rate) => (
-                                <tr key={rate.id} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      value={rate.proveedor}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "proveedor",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="Proveedor"
-                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      value={rate.tipo}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "tipo",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="Tipo"
-                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      value={rate.tipoVehiculo}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "tipoVehiculo",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="Tipo vehículo"
-                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      value={rate.tipoTarifa}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "tipoTarifa",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="Tipo tarifa"
-                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      value={rate.contrato}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "contrato",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="Contrato"
-                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      type="number"
-                                      value={rate.tarifa}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "tarifa",
-                                          Number(e.target.value)
-                                        )
-                                      }
-                                      placeholder="Tarifa"
-                                      className="text-sm w-32 border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Input
-                                      type="number"
-                                      value={rate.diferencia}
-                                      onChange={(e) =>
-                                        updateComparisonRate(
-                                          item.id,
-                                          rate.id,
-                                          "diferencia",
-                                          Number(e.target.value)
-                                        )
-                                      }
-                                      placeholder="%"
-                                      className="text-sm w-20 border-2 focus:ring-2 focus:ring-blue-500"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => removeComparisonRate(item.id, rate.id)}
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenModalCarrierPricing(item.id)}
-                          className="mt-4 border-2 hover:bg-gray-50"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Agregar tarifa comparativa
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-              <Controller
-                name="isSingleSource"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id="singleSource"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="mt-0.5 border-2 border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
-                  />
-                )}
-              />
-              <Label
-                htmlFor="singleSource"
-                className="text-sm text-gray-900 font-medium cursor-pointer leading-relaxed"
-              >
-                Enviar solicitud de aprobación como Single source
-              </Label>
-            </div>
-          </div>
-        )}
+        <ComparativeAnalysis
+          forecastItems={forecastItems}
+          comparisonRates={comparisonRates}
+          isSingleSource={isSingleSource}
+          control={control}
+          onUpdateComparisonRate={updateComparisonRate}
+          onRemoveComparisonRate={removeComparisonRate}
+          onOpenModalCarrierPricing={handleOpenModalCarrierPricing}
+          calculateGrandTotal={calculateGrandTotal}
+        />
 
         {/* Observaciones section */}
         <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
