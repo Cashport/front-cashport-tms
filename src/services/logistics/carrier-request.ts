@@ -24,3 +24,16 @@ export const sendTenderProposalToCarriers = async (data: ICreateCarrierRequestAu
     throw error;
   }
 };
+
+export const getPricingComparisonByTransferRequestId = async (carrierRequestIds: number[]) => {
+  try {
+    const response: GenericResponse<{ journey: ITransferRequestJourneyReview[] }> = await API.post(
+      "/carrier/request/get-pricing-comparison",
+      { carrierRequestIds }
+    );
+    if (response.success) return response.data;
+  } catch (error) {
+    console.error("Error fetching pricing comparison:", error);
+    throw error;
+  }
+};

@@ -41,6 +41,7 @@ type Props = {
   view?: string;
   setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
   extractCreatedCarriers?: (_: { journey: ITransferRequestJourneyReview[] }) => void;
+  useGetPricingComparison?: boolean;
 };
 export default function ModalSelectCarrierPricing({
   open,

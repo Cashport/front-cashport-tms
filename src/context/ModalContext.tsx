@@ -11,6 +11,7 @@ type ModalSelectCarrierPricingProps = {
   mutateStepthree?: (journey: ITransferRequestJourneyReview[]) => void;
   setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
   extractCreatedCarriers?: (data: { journey: ITransferRequestJourneyReview[] }) => void;
+  useGetPricingComparison?: boolean;
 };
 
 type ModalProps = ModalSelectCarrierPricingProps;

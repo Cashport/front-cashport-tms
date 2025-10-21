@@ -824,7 +824,8 @@ export function NewApprovalForm() {
     openModal("carrier_pricing_request", {
       transferRequestId: transferRequestId || 0,
       extractCreatedCarriers: (createdCarriers) =>
-        handleExtractCreatedCarriers(createdCarriers, forecastItemId)
+        handleExtractCreatedCarriers(createdCarriers, forecastItemId),
+      useGetPricingComparison: true
     });
   };
 
