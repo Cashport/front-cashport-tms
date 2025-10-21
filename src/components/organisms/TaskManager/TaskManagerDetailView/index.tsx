@@ -38,6 +38,9 @@ import {
   ITaskPricingComparation,
   ITaskApprover
 } from "@/types/tasks/ITasks";
+import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
+import { Checkbox } from "@/modules/chat/ui/checkbox";
+import { Label } from "@/modules/chat/ui/label";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
@@ -58,6 +61,14 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectObservation, setRejectObservation] = useState("");
+  const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
+
+  const toggleAnalysis = (id: string) => {
+    setExpandedAnalysis((prev) => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   useEffect(() => {
     const fetchTaskDetail = async () => {
@@ -243,7 +254,6 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
               </Col>
             </Row>
           </div>
-
           {/* ===== INFORMACIÓN DEL VIAJE ===== */}
           <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
             <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
@@ -300,7 +310,6 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
               </Panel>
             </Collapse>
           </div>
-
           {/* ===== TARIFAS ===== */}
           <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
             <Title level={4}>Tarifas</Title>
@@ -370,116 +379,168 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
               />
             </Table>
           </div>
-
           {/* ===== ANÁLISIS COMPARATIVO ===== */}
-          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
-            <Title level={4}>Análisis comparativo</Title>
-            {pricing.map((p: ITaskPricing) => {
-              if (!p.comparations || p.comparations.length === 0) return null;
-
-              // Base + comparaciones
-              const tableData: (ITaskPricing | ITaskPricingComparation)[] = [p, ...p.comparations];
+          <div className="space-y-6 mb-6">
+            {pricing.map((item) => {
+              const baseRate = item.rate;
+              const comparations = item.comparations || [];
 
               return (
-                <Table
-                  key={p.id_approval_item}
-                  dataSource={tableData}
-                  rowKey={(record, index) => `${record.id_carrier_request}-${index}`}
-                  pagination={false}
-                  bordered
-                  size="small"
-                  style={{ marginBottom: 24 }}
+                <div
+                  key={item.id_approval_item}
+                  className="border border-gray-200 rounded-lg shadow-sm"
                 >
-                  <Table.Column
-                    title="Proveedor"
-                    dataIndex="provider"
-                    key="provider"
-                    render={(text) => <strong>{text}</strong>}
-                  />
-                  <Table.Column title="Contrato" dataIndex="contract" key="contract" />
-                  <Table.Column title="Tipo Vehículo" dataIndex="vehicle_type" key="vehicle_type" />
-                  <Table.Column
-                    title="Tarifa"
-                    dataIndex="rate"
-                    key="rate"
-                    render={(value: number) =>
-                      value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
-                    }
-                  />
-                  <Table.Column
-                    title="Cantidad de usos"
-                    dataIndex="usage_quantity"
-                    key="usage_quantity"
-                  />
-                  <Table.Column
-                    title="Total"
-                    dataIndex="total"
-                    key="total"
-                    render={(value: number) =>
-                      value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
-                    }
-                  />
-                  <Table.Column
-                    title="Diferencia"
-                    key="diferencia"
-                    render={(_, record: ITaskPricing | ITaskPricingComparation, index) => {
-                      if (index === 0) return "-";
-                      const rate = "rate" in record ? record.rate : 0;
-                      const baseRate = p.rate;
-                      const diff = ((rate - baseRate) / baseRate) * 100;
-                      return `${diff >= 0 ? "+" : ""}${diff.toFixed(2)}%`;
-                    }}
-                  />
-                </Table>
+                  {/* Encabezado */}
+                  <div
+                    className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => toggleAnalysis(item.id_approval_item.toString())}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900">{item.provider}</h3>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-gray-900">
+                            {item.rate.toLocaleString("es-CO", {
+                              style: "currency",
+                              currency: "COP"
+                            })}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {item.vehicle_type} • {item.rate_description || "-"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Vendor: {item.vendor} • Contrato: {item.contract || "-"}
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      {expandedAnalysis[item.id_approval_item] ? (
+                        <ChevronUp className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tabla de comparaciones */}
+                  {expandedAnalysis[item.id_approval_item] && (
+                    <div className="p-4 bg-white">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                Proveedor
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                Tipo vehículo
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                Tipo tarifa
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                Contrato
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                Tarifa
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                Diferencia
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {comparations.map((c) => {
+                              const diff = ((c.rate - baseRate) / baseRate) * 100;
+                              return (
+                                <tr key={c.id_carrier_request} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3 text-sm text-gray-900">{c.provider}</td>
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {c.vehicle_type}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {c.rate_description || "-"}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {c.contract || "-"}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                    {c.rate.toLocaleString("es-CO", {
+                                      style: "currency",
+                                      currency: "COP"
+                                    })}
+                                  </td>
+                                  <td
+                                    className={`px-4 py-3 text-sm font-medium ${
+                                      diff > 0
+                                        ? "text-red-600"
+                                        : diff < 0
+                                          ? "text-green-600"
+                                          : "text-gray-900"
+                                    }`}
+                                  >
+                                    {diff > 0 ? "+" : ""}
+                                    {diff.toFixed(2)}%
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
 
           {/* ===== APROBADORES PENDIENTES ===== */}
           <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
-            <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
-              <Panel header="Aprobadores pendientes" key="1">
-                <Table
-                  dataSource={users_approval}
-                  rowKey={(record) => record.id_user.toString()}
-                  pagination={false}
-                  bordered={false}
-                  size="small"
-                >
-                  <Table.Column
-                    title="Nombre"
-                    dataIndex="name"
-                    key="name"
-                    render={(text) => <strong>{text}</strong>}
-                  />
-                  <Table.Column title="Email" dataIndex="email" key="email" />
-                  <Table.Column
-                    title="Estado"
-                    dataIndex="status"
-                    key="status"
-                    render={(status: string) => {
-                      let color = "#999";
-                      let text = "Pendiente";
-                      if (status === "Aprobado") {
-                        color = "#4caf50";
-                        text = "Aprobado";
-                      } else if (status === "Rechazado") {
-                        color = "#f44336";
-                        text = "Rechazado";
-                      }
-                      return (
-                        <span style={{ display: "flex", alignItems: "center", gap: 8, color }}>
-                          {status === "Aprobado" && <CheckCircle />}
-                          {status === "Rechazado" && <XCircle />}
-                          {status === "pending" && <Clock />}
-                          {text}
-                        </span>
-                      );
-                    }}
-                  />
-                </Table>
-              </Panel>
-            </Collapse>
+            <Title level={4}>Aprobadores pendientes</Title>
+
+            <Table
+              dataSource={users_approval}
+              rowKey={(record) => record.id_user.toString()}
+              pagination={false}
+              bordered={false}
+              size="small"
+              style={{ marginTop: 16 }}
+            >
+              <Table.Column
+                title="Nombre"
+                dataIndex="name"
+                key="name"
+                render={(text) => <strong>{text}</strong>}
+              />
+              <Table.Column title="Email" dataIndex="email" key="email" />
+              <Table.Column
+                title="Estado"
+                dataIndex="status"
+                key="status"
+                render={(status: string) => {
+                  let color = "#999";
+                  let text = "Pendiente";
+                  if (status === "Aprobado") {
+                    color = "#4caf50";
+                    text = "Aprobado";
+                  } else if (status === "Rechazado") {
+                    color = "#f44336";
+                    text = "Rechazado";
+                  }
+
+                  return (
+                    <span style={{ display: "flex", alignItems: "center", gap: 8, color }}>
+                      {status === "Aprobado" && <CheckCircle />}
+                      {status === "Rechazado" && <XCircle />}
+                      {status === "pending" && <Clock />}
+                      {text}
+                    </span>
+                  );
+                }}
+              />
+            </Table>
           </div>
         </Card>
 
