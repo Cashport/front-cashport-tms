@@ -1,57 +1,34 @@
 "use client";
 
 import type React from "react";
+import type { Control, UseFormWatch, UseFormSetValue } from "react-hook-form";
+import type { INewApprovalForm } from "@/types/logistics/approval";
 import { SpecificTripQuestions } from "./SpecificTripQuestions";
 import { RecurringRateQuestions } from "./RecurringRateQuestions";
 import { OutsourcingQuestions } from "./OutsourcingQuestions";
 
 interface ValidationQuestionsProps {
+  control: Control<INewApprovalForm>;
+  watch: UseFormWatch<INewApprovalForm>;
+  setValue: UseFormSetValue<INewApprovalForm>;
   tipoAprobacion: string;
-  validadoCoordinador: string;
-  setValidadoCoordinador: (value: string) => void;
-  proveedorRecomendado: string;
-  setProveedorRecomendado: (value: string) => void;
-  emailConfirmacionFile: File | null;
-  setEmailConfirmacionFile: (file: File | null) => void;
   handleEmailFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  motivoTercerizacion: string;
-  setMotivoTercerizacion: (value: string) => void;
-  existenProveedoresZona: string;
-  setExistenProveedoresZona: (value: string) => void;
-  proveedorSinDisponibilidad: string;
-  setProveedorSinDisponibilidad: (value: string) => void;
-  aseguroHabilitar: boolean;
-  setAseguroHabilitar: (value: boolean) => void;
 }
 
 export function ValidationQuestions({
+  control,
+  watch,
+  setValue,
   tipoAprobacion,
-  validadoCoordinador,
-  setValidadoCoordinador,
-  proveedorRecomendado,
-  setProveedorRecomendado,
-  emailConfirmacionFile,
-  setEmailConfirmacionFile,
-  handleEmailFileChange,
-  motivoTercerizacion,
-  setMotivoTercerizacion,
-  existenProveedoresZona,
-  setExistenProveedoresZona,
-  proveedorSinDisponibilidad,
-  setProveedorSinDisponibilidad,
-  aseguroHabilitar,
-  setAseguroHabilitar
+  handleEmailFileChange
 }: ValidationQuestionsProps) {
   switch (tipoAprobacion) {
     case "viaje-especifico":
       return (
         <SpecificTripQuestions
-          validadoCoordinador={validadoCoordinador}
-          setValidadoCoordinador={setValidadoCoordinador}
-          proveedorRecomendado={proveedorRecomendado}
-          setProveedorRecomendado={setProveedorRecomendado}
-          emailConfirmacionFile={emailConfirmacionFile}
-          setEmailConfirmacionFile={setEmailConfirmacionFile}
+          control={control}
+          watch={watch}
+          setValue={setValue}
           handleEmailFileChange={handleEmailFileChange}
           idPrefix="specific"
         />
@@ -60,12 +37,9 @@ export function ValidationQuestions({
     case "tarifa-recurrente":
       return (
         <RecurringRateQuestions
-          validadoCoordinador={validadoCoordinador}
-          setValidadoCoordinador={setValidadoCoordinador}
-          proveedorRecomendado={proveedorRecomendado}
-          setProveedorRecomendado={setProveedorRecomendado}
-          emailConfirmacionFile={emailConfirmacionFile}
-          setEmailConfirmacionFile={setEmailConfirmacionFile}
+          control={control}
+          watch={watch}
+          setValue={setValue}
           handleEmailFileChange={handleEmailFileChange}
           idPrefix="recurring"
         />
@@ -74,14 +48,9 @@ export function ValidationQuestions({
     case "tercerizacion":
       return (
         <OutsourcingQuestions
-          motivoTercerizacion={motivoTercerizacion}
-          setMotivoTercerizacion={setMotivoTercerizacion}
-          existenProveedoresZona={existenProveedoresZona}
-          setExistenProveedoresZona={setExistenProveedoresZona}
-          proveedorSinDisponibilidad={proveedorSinDisponibilidad}
-          setProveedorSinDisponibilidad={setProveedorSinDisponibilidad}
-          aseguroHabilitar={aseguroHabilitar}
-          setAseguroHabilitar={setAseguroHabilitar}
+          control={control}
+          watch={watch}
+          setValue={setValue}
         />
       );
 

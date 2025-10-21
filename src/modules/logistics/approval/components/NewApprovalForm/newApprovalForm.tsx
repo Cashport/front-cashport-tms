@@ -2,7 +2,9 @@
 
 import type React from "react";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
 import { Select as AntSelect, message } from "antd";
@@ -13,6 +15,14 @@ import {
   type IApprovalRequest
 } from "@/services/logistics/pricingApprovals/pricingApprovals";
 import { IApprovalType, IApprover, ITransferRequestJourneyReview } from "@/types/logistics/schema";
+import type {
+  INewApprovalForm,
+  ForecastItem,
+  ComparisonRate,
+  Approver
+} from "@/types/logistics/approval";
+import { defaultApprovalFormValues } from "@/types/logistics/approval";
+import { approvalFormSchema } from "@/modules/logistics/approval/schemas/approvalFormSchema";
 
 import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
@@ -39,35 +49,6 @@ const normalizeToKebabCase = (name: string): string => {
     .replace(/[\u0300-\u036f]/g, "") // Remove accents
     .replace(/\s+/g, "-"); // Replace spaces with hyphens
 };
-
-interface ForecastItem {
-  id: string;
-  proveedor: string;
-  vendor: string;
-  contrato: string;
-  tipoVehiculo: string;
-  descripcionTarifa: string;
-  tarifa: number;
-  cantidadUsos: number;
-  cotizacionUrl: string;
-}
-
-interface ComparisonRate {
-  id: string;
-  proveedor: string;
-  tipo: string;
-  tipoVehiculo: string;
-  tipoTarifa: string;
-  contrato: string;
-  tarifa: number;
-  diferencia: number;
-}
-
-interface Approver {
-  id: string;
-  name: string;
-  email: string;
-}
 
 export function NewApprovalForm() {
   // Zustand store - Carrier for Approval slice
@@ -102,63 +83,68 @@ export function NewApprovalForm() {
   // context for modal carrier pricing request
   const { openModal } = useModalDetail();
 
-  const [tipoAprobacion, setTipoAprobacion] = useState<string>("");
-  const [validadoCoordinador, setValidadoCoordinador] = useState<string>("");
-  const [proveedorRecomendado, setProveedorRecomendado] = useState<string>("");
-  const [emailConfirmacionFile, setEmailConfirmacionFile] = useState<File | null>(null);
-
-  const [existenProveedoresZona, setExistenProveedoresZona] = useState<string>("");
-  const [motivoTercerizacion, setMotivoTercerizacion] = useState<string>("");
-  const [proveedorSinDisponibilidad, setProveedorSinDisponibilidad] = useState<string>("");
-  const [aseguroHabilitar, setAseguroHabilitar] = useState<boolean>(false);
-
-  const [isSingleSource, setIsSingleSource] = useState<boolean>(false);
-  const [observaciones, setObservaciones] = useState<string>("");
-
-  const [approvers, setApprovers] = useState<Approver[]>([{ id: "1", name: "", email: "" }]);
-
-  // Initialize forecastItems with selectedCarriers data if available
-  const [forecastItems, setForecastItems] = useState<ForecastItem[]>(() => {
-    if (selectedCarriers && selectedCarriers.length > 0) {
-      return selectedCarriers.map((carrier) => ({
-        id: carrier.id.toString(),
-        proveedor: carrier.carrier,
-        vendor: carrier.id_carrier.toString(),
-        contrato: carrier.driver_contract,
-        tipoVehiculo: carrier.vehicles,
-        descripcionTarifa: carrier.service_type,
-        tarifa: carrier.amount,
-        cantidadUsos: 0,
-        cotizacionUrl: ""
-      }));
-    }
-
-    // Fallback: empty array if no selectedCarriers
-    return [];
-  });
-
-  const [comparisonRates, setComparisonRates] = useState<Record<string, ComparisonRate[]>>({});
+  // UI-only state (not part of form)
   const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    if (tipoAprobacion === "viaje-especifico" || tipoAprobacion === "tercerizacion") {
-      setForecastItems(forecastItems.map((item) => ({ ...item, cantidadUsos: 1 })));
-    }
-  }, [tipoAprobacion]);
+  // Initialize default values with selectedCarriers
+  const initialFormValues = useMemo<INewApprovalForm>(() => {
+    const forecastItems: ForecastItem[] =
+      selectedCarriers && selectedCarriers.length > 0
+        ? selectedCarriers.map((carrier) => ({
+            id: carrier.id.toString(),
+            proveedor: carrier.carrier,
+            vendor: carrier.id_carrier.toString(),
+            contrato: carrier.driver_contract,
+            tipoVehiculo: carrier.vehicles,
+            descripcionTarifa: carrier.service_type,
+            tarifa: carrier.amount,
+            cantidadUsos: 0,
+            cotizacionUrl: ""
+          }))
+        : [];
 
+    return {
+      ...defaultApprovalFormValues,
+      forecastItems
+    };
+  }, [selectedCarriers]);
+
+  // React Hook Form setup
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors }
+  } = useForm<INewApprovalForm>({
+    resolver: yupResolver(approvalFormSchema) as any,
+    defaultValues: initialFormValues,
+    mode: "onBlur"
+  });
+
+  // Watch form values for reactive UI
+  const tipoAprobacion = watch("tipoAprobacion");
+  const forecastItems = watch("forecastItems");
+  const comparisonRates = watch("comparisonRates");
+  const isSingleSource = watch("isSingleSource");
+  const approvers = watch("approvers");
+
+  // Helper: Update cantidad de usos for forecast items
   const updateCantidadUsos = (id: string, value: string) => {
     if (tipoAprobacion === "viaje-especifico" || tipoAprobacion === "tercerizacion") {
       return;
     }
     const cantidad = Number.parseInt(value) || 0;
-    setForecastItems(
-      forecastItems.map((item) => (item.id === id ? { ...item, cantidadUsos: cantidad } : item))
+    const updatedItems = forecastItems.map((item) =>
+      item.id === id ? { ...item, cantidadUsos: cantidad } : item
     );
+    setValue("forecastItems", updatedItems);
   };
 
+  // Helper: Handle email file change
   const handleEmailFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setEmailConfirmacionFile(e.target.files[0]);
+      setValue("emailConfirmacionFile", e.target.files[0]);
     }
   };
 
@@ -172,25 +158,29 @@ export function NewApprovalForm() {
     }, 0);
   };
 
+  // Helper: Remove comparison rate
   const removeComparisonRate = (forecastItemId: string, rateId: string) => {
-    setComparisonRates({
+    const updated = {
       ...comparisonRates,
       [forecastItemId]: (comparisonRates[forecastItemId] || []).filter((rate) => rate.id !== rateId)
-    });
+    };
+    setValue("comparisonRates", updated);
   };
 
+  // Helper: Update comparison rate field
   const updateComparisonRate = (
     forecastItemId: string,
     rateId: string,
     field: keyof ComparisonRate,
     value: any
   ) => {
-    setComparisonRates({
+    const updated = {
       ...comparisonRates,
       [forecastItemId]: (comparisonRates[forecastItemId] || []).map((rate) =>
         rate.id === rateId ? { ...rate, [field]: value } : rate
       )
-    });
+    };
+    setValue("comparisonRates", updated);
   };
 
   const toggleAnalysis = (forecastItemId: string) => {
@@ -201,89 +191,12 @@ export function NewApprovalForm() {
   };
 
   /**
-   * Validate required fields before submission
+   * Prepare approval data by transforming form data into API-compatible format
    */
-  const validateForm = (): string | null => {
-    // Validate approval type
-    if (!tipoAprobacion) {
-      return "Debe seleccionar un tipo de aprobación";
-    }
-
-    // Validate type-specific questions
-    switch (tipoAprobacion) {
-      case "viaje-especifico":
-      case "tarifa-recurrente":
-        if (!validadoCoordinador) {
-          return "Debe responder si validó con el coordinador de la zona";
-        }
-        if (!proveedorRecomendado) {
-          return "Debe indicar si el proveedor es recomendado por sostenibilidad";
-        }
-        if (proveedorRecomendado === "si" && !emailConfirmacionFile) {
-          return "Debe adjuntar el correo de confirmación del departamento de sostenibilidad";
-        }
-        break;
-
-      case "tercerizacion":
-        if (!motivoTercerizacion) {
-          return "Debe seleccionar el motivo de tercerización";
-        }
-        if (!existenProveedoresZona) {
-          return "Debe indicar si existen proveedores en la zona";
-        }
-        if (existenProveedoresZona === "si" && !proveedorSinDisponibilidad) {
-          return "Debe seleccionar el proveedor local que no presentó disponibilidad";
-        }
-        if (!aseguroHabilitar) {
-          return "Debe confirmar que habilitará como subcontratista ante Halliburton";
-        }
-        break;
-    }
-
-    // Validate forecast items have quantity
-    if (forecastItems.length === 0) {
-      return "Debe tener al menos una tarifa en el forecast";
-    }
-
-    for (const item of forecastItems) {
-      if (item.cantidadUsos <= 0) {
-        return "Todas las tarifas deben tener una cantidad de usos mayor a 0";
-      }
-    }
-
-    // Validate comparison rates for high amounts
-    const grandTotal = calculateGrandTotal();
-    if (grandTotal > 100000000 && !isSingleSource) {
-      const hasAllComparisons = forecastItems.every((item) => {
-        const comparisons = comparisonRates[item.id] || [];
-        return comparisons.length > 0;
-      });
-
-      if (!hasAllComparisons) {
-        return "Para montos superiores a 25 mil USD, debe agregar tarifas comparativas o marcar como Single source";
-      }
-    }
-
-    // Validate at least one approver with valid data
-    if (approvers.length === 0) {
-      return "Debe agregar al menos un aprobador";
-    }
-
-    const hasValidApprover = approvers.some((approver) => approver.name && approver.email);
-    if (!hasValidApprover) {
-      return "Debe seleccionar al menos un aprobador válido";
-    }
-
-    return null; // All validations passed
-  };
-
-  /**
-   * Prepare approval data by transforming form state into API-compatible format
-   */
-  const prepareApprovalData = (): IApprovalRequest => {
+  const prepareApprovalData = (data: INewApprovalForm): IApprovalRequest => {
     // Find the approval type ID from the selected kebab-case string
     const approvalType = approvalTypes?.find(
-      (type) => normalizeToKebabCase(type.name) === tipoAprobacion
+      (type) => normalizeToKebabCase(type.name) === data.tipoAprobacion
     );
 
     if (!approvalType) {
@@ -291,12 +204,10 @@ export function NewApprovalForm() {
     }
 
     // Transform forecastItems to pricings array
-    const pricings = forecastItems.map((item) => {
+    const pricings = data.forecastItems.map((item) => {
       // Get comparison pricing IDs for this forecast item
-      const comparationPricings = (comparisonRates[item.id] || [])
+      const comparationPricings = (data.comparisonRates[item.id] || [])
         .map((rate) => {
-          // If comparison rates have IDs that are numeric, extract them
-          // Otherwise, they might need to be created first or this field might accept different data
           const numericId = Number.parseInt(rate.id.replace(/\D/g, ""));
           return isNaN(numericId) ? 0 : numericId;
         })
@@ -310,7 +221,7 @@ export function NewApprovalForm() {
     });
 
     // Transform approvers to get user IDs
-    const approversData = approvers
+    const approversData = data.approvers
       .map((approver) => {
         const approverOption = approverOptions?.find((opt) => opt.name === approver.name);
         return approverOption ? { id_user: approverOption.id } : null;
@@ -322,40 +233,36 @@ export function NewApprovalForm() {
       id_approval_type: approvalType.id,
       pricings,
       approvers: approversData,
-      send_single_source: isSingleSource,
-      is_another_contract_active: validadoCoordinador === "si",
-      is_provider_recommended_by_sustainability: proveedorRecomendado === "si",
-      tercerization_motive: motivoTercerizacion || "",
-      exists_another_provider_in_zone: existenProveedoresZona === "si",
-      subcontractor_ensure: aseguroHabilitar,
-      observations: observaciones || ""
+      send_single_source: data.isSingleSource,
+      is_another_contract_active: data.validadoCoordinador === "si",
+      is_provider_recommended_by_sustainability: data.proveedorRecomendado === "si",
+      tercerization_motive: data.motivoTercerizacion || "",
+      exists_another_provider_in_zone: data.existenProveedoresZona === "si",
+      subcontractor_ensure: data.aseguroHabilitar,
+      observations: data.observaciones || ""
     };
 
     return requestData;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate form before submission
-    const validationError = validateForm();
-    if (validationError) {
-      message.error(validationError);
-      return;
-    }
-
+  /**
+   * Handle form submission
+   * React Hook Form handles validation via Yup schema
+   */
+  const onSubmit = async (data: INewApprovalForm) => {
+    console.log("✅ Form validation passed! Form data:", data);
     try {
       // Prepare the structured data for API submission
-      const requestData = prepareApprovalData();
+      const requestData = prepareApprovalData(data);
 
-      console.log("Submitting new approval:", {
+      console.log("📤 Submitting new approval:", {
         requestData,
-        emailConfirmacionFile,
+        emailConfirmacionFile: data.emailConfirmacionFile,
         total: calculateGrandTotal()
       });
 
       // Submit the approval request with optional file
-      // await createApproval(requestData, emailConfirmacionFile || undefined);
+      // await createApproval(requestData, data.emailConfirmacionFile || undefined);
 
       message.success("Solicitud de aprobación creada exitosamente.");
 
@@ -363,39 +270,110 @@ export function NewApprovalForm() {
       // router.push(`/logistics/transfer-request/${transferRequestId}`);
       // clearCarrierForApproval();
     } catch (error) {
-      console.error("Error creating approval:", error);
+      console.error("❌ Error creating approval:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Error al crear la solicitud de aprobación.";
       message.error(errorMessage);
     }
   };
 
+  /**
+   * Handle form errors - called when validation fails
+   */
+  const onError = (errors: any) => {
+    console.group("❌ VALIDATION ERRORS DETECTED");
+    console.error("Raw errors object:", errors);
 
+    // Detailed table view
+    console.table(
+      Object.entries(errors).map(([field, error]: [string, any]) => ({
+        Campo: field,
+        Mensaje: error?.message || "Error desconocido",
+        Tipo: error?.type,
+        Ref: error?.ref?.name || "N/A"
+      }))
+    );
+
+    // Check for nested errors in arrays/objects (forecastItems, approvers, comparisonRates)
+    Object.entries(errors).forEach(([field, error]: [string, any]) => {
+      if (error && typeof error === "object" && !error.message) {
+        console.log(`📦 Nested errors in "${field}":`, error);
+      }
+    });
+
+    console.groupEnd();
+
+    // Helper function to extract first error message (including nested errors)
+    const getFirstErrorMessage = (errorsObj: any): string | null => {
+      for (const [field, error] of Object.entries(errorsObj)) {
+        // Direct error message
+        if ((error as any)?.message) {
+          return `${field}: ${(error as any).message}`;
+        }
+
+        // Nested array errors (e.g., forecastItems[0].cantidadUsos)
+        if (Array.isArray(error)) {
+          for (let i = 0; i < error.length; i++) {
+            if (error[i]) {
+              const nestedMsg = getFirstErrorMessage(error[i]);
+              if (nestedMsg) {
+                return `${nestedMsg}`;
+              }
+            }
+          }
+        }
+
+        // Nested object errors (e.g., comparisonRates.root)
+        if (error && typeof error === "object" && !Array.isArray(error)) {
+          const nestedMsg = getFirstErrorMessage(error);
+          if (nestedMsg) {
+            return `${nestedMsg}`;
+          }
+        }
+      }
+      return null;
+    };
+
+    // Show first error message to user
+    const firstErrorMessage =
+      getFirstErrorMessage(errors) || "Por favor, corrija los errores en el formulario";
+    message.error(firstErrorMessage);
+  };
+
+  // Helper: Add new approver
   const addApprover = () => {
     const newApprover: Approver = {
       id: Date.now().toString(),
       name: "",
       email: ""
     };
-    setApprovers([...approvers, newApprover]);
+    setValue("approvers", [...approvers, newApprover]);
   };
 
+  // Helper: Remove approver
   const removeApprover = (id: string) => {
     if (approvers.length > 1) {
-      setApprovers(approvers.filter((approver) => approver.id !== id));
+      setValue(
+        "approvers",
+        approvers.filter((approver) => approver.id !== id)
+      );
     }
   };
 
+  // Helper: Update approver field
   const updateApprover = (id: string, field: keyof Approver, value: string) => {
-    setApprovers(
+    setValue(
+      "approvers",
       approvers.map((approver) => (approver.id === id ? { ...approver, [field]: value } : approver))
     );
   };
 
+  // Helper: Handle approver selection from dropdown
   const handleApproverSelect = (approverId: string, approverApiId: number) => {
     const selectedApprover = approverOptions?.find((opt) => opt.id === approverApiId);
     if (selectedApprover) {
-      setApprovers(
+      setValue(
+        "approvers",
         approvers.map((approver) =>
           approver.id === approverId
             ? {
@@ -446,37 +424,37 @@ export function NewApprovalForm() {
       console.log("Extracted carriers for comparison:", lastCarrierPerTrip);
 
       // Set the last carrier of each trip to the selected forecast item's comparisonRates
-      setComparisonRates((prevRates) => {
-        const updatedRates = { ...prevRates };
+      const updatedRates = { ...comparisonRates };
 
-        // Initialize array if it doesn't exist
-        if (!updatedRates[forecastItemId]) {
-          updatedRates[forecastItemId] = [];
-        }
+      // Initialize array if it doesn't exist
+      if (!updatedRates[forecastItemId]) {
+        updatedRates[forecastItemId] = [];
+      }
 
-        lastCarrierPerTrip.forEach((carrier) => {
-          // Calculate percentage difference
-          const diferencia =
-            baseTarifa > 0 ? Math.round(((carrier.amount - baseTarifa) / baseTarifa) * 100) : 0;
+      lastCarrierPerTrip.forEach((carrier) => {
+        if (!carrier) return;
 
-          const newRate: ComparisonRate = {
-            id: carrier.id.toString(),
-            proveedor: carrier.carrier,
-            tipo: carrier.service_type,
-            tipoVehiculo: carrier.vehicles,
-            tipoTarifa: "-",
-            contrato: carrier.driver_contract,
-            tarifa: carrier.amount,
-            diferencia: diferencia
-          };
+        // Calculate percentage difference
+        const diferencia =
+          baseTarifa > 0 ? Math.round(((carrier.amount - baseTarifa) / baseTarifa) * 100) : 0;
 
-          updatedRates[forecastItemId].push(newRate);
-        });
+        const newRate: ComparisonRate = {
+          id: carrier.id.toString(),
+          proveedor: carrier.carrier,
+          tipo: carrier.service_type,
+          tipoVehiculo: carrier.vehicles,
+          tipoTarifa: "-",
+          contrato: carrier.driver_contract,
+          tarifa: carrier.amount,
+          diferencia: diferencia
+        };
 
-        return updatedRates;
+        updatedRates[forecastItemId].push(newRate);
       });
+
+      setValue("comparisonRates", updatedRates);
     },
-    [forecastItems]
+    [forecastItems, comparisonRates, setValue]
   );
 
   const handleOpenModalCarrierPricing = (forecastItemId: string) => {
@@ -506,515 +484,522 @@ export function NewApprovalForm() {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* Información de aprobación */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Información de aprobación</h2>
+        {/* Información de aprobación */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Información de aprobación</h2>
 
-            <div className="mb-6 space-y-2">
-              <Label htmlFor="tipoAprobacion" className="text-sm font-medium text-gray-700">
-                Solicitud de aprobación para
-              </Label>
-              <AntSelect
-                id="tipoAprobacion"
-                value={tipoAprobacion}
-                onChange={setTipoAprobacion}
-                placeholder="Seleccionar tipo"
-                className="max-w-md"
-                style={{ width: "100%" }}
-                size="large"
-                loading={isLoadingTypes}
-                options={approvalTypes?.map((type) => ({
-                  label: type.name,
-                  value: normalizeToKebabCase(type.name)
-                }))}
-              />
-            </div>
-
-            {tipoAprobacion && (
-              <div className="space-y-6 pt-6">
-                <ValidationQuestions
-                  tipoAprobacion={tipoAprobacion}
-                  validadoCoordinador={validadoCoordinador}
-                  setValidadoCoordinador={setValidadoCoordinador}
-                  proveedorRecomendado={proveedorRecomendado}
-                  setProveedorRecomendado={setProveedorRecomendado}
-                  emailConfirmacionFile={emailConfirmacionFile}
-                  setEmailConfirmacionFile={setEmailConfirmacionFile}
-                  handleEmailFileChange={handleEmailFileChange}
-                  motivoTercerizacion={motivoTercerizacion}
-                  setMotivoTercerizacion={setMotivoTercerizacion}
-                  existenProveedoresZona={existenProveedoresZona}
-                  setExistenProveedoresZona={setExistenProveedoresZona}
-                  proveedorSinDisponibilidad={proveedorSinDisponibilidad}
-                  setProveedorSinDisponibilidad={setProveedorSinDisponibilidad}
-                  aseguroHabilitar={aseguroHabilitar}
-                  setAseguroHabilitar={setAseguroHabilitar}
+          <div className="mb-6 space-y-2">
+            <Label htmlFor="tipoAprobacion" className="text-sm font-medium text-gray-700">
+              Solicitud de aprobación para
+            </Label>
+            <Controller
+              name="tipoAprobacion"
+              control={control}
+              render={({ field }) => (
+                <AntSelect
+                  id="tipoAprobacion"
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar tipo"
+                  className="max-w-md"
+                  style={{ width: "100%" }}
+                  size="large"
+                  loading={isLoadingTypes}
+                  options={approvalTypes?.map((type) => ({
+                    label: type.name,
+                    value: normalizeToKebabCase(type.name)
+                  }))}
                 />
-              </div>
+              )}
+            />
+            {errors.tipoAprobacion && (
+              <p className="text-sm text-red-600 mt-1">{errors.tipoAprobacion.message}</p>
             )}
           </div>
 
-          {/* Forecast section */}
-          <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
-            <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Tarifas</h2>
-              {calculateGrandTotal() > 100000000 && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                  Alerta: Mayor a 25 mil USD
-                </span>
-              )}
-            </div>
-
-            <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Proveedor
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Vendor
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Contrato
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Tipo de vehículo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Descripción tarifa
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Cotización
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Tarifa
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Cantidad de usos
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {forecastItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-sm text-gray-900">{item.proveedor}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{item.vendor}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
-                      <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{item.descripcionTarifa}</td>
-                      <td className="px-4 py-3">
-                        <a
-                          href={item.cotizacionUrl}
-                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                          download
-                        >
-                          <FileText className="h-4 w-4" />
-                          <span>PDF</span>
-                          <Download className="h-3 w-3" />
-                        </a>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        $ {item.tarifa.toLocaleString("es-CO")}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Input
-                          type="number"
-                          value={item.cantidadUsos}
-                          onChange={(e) => updateCantidadUsos(item.id, e.target.value)}
-                          min="0"
-                          disabled={
-                            tipoAprobacion === "viaje-especifico" ||
-                            tipoAprobacion === "tercerizacion"
-                          }
-                          className="w-20 text-center border-2 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-600"
-                          required
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                        $ {calculateTotal(item.tarifa, item.cantidadUsos).toLocaleString("es-CO")}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="bg-gray-50 font-semibold">
-                    <td colSpan={8} className="px-4 py-3 text-right text-sm text-gray-900">
-                      Total
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {calculateGrandTotal().toLocaleString("es-CO")}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {calculateGrandTotal() > 100000000 && (
-            <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Análisis comparativo</h2>
-              <p className="text-sm text-gray-600 mb-6">
-                El monto supera 25 mil USD. Por favor, agregue tarifas comparativas para cada
-                registro del forecast o marque la opción de Single source.
-              </p>
-
-              {!isSingleSource && (
-                <div className="space-y-6 mb-6">
-                  {forecastItems.map((item) => (
-                    <div key={item.id} className="border border-gray-200 rounded-lg shadow-sm">
-                      {/* Header for each forecast item */}
-                      <div
-                        className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                        onClick={() => toggleAnalysis(item.id)}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-semibold text-gray-900">{item.proveedor}</h3>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-gray-900">
-                                $ {item.tarifa.toLocaleString("es-CO")}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {item.tipoVehiculo} • Km {item.descripcionTarifa}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            Vendor: {item.vendor} Contrato: {item.contrato}
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          {expandedAnalysis[item.id] ? (
-                            <ChevronUp className="h-5 w-5 text-gray-500" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Comparison table for this forecast item */}
-                      {expandedAnalysis[item.id] && (
-                        <div className="p-4 bg-white">
-                          <div className="overflow-x-auto">
-                            <table className="w-full">
-                              <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Proveedor
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Tipo
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Tipo vehículo
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Tipo tarifa
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Contrato
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Tarifa
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                    Diferencia
-                                  </th>
-                                  <th className="px-4 py-3"></th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-gray-200">
-                                {(comparisonRates[item.id] || []).map((rate) => (
-                                  <tr key={rate.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        value={rate.proveedor}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "proveedor",
-                                            e.target.value
-                                          )
-                                        }
-                                        placeholder="Proveedor"
-                                        className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        value={rate.tipo}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "tipo",
-                                            e.target.value
-                                          )
-                                        }
-                                        placeholder="Tipo"
-                                        className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        value={rate.tipoVehiculo}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "tipoVehiculo",
-                                            e.target.value
-                                          )
-                                        }
-                                        placeholder="Tipo vehículo"
-                                        className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        value={rate.tipoTarifa}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "tipoTarifa",
-                                            e.target.value
-                                          )
-                                        }
-                                        placeholder="Tipo tarifa"
-                                        className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        value={rate.contrato}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "contrato",
-                                            e.target.value
-                                          )
-                                        }
-                                        placeholder="Contrato"
-                                        className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        type="number"
-                                        value={rate.tarifa}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "tarifa",
-                                            Number(e.target.value)
-                                          )
-                                        }
-                                        placeholder="Tarifa"
-                                        className="text-sm w-32 border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Input
-                                        type="number"
-                                        value={rate.diferencia}
-                                        onChange={(e) =>
-                                          updateComparisonRate(
-                                            item.id,
-                                            rate.id,
-                                            "diferencia",
-                                            Number(e.target.value)
-                                          )
-                                        }
-                                        placeholder="%"
-                                        className="text-sm w-20 border-2 focus:ring-2 focus:ring-blue-500"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => removeComparisonRate(item.id, rate.id)}
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                      >
-                                        <X className="h-4 w-4" />
-                                      </Button>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenModalCarrierPricing(item.id)}
-                            className="mt-4 border-2 hover:bg-gray-50"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Agregar tarifa comparativa
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                <Checkbox
-                  id="singleSource"
-                  checked={isSingleSource}
-                  onCheckedChange={(checked) => setIsSingleSource(checked as boolean)}
-                  className="mt-0.5 border-2 border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
-                />
-                <Label
-                  htmlFor="singleSource"
-                  className="text-sm text-gray-900 font-medium cursor-pointer leading-relaxed"
-                >
-                  Enviar solicitud de aprobación como Single source
-                </Label>
-              </div>
+          {tipoAprobacion && (
+            <div className="space-y-6 pt-6">
+              <ValidationQuestions
+                control={control}
+                watch={watch}
+                setValue={setValue}
+                tipoAprobacion={tipoAprobacion}
+                handleEmailFileChange={handleEmailFileChange}
+              />
             </div>
           )}
+        </div>
 
-          {/* Observaciones section */}
-          <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Observaciones</h2>
-            <div className="space-y-2">
-              <Label htmlFor="observaciones" className="text-sm font-medium text-gray-700">
-                Comentarios adicionales (opcional)
-              </Label>
-              <Textarea
-                id="observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                placeholder="Ingrese cualquier observación o comentario adicional sobre esta solicitud de aprobación..."
-                className="min-h-[120px] border-2 focus:ring-2 focus:ring-blue-500 resize-none"
-                rows={5}
-              />
-              <p className="text-xs text-gray-500">
-                Puede incluir información adicional relevante para la aprobación
-              </p>
-            </div>
+        {/* Forecast section */}
+        <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Tarifas</h2>
+            {calculateGrandTotal() > 100000000 && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                Alerta: Mayor a 25 mil USD
+              </span>
+            )}
           </div>
 
-          {/* Aprobadores section */}
-          <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Aprobadores</h2>
-            <p className="text-sm text-gray-600 mb-6">
-              Seleccione los aprobadores que revisarán esta solicitud. Debe incluir al menos un
-              aprobador.
-            </p>
-
-            <div className="space-y-4">
-              {approvers.map((approver, index) => (
-                <div
-                  key={approver.id}
-                  className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
-                >
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor={`approver-name-${approver.id}`}
-                        className="text-sm font-medium text-gray-700"
+          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Proveedor
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Vendor
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Contrato
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Tipo de vehículo
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Descripción tarifa
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Cotización
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Tarifa
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                    Cantidad de usos
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {forecastItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-sm text-gray-900">{item.proveedor}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{item.vendor}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
+                    <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{item.descripcionTarifa}</td>
+                    <td className="px-4 py-3">
+                      <a
+                        href={item.cotizacionUrl}
+                        className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                        download
                       >
-                        Nombre {index === 0 && <span className="text-red-500">*</span>}
-                      </Label>
-                      <AntSelect
-                        id={`approver-name-${approver.id}`}
-                        value={
-                          approver.name
-                            ? approverOptions?.find((opt) => opt.name === approver.name)?.id
-                            : undefined
-                        }
-                        onChange={(value: number) => handleApproverSelect(approver.id, value)}
-                        placeholder="Seleccionar aprobador"
-                        style={{ width: "100%", height: 36 }}
-                        loading={isLoadingApprovers}
-                        showSearch
-                        filterOption={(input, option) =>
-                          (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={approverOptions?.map((opt) => ({
-                          label: opt.name,
-                          value: opt.id
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor={`approver-email-${approver.id}`}
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Correo electrónico {index === 0 && <span className="text-red-500">*</span>}
-                      </Label>
+                        <FileText className="h-4 w-4" />
+                        <span>PDF</span>
+                        <Download className="h-3 w-3" />
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      $ {item.tarifa.toLocaleString("es-CO")}
+                    </td>
+                    <td className="px-4 py-3">
                       <Input
-                        id={`approver-email-${approver.id}`}
-                        type="email"
-                        value={approver.email}
-                        onChange={(e) => updateApprover(approver.id, "email", e.target.value)}
-                        placeholder="correo@ejemplo.com"
-                        className="border-2 focus:ring-2 focus:ring-blue-500"
-                        disabled
+                        type="number"
+                        value={item.cantidadUsos}
+                        onChange={(e) => updateCantidadUsos(item.id, e.target.value)}
+                        min="0"
+                        disabled={
+                          tipoAprobacion === "viaje-especifico" ||
+                          tipoAprobacion === "tercerizacion"
+                        }
+                        className="w-20 text-center border-2 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-600"
                         required
                       />
-                    </div>
-                  </div>
-                  {approvers.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeApprover(approver.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 mt-8"
+                    </td>
+                    <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                      $ {calculateTotal(item.tarifa, item.cantidadUsos).toLocaleString("es-CO")}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="bg-gray-50 font-semibold">
+                  <td colSpan={8} className="px-4 py-3 text-right text-sm text-gray-900">
+                    Total
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    {calculateGrandTotal().toLocaleString("es-CO")}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {calculateGrandTotal() > 100000000 && (
+          <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Análisis comparativo</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              El monto supera 25 mil USD. Por favor, agregue tarifas comparativas para cada registro
+              del forecast o marque la opción de Single source.
+            </p>
+
+            {!isSingleSource && (
+              <div className="space-y-6 mb-6">
+                {forecastItems.map((item) => (
+                  <div key={item.id} className="border border-gray-200 rounded-lg shadow-sm">
+                    {/* Header for each forecast item */}
+                    <div
+                      className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => toggleAnalysis(item.id)}
                     >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-gray-900">{item.proveedor}</h3>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-gray-900">
+                              $ {item.tarifa.toLocaleString("es-CO")}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {item.tipoVehiculo} • Km {item.descripcionTarifa}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          Vendor: {item.vendor} Contrato: {item.contrato}
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        {expandedAnalysis[item.id] ? (
+                          <ChevronUp className="h-5 w-5 text-gray-500" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-gray-500" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Comparison table for this forecast item */}
+                    {expandedAnalysis[item.id] && (
+                      <div className="p-4 bg-white">
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Proveedor
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Tipo
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Tipo vehículo
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Tipo tarifa
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Contrato
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Tarifa
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                                  Diferencia
+                                </th>
+                                <th className="px-4 py-3"></th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {(comparisonRates[item.id] || []).map((rate) => (
+                                <tr key={rate.id} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      value={rate.proveedor}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "proveedor",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Proveedor"
+                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      value={rate.tipo}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "tipo",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Tipo"
+                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      value={rate.tipoVehiculo}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "tipoVehiculo",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Tipo vehículo"
+                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      value={rate.tipoTarifa}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "tipoTarifa",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Tipo tarifa"
+                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      value={rate.contrato}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "contrato",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Contrato"
+                                      className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      type="number"
+                                      value={rate.tarifa}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "tarifa",
+                                          Number(e.target.value)
+                                        )
+                                      }
+                                      placeholder="Tarifa"
+                                      className="text-sm w-32 border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Input
+                                      type="number"
+                                      value={rate.diferencia}
+                                      onChange={(e) =>
+                                        updateComparisonRate(
+                                          item.id,
+                                          rate.id,
+                                          "diferencia",
+                                          Number(e.target.value)
+                                        )
+                                      }
+                                      placeholder="%"
+                                      className="text-sm w-20 border-2 focus:ring-2 focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeComparisonRate(item.id, rate.id)}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenModalCarrierPricing(item.id)}
+                          className="mt-4 border-2 hover:bg-gray-50"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar tarifa comparativa
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+              <Controller
+                name="isSingleSource"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="singleSource"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-0.5 border-2 border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
+                  />
+                )}
+              />
+              <Label
+                htmlFor="singleSource"
+                className="text-sm text-gray-900 font-medium cursor-pointer leading-relaxed"
+              >
+                Enviar solicitud de aprobación como Single source
+              </Label>
             </div>
+          </div>
+        )}
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addApprover}
-              className="mt-4 border-2 hover:bg-gray-50 bg-transparent"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar aprobador adicional
-            </Button>
+        {/* Observaciones section */}
+        <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Observaciones</h2>
+          <div className="space-y-2">
+            <Label htmlFor="observaciones" className="text-sm font-medium text-gray-700">
+              Comentarios adicionales (opcional)
+            </Label>
+            <Controller
+              name="observaciones"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  id="observaciones"
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Ingrese cualquier observación o comentario adicional sobre esta solicitud de aprobación..."
+                  className="min-h-[120px] border-2 focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={5}
+                />
+              )}
+            />
+            <p className="text-xs text-gray-500">
+              Puede incluir información adicional relevante para la aprobación
+            </p>
+          </div>
+        </div>
+
+        {/* Aprobadores section */}
+        <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Aprobadores</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Seleccione los aprobadores que revisarán esta solicitud. Debe incluir al menos un
+            aprobador.
+          </p>
+
+          <div className="space-y-4">
+            {approvers.map((approver, index) => (
+              <div
+                key={approver.id}
+                className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
+              >
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor={`approver-name-${approver.id}`}
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Nombre {index === 0 && <span className="text-red-500">*</span>}
+                    </Label>
+                    <AntSelect
+                      id={`approver-name-${approver.id}`}
+                      value={
+                        approver.name
+                          ? approverOptions?.find((opt) => opt.name === approver.name)?.id
+                          : undefined
+                      }
+                      onChange={(value: number) => handleApproverSelect(approver.id, value)}
+                      placeholder="Seleccionar aprobador"
+                      style={{ width: "100%", height: 36 }}
+                      loading={isLoadingApprovers}
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                      }
+                      options={approverOptions?.map((opt) => ({
+                        label: opt.name,
+                        value: opt.id
+                      }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor={`approver-email-${approver.id}`}
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Correo electrónico {index === 0 && <span className="text-red-500">*</span>}
+                    </Label>
+                    <Input
+                      id={`approver-email-${approver.id}`}
+                      type="email"
+                      value={approver.email}
+                      onChange={(e) => updateApprover(approver.id, "email", e.target.value)}
+                      placeholder="correo@ejemplo.com"
+                      className="border-2 focus:ring-2 focus:ring-blue-500"
+                      disabled
+                      required
+                    />
+                  </div>
+                </div>
+                {approvers.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeApprover(approver.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 mt-8"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            ))}
           </div>
 
-          <div className="flex gap-4 justify-end pt-6 border-t border-gray-200">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleGoBack}
-              className="px-8 bg-transparent border-2"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="px-8 text-black font-semibold"
-              style={{ backgroundColor: "#CBE71E" }}
-            >
-              Crear aprobación
-            </Button>
-          </div>
-        </form>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addApprover}
+            className="mt-4 border-2 hover:bg-gray-50 bg-transparent"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar aprobador adicional
+          </Button>
+        </div>
+
+        <div className="flex gap-4 justify-end pt-6 border-t border-gray-200">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoBack}
+            className="px-8 bg-transparent border-2"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="px-8 text-black font-semibold"
+            style={{ backgroundColor: "#CBE71E" }}
+            onClick={handleSubmit(onSubmit, onError)}
+          >
+            Crear aprobación
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
