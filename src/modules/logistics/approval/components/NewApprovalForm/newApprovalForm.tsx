@@ -435,6 +435,20 @@ export function NewApprovalForm() {
     [forecastItems, comparisonRates, setValue]
   );
 
+  const handleTipoAprobacionChange = (newTipoAprobacion: string) => {
+    // Reset all ValidationQuestions fields when tipoAprobacion changes
+    setValue("validadoCoordinador", "");
+    setValue("proveedorRecomendado", "");
+    setValue("emailConfirmacionFile", null);
+    setValue("motivoTercerizacion", "");
+    setValue("existenProveedoresZona", "");
+    setValue("proveedorSinDisponibilidad", "");
+    setValue("aseguroHabilitar", false);
+
+    // Update the tipoAprobacion value
+    setValue("tipoAprobacion", newTipoAprobacion);
+  };
+
   const handleOpenModalCarrierPricing = (forecastItemId: string) => {
     setIsModalCarrierComparisonOpen({ open: true, carrierRequestId: Number(forecastItemId) });
   };
@@ -526,7 +540,7 @@ export function NewApprovalForm() {
                 <AntSelect
                   id="tipoAprobacion"
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={handleTipoAprobacionChange}
                   placeholder="Seleccionar tipo"
                   className="max-w-md"
                   style={{ width: "100%" }}
