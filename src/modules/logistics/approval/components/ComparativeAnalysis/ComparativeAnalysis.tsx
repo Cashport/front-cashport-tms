@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Controller, Control } from "react-hook-form";
 import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
-import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import type {
@@ -18,12 +17,6 @@ interface ComparativeAnalysisProps {
   comparisonRates: Record<string, ComparisonRate[]>;
   isSingleSource: boolean;
   control: Control<INewApprovalForm>;
-  onUpdateComparisonRate: (
-    forecastItemId: string,
-    rateId: string,
-    field: keyof ComparisonRate,
-    value: string | number
-  ) => void;
   onRemoveComparisonRate: (forecastItemId: string, rateId: string) => void;
   onOpenModalCarrierPricing: (forecastItemId: string) => void;
   calculateGrandTotal: () => number;
@@ -34,7 +27,6 @@ export function ComparativeAnalysis({
   comparisonRates,
   isSingleSource,
   control,
-  onUpdateComparisonRate,
   onRemoveComparisonRate,
   onOpenModalCarrierPricing,
   calculateGrandTotal
@@ -131,91 +123,37 @@ export function ComparativeAnalysis({
                         {(comparisonRates[item.id] || []).map((rate) => (
                           <tr key={rate.id} className="hover:bg-gray-50">
                             <td className="px-4 py-3">
-                              <Input
-                                value={rate.proveedor}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(item.id, rate.id, "proveedor", e.target.value)
-                                }
-                                placeholder="Proveedor"
-                                className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span className="text-sm text-gray-900">{rate.proveedor || "-"}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <Input
-                                value={rate.tipo}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(item.id, rate.id, "tipo", e.target.value)
-                                }
-                                placeholder="Tipo"
-                                className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span className="text-sm text-gray-900">{rate.tipo || "-"}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <Input
-                                value={rate.tipoVehiculo}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(
-                                    item.id,
-                                    rate.id,
-                                    "tipoVehiculo",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="Tipo vehículo"
-                                className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span className="text-sm text-gray-900">{rate.tipoVehiculo || "-"}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <Input
-                                value={rate.tipoTarifa}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(item.id, rate.id, "tipoTarifa", e.target.value)
-                                }
-                                placeholder="Tipo tarifa"
-                                className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span className="text-sm text-gray-900">{rate.tipoTarifa || "-"}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <Input
-                                value={rate.contrato}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(item.id, rate.id, "contrato", e.target.value)
-                                }
-                                placeholder="Contrato"
-                                className="text-sm border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span className="text-sm text-gray-900">{rate.contrato || "-"}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <Input
-                                type="number"
-                                value={rate.tarifa}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(
-                                    item.id,
-                                    rate.id,
-                                    "tarifa",
-                                    Number(e.target.value)
-                                  )
-                                }
-                                placeholder="Tarifa"
-                                className="text-sm w-32 border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span className="text-sm font-medium text-gray-900">
+                                $ {rate.tarifa.toLocaleString("es-CO")}
+                              </span>
                             </td>
                             <td className="px-4 py-3">
-                              <Input
-                                type="number"
-                                value={rate.diferencia}
-                                onChange={(e) =>
-                                  onUpdateComparisonRate(
-                                    item.id,
-                                    rate.id,
-                                    "diferencia",
-                                    Number(e.target.value)
-                                  )
-                                }
-                                placeholder="%"
-                                className="text-sm w-20 border-2 focus:ring-2 focus:ring-blue-500"
-                              />
+                              <span
+                                className={`text-sm font-medium ${
+                                  rate.diferencia > 0
+                                    ? "text-red-600"
+                                    : rate.diferencia < 0
+                                      ? "text-green-600"
+                                      : "text-gray-900"
+                                }`}
+                              >
+                                {rate.diferencia > 0 ? "+" : ""}$ {rate.diferencia.toLocaleString("es-CO")}
+                              </span>
                             </td>
                             <td className="px-4 py-3">
                               <Button

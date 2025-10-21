@@ -22,7 +22,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   carrierRequestId: number;
-  handleSuccess: (selectedCarriers: ICarriersPricingWithCheck[]) => void;
+  handleSuccess: (selectedCarriers: ICarriersPricingWithCheck[], carrierRequestId: number) => void;
 };
 export default function ModalSelectCarrierPricingComparison({
   open,
@@ -72,7 +72,10 @@ export default function ModalSelectCarrierPricingComparison({
   const handleSubmitForm = async () => {
     setIsSubmitting(true);
     try {
-      handleSuccess(carriersPricing.filter((carrier) => carrier.checked));
+      handleSuccess(
+        carriersPricing.filter((carrier) => carrier.checked),
+        carrierRequestId
+      );
       onClose();
     } catch (error) {
       if (error instanceof Error) message.error(error.message);

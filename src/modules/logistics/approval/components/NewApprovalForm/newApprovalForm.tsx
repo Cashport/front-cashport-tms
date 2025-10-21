@@ -168,22 +168,6 @@ export function NewApprovalForm() {
     setValue("comparisonRates", updated);
   };
 
-  // Helper: Update comparison rate field
-  const updateComparisonRate = (
-    forecastItemId: string,
-    rateId: string,
-    field: keyof ComparisonRate,
-    value: any
-  ) => {
-    const updated = {
-      ...comparisonRates,
-      [forecastItemId]: (comparisonRates[forecastItemId] || []).map((rate) =>
-        rate.id === rateId ? { ...rate, [field]: value } : rate
-      )
-    };
-    setValue("comparisonRates", updated);
-  };
-
   /**
    * Prepare approval data by transforming form data into API-compatible format
    */
@@ -455,8 +439,58 @@ export function NewApprovalForm() {
     setIsModalCarrierComparisonOpen({ open: true, carrierRequestId: Number(forecastItemId) });
   };
 
-  const handleAddCarrierComparison = (selectedCarriers: ICarriersPricingWithCheck[]) => {
-    console.log("Selected carriers from modal:", selectedCarriers);
+  const handleAddCarrierComparison = (
+    selectedCarriers: ICarriersPricingWithCheck[],
+    carrierRequestId: number
+  ) => {
+    // Convert carrierRequestId to string to match forecastItemId format
+    const forecastItemId = carrierRequestId.toString();
+
+    // Find the original forecast item to get the original price
+    const originalForecastItem = forecastItems.find((item) => item.id === forecastItemId);
+    const originalPrice = originalForecastItem?.tarifa || 0;
+
+    // Get existing comparison rates for this forecast item
+    const existingRates = comparisonRates[forecastItemId] || [];
+
+    // Transform selected carriers to ComparisonRate format
+    const newComparisonRates: ComparisonRate[] = selectedCarriers.map((carrier) => {
+      const carrierPrice = carrier.price || 0;
+
+      // Calculate absolute difference: carrierPrice - originalPrice
+      // Positive value means carrier is more expensive, negative means cheaper
+      const diferencia = carrierPrice - originalPrice;
+
+      return {
+        id: carrier.id_carrier_pricing.toString(),
+        proveedor: carrier.Proveedor || "",
+        tipo: "-",
+        tipoVehiculo: originalForecastItem?.tipoVehiculo || "",
+        tipoTarifa: carrier.fee_description || "",
+        contrato: "", // Not available in ICarriersPricingWithCheck, leave empty for user to fill
+        tarifa: carrierPrice,
+        diferencia
+      };
+    });
+
+    // Filter out duplicates based on id_carrier_pricing
+    const existingIds = new Set(existingRates.map((rate) => rate.id));
+    const uniqueNewRates = newComparisonRates.filter((rate) => !existingIds.has(rate.id));
+
+    // Combine existing and new rates
+    const updatedRates = [...existingRates, ...uniqueNewRates];
+
+    // Update comparison rates for this forecast item
+    const updatedComparisonRates = {
+      ...comparisonRates,
+      [forecastItemId]: updatedRates
+    };
+
+    // Update form state
+    setValue("comparisonRates", updatedComparisonRates);
+
+    console.log("Updated comparison rates:", updatedComparisonRates);
+    console.log(`Original price: ${originalPrice}, Differences calculated based on it`);
   };
 
   return (
@@ -614,7 +648,6 @@ export function NewApprovalForm() {
           comparisonRates={comparisonRates}
           isSingleSource={isSingleSource}
           control={control}
-          onUpdateComparisonRate={updateComparisonRate}
           onRemoveComparisonRate={removeComparisonRate}
           onOpenModalCarrierPricing={handleOpenModalCarrierPricing}
           calculateGrandTotal={calculateGrandTotal}
