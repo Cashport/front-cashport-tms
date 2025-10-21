@@ -81,9 +81,9 @@ export const STATUS = {
     APROBADO: "dcf4e68b-11cb-4352-8ea7-f6356fa98db9"
   },
   PRICING_APPROVAL: {
-    PENDIENTE: "6d5e2aa5-8e77-11f0-b08c-0635ef5156a1",
-    APROBADO: "6d5ee261-8e77-11f0-b08c-0635ef5156a1",
-    RECHAZADO: "6d5ef9a1-8e77-11f0-b08c-0635ef5156a1"
+    PENDIENTE: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    APROBADO: "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+    RECHAZADO: "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f"
   }
 };
 
