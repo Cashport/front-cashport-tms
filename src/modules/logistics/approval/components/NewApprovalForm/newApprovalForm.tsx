@@ -1,43 +1,43 @@
 "use client";
 
 import type React from "react";
-
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { Select as AntSelect, message } from "antd";
+import { ArrowLeft, Plus, X } from "lucide-react";
+
+import { useAppStore } from "@/lib/store/store";
 import {
-  createApproval,
   getApprovers,
   getTypes,
   type IApprovalRequest
 } from "@/services/logistics/pricingApprovals/pricingApprovals";
-import { IApprovalType, IApprover, ITransferRequestJourneyReview } from "@/types/logistics/schema";
+
+import { approvalFormSchema } from "@/modules/logistics/approval/schemas/approvalFormSchema";
+import { Label } from "@/modules/chat/ui/label";
+import { Card, CardContent } from "@/modules/chat/ui/card";
+import { Textarea } from "@/modules/chat/ui/textarea";
+import { Input } from "@/modules/chat/ui/input";
+import { Button } from "@/modules/chat/ui/button";
+import { ValidationQuestions } from "@/modules/logistics/approval/components/ValidationQuestions";
+import { ComparativeAnalysis } from "@/modules/logistics/approval/components/ComparativeAnalysis/ComparativeAnalysis";
+import ModalSelectCarrierPricingComparison from "@/components/organisms/logistics/orders/transfer_request/components/modals/ModalSelectCarrierPricingComparison";
+
+import { defaultApprovalFormValues } from "@/types/logistics/approval";
 import type {
   INewApprovalForm,
   ForecastItem,
   ComparisonRate,
   Approver
 } from "@/types/logistics/approval";
-import { defaultApprovalFormValues } from "@/types/logistics/approval";
-import { approvalFormSchema } from "@/modules/logistics/approval/schemas/approvalFormSchema";
-
-import { ArrowLeft, Plus, X } from "lucide-react";
-import { Label } from "@/modules/chat/ui/label";
-import { Card, CardContent } from "@/modules/chat/ui/card";
-import { Textarea } from "@/modules/chat/ui/textarea";
-import { Input } from "@/modules/chat/ui/input";
-import { Button } from "@/modules/chat/ui/button";
+import { IApprovalType, IApprover, ITransferRequestJourneyReview } from "@/types/logistics/schema";
 
 import "@/modules/chat/styles/chatStyles.css";
-import { useRouter } from "next/navigation";
-import { useModalDetail } from "@/context/ModalContext";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import { ValidationQuestions } from "@/modules/logistics/approval/components/ValidationQuestions";
-import { ComparativeAnalysis } from "@/modules/logistics/approval/components/ComparativeAnalysis/ComparativeAnalysis";
 
 dayjs.extend(utc);
 
@@ -53,8 +53,13 @@ const normalizeToKebabCase = (name: string): string => {
 export function NewApprovalForm() {
   // Zustand store - Carrier for Approval slice
   const selectedCarriers = useAppStore((state) => state.selectedCarriers);
+  console.log("Selected carriers from store:", selectedCarriers);
   const transferRequestId = useAppStore((state) => state.transferRequestId);
   const clearCarrierForApproval = useAppStore((state) => state.clearCarrierForApproval);
+  const [isModalCarrierComparisonOpen, setIsModalCarrierComparisonOpen] = useState({
+    open: false,
+    carrierRequestId: 0
+  });
 
   const router = useRouter();
 
@@ -79,9 +84,6 @@ export function NewApprovalForm() {
       revalidateOnReconnect: false
     }
   );
-
-  // context for modal carrier pricing request
-  const { openModal } = useModalDetail();
 
   // Initialize default values with selectedCarriers
   const initialFormValues = useMemo<INewApprovalForm>(() => {
@@ -448,12 +450,7 @@ export function NewApprovalForm() {
   );
 
   const handleOpenModalCarrierPricing = (forecastItemId: string) => {
-    openModal("carrier_pricing_request", {
-      transferRequestId: transferRequestId || 0,
-      extractCreatedCarriers: (createdCarriers) =>
-        handleExtractCreatedCarriers(createdCarriers, forecastItemId),
-      useGetPricingComparison: true
-    });
+    setIsModalCarrierComparisonOpen({ open: true, carrierRequestId: Number(forecastItemId) });
   };
 
   return (
@@ -752,6 +749,13 @@ export function NewApprovalForm() {
           </Button>
         </div>
       </CardContent>
+
+      <ModalSelectCarrierPricingComparison
+        open={isModalCarrierComparisonOpen.open}
+        onClose={() => setIsModalCarrierComparisonOpen({ open: false, carrierRequestId: 0 })}
+        transferRequestId={transferRequestId || 0}
+        carrierRequestId={isModalCarrierComparisonOpen.carrierRequestId}
+      />
     </Card>
   );
 }

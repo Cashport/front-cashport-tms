@@ -14,11 +14,11 @@ const { Text } = Typography;
 
 interface CarrierPriceCardProps {
   carrier: CarriersPricingModal;
-  currentTripId: number | null;
+  currentTripId?: number | null;
   isChecked: boolean;
   handleCheck: (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => void;
   type: serviceType;
-  journey: Omit<JourneyTripPricing, "trips" | "other_requirements">;
+  journey?: Omit<JourneyTripPricing, "trips" | "other_requirements">;
 }
 
 const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
@@ -29,33 +29,34 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
   type,
   journey
 }) => {
-  if (!currentTripId) return <></>;
-
-  // Obtener las comunidades del journey
-  const journeyCommunities = [
-    journey.start_group_location_desc,
-    journey.end_group_location_desc
-  ].filter(Boolean); // Filtrar valores null/undefined
-
-  // Parsear las comunidades del carrier
-  const carrierCommunities = carrier.communities
-    ? carrier.communities
-        .split(",")
-        .map((c) => c.trim())
-        .filter(Boolean)
-    : []; // Si no hay communities, usar array vacío
-
-  // Encontrar la comunidad que coincide
+  // Lógica de comunidades solo si tenemos journey
   let isCommunityCarrier: string | null = null;
 
-  for (const carrierCommunity of carrierCommunities) {
-    for (const journeyCommunity of journeyCommunities) {
-      if (carrierCommunity?.toLowerCase() === journeyCommunity?.toLowerCase()) {
-        isCommunityCarrier = carrierCommunity; // Guardar el nombre de la comunidad que coincide
-        break;
+  if (journey) {
+    // Obtener las comunidades del journey
+    const journeyCommunities = [
+      journey.start_group_location_desc,
+      journey.end_group_location_desc
+    ].filter(Boolean); // Filtrar valores null/undefined
+
+    // Parsear las comunidades del carrier
+    const carrierCommunities = (carrier as any).communities
+      ? (carrier as any).communities
+          .split(",")
+          .map((c: string) => c.trim())
+          .filter(Boolean)
+      : []; // Si no hay communities, usar array vacío
+
+    // Encontrar la comunidad que coincide
+    for (const carrierCommunity of carrierCommunities) {
+      for (const journeyCommunity of journeyCommunities) {
+        if (carrierCommunity?.toLowerCase() === journeyCommunity?.toLowerCase()) {
+          isCommunityCarrier = carrierCommunity; // Guardar el nombre de la comunidad que coincide
+          break;
+        }
       }
+      if (isCommunityCarrier) break;
     }
-    if (isCommunityCarrier) break;
   }
 
   return (
@@ -96,8 +97,8 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
           </Flex>
         )} */}
         <Text style={{ fontSize: "1.2rem" }}>${carrier.price?.toLocaleString("es-CO")}</Text>
-        {type === "other_requirement" && carrier.pricing_description ? (
-          <Text>{carrier.pricing_description}</Text>
+        {type === "other_requirement" && (carrier as any).pricing_description ? (
+          <Text>{(carrier as any).pricing_description}</Text>
         ) : (
           <Text style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             {carrier.disponibility} <Truck size={16} weight="fill" />
