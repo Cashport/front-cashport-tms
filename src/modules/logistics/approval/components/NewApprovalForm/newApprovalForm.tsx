@@ -18,16 +18,8 @@ import { ArrowLeft, FileText, Download, X, Plus, ChevronDown, ChevronUp } from "
 import { Label } from "@/modules/chat/ui/label";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Textarea } from "@/modules/chat/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/modules/chat/ui/radio-group";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 
 import "@/modules/chat/styles/chatStyles.css";
@@ -35,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { useModalDetail } from "@/context/ModalContext";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { ValidationQuestions } from "@/modules/logistics/approval/components/ValidationQuestions";
 
 dayjs.extend(utc);
 
@@ -377,340 +370,6 @@ export function NewApprovalForm() {
     }
   };
 
-  const renderValidationQuestions = () => {
-    switch (tipoAprobacion) {
-      case "viaje-especifico":
-        return (
-          <>
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">
-                Valido previamente con el coordinador de la zona que no haya un contrato activo para
-                este scope?
-              </Label>
-              <RadioGroup
-                value={validadoCoordinador}
-                onValueChange={setValidadoCoordinador}
-                required
-              >
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="si" id="validado-si" className="border-2" />
-                    <Label
-                      htmlFor="validado-si"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      Sí
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="validado-no" className="border-2" />
-                    <Label
-                      htmlFor="validado-no"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      No
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">
-                ¿Este proveedor es recomendado por el departamento de sostenibilidad?
-              </Label>
-              <RadioGroup
-                value={proveedorRecomendado}
-                onValueChange={setProveedorRecomendado}
-                required
-              >
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="si" id="recomendado-si" className="border-2" />
-                    <Label
-                      htmlFor="recomendado-si"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      Sí
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="recomendado-no" className="border-2" />
-                    <Label
-                      htmlFor="recomendado-no"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      No
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-
-              {proveedorRecomendado === "si" && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <Label
-                    htmlFor="emailConfirmacion"
-                    className="text-sm font-medium text-gray-700 mb-2 block"
-                  >
-                    Adjuntar correo de confirmación
-                  </Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      id="emailConfirmacion"
-                      type="file"
-                      accept=".pdf,.eml,.msg"
-                      onChange={handleEmailFileChange}
-                      className="flex-1 border-2 focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                    {emailConfirmacionFile && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEmailConfirmacionFile(null)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  {emailConfirmacionFile && (
-                    <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      {emailConfirmacionFile.name}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </>
-        );
-
-      case "tarifa-recurrente":
-        return (
-          <>
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">
-                Valido previamente con el coordinador de la zona que no haya un contrato activo para
-                este scope?
-              </Label>
-              <RadioGroup
-                value={validadoCoordinador}
-                onValueChange={setValidadoCoordinador}
-                required
-              >
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="si" id="validado-si-recurrente" className="border-2" />
-                    <Label
-                      htmlFor="validado-si-recurrente"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      Sí
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="validado-no-recurrente" className="border-2" />
-                    <Label
-                      htmlFor="validado-no-recurrente"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      No
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">
-                ¿Este proveedor es recomendado por el departamento de sostenibilidad?
-              </Label>
-              <RadioGroup
-                value={proveedorRecomendado}
-                onValueChange={setProveedorRecomendado}
-                required
-              >
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="si"
-                      id="recomendado-si-recurrente"
-                      className="border-2"
-                    />
-                    <Label
-                      htmlFor="recomendado-si-recurrente"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      Sí
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="no"
-                      id="recomendado-no-recurrente"
-                      className="border-2"
-                    />
-                    <Label
-                      htmlFor="recomendado-no-recurrente"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      No
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-
-              {proveedorRecomendado === "si" && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <Label
-                    htmlFor="emailConfirmacion"
-                    className="text-sm font-medium text-gray-700 mb-2 block"
-                  >
-                    Adjuntar correo de confirmación
-                  </Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      id="emailConfirmacion"
-                      type="file"
-                      accept=".pdf,.eml,.msg"
-                      onChange={handleEmailFileChange}
-                      className="flex-1 border-2 focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                    {emailConfirmacionFile && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEmailConfirmacionFile(null)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  {emailConfirmacionFile && (
-                    <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      {emailConfirmacionFile.name}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </>
-        );
-
-      case "tercerizacion":
-        return (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="motivoTercerizacion" className="text-sm font-medium text-gray-700">
-                Motivo por el cual esta tercerizando
-              </Label>
-              <Select value={motivoTercerizacion} onValueChange={setMotivoTercerizacion} required>
-                <SelectTrigger
-                  id="motivoTercerizacion"
-                  className="border-2 focus:ring-2 focus:ring-blue-500"
-                >
-                  <SelectValue placeholder="Seleccionar motivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no-proveedores">No tenemos proveedores en la zona</SelectItem>
-                  <SelectItem value="lineamiento-social">Lineamiento Social</SelectItem>
-                  <SelectItem value="falta-disponibilidad">
-                    Falta de disponibilidad con proveedor
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">
-                Existen proveedores en la zona para prestar el servicio
-              </Label>
-              <RadioGroup
-                value={existenProveedoresZona}
-                onValueChange={setExistenProveedoresZona}
-                required
-              >
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="si" id="proveedores-zona-si" className="border-2" />
-                    <Label
-                      htmlFor="proveedores-zona-si"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      Sí
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="proveedores-zona-no" className="border-2" />
-                    <Label
-                      htmlFor="proveedores-zona-no"
-                      className="font-normal cursor-pointer text-gray-700"
-                    >
-                      No
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {existenProveedoresZona === "si" && (
-              <div className="space-y-2">
-                <Label
-                  htmlFor="proveedorSinDisponibilidad"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Proveedor local que no presento disponibilidad
-                </Label>
-                <Select
-                  value={proveedorSinDisponibilidad}
-                  onValueChange={setProveedorSinDisponibilidad}
-                  required
-                >
-                  <SelectTrigger
-                    id="proveedorSinDisponibilidad"
-                    className="border-2 focus:ring-2 focus:ring-blue-500"
-                  >
-                    <SelectValue placeholder="Seleccionar proveedor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="coltanques">COLTANQUES</SelectItem>
-                    <SelectItem value="ng-transportes">NG TRANSPORTES</SelectItem>
-                    <SelectItem value="entrapetrol">ENTRAPETROL</SelectItem>
-                    <SelectItem value="transporte-express">TRANSPORTE EXPRESS</SelectItem>
-                    <SelectItem value="logistica-del-norte">LOGÍSTICA DEL NORTE</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="flex items-start space-x-3 p-4 bg-purple-600 rounded-lg shadow-sm">
-              <Checkbox
-                id="aseguroHabilitar"
-                checked={aseguroHabilitar}
-                onCheckedChange={(checked) => setAseguroHabilitar(checked as boolean)}
-                required
-                className="mt-0.5 border-2 border-white data-[state=checked]:bg-white data-[state=checked]:text-purple-600"
-              />
-              <Label
-                htmlFor="aseguroHabilitar"
-                className="text-sm text-white font-normal cursor-pointer leading-relaxed"
-              >
-                Aseguro habilitar como subcontratista ante Halliburton a la empresa utilizada.
-              </Label>
-            </div>
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
 
   const addApprover = () => {
     const newApprover: Approver = {
@@ -872,7 +531,28 @@ export function NewApprovalForm() {
               />
             </div>
 
-            {tipoAprobacion && <div className="space-y-6 pt-6">{renderValidationQuestions()}</div>}
+            {tipoAprobacion && (
+              <div className="space-y-6 pt-6">
+                <ValidationQuestions
+                  tipoAprobacion={tipoAprobacion}
+                  validadoCoordinador={validadoCoordinador}
+                  setValidadoCoordinador={setValidadoCoordinador}
+                  proveedorRecomendado={proveedorRecomendado}
+                  setProveedorRecomendado={setProveedorRecomendado}
+                  emailConfirmacionFile={emailConfirmacionFile}
+                  setEmailConfirmacionFile={setEmailConfirmacionFile}
+                  handleEmailFileChange={handleEmailFileChange}
+                  motivoTercerizacion={motivoTercerizacion}
+                  setMotivoTercerizacion={setMotivoTercerizacion}
+                  existenProveedoresZona={existenProveedoresZona}
+                  setExistenProveedoresZona={setExistenProveedoresZona}
+                  proveedorSinDisponibilidad={proveedorSinDisponibilidad}
+                  setProveedorSinDisponibilidad={setProveedorSinDisponibilidad}
+                  aseguroHabilitar={aseguroHabilitar}
+                  setAseguroHabilitar={setAseguroHabilitar}
+                />
+              </div>
+            )}
           </div>
 
           {/* Forecast section */}
