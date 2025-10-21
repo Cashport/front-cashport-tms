@@ -79,6 +79,11 @@ export const STATUS = {
     RECHAZADO_IA: "cdc3af46-5ba3-416b-bc76-0aa825efb1aa",
     PENDIENTE: "c02b3475-f59a-4222-bb28-9dbb51cf02c1",
     APROBADO: "dcf4e68b-11cb-4352-8ea7-f6356fa98db9"
+  },
+  PRICING_APPROVAL: {
+    PENDIENTE: "6d5e2aa5-8e77-11f0-b08c-0635ef5156a1",
+    APROBADO: "6d5ee261-8e77-11f0-b08c-0635ef5156a1",
+    RECHAZADO: "6d5ef9a1-8e77-11f0-b08c-0635ef5156a1"
   }
 };
 

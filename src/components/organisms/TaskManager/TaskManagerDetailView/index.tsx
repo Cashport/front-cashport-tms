@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import Container from "@/components/atoms/Container/Container";
 import { CheckCircle, XCircle, Clock } from "phosphor-react";
 import { getTaskDetail, updatePricingApprovalStatus } from "@/services/tasks/tasks";
+import { STATUS } from "@/utils/constants/globalConstants";
 import {
   ITaskDetail,
   ITaskPricing,
@@ -136,6 +137,9 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
     if (status === "rejected") return <Tag color="red">Rechazado</Tag>;
     return <Tag color="default">Pendiente</Tag>;
   };
+  const isApprovedOrRejected =
+    approval.status === STATUS.PRICING_APPROVAL.APROBADO ||
+    approval.status === STATUS.PRICING_APPROVAL.RECHAZADO;
 
   return (
     <div style={{ overflowY: "auto" }}>
@@ -162,12 +166,16 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
             </Tooltip>
           </Space>
           <Space>
-            <Button type="primary" icon={<CheckOutlined />} onClick={handleApprove}>
-              Aprobar
-            </Button>
-            <Button danger icon={<CloseOutlined />} onClick={handleReject}>
-              Rechazar
-            </Button>
+            {!isApprovedOrRejected && (
+              <>
+                <Button type="primary" onClick={handleApprove}>
+                  Aprobar
+                </Button>
+                <Button danger onClick={handleReject}>
+                  Rechazar
+                </Button>
+              </>
+            )}
           </Space>
         </Flex>
 
