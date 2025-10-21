@@ -13,6 +13,7 @@ import { ArrowLeft, Plus, X } from "lucide-react";
 
 import { useAppStore } from "@/lib/store/store";
 import {
+  createApproval,
   getApprovers,
   getTypes,
   type IApprovalRequest
@@ -55,7 +56,6 @@ const normalizeToKebabCase = (name: string): string => {
 export function NewApprovalForm() {
   // Zustand store - Carrier for Approval slice
   const selectedCarriers = useAppStore((state) => state.selectedCarriers);
-  console.log("Selected carriers from store:", selectedCarriers);
   const transferRequestId = useAppStore((state) => state.transferRequestId);
   const clearCarrierForApproval = useAppStore((state) => state.clearCarrierForApproval);
   const [isModalCarrierComparisonOpen, setIsModalCarrierComparisonOpen] = useState({
@@ -228,25 +228,16 @@ export function NewApprovalForm() {
    * React Hook Form handles validation via Yup schema
    */
   const onSubmit = async (data: INewApprovalForm) => {
-    console.log("✅ Form validation passed! Form data:", data);
     try {
       // Prepare the structured data for API submission
       const requestData = prepareApprovalData(data);
-
-      console.log("📤 Submitting new approval:", {
-        requestData,
-        emailConfirmacionFile: data.emailConfirmacionFile,
-        total: calculateGrandTotal()
-      });
-
       // Submit the approval request with optional file
-      // await createApproval(requestData, data.emailConfirmacionFile || undefined);
-
+      await createApproval(requestData, data.emailConfirmacionFile || undefined);
       message.success("Solicitud de aprobación creada exitosamente.");
 
       // Navigate back to transfer request detail after successful creation
-      // router.push(`/logistics/transfer-request/${transferRequestId}`);
-      // clearCarrierForApproval();
+      router.push(`/logistics/transfer-request/${transferRequestId}`);
+      clearCarrierForApproval();
     } catch (error) {
       console.error("❌ Error creating approval:", error);
       const errorMessage =
@@ -275,7 +266,7 @@ export function NewApprovalForm() {
     // Check for nested errors in arrays/objects (forecastItems, approvers, comparisonRates)
     Object.entries(errors).forEach(([field, error]: [string, any]) => {
       if (error && typeof error === "object" && !error.message) {
-        console.log(`📦 Nested errors in "${field}":`, error);
+        console.error(`📦 Nested errors in "${field}":`, error);
       }
     });
 
@@ -370,71 +361,6 @@ export function NewApprovalForm() {
     clearCarrierForApproval();
   };
 
-  const handleExtractCreatedCarriers = useCallback(
-    (
-      createdCarriers: {
-        journey: ITransferRequestJourneyReview[];
-      },
-      forecastItemId: string
-    ) => {
-      console.log("forecastItemId recibido:", forecastItemId);
-      // Verificar que haya un vendor seleccionado
-      if (!forecastItemId) {
-        console.error("No forecast item selected");
-        return;
-      }
-
-      // Extraer trips sin aplanar carriers_pricing
-      const allTrips = createdCarriers.journey.flatMap((journey) => journey.trips);
-
-      // Obtener el último carrier_pricing de cada trip (los recién creados)
-      const lastCarrierPerTrip = allTrips
-        .map((trip) => {
-          const carriers = trip.carriers_pricing;
-          return carriers.length > 0 ? carriers[carriers.length - 1] : null;
-        })
-        .filter((carrier) => carrier !== null);
-
-      // Find the forecast item to calculate price difference
-      const forecastItem = forecastItems.find((item) => item.id === forecastItemId);
-      const baseTarifa = forecastItem?.tarifa || 0;
-
-      console.log("Extracted carriers for comparison:", lastCarrierPerTrip);
-
-      // Set the last carrier of each trip to the selected forecast item's comparisonRates
-      const updatedRates = { ...comparisonRates };
-
-      // Initialize array if it doesn't exist
-      if (!updatedRates[forecastItemId]) {
-        updatedRates[forecastItemId] = [];
-      }
-
-      lastCarrierPerTrip.forEach((carrier) => {
-        if (!carrier) return;
-
-        // Calculate percentage difference
-        const diferencia =
-          baseTarifa > 0 ? Math.round(((carrier.amount - baseTarifa) / baseTarifa) * 100) : 0;
-
-        const newRate: ComparisonRate = {
-          id: carrier.id.toString(),
-          proveedor: carrier.carrier,
-          tipo: carrier.service_type,
-          tipoVehiculo: carrier.vehicles,
-          tipoTarifa: "-",
-          contrato: carrier.driver_contract,
-          tarifa: carrier.amount,
-          diferencia: diferencia
-        };
-
-        updatedRates[forecastItemId].push(newRate);
-      });
-
-      setValue("comparisonRates", updatedRates);
-    },
-    [forecastItems, comparisonRates, setValue]
-  );
-
   const handleTipoAprobacionChange = (newTipoAprobacion: string) => {
     // Reset all ValidationQuestions fields when tipoAprobacion changes
     setValue("validadoCoordinador", "");
@@ -502,9 +428,6 @@ export function NewApprovalForm() {
 
     // Update form state
     setValue("comparisonRates", updatedComparisonRates);
-
-    console.log("Updated comparison rates:", updatedComparisonRates);
-    console.log(`Original price: ${originalPrice}, Differences calculated based on it`);
   };
 
   return (
