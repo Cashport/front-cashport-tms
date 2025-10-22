@@ -9,7 +9,7 @@ import useSWR from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Select as AntSelect, message } from "antd";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, X, FileText, Download } from "lucide-react";
 
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -506,7 +506,7 @@ export function NewApprovalForm() {
           </div>
 
           <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-            <table className="w-full">
+            <table className="w-full min-w-max">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
@@ -530,9 +530,7 @@ export function NewApprovalForm() {
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
                     Tarifa
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Cantidad de usos
-                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Usos</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Total</th>
                 </tr>
               </thead>
@@ -544,7 +542,16 @@ export function NewApprovalForm() {
                     <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
                     <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{item.descripcionTarifa}</td>
-
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                        title="Descargar cotización"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span>PDF</span>
+                        <Download className="h-3.5 w-3.5" />
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       $ {item.tarifa.toLocaleString("es-CO")}
                     </td>
@@ -572,7 +579,7 @@ export function NewApprovalForm() {
                     Total
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {calculateGrandTotal().toLocaleString("es-CO")}
+                    $ {calculateGrandTotal().toLocaleString("es-CO")}
                   </td>
                 </tr>
               </tbody>
