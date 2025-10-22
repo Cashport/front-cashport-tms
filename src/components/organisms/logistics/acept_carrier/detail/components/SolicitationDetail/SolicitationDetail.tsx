@@ -164,7 +164,11 @@ export default function SolicitationDetail({
       )}
       <Buttons
         canContinue={true}
-        isRightButtonActive={true}
+        isRightButtonActive={
+          providerDetail?.isAuction && formMode === FormMode.CREATE
+            ? !!(quote?.amount && quote?.files && quote.files.length > 0)
+            : true
+        }
         isLeftButtonActive={true}
         handleNext={() => {
           if (entityType === "otherRequirement") {
