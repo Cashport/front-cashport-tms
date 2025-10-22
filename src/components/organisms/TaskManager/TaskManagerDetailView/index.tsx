@@ -191,358 +191,356 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         </Flex>
 
         {/* ===== INFORMACIÓN DE APROBACIÓN ===== */}
-        <Card style={{ marginBottom: 24, padding: 0 }}>
-          <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0" }}>
-            <Title level={4}>Información de aprobación</Title>
+        <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0" }}>
+          <Title level={4}>Información de aprobación</Title>
 
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12}>
-                <Text type="secondary">Solicitud de aprobación para</Text>
-                <div>{approval.approval_type_name}</div>
-              </Col>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={12}>
+              <Text type="secondary">Solicitud de aprobación para</Text>
+              <div>{approval.approval_type_name}</div>
+            </Col>
 
-              <Col xs={24} md={12}>
-                <Text type="secondary">TR o Proyecto asociado a esta solicitud</Text>
-                <div style={{ color: "#1677ff", fontWeight: 600, cursor: "pointer" }}>
-                  {approval.id_transfer_request ? `TR-${approval.id_transfer_request}` : "-"}
-                </div>
-              </Col>
-            </Row>
+            <Col xs={24} md={12}>
+              <Text type="secondary">TR o Proyecto asociado a esta solicitud</Text>
+              <div style={{ color: "#1677ff", fontWeight: 600, cursor: "pointer" }}>
+                {approval.id_transfer_request ? `TR-${approval.id_transfer_request}` : "-"}
+              </div>
+            </Col>
+          </Row>
 
-            <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
-              <Col xs={24} md={12}>
-                <Text type="secondary">
-                  Valido previamente con el coordinador de la zona que no haya un contrato activo
-                  para este scope?
-                </Text>
+          <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
+            <Col xs={24} md={12}>
+              <Text type="secondary">
+                Valido previamente con el coordinador de la zona que no haya un contrato activo para
+                este scope?
+              </Text>
+              <div
+                style={{
+                  color: approval.is_another_contract_active ? "green" : "red",
+                  fontWeight: 600
+                }}
+              >
+                {approval.is_another_contract_active ? "Sí" : "No"}
+              </div>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
+            <Col xs={24} md={12}>
+              <Text type="secondary">
+                ¿Este proveedor es recomendado por el departamento de sostenibilidad?
+              </Text>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div
                   style={{
-                    color: approval.is_another_contract_active ? "green" : "red",
+                    color: approval.is_provider_recommended_by_sustainability ? "green" : "red",
                     fontWeight: 600
                   }}
                 >
-                  {approval.is_another_contract_active ? "Sí" : "No"}
+                  {approval.is_provider_recommended_by_sustainability ? "Sí" : "No"}
                 </div>
-              </Col>
-            </Row>
-
-            <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
-              <Col xs={24} md={12}>
-                <Text type="secondary">
-                  ¿Este proveedor es recomendado por el departamento de sostenibilidad?
-                </Text>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div
-                    style={{
-                      color: approval.is_provider_recommended_by_sustainability ? "green" : "red",
-                      fontWeight: 600
-                    }}
+                {approval.evidence_file_url && (
+                  <Button
+                    type="link"
+                    icon={<PaperClipOutlined />}
+                    onClick={handleDownloadEmail}
+                    style={{ padding: 0 }}
                   >
-                    {approval.is_provider_recommended_by_sustainability ? "Sí" : "No"}
-                  </div>
-                  {approval.evidence_file_url && (
-                    <Button
-                      type="link"
-                      icon={<PaperClipOutlined />}
-                      onClick={handleDownloadEmail}
-                      style={{ padding: 0 }}
-                    >
-                      Descargar evidencia <DownloadOutlined />
-                    </Button>
-                  )}
-                </div>
-              </Col>
-            </Row>
-          </div>
-          {/* ===== INFORMACIÓN DEL VIAJE ===== */}
-          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
-            <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
-              <Panel header="Información del viaje" key="1">
-                <Row gutter={[24, 16]} align="middle">
-                  <Col xs={24} md={12}>
-                    <Text type="secondary">Origen</Text>
-                    <div style={{ fontWeight: 600 }}>{approval.origin}</div>
-                  </Col>
-
-                  <Col xs={24} md={12}>
-                    <Text type="secondary">Destino</Text>
-                    <div style={{ fontWeight: 600 }}>{approval.destination}</div>
-                  </Col>
-
-                  <Col xs={24} md={12}>
-                    <Text type="secondary">Tipo de servicio</Text>
-                    <div style={{ fontWeight: 600 }}>
-                      {pricing.length > 0 && pricing[0].rate_description
-                        ? pricing[0].rate_description
-                        : ""}
-                    </div>
-                  </Col>
-
-                  <Col
-                    xs={24}
-                    md={12}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}
-                  >
-                    <div>
-                      <Text type="secondary">VP</Text>
-                      <div style={{ fontWeight: 600 }}>{approval.vp}</div>
-                    </div>
-                    {approval.id_transfer_request && (
-                      <div>
-                        <a
-                          style={{ fontWeight: 600 }}
-                          onClick={() =>
-                            router.push(
-                              `/logistics/transfer-orders/details/${approval.id_transfer_request}`
-                            )
-                          }
-                        >
-                          Ver detalle de TR →
-                        </a>
-                      </div>
-                    )}
-                  </Col>
-                </Row>
-              </Panel>
-            </Collapse>
-          </div>
-          {/* ===== TARIFAS ===== */}
-          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
-            <Title level={4}>Tarifas</Title>
-            <Table
-              dataSource={pricing}
-              rowKey={(record) => record.id_approval_item.toString()}
-              pagination={false}
-              bordered
-              summary={(pageData) => {
-                let totalSum = 0;
-                pageData.forEach(({ total }) => {
-                  totalSum += total;
-                });
-                return (
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0} colSpan={8}>
-                      <div style={{ textAlign: "right", fontWeight: "bold" }}>Total</div>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={9}>
-                      <div style={{ fontWeight: "bold" }}>
-                        {totalSum.toLocaleString("es-CO", { style: "currency", currency: "COP" })}
-                      </div>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                );
-              }}
-            >
-              <Table.Column title="Proveedor" dataIndex="provider" key="provider" />
-              <Table.Column title="Vendor" dataIndex="vendor" key="vendor" />
-              <Table.Column title="Contrato" dataIndex="contract" key="contract" />
-              <Table.Column title="Tipo Vehículo" dataIndex="vehicle_type" key="vehicle_type" />
-              <Table.Column
-                title="Descripción tarifa"
-                dataIndex="rate_description"
-                key="rate_description"
-                render={(value: string | null) => value || "-"}
-              />
-              <Table.Column
-                title="Cotización"
-                key="quotation"
-                render={() => (
-                  <Button type="link" disabled>
-                    PDF
+                    Descargar evidencia <DownloadOutlined />
                   </Button>
                 )}
-              />
-              <Table.Column
-                title="Tarifa"
-                dataIndex="rate"
-                key="rate"
-                render={(value: number) =>
-                  value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
-                }
-              />
-              <Table.Column
-                title="Cantidad de usos"
-                dataIndex="usage_quantity"
-                key="usage_quantity"
-              />
-              <Table.Column
-                title="Total"
-                dataIndex="total"
-                key="total"
-                render={(value: number) =>
-                  value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
-                }
-              />
-            </Table>
-          </div>
-          {/* ===== ANÁLISIS COMPARATIVO ===== */}
-          <div className="space-y-6 mb-6">
-            {pricing.map((item) => {
-              const baseRate = item.rate;
-              const comparations = item.comparations || [];
+              </div>
+            </Col>
+          </Row>
+        </div>
+        {/* ===== INFORMACIÓN DEL VIAJE ===== */}
+        <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+          <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
+            <Panel header="Información del viaje" key="1">
+              <Row gutter={[24, 16]} align="middle">
+                <Col xs={24} md={12}>
+                  <Text type="secondary">Origen</Text>
+                  <div style={{ fontWeight: 600 }}>{approval.origin}</div>
+                </Col>
 
-              return (
-                <div
-                  key={item.id_approval_item}
-                  className="border border-gray-200 rounded-lg shadow-sm"
-                >
-                  {/* Encabezado */}
-                  <div
-                    className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => toggleAnalysis(item.id_approval_item.toString())}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900">{item.provider}</h3>
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-gray-900">
-                            {item.rate.toLocaleString("es-CO", {
-                              style: "currency",
-                              currency: "COP"
-                            })}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {item.vehicle_type} • {item.rate_description || "-"}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        Vendor: {item.vendor} • Contrato: {item.contract || "-"}
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      {expandedAnalysis[item.id_approval_item] ? (
-                        <ChevronUp className="h-5 w-5 text-gray-500" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-gray-500" />
-                      )}
-                    </div>
+                <Col xs={24} md={12}>
+                  <Text type="secondary">Destino</Text>
+                  <div style={{ fontWeight: 600 }}>{approval.destination}</div>
+                </Col>
+
+                <Col xs={24} md={12}>
+                  <Text type="secondary">Tipo de servicio</Text>
+                  <div style={{ fontWeight: 600 }}>
+                    {pricing.length > 0 && pricing[0].rate_description
+                      ? pricing[0].rate_description
+                      : ""}
                   </div>
+                </Col>
 
-                  {/* Tabla de comparaciones */}
-                  {expandedAnalysis[item.id_approval_item] && (
-                    <div className="p-4 bg-white">
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead className="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                Proveedor
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                Tipo vehículo
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                Tipo tarifa
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                Contrato
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                Tarifa
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                                Diferencia
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {comparations.map((c) => {
-                              const diff = ((c.rate - baseRate) / baseRate) * 100;
-                              return (
-                                <tr key={c.id_carrier_request} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 text-sm text-gray-900">{c.provider}</td>
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {c.vehicle_type}
-                                  </td>
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {c.rate_description || "-"}
-                                  </td>
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {c.contract || "-"}
-                                  </td>
-                                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                    {c.rate.toLocaleString("es-CO", {
-                                      style: "currency",
-                                      currency: "COP"
-                                    })}
-                                  </td>
-                                  <td
-                                    className={`px-4 py-3 text-sm font-medium ${
-                                      diff > 0
-                                        ? "text-red-600"
-                                        : diff < 0
-                                          ? "text-green-600"
-                                          : "text-gray-900"
-                                    }`}
-                                  >
-                                    {diff > 0 ? "+" : ""}
-                                    {diff.toFixed(2)}%
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                <Col
+                  xs={24}
+                  md={12}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                  }}
+                >
+                  <div>
+                    <Text type="secondary">VP</Text>
+                    <div style={{ fontWeight: 600 }}>{approval.vp}</div>
+                  </div>
+                  {approval.id_transfer_request && (
+                    <div>
+                      <a
+                        style={{ fontWeight: 600 }}
+                        onClick={() =>
+                          router.push(
+                            `/logistics/transfer-orders/details/${approval.id_transfer_request}`
+                          )
+                        }
+                      >
+                        Ver detalle de TR →
+                      </a>
                     </div>
                   )}
-                </div>
+                </Col>
+              </Row>
+            </Panel>
+          </Collapse>
+        </div>
+        {/* ===== TARIFAS ===== */}
+        <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+          <Title level={4}>Tarifas</Title>
+          <Table
+            dataSource={pricing}
+            rowKey={(record) => record.id_approval_item.toString()}
+            pagination={false}
+            bordered
+            summary={(pageData) => {
+              let totalSum = 0;
+              pageData.forEach(({ total }) => {
+                totalSum += total;
+              });
+              return (
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0} colSpan={8}>
+                    <div style={{ textAlign: "right", fontWeight: "bold" }}>Total</div>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell index={9}>
+                    <div style={{ fontWeight: "bold" }}>
+                      {totalSum.toLocaleString("es-CO", { style: "currency", currency: "COP" })}
+                    </div>
+                  </Table.Summary.Cell>
+                </Table.Summary.Row>
               );
-            })}
-          </div>
+            }}
+          >
+            <Table.Column title="Proveedor" dataIndex="provider" key="provider" />
+            <Table.Column title="Vendor" dataIndex="vendor" key="vendor" />
+            <Table.Column title="Contrato" dataIndex="contract" key="contract" />
+            <Table.Column title="Tipo Vehículo" dataIndex="vehicle_type" key="vehicle_type" />
+            <Table.Column
+              title="Descripción tarifa"
+              dataIndex="rate_description"
+              key="rate_description"
+              render={(value: string | null) => value || "-"}
+            />
+            <Table.Column
+              title="Cotización"
+              key="quotation"
+              render={() => (
+                <Button type="link" disabled>
+                  PDF
+                </Button>
+              )}
+            />
+            <Table.Column
+              title="Tarifa"
+              dataIndex="rate"
+              key="rate"
+              render={(value: number) =>
+                value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
+              }
+            />
+            <Table.Column
+              title="Cantidad de usos"
+              dataIndex="usage_quantity"
+              key="usage_quantity"
+            />
+            <Table.Column
+              title="Total"
+              dataIndex="total"
+              key="total"
+              render={(value: number) =>
+                value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
+              }
+            />
+          </Table>
+        </div>
+        {/* ===== ANÁLISIS COMPARATIVO ===== */}
+        <div className="space-y-6 mb-6">
+          {pricing.map((item) => {
+            const baseRate = item.rate;
+            const comparations = item.comparations || [];
 
-          {/* ===== APROBADORES PENDIENTES ===== */}
-          <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
-            <Title level={4}>Aprobadores pendientes</Title>
+            return (
+              <div
+                key={item.id_approval_item}
+                className="border border-gray-200 rounded-lg shadow-sm"
+              >
+                {/* Encabezado */}
+                <div
+                  className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => toggleAnalysis(item.id_approval_item.toString())}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">{item.provider}</h3>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-gray-900">
+                          {item.rate.toLocaleString("es-CO", {
+                            style: "currency",
+                            currency: "COP"
+                          })}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {item.vehicle_type} • {item.rate_description || "-"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      Vendor: {item.vendor} • Contrato: {item.contract || "-"}
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    {expandedAnalysis[item.id_approval_item] ? (
+                      <ChevronUp className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-gray-500" />
+                    )}
+                  </div>
+                </div>
 
-            <Table
-              dataSource={users_approval}
-              rowKey={(record) => record.id_user.toString()}
-              pagination={false}
-              bordered={false}
-              size="small"
-              style={{ marginTop: 16 }}
-            >
-              <Table.Column
-                title="Nombre"
-                dataIndex="name"
-                key="name"
-                render={(text) => <strong>{text}</strong>}
-              />
-              <Table.Column title="Email" dataIndex="email" key="email" />
-              <Table.Column
-                title="Estado"
-                dataIndex="status"
-                key="status"
-                render={(status: string) => {
-                  let color = "#999";
-                  let text = "Pendiente";
-                  if (status === "Aprobado") {
-                    color = "#4caf50";
-                    text = "Aprobado";
-                  } else if (status === "Rechazado") {
-                    color = "#f44336";
-                    text = "Rechazado";
-                  }
+                {/* Tabla de comparaciones */}
+                {expandedAnalysis[item.id_approval_item] && (
+                  <div className="p-4 bg-white">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                              Proveedor
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                              Tipo vehículo
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                              Tipo tarifa
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                              Contrato
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                              Tarifa
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                              Diferencia
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {comparations.map((c) => {
+                            const diff = ((c.rate - baseRate) / baseRate) * 100;
+                            return (
+                              <tr key={c.id_carrier_request} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm text-gray-900">{c.provider}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {c.vehicle_type}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {c.rate_description || "-"}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {c.contract || "-"}
+                                </td>
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                  {c.rate.toLocaleString("es-CO", {
+                                    style: "currency",
+                                    currency: "COP"
+                                  })}
+                                </td>
+                                <td
+                                  className={`px-4 py-3 text-sm font-medium ${
+                                    diff > 0
+                                      ? "text-red-600"
+                                      : diff < 0
+                                        ? "text-green-600"
+                                        : "text-gray-900"
+                                  }`}
+                                >
+                                  {diff > 0 ? "+" : ""}
+                                  {diff.toFixed(2)}%
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-                  return (
-                    <span style={{ display: "flex", alignItems: "center", gap: 8, color }}>
-                      {status === "Aprobado" && <CheckCircle />}
-                      {status === "Rechazado" && <XCircle />}
-                      {status === "pending" && <Clock />}
-                      {text}
-                    </span>
-                  );
-                }}
-              />
-            </Table>
-          </div>
-        </Card>
+        {/* ===== APROBADORES PENDIENTES ===== */}
+        <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+          <Title level={4}>Aprobadores pendientes</Title>
+
+          <Table
+            dataSource={users_approval}
+            rowKey={(record) => record.id_user.toString()}
+            pagination={false}
+            bordered={false}
+            size="small"
+            style={{ marginTop: 16 }}
+          >
+            <Table.Column
+              title="Nombre"
+              dataIndex="name"
+              key="name"
+              render={(text) => <strong>{text}</strong>}
+            />
+            <Table.Column title="Email" dataIndex="email" key="email" />
+            <Table.Column
+              title="Estado"
+              dataIndex="status"
+              key="status"
+              render={(status: string) => {
+                let color = "#999";
+                let text = "Pendiente";
+                if (status === "Aprobado") {
+                  color = "#4caf50";
+                  text = "Aprobado";
+                } else if (status === "Rechazado") {
+                  color = "#f44336";
+                  text = "Rechazado";
+                }
+
+                return (
+                  <span style={{ display: "flex", alignItems: "center", gap: 8, color }}>
+                    {status === "Aprobado" && <CheckCircle />}
+                    {status === "Rechazado" && <XCircle />}
+                    {status === "pending" && <Clock />}
+                    {text}
+                  </span>
+                );
+              }}
+            />
+          </Table>
+        </div>
 
         {/* ===== MODALES ===== */}
         <Modal
