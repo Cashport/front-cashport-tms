@@ -30,6 +30,7 @@ import { ComparativeAnalysis } from "@/modules/logistics/approval/components/Com
 import ModalSelectCarrierPricingComparison, {
   ICarriersPricingWithCheck
 } from "@/components/organisms/logistics/orders/transfer_request/components/modals/ModalSelectCarrierPricingComparison";
+import CarriersFeeTable from "@/components/molecules/tables/CarriersFeeTable";
 
 import { defaultApprovalFormValues } from "@/types/logistics/approval";
 import type {
@@ -505,79 +506,11 @@ export function NewApprovalForm() {
             )}
           </div>
 
-          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Proveedor
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Vendor
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Contrato
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Tipo de vehículo
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Descripción tarifa
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Cotización
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Tarifa
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                    Cantidad de usos
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {forecastItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-sm text-gray-900">{item.proveedor}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{item.vendor}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
-                    <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{item.descripcionTarifa}</td>
-
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      $ {item.tarifa.toLocaleString("es-CO")}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Input
-                        type="number"
-                        value={item.cantidadUsos}
-                        onChange={(e) => updateCantidadUsos(item.id, e.target.value)}
-                        min="0"
-                        disabled={
-                          tipoAprobacion === "viaje-especifico" ||
-                          tipoAprobacion === "tercerizacion"
-                        }
-                        className="w-20 text-center border-2 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-600"
-                        required
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                      $ {calculateTotal(item.tarifa, item.cantidadUsos).toLocaleString("es-CO")}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="bg-gray-50 font-semibold">
-                  <td colSpan={8} className="px-4 py-3 text-right text-sm text-gray-900">
-                    Total
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {calculateGrandTotal().toLocaleString("es-CO")}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <CarriersFeeTable
+            forecastItems={forecastItems}
+            tipoAprobacion={tipoAprobacion}
+            onCantidadUsosChange={updateCantidadUsos}
+          />
         </div>
 
         <ComparativeAnalysis
