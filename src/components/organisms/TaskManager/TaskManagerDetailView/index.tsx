@@ -32,15 +32,10 @@ import Container from "@/components/atoms/Container/Container";
 import { CheckCircle, XCircle, Clock } from "phosphor-react";
 import { getTaskDetail, updatePricingApprovalStatus } from "@/services/tasks/tasks";
 import { STATUS } from "@/utils/constants/globalConstants";
-import {
-  ITaskDetail,
-  ITaskPricing,
-  ITaskPricingComparation,
-  ITaskApprover
-} from "@/types/tasks/ITasks";
+import { ITaskDetail } from "@/types/tasks/ITasks";
 import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
-import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { Label } from "@/modules/chat/ui/label";
+import CarriersFeeTable from "@/components/molecules/tables/CarriersFeeTable";
+import type { ForecastItem } from "@/types/logistics/approval";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
@@ -143,6 +138,19 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
 
   const { approval, pricing, users_approval } = taskDetail;
 
+  // Transform pricing data to ForecastItem format for CarriersFeeTable
+  const transformedPricing: ForecastItem[] = pricing.map((item) => ({
+    id: item.id_approval_item.toString(),
+    proveedor: item.provider,
+    vendor: item.vendor.toString(),
+    contrato: item.contract,
+    tipoVehiculo: item.vehicle_type,
+    descripcionTarifa: item.rate_description || "",
+    tarifa: item.rate,
+    cantidadUsos: item.usage_quantity,
+    cotizacionUrl: ""
+  }));
+
   const renderStatusTag = (status: string) => {
     if (status === "approved") return <Tag color="green">Aprobado</Tag>;
     if (status === "rejected") return <Tag color="red">Rechazado</Tag>;
@@ -191,7 +199,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         </Flex>
 
         {/* ===== INFORMACIÓN DE APROBACIÓN ===== */}
-        <div style={{ padding: "16px 24px", borderBottom: "1px solid #f0f0f0" }}>
+        <div style={{ padding: "16px 0", borderBottom: "1px solid #f0f0f0" }}>
           <Title level={4}>Información de aprobación</Title>
 
           <Row gutter={[16, 16]}>
@@ -254,7 +262,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           </Row>
         </div>
         {/* ===== INFORMACIÓN DEL VIAJE ===== */}
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+        <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
           <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
             <Panel header="Información del viaje" key="1">
               <Row gutter={[24, 16]} align="middle">
@@ -310,73 +318,9 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           </Collapse>
         </div>
         {/* ===== TARIFAS ===== */}
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+        <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
           <Title level={4}>Tarifas</Title>
-          <Table
-            dataSource={pricing}
-            rowKey={(record) => record.id_approval_item.toString()}
-            pagination={false}
-            bordered
-            summary={(pageData) => {
-              let totalSum = 0;
-              pageData.forEach(({ total }) => {
-                totalSum += total;
-              });
-              return (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0} colSpan={8}>
-                    <div style={{ textAlign: "right", fontWeight: "bold" }}>Total</div>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={9}>
-                    <div style={{ fontWeight: "bold" }}>
-                      {totalSum.toLocaleString("es-CO", { style: "currency", currency: "COP" })}
-                    </div>
-                  </Table.Summary.Cell>
-                </Table.Summary.Row>
-              );
-            }}
-          >
-            <Table.Column title="Proveedor" dataIndex="provider" key="provider" />
-            <Table.Column title="Vendor" dataIndex="vendor" key="vendor" />
-            <Table.Column title="Contrato" dataIndex="contract" key="contract" />
-            <Table.Column title="Tipo Vehículo" dataIndex="vehicle_type" key="vehicle_type" />
-            <Table.Column
-              title="Descripción tarifa"
-              dataIndex="rate_description"
-              key="rate_description"
-              render={(value: string | null) => value || "-"}
-            />
-            <Table.Column
-              title="Cotización"
-              key="quotation"
-              render={() => (
-                <Button type="link" disabled>
-                  PDF
-                </Button>
-              )}
-            />
-            <Table.Column
-              title="Tarifa"
-              dataIndex="rate"
-              key="rate"
-              render={(value: number) =>
-                value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
-              }
-            />
-            <Table.Column
-              title="Cantidad de usos"
-              dataIndex="usage_quantity"
-              key="usage_quantity"
-            />
-            <Table.Column
-              title="Total"
-              dataIndex="total"
-              key="total"
-              render={(value: number) =>
-                value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
-              }
-            />
-          </Table>
+          <CarriersFeeTable forecastItems={transformedPricing} tipoAprobacion="" noInput={true} />
         </div>
         {/* ===== ANÁLISIS COMPARATIVO ===== */}
         <div className="space-y-6 mb-6">
@@ -496,7 +440,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         </div>
 
         {/* ===== APROBADORES PENDIENTES ===== */}
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0" }}>
+        <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
           <Title level={4}>Aprobadores pendientes</Title>
 
           <Table

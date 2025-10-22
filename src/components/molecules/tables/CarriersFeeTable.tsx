@@ -2,6 +2,8 @@ import { FileText, Download } from "lucide-react";
 import { Input } from "@/modules/chat/ui/input";
 import type { ForecastItem } from "@/types/logistics/approval";
 
+import "@/modules/chat/styles/chatStyles.css";
+
 interface CarriersFeeTableProps {
   forecastItems: ForecastItem[];
   tipoAprobacion: string;
@@ -52,7 +54,12 @@ export default function CarriersFeeTable({
         <tbody className="divide-y divide-gray-200 bg-white">
           {forecastItems.map((item) => (
             <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3 text-sm text-gray-900">{item.proveedor}</td>
+              <td
+                className="px-4 py-3 text-sm text-gray-900 max-w-[200px] truncate"
+                title={item.proveedor}
+              >
+                {item.proveedor}
+              </td>
               <td className="px-4 py-3 text-sm text-gray-900">{item.vendor}</td>
               <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
               <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
@@ -74,7 +81,7 @@ export default function CarriersFeeTable({
               <td className="px-4 py-3 text-sm text-gray-900">
                 $ {item.tarifa.toLocaleString("es-CO")}
               </td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3 text-sm text-gray-900">
                 {noInput ? (
                   item.cantidadUsos
                 ) : (
