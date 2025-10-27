@@ -324,6 +324,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         </div>
         {/* ===== ANÁLISIS COMPARATIVO ===== */}
         <div className="space-y-6 mb-6">
+          <Title level={4}>Análisis Comparativo</Title>
           {pricing.map((item) => {
             const baseRate = item.rate;
             const comparations = item.comparations || [];
