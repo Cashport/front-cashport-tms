@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import {
   Button,
   Card,
-  Collapse,
   Modal,
   Input,
   Select,
@@ -38,7 +37,6 @@ import CarriersFeeTable from "@/components/molecules/tables/CarriersFeeTable";
 import type { ForecastItem } from "@/types/logistics/approval";
 
 const { Title, Text } = Typography;
-const { Panel } = Collapse;
 const { Option } = Select;
 
 interface TaskManagerDetailViewProps {
@@ -199,9 +197,8 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         </Flex>
 
         {/* ===== INFORMACIÓN DE APROBACIÓN ===== */}
-        <div style={{ padding: "16px 0", borderBottom: "1px solid #f0f0f0" }}>
+        <div style={{ padding: "16px 0" }}>
           <Title level={4}>Información de aprobación</Title>
-
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Text type="secondary">Solicitud de aprobación para</Text>
@@ -263,59 +260,72 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         </div>
         {/* ===== INFORMACIÓN DEL VIAJE ===== */}
         <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
-          <Collapse accordion defaultActiveKey={["1"]} expandIconPosition="end" bordered={false}>
-            <Panel header="Información del viaje" key="1">
-              <Row gutter={[24, 16]} align="middle">
-                <Col xs={24} md={12}>
-                  <Text type="secondary">Origen</Text>
-                  <div style={{ fontWeight: 600 }}>{approval.origin}</div>
-                </Col>
+          <Title level={4}>Información del viaje</Title>
 
-                <Col xs={24} md={12}>
-                  <Text type="secondary">Destino</Text>
-                  <div style={{ fontWeight: 600 }}>{approval.destination}</div>
-                </Col>
+          <Row gutter={[24, 16]} align="middle">
+            <Col xs={24} md={12}>
+              <Text type="secondary">Origen</Text>
+              <div style={{ fontWeight: 600 }}>{approval.origin}</div>
+            </Col>
 
-                <Col xs={24} md={12}>
-                  <Text type="secondary">Tipo de servicio</Text>
-                  <div style={{ fontWeight: 600 }}>
-                    {pricing.length > 0 && pricing[0].rate_description
-                      ? pricing[0].rate_description
-                      : ""}
-                  </div>
-                </Col>
+            <Col xs={24} md={12}>
+              <Text type="secondary">Destino</Text>
+              <div style={{ fontWeight: 600 }}>{approval.destination}</div>
+            </Col>
 
-                <Col
-                  xs={24}
-                  md={12}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center"
-                  }}
-                >
-                  <div>
-                    <Text type="secondary">VP</Text>
-                    <div style={{ fontWeight: 600 }}>{approval.vp}</div>
-                  </div>
-                  {approval.id_transfer_request && (
-                    <div>
-                      <a
-                        style={{ fontWeight: 600 }}
-                        onClick={() =>
-                          router.push(
-                            `/logistics/transfer-orders/details/${approval.id_transfer_request}`
-                          )
-                        }
-                      >
-                        Ver detalle de TR →
-                      </a>
-                    </div>
-                  )}
-                </Col>
-              </Row>
-            </Panel>
-          </Collapse>
+            <Col xs={24} md={12}>
+              <Text type="secondary">Tipo de servicio</Text>
+              <div style={{ fontWeight: 600 }}>
+                {pricing.length > 0 && pricing[0].rate_description
+                  ? pricing[0].rate_description
+                  : ""}
+              </div>
+            </Col>
+
+            <Col
+              xs={24}
+              md={12}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <Text type="secondary">VP</Text>
+                <div style={{ fontWeight: 600 }}>{approval.vp}</div>
+              </div>
+              {approval.id_transfer_request && (
+                <div>
+                  <a
+                    style={{ fontWeight: 600 }}
+                    onClick={() =>
+                      router.push(
+                        `/logistics/transfer-orders/details/${approval.id_transfer_request}`
+                      )
+                    }
+                  >
+                    Ver detalle de TR →
+                  </a>
+                </div>
+              )}
+            </Col>
+          </Row>
+        </div>
+        {/* ===== Observaciones ===== */}
+        <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
+          <Title level={4}>Observaciones</Title>
+          <p
+            className="text-sm"
+            style={{
+              color: "#ddd !important",
+              backgroundColor: "#f7f7f7",
+              padding: "0.7rem",
+              borderRadius: "0.25rem"
+            }}
+          >
+            {approval.observations}
+          </p>
         </div>
         {/* ===== TARIFAS ===== */}
         <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
@@ -323,7 +333,10 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           <CarriersFeeTable forecastItems={transformedPricing} tipoAprobacion="" noInput={true} />
         </div>
         {/* ===== ANÁLISIS COMPARATIVO ===== */}
-        <div className="space-y-6 mb-6">
+        <div
+          className="space-y-6 mb-6"
+          style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}
+        >
           <Title level={4}>Análisis Comparativo</Title>
           {pricing.map((item) => {
             const baseRate = item.rate;
