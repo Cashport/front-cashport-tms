@@ -32,7 +32,7 @@ export default function CarriersFeeTable({
   };
 
   return (
-    <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+    <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm my-3">
       <table className="w-full min-w-max">
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
