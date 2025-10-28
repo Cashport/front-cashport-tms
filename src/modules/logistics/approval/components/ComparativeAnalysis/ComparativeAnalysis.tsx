@@ -152,7 +152,14 @@ export function ComparativeAnalysis({
                                       : "text-gray-900"
                                 }`}
                               >
-                                {rate.diferencia > 0 ? "+" : ""}$ {rate.diferencia.toLocaleString("es-CO")}
+                                {(() => {
+                                  // Calculate percentage difference, protecting against division by zero
+                                  const percentage = item.tarifa !== 0
+                                    ? ((rate.tarifa - item.tarifa) / item.tarifa) * 100
+                                    : 0;
+                                  const sign = percentage > 0 ? "+" : "";
+                                  return `${sign}${percentage.toFixed(2)}%`;
+                                })()}
                               </span>
                             </td>
                             <td className="px-4 py-3">

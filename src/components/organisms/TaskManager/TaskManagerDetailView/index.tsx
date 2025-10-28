@@ -170,17 +170,6 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
             <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
               Volver
             </Button>
-
-            <Tooltip title="Generar acción (no disponible)">
-              <Button icon={<MoreOutlined />} disabled>
-                Generar acción
-              </Button>
-            </Tooltip>
-            <Tooltip title="Editar tarea (no disponible)">
-              <Button icon={<EditOutlined />} disabled>
-                Editar
-              </Button>
-            </Tooltip>
           </Space>
           <Space>
             {!isApprovedOrRejected && (
@@ -216,8 +205,8 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
             <Col xs={24} md={12}>
               <Text type="secondary">
-                Valido previamente con el coordinador de la zona que no haya un contrato activo para
-                este scope?
+                ¿Validó previamente con el coordinador de la zona que no haya un contrato activo
+                para este scope?
               </Text>
               <div
                 style={{
