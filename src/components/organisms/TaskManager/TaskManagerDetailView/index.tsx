@@ -343,7 +343,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
               >
                 {/* Encabezado */}
                 <div
-                  className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
                   onClick={() => toggleAnalysis(item.id_approval_item.toString())}
                 >
                   <div className="flex-1">
