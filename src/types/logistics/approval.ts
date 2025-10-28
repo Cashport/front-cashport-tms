@@ -11,7 +11,7 @@ export interface ForecastItem {
   descripcionTarifa: string;
   tarifa: number;
   cantidadUsos: number;
-  cotizacionUrl: string;
+  cotizacionUrl?: string;
 }
 
 export interface ComparisonRate {

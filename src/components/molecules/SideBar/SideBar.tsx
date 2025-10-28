@@ -291,7 +291,7 @@ export const SideBar = () => {
               type="primary"
               size="large"
               icon={<ClipboardText size={26} />}
-              className={path === "/gestor-tareas" ? "buttonIcon" : "buttonIconActive"}
+              className={path.startsWith("/gestor-tareas") ? "buttonIcon" : "buttonIconActive"}
             >
               {isSideBarLarge && "Tareas"}
             </Button>

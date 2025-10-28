@@ -146,7 +146,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
     descripcionTarifa: item.rate_description || "",
     tarifa: item.rate,
     cantidadUsos: item.usage_quantity,
-    cotizacionUrl: ""
+    cotizacionUrl: item.url_evidence
   }));
 
   const renderStatusTag = (status: string) => {
@@ -170,17 +170,6 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
             <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
               Volver
             </Button>
-
-            <Tooltip title="Generar acción (no disponible)">
-              <Button icon={<MoreOutlined />} disabled>
-                Generar acción
-              </Button>
-            </Tooltip>
-            <Tooltip title="Editar tarea (no disponible)">
-              <Button icon={<EditOutlined />} disabled>
-                Editar
-              </Button>
-            </Tooltip>
           </Space>
           <Space>
             {!isApprovedOrRejected && (
@@ -216,8 +205,8 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
             <Col xs={24} md={12}>
               <Text type="secondary">
-                Valido previamente con el coordinador de la zona que no haya un contrato activo para
-                este scope?
+                ¿Validó previamente con el coordinador de la zona que no haya un contrato activo
+                para este scope?
               </Text>
               <div
                 style={{
@@ -330,7 +319,12 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         {/* ===== TARIFAS ===== */}
         <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
           <Title level={4}>Tarifas</Title>
-          <CarriersFeeTable forecastItems={transformedPricing} tipoAprobacion="" noInput={true} />
+          <CarriersFeeTable
+            forecastItems={transformedPricing}
+            tipoAprobacion=""
+            noInput={true}
+            onDownloadQuote={(url) => window.open(url, "_blank")}
+          />
         </div>
         {/* ===== ANÁLISIS COMPARATIVO ===== */}
         <div
@@ -349,7 +343,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
               >
                 {/* Encabezado */}
                 <div
-                  className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
                   onClick={() => toggleAnalysis(item.id_approval_item.toString())}
                 >
                   <div className="flex-1">

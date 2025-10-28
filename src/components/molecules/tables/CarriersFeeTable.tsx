@@ -62,13 +62,15 @@ export default function CarriersFeeTable({
               </td>
               <td className="px-4 py-3 text-sm text-gray-900">{item.vendor}</td>
               <td className="px-4 py-3 text-sm text-gray-900">{item.contrato}</td>
-              <td className="px-4 py-3 text-sm text-blue-600">{item.tipoVehiculo}</td>
+              <td className="px-4 py-3 text-sm text-gray-900">{item.tipoVehiculo}</td>
               <td className="px-4 py-3 text-sm text-gray-900">{item.descripcionTarifa}</td>
               <td className="py-3 px-4 text-center">
                 <button
                   type="button"
                   onClick={() =>
-                    onDownloadQuote && onDownloadQuote(item.cotizacionUrl!, item.proveedor)
+                    onDownloadQuote &&
+                    item.cotizacionUrl &&
+                    onDownloadQuote(item.cotizacionUrl, item.proveedor)
                   }
                   className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                   title="Descargar cotización"
