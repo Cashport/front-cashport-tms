@@ -100,7 +100,7 @@ export function NewApprovalForm() {
             tipoVehiculo: carrier.vehicles,
             descripcionTarifa: carrier.service_type,
             tarifa: carrier.amount,
-            cantidadUsos: 0,
+            cantidadUsos: 1,
             cotizacionUrl: ""
           }))
         : [];

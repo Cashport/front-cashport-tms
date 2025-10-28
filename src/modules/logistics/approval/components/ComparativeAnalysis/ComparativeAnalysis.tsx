@@ -6,11 +6,7 @@ import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
 import { Button } from "@/modules/chat/ui/button";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import type {
-  INewApprovalForm,
-  ForecastItem,
-  ComparisonRate
-} from "@/types/logistics/approval";
+import type { INewApprovalForm, ForecastItem, ComparisonRate } from "@/types/logistics/approval";
 
 interface ComparativeAnalysisProps {
   forecastItems: ForecastItem[];
@@ -41,18 +37,15 @@ export function ComparativeAnalysis({
     });
   };
 
-  // Only render if total exceeds threshold
-  if (calculateGrandTotal() <= 100000000) {
-    return null;
-  }
-
   return (
     <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
       <h2 className="text-lg font-semibold text-gray-900 mb-6">Análisis comparativo</h2>
-      <p className="text-sm text-gray-600 mb-6">
-        El monto supera 25 mil USD. Por favor, agregue tarifas comparativas para cada registro del
-        forecast o marque la opción de Single source.
-      </p>
+      {calculateGrandTotal() > 100000000 && (
+        <p className="text-sm text-gray-600 mb-6">
+          El monto supera 25 mil USD. Por favor, agregue tarifas comparativas para cada registro del
+          forecast o marque la opción de Single source.
+        </p>
+      )}
 
       {!isSingleSource && (
         <div className="space-y-6 mb-6">
@@ -129,10 +122,14 @@ export function ComparativeAnalysis({
                               <span className="text-sm text-gray-900">{rate.tipo || "-"}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <span className="text-sm text-gray-900">{rate.tipoVehiculo || "-"}</span>
+                              <span className="text-sm text-gray-900">
+                                {rate.tipoVehiculo || "-"}
+                              </span>
                             </td>
                             <td className="px-4 py-3">
-                              <span className="text-sm text-gray-900">{rate.tipoTarifa || "-"}</span>
+                              <span className="text-sm text-gray-900">
+                                {rate.tipoTarifa || "-"}
+                              </span>
                             </td>
                             <td className="px-4 py-3">
                               <span className="text-sm text-gray-900">{rate.contrato || "-"}</span>
@@ -154,9 +151,10 @@ export function ComparativeAnalysis({
                               >
                                 {(() => {
                                   // Calculate percentage difference, protecting against division by zero
-                                  const percentage = item.tarifa !== 0
-                                    ? ((rate.tarifa - item.tarifa) / item.tarifa) * 100
-                                    : 0;
+                                  const percentage =
+                                    item.tarifa !== 0
+                                      ? ((rate.tarifa - item.tarifa) / item.tarifa) * 100
+                                      : 0;
                                   const sign = percentage > 0 ? "+" : "";
                                   return `${sign}${percentage.toFixed(2)}%`;
                                 })()}
