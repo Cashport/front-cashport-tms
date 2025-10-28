@@ -146,7 +146,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
     descripcionTarifa: item.rate_description || "",
     tarifa: item.rate,
     cantidadUsos: item.usage_quantity,
-    cotizacionUrl: ""
+    cotizacionUrl: item.url_evidence
   }));
 
   const renderStatusTag = (status: string) => {
@@ -330,7 +330,12 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
         {/* ===== TARIFAS ===== */}
         <div style={{ padding: "16px 0", borderTop: "1px solid #f0f0f0" }}>
           <Title level={4}>Tarifas</Title>
-          <CarriersFeeTable forecastItems={transformedPricing} tipoAprobacion="" noInput={true} />
+          <CarriersFeeTable
+            forecastItems={transformedPricing}
+            tipoAprobacion=""
+            noInput={true}
+            onDownloadQuote={(url) => window.open(url, "_blank")}
+          />
         </div>
         {/* ===== ANÁLISIS COMPARATIVO ===== */}
         <div
