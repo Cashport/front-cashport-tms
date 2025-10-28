@@ -93,7 +93,7 @@ export default function CarriersFeeTable({
                     onChange={(e) =>
                       onCantidadUsosChange && onCantidadUsosChange(item.id, e.target.value)
                     }
-                    min="0"
+                    min={1}
                     disabled={
                       tipoAprobacion === "viaje-especifico" || tipoAprobacion === "tercerizacion"
                     }
