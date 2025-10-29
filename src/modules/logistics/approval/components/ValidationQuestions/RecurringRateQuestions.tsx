@@ -31,8 +31,8 @@ export function RecurringRateQuestions({
     <>
       <div className="space-y-3">
         <Label className="text-sm font-medium text-gray-700">
-          Valido previamente con el coordinador de la zona que no haya un contrato activo para
-          este scope?
+          ¿Validó previamente con el coordinador de la zona que no haya un contrato activo para este
+          scope?
         </Label>
         <Controller
           name="validadoCoordinador"
