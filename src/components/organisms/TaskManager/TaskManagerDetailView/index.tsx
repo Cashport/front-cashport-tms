@@ -148,7 +148,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
     descripcionTarifa: item.rate_description || "",
     tarifa: item.rate,
     cantidadUsos: item.usage_quantity,
-    cotizacionUrl: ""
+    cotizacionUrl: item.url_evidence
   }));
 
   const renderStatusTag = (status: string) => {
