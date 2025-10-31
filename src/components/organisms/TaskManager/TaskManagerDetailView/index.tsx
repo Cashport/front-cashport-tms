@@ -131,6 +131,24 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
     link.click();
   };
 
+  const handleDownloadQuote = (url: string, proveedor: string) => {
+    if (!url) {
+      message.warning("No hay cotización disponible para descargar");
+      return;
+    }
+    try {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `cotizacion_${proveedor.replace(/\s+/g, "_")}.pdf`;
+      link.target = "_blank";
+      link.click();
+      message.success(`Descargando cotización de ${proveedor}`);
+    } catch (error) {
+      console.error("Error al descargar cotización:", error);
+      message.error("Error al descargar la cotización");
+    }
+  };
+
   if (loading) return <div>Cargando detalle de la aprobación...</div>;
   if (!taskDetail) return <div>No se encontró la aprobación.</div>;
 
@@ -323,7 +341,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
             forecastItems={transformedPricing}
             tipoAprobacion=""
             noInput={true}
-            onDownloadQuote={(url) => window.open(url, "_blank")}
+            onDownloadQuote={handleDownloadQuote}
           />
         </div>
         {/* ===== ANÁLISIS COMPARATIVO ===== */}

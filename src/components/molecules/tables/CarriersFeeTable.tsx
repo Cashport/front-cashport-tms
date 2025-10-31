@@ -9,7 +9,7 @@ interface CarriersFeeTableProps {
   tipoAprobacion: string;
   noInput?: boolean;
   onCantidadUsosChange?: (id: string, value: string) => void;
-  onDownloadQuote?: (url: string, proveedor: string) => void;
+  onDownloadQuote: (url: string, proveedor: string) => void;
 }
 
 export default function CarriersFeeTable({

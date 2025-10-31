@@ -61,6 +61,7 @@ export interface ITaskPricing {
   rate: number;
   usage_quantity: number;
   total: number;
+  url_evidence: string;
   comparations: ITaskPricingComparation[];
   url_evidence?: string;
 }
