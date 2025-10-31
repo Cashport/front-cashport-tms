@@ -100,7 +100,7 @@ export function NewApprovalForm() {
             tipoVehiculo: carrier.vehicles,
             descripcionTarifa: carrier.service_type,
             tarifa: carrier.amount,
-            cantidadUsos: 0,
+            cantidadUsos: 1,
             cotizacionUrl: ""
           }))
         : [];
@@ -128,7 +128,6 @@ export function NewApprovalForm() {
   const tipoAprobacion = watch("tipoAprobacion");
   const forecastItems = watch("forecastItems");
   const comparisonRates = watch("comparisonRates");
-  const isSingleSource = watch("isSingleSource");
   const approvers = watch("approvers");
 
   // Helper: Update cantidad de usos for forecast items
@@ -212,7 +211,7 @@ export function NewApprovalForm() {
       id_approval_type: approvalType.id,
       pricings,
       approvers: approversData,
-      send_single_source: data.isSingleSource,
+      send_single_source: false,
       is_another_contract_active: data.validadoCoordinador === "si",
       is_provider_recommended_by_sustainability: data.proveedorRecomendado === "si",
       tercerization_motive: data.motivoTercerizacion || "",
@@ -535,11 +534,11 @@ export function NewApprovalForm() {
         <ComparativeAnalysis
           forecastItems={forecastItems}
           comparisonRates={comparisonRates}
-          isSingleSource={isSingleSource}
           control={control}
           onRemoveComparisonRate={removeComparisonRate}
           onOpenModalCarrierPricing={handleOpenModalCarrierPricing}
           calculateGrandTotal={calculateGrandTotal}
+          tipoAprobacion={tipoAprobacion}
         />
 
         {/* Observaciones section */}

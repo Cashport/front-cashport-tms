@@ -31,8 +31,8 @@ export function SpecificTripQuestions({
     <>
       <div className="space-y-3">
         <Label className="text-sm font-medium text-gray-700">
-          Valido previamente con el coordinador de la zona que no haya un contrato activo para
-          este scope?
+          ¿Validó previamente con el coordinador de la zona que no haya un contrato activo para este
+          scope?
         </Label>
         <Controller
           name="validadoCoordinador"
@@ -75,7 +75,11 @@ export function SpecificTripQuestions({
             <RadioGroup value={field.value} onValueChange={field.onChange} required>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="si" id={`recomendado-si-${idPrefix}`} className="border-2" />
+                  <RadioGroupItem
+                    value="si"
+                    id={`recomendado-si-${idPrefix}`}
+                    className="border-2"
+                  />
                   <Label
                     htmlFor={`recomendado-si-${idPrefix}`}
                     className="font-normal cursor-pointer text-gray-700"
@@ -84,7 +88,11 @@ export function SpecificTripQuestions({
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id={`recomendado-no-${idPrefix}`} className="border-2" />
+                  <RadioGroupItem
+                    value="no"
+                    id={`recomendado-no-${idPrefix}`}
+                    className="border-2"
+                  />
                   <Label
                     htmlFor={`recomendado-no-${idPrefix}`}
                     className="font-normal cursor-pointer text-gray-700"
