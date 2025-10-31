@@ -57,7 +57,7 @@ export function OutsourcingQuestions({ control, watch, setValue }: OutsourcingQu
 
       <div className="space-y-3">
         <Label className="text-sm font-medium text-gray-700">
-          Existen proveedores en la zona para prestar el servicio
+          ¿Existen proveedores en la zona para prestar el servicio?
         </Label>
         <Controller
           name="existenProveedoresZona"
