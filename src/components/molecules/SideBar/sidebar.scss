@@ -14,61 +14,26 @@
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
 
-    .containerButtons {
+    .logoContainer {
         display: flex;
-        padding: 10px 14px;
-        align-items: center;
-        row-gap: 6px;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 2rem;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+        border-radius: 8px;
 
-        .logoContainer {
-            display: flex;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 2rem;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-
-            &__image {
-                border-radius: inherit;
-                width: 50px;
-                height: 50px;
-                object-fit: scale-down;
-                background-color: $white;
-            }
-
-            &:hover {
-                opacity: 0.9;
-                border: 1px solid $black;
-            }
+        &__image {
+            border-radius: inherit;
+            width: 50px;
+            height: 50px;
+            object-fit: scale-down;
+            background-color: $white;
         }
 
-        .buttonIcon {
-            background-color: $secondary;
-            box-shadow: none;
-            color: black;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
-        }
-
-        .buttonIconActive {
-            background-color: transparent;
-            color: black;
-            box-shadow: none;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
-        }
-
-        .imageWithoutImage {
-            background-color: $secondary !important;
+        &:hover {
+            opacity: 0.9;
+            border: 1px solid $black;
         }
     }
 }
@@ -132,6 +97,22 @@
             align-items: center;
             box-shadow: none;
             justify-content: center;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 1rem;
+        padding-left: 2rem;
+        align-items: center;
+
+        .logoContainer {
+            margin: 0;
         }
     }
 }

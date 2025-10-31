@@ -1,0 +1,33 @@
+@import "@styles/variables.scss";
+
+.containerButtons {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  align-items: center;
+  row-gap: 6px;
+
+  .buttonIcon {
+    background-color: $secondary;
+    box-shadow: none;
+    color: black;
+    align-items: center;
+
+    &:hover {
+      background-color: $secondary !important;
+      color: black;
+    }
+  }
+
+  .buttonIconActive {
+    background-color: transparent;
+    color: black;
+    box-shadow: none;
+    align-items: center;
+
+    &:hover {
+      background-color: $secondary !important;
+      color: black;
+    }
+  }
+}
