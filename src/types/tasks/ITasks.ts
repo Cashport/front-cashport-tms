@@ -63,7 +63,6 @@ export interface ITaskPricing {
   total: number;
   url_evidence: string;
   comparations: ITaskPricingComparation[];
-  url_evidence?: string;
 }
 
 export interface ITaskApproval {
