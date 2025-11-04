@@ -34,7 +34,7 @@ export interface IApprovalRequest {
   }[];
   send_single_source: boolean;
   is_another_contract_active: boolean;
-  is_provider_recommended_by_sustainability: boolean;
+  is_provider_recommended_by_sustainability: number;
   tercerization_motive: string;
   exists_another_provider_in_zone: boolean;
   subcontractor_ensure: boolean;

@@ -3,8 +3,7 @@
 import type React from "react";
 import type { Control, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import type { INewApprovalForm } from "@/types/logistics/approval";
-import { SpecificTripQuestions } from "./SpecificTripQuestions";
-import { RecurringRateQuestions } from "./RecurringRateQuestions";
+import { CommonApprovalQuestions } from "./CommonApprovalQuestions";
 import { OutsourcingQuestions } from "./OutsourcingQuestions";
 
 interface ValidationQuestionsProps {
@@ -24,24 +23,14 @@ export function ValidationQuestions({
 }: ValidationQuestionsProps) {
   switch (tipoAprobacion) {
     case "viaje-especifico":
-      return (
-        <SpecificTripQuestions
-          control={control}
-          watch={watch}
-          setValue={setValue}
-          handleEmailFileChange={handleEmailFileChange}
-          idPrefix="specific"
-        />
-      );
-
     case "tarifa-recurrente":
       return (
-        <RecurringRateQuestions
+        <CommonApprovalQuestions
           control={control}
           watch={watch}
           setValue={setValue}
           handleEmailFileChange={handleEmailFileChange}
-          idPrefix="recurring"
+          idPrefix={tipoAprobacion === "viaje-especifico" ? "specific" : "recurring"}
         />
       );
 
