@@ -6,6 +6,7 @@
     display: flex;
     flex-direction: row;
     overflow: hidden;
+    background-color: $background;
 
     .rightContent {
         height: 100%;
@@ -15,5 +16,12 @@
         padding: 1rem;
         padding-left: 2rem;
         overflow-y: auto;
+    }
+}
+
+// media queries
+@media (max-width: 768px) {
+    .mainWrapper {
+        flex-direction: column;
     }
 }
