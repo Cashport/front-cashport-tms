@@ -119,6 +119,7 @@
     border-bottom-right-radius: 12px;
     animation: slideInFromTop 250ms ease-out;
     border-top: 1px solid $light-gray;
+    z-index: 50;
 }
 
 // Animation for mobile menu slide-in
