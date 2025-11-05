@@ -9,21 +9,33 @@ import { RadioGroup, RadioGroupItem } from "@/modules/chat/ui/radio-group";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 
-interface RecurringRateQuestionsProps {
+/**
+ * Common approval questions component
+ *
+ * This component is used for multiple approval types that share the same validation questions:
+ * - "viaje-especifico" (Specific Trip)
+ * - "tarifa-recurrente" (Recurring Rate)
+ *
+ * Questions handled:
+ * 1. Coordinator zone validation - Validates if an active contract exists for this scope
+ * 2. Sustainability department recommendation - Checks if the provider is recommended
+ * 3. Confirmation email attachment - Conditional file upload when provider is recommended
+ */
+interface CommonApprovalQuestionsProps {
   control: Control<INewApprovalForm>;
   watch: UseFormWatch<INewApprovalForm>;
   setValue: UseFormSetValue<INewApprovalForm>;
   handleEmailFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  idPrefix?: string;
+  idPrefix: string; // Unique identifier to ensure HTML ID uniqueness across instances
 }
 
-export function RecurringRateQuestions({
+export function CommonApprovalQuestions({
   control,
   watch,
   setValue,
   handleEmailFileChange,
-  idPrefix = "recurring"
-}: RecurringRateQuestionsProps) {
+  idPrefix
+}: CommonApprovalQuestionsProps) {
   const proveedorRecomendado = watch("proveedorRecomendado");
   const emailConfirmacionFile = watch("emailConfirmacionFile");
 
@@ -76,7 +88,7 @@ export function RecurringRateQuestions({
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
-                    value="si"
+                    value="1"
                     id={`recomendado-si-${idPrefix}`}
                     className="border-2"
                   />
@@ -89,7 +101,7 @@ export function RecurringRateQuestions({
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
-                    value="no"
+                    value="0"
                     id={`recomendado-no-${idPrefix}`}
                     className="border-2"
                   />
@@ -98,6 +110,19 @@ export function RecurringRateQuestions({
                     className="font-normal cursor-pointer text-gray-700"
                   >
                     No
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value="2"
+                    id={`recomendado-no-aplica-${idPrefix}`}
+                    className="border-2"
+                  />
+                  <Label
+                    htmlFor={`recomendado-no-aplica-${idPrefix}`}
+                    className="font-normal cursor-pointer text-gray-700"
+                  >
+                    No aplica
                   </Label>
                 </div>
               </div>
