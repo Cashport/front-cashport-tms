@@ -82,7 +82,7 @@ export const SideBar = () => {
   }, [isHy]);
 
   return (
-    <div className={isSideBarLarge ? "mainLarge" : "main"}>
+    <div className={`sidebar ${isSideBarLarge ? "mainLarge" : "main"}`}>
       {width && width <= 768 ? <List size={32} /> : null}
       <Flex vertical align="center">
         <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>
