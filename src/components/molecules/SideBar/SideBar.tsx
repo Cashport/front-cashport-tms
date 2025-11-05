@@ -20,6 +20,7 @@ export const SideBar = () => {
   const width = useScreenWidth();
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
+  const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
   const router = useRouter();
   const path = usePathname();
   const project = useStore(useAppStore, (state) => state.selectedProject);
@@ -81,9 +82,20 @@ export const SideBar = () => {
     }
   }, [isHy]);
 
+  const handleButtonMenuClick = () => {
+    setIsModuleMenuOpen((prev) => !prev);
+  };
+
   return (
     <div className={`sidebar ${isSideBarLarge ? "mainLarge" : "main"}`}>
-      {width && width <= 768 ? <List size={32} /> : null}
+      {width && width <= 768 ? (
+        <Button type="text" className="buttonMenu" onClick={handleButtonMenuClick}>
+          <List size={26} />
+        </Button>
+      ) : null}
+      {isModuleMenuOpen && width && width <= 768 ? (
+        <ModulesButtons isSideBarLarge={isSideBarLarge} path={path} project={project} />
+      ) : null}
       <Flex vertical align="center">
         <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>
           {LOGO ? (

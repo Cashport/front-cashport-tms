@@ -36,6 +36,12 @@
             border: 1px solid $black;
         }
     }
+
+    .buttonMenu {
+        border-radius: 50%;
+        aspect-ratio: 1 / 1 !important;
+        padding: 12px 6px;
+    }
 }
 
 .mainLarge {
