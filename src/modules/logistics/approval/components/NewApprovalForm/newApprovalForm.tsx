@@ -117,7 +117,7 @@ export function NewApprovalForm() {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors }
+    formState: { errors, isSubmitting }
   } = useForm<INewApprovalForm>({
     resolver: yupResolver(approvalFormSchema) as any,
     defaultValues: initialFormValues,
@@ -664,6 +664,7 @@ export function NewApprovalForm() {
             variant="outline"
             onClick={handleGoBack}
             className="px-8 bg-transparent border-2"
+            disabled={isSubmitting}
           >
             Cancelar
           </Button>
@@ -672,6 +673,7 @@ export function NewApprovalForm() {
             className="px-8 text-black font-semibold"
             style={{ backgroundColor: "#CBE71E" }}
             onClick={handleSubmit(onSubmit, onError)}
+            disabled={isSubmitting}
           >
             Crear aprobación
           </Button>
