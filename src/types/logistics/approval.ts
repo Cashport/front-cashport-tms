@@ -11,7 +11,7 @@ export interface ForecastItem {
   descripcionTarifa: string;
   tarifa: number;
   cantidadUsos: number;
-  cotizacionUrl: string;
+  cotizacionUrl?: string;
 }
 
 export interface ComparisonRate {
@@ -39,7 +39,6 @@ export interface INewApprovalForm {
   // General fields
   tipoAprobacion: string;
   observaciones: string;
-  isSingleSource: boolean;
 
   // Specific Trip / Recurring Rate questions
   validadoCoordinador: string;
@@ -65,7 +64,6 @@ export const defaultApprovalFormValues: INewApprovalForm = {
   // General
   tipoAprobacion: "",
   observaciones: "",
-  isSingleSource: false,
 
   // Specific Trip / Recurring Rate
   validadoCoordinador: "",
