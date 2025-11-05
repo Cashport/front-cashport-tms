@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Avatar, Button, Flex } from "antd";
 
 import { ArrowLineRight, Clipboard, List } from "phosphor-react";
@@ -21,6 +21,7 @@ export const SideBar = () => {
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const path = usePathname();
   const project = useStore(useAppStore, (state) => state.selectedProject);
@@ -34,6 +35,23 @@ export const SideBar = () => {
     console.log(project);
     if (isHy) setIsComponentLoading(false);
   }, [isHy, project]);
+
+  // Click-outside handler for mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsModuleMenuOpen(false);
+      }
+    };
+
+    if (isModuleMenuOpen && width && width <= 768) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isModuleMenuOpen, width]);
 
   useEffect(() => {
     //to check if there is a project selected
@@ -94,7 +112,14 @@ export const SideBar = () => {
         </Button>
       ) : null}
       {isModuleMenuOpen && width && width <= 768 ? (
-        <ModulesButtons isSideBarLarge={isSideBarLarge} path={path} project={project} />
+        <div ref={mobileMenuRef} className="mobileMenuWrapper">
+          <ModulesButtons
+            isSideBarLarge={isSideBarLarge}
+            path={path}
+            project={project}
+            isMobileMenu={true}
+          />
+        </div>
       ) : null}
       <Flex vertical align="center">
         <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>

@@ -22,15 +22,21 @@ interface ModulesButtonsProps {
   isSideBarLarge: boolean;
   path: string;
   project: ISelectedProject | undefined;
+  isMobileMenu?: boolean;
 }
 
 /**
  * ModulesButtons component renders navigation buttons for different modules
  * based on user permissions. Buttons are displayed in the SideBar.
  */
-export const ModulesButtons = ({ isSideBarLarge, path, project }: ModulesButtonsProps) => {
+export const ModulesButtons = ({
+  isSideBarLarge,
+  path,
+  project,
+  isMobileMenu
+}: ModulesButtonsProps) => {
   return (
-    <div className="containerButtons">
+    <div className={`containerButtons ${isMobileMenu ? "mobile" : ""}`}>
       {checkUserViewPermissions(project, "Clientes") && (
         <Link href="/clientes/all">
           <Button
