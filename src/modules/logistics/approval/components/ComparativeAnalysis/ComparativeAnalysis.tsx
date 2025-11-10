@@ -1,31 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Controller, Control } from "react-hook-form";
 import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
-import { Label } from "@/modules/chat/ui/label";
 import { Button } from "@/modules/chat/ui/button";
-import { Checkbox } from "@/modules/chat/ui/checkbox";
-import type { INewApprovalForm, ForecastItem, ComparisonRate } from "@/types/logistics/approval";
+import type { ForecastItem, ComparisonRate } from "@/types/logistics/approval";
 
 interface ComparativeAnalysisProps {
   forecastItems: ForecastItem[];
   comparisonRates: Record<string, ComparisonRate[]>;
-  control: Control<INewApprovalForm>;
   onRemoveComparisonRate: (forecastItemId: string, rateId: string) => void;
   onOpenModalCarrierPricing: (forecastItemId: string) => void;
   calculateGrandTotal: () => number;
-  tipoAprobacion: string;
 }
 
 export function ComparativeAnalysis({
   forecastItems,
   comparisonRates,
-  control,
   onRemoveComparisonRate,
   onOpenModalCarrierPricing,
-  calculateGrandTotal,
-  tipoAprobacion
+  calculateGrandTotal
 }: ComparativeAnalysisProps) {
   // Local state for expanded accordion items
   const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
@@ -37,11 +30,34 @@ export function ComparativeAnalysis({
     });
   };
 
-  console.log("tipoAprobacion: string", tipoAprobacion);
+  // Calculate balance percentage: difference between main rate and average of comparison rates
+  const calculateBalancePercentage = (item: ForecastItem) => {
+    const itemComparisonRates = comparisonRates[item.id] || [];
 
-  if (tipoAprobacion !== "tarifa-recurrente") {
-    return null;
-  }
+    // Don't show balance if there are no comparison rates
+    if (itemComparisonRates.length === 0) {
+      return null;
+    }
+
+    // Calculate average of comparison rates
+    const sumOfComparisonRates = itemComparisonRates.reduce((sum, rate) => sum + rate.tarifa, 0);
+    const average = sumOfComparisonRates / itemComparisonRates.length;
+
+    // Protect against division by zero
+    if (average === 0) {
+      return null;
+    }
+
+    // Calculate percentage difference: ((mainRate - average) / average) * 100
+    const difference = item.tarifa - average;
+    const percentage = (difference / average) * 100;
+
+    return {
+      percentage: percentage.toFixed(2),
+      isPositive: percentage > 0,
+      formattedPercentage: `${percentage > 0 ? "+" : ""}${percentage.toFixed(1)}%`
+    };
+  };
 
   return (
     <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
@@ -64,12 +80,29 @@ export function ComparativeAnalysis({
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-gray-900">{item.proveedor}</h3>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-gray-900">
-                      $ {item.tarifa.toLocaleString("es-CO")}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {item.tipoVehiculo} • Km {item.descripcionTarifa}
+                  <div className="flex items-start gap-2">
+                    {/* General balance: percentage difference between main rate and average of comparison rates */}
+                    {(() => {
+                      const balance = calculateBalancePercentage(item);
+                      if (!balance) return null;
+
+                      return (
+                        <div
+                          className={`text-lg font-semibold ${
+                            balance.isPositive ? "text-red-600" : "text-green-600"
+                          }`}
+                        >
+                          {balance.formattedPercentage}
+                        </div>
+                      );
+                    })()}
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-gray-900">
+                        $ {item.tarifa.toLocaleString("es-CO")}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {item.tipoVehiculo} • Km {item.descripcionTarifa}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -143,15 +176,7 @@ export function ComparativeAnalysis({
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span
-                              className={`text-sm font-medium ${
-                                rate.diferencia > 0
-                                  ? "text-red-600"
-                                  : rate.diferencia < 0
-                                    ? "text-green-600"
-                                    : "text-gray-900"
-                              }`}
-                            >
+                            <span className={`text-sm font-medium text-gray-900`}>
                               {(() => {
                                 // Calculate percentage difference, protecting against division by zero
                                 const percentage =

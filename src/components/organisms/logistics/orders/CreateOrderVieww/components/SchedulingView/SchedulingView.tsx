@@ -413,7 +413,7 @@ const SchedulingView: React.FC<SchedulingViewProps> = ({ control, setValue, rese
             }}
           >
             <Calendar size={24} />
-            <div className="text">Renta fija</div>
+            <div className="text">Renta/Disponibilidad</div>
           </button>
         </Flex>
 
