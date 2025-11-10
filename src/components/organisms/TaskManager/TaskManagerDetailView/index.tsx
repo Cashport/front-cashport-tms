@@ -89,7 +89,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
       setShowApproveModal(false);
       const response = await updatePricingApprovalStatus(approvalId, "APPROVED");
       if (response.success) {
-        message.success(response.message);
+        message.success("La solicitud ha sido aprobada correctamente.");
         const detail = await getTaskDetail(approvalId);
         if (detail.success && detail.data) setTaskDetail(detail.data);
       } else {
@@ -111,7 +111,7 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
       setShowRejectModal(false);
       const response = await updatePricingApprovalStatus(approvalId, "REJECTED");
       if (response.success) {
-        message.success(response.message);
+        message.success("La solicitud ha sido rechazada correctamente.");
         const detail = await getTaskDetail(approvalId);
         if (detail.success && detail.data) setTaskDetail(detail.data);
       } else {
