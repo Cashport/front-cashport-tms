@@ -14,8 +14,13 @@ import {
   Receipt,
   ClipboardText
 } from "phosphor-react";
+
 import { checkUserViewPermissions } from "@/utils/utils";
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
+
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
+
 import "./modulesButtons.scss";
 
 interface ModulesButtonsProps {
@@ -35,6 +40,10 @@ export const ModulesButtons = ({
   project,
   isMobileMenu
 }: ModulesButtonsProps) => {
+  const height = useScreenHeight();
+  const width = useScreenWidth();
+  const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
+
   return (
     <div className={`containerButtons ${isMobileMenu ? "mobile" : ""}`}>
       {checkUserViewPermissions(project, "Clientes") && (
@@ -42,7 +51,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<User size={26} />}
+            icon={<User size={iconSize} />}
             className={path.startsWith("/clientes") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Clientes"}
@@ -54,7 +63,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<BellSimpleRinging size={26} />}
+            icon={<BellSimpleRinging size={iconSize} />}
             className={path.startsWith("/descuentos") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Descuentos"}
@@ -66,7 +75,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<BellSimpleRinging size={26} />}
+            icon={<BellSimpleRinging size={iconSize} />}
             className={path.startsWith("/notificaciones") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Notificaciones"}
@@ -79,7 +88,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<Megaphone size={26} />}
+            icon={<Megaphone size={iconSize} />}
             className={path.startsWith("/comercio") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Descuentos"}
@@ -92,7 +101,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<Bank size={26} />}
+            icon={<Bank size={iconSize} />}
             className={path === "/banco" ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Bancos"}
@@ -105,7 +114,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<TrendUp size={26} />}
+            icon={<TrendUp size={iconSize} />}
             className={path.startsWith("/logistics/contracts") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Ajustes"}
@@ -117,7 +126,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<Gear size={26} />}
+            icon={<Gear size={iconSize} />}
             className={
               path === "/" || path.startsWith("/proyectos/review")
                 ? "buttonIcon"
@@ -133,7 +142,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<UsersThree size={26} />}
+            icon={<UsersThree size={iconSize} />}
             className={path.startsWith("/logistics/providers") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Clientes"}
@@ -145,7 +154,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<MapPin size={26} />}
+            icon={<MapPin size={iconSize} />}
             className={path.startsWith("/map") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Ajustes"}
@@ -157,7 +166,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<Truck size={26} />}
+            icon={<Truck size={iconSize} />}
             className={
               path.startsWith("/logistics/transfer-orders") || path.startsWith("/logistics/orders")
                 ? "buttonIcon"
@@ -173,7 +182,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<CurrencyCircleDollar size={26} />}
+            icon={<CurrencyCircleDollar size={iconSize} />}
             className={
               path.startsWith("/logistics/acept_carrier") ? "buttonIcon" : "buttonIconActive"
             }
@@ -187,7 +196,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<Receipt size={26} />}
+            icon={<Receipt size={iconSize} />}
             className={path.startsWith("/facturacion") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Proveedores"}
@@ -199,7 +208,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<Gear size={26} />}
+            icon={<Gear size={iconSize} />}
             className={
               path.startsWith("/logistics/configuration") ? "buttonIcon" : "buttonIconActive"
             }
@@ -213,7 +222,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<ClipboardText size={26} />}
+            icon={<ClipboardText size={iconSize} />}
             className={path === "/gestor-tareas" ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Tareas"}
@@ -225,7 +234,7 @@ export const ModulesButtons = ({
           <Button
             type="primary"
             size="large"
-            icon={<ChatCircleDots size={26} />}
+            icon={<ChatCircleDots size={iconSize} />}
             className={path === "/chat" ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Ajustes"}

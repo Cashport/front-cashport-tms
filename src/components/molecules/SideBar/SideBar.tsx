@@ -14,10 +14,13 @@ import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjec
 import { setProjectInApi } from "@/utils/api/api";
 import { ModulesButtons } from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 export const SideBar = () => {
   const [isSideBarLarge, setIsSideBarLarge] = useState(false);
   const width = useScreenWidth();
+  const height = useScreenHeight();
+  const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
@@ -108,7 +111,7 @@ export const SideBar = () => {
     <div className={`sidebar ${isSideBarLarge ? "mainLarge" : "main"}`}>
       {width && width <= 768 ? (
         <Button type="text" className="buttonMenu" onClick={handleButtonMenuClick}>
-          <List size={26} />
+          <List size={iconSize} />
         </Button>
       ) : null}
       {isModuleMenuOpen && width && width <= 768 ? (
@@ -134,17 +137,14 @@ export const SideBar = () => {
           <ModulesButtons isSideBarLarge={isSideBarLarge} path={path} project={project} />
         ) : null}
       </Flex>
-      <Flex className="exit">
-        <Button
-          type="text"
-          size="large"
-          onClick={() => logOut(router)}
-          icon={<ArrowLineRight size={26} />}
-          className="buttonExit"
-        >
-          {isSideBarLarge && "Salir"}
-        </Button>
-      </Flex>
+      <Button
+        type="text"
+        onClick={() => logOut(router)}
+        icon={<ArrowLineRight size={iconSize} />}
+        className="buttonExit"
+      >
+        {isSideBarLarge && "Salir"}
+      </Button>
       <ModalProjectSelector
         isOpen={modalProjectSelectorOpen}
         onClose={() => setModalProjectSelectorOpen(false)}

@@ -37,8 +37,8 @@
         }
     }
 
-    .buttonMenu {
-        border-radius: 50%;
+    .buttonMenu,
+    .buttonExit {
         aspect-ratio: 1 / 1 !important;
         padding: 12px 6px;
     }
@@ -57,54 +57,6 @@
     padding-top: 5rem;
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
-
-    .containerButtons {
-        display: flex;
-        width: 90%;
-        padding: 10px 14px;
-        align-items: center;
-        row-gap: 6px;
-        .logoContainer {
-            margin-bottom: 2rem;
-        }
-
-        .buttonIcon {
-            background-color: $secondary;
-            box-shadow: none;
-            display: flex;
-            width: 100%;
-            color: black;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
-        }
-
-        .buttonIconActive {
-            width: 100%;
-            background-color: transparent;
-            color: black;
-            box-shadow: none;
-            display: flex;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
-        }
-    }
-    .exit {
-        display: flex;
-        .buttonExit {
-            display: flex;
-            align-items: center;
-            box-shadow: none;
-            justify-content: center;
-        }
-    }
 }
 
 // Mobile menu wrapper styles
@@ -140,8 +92,7 @@
         height: auto;
         flex-direction: row;
         flex-wrap: wrap;
-        padding: 1rem;
-        padding-left: 2rem;
+        padding: 1rem 2rem;
         align-items: center;
         border-radius: 0 0 1rem 1rem;
         box-shadow: 0px 5px 16px -3px #f0f0f0;
@@ -150,39 +101,24 @@
         .logoContainer {
             margin: 0;
         }
+    }
+}
 
-        // Mobile menu specific styles when inside sidebar
-        .mobileMenuWrapper {
-            .containerButtons {
-                flex-direction: row;
-                gap: 10px;
-                overflow-x: auto;
-                overflow-y: hidden;
-                padding: 16px 14px;
-
-                // Hide scrollbar for better appearance
-                &::-webkit-scrollbar {
-                    height: 4px;
-                }
-
-                &::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-
-                &::-webkit-scrollbar-thumb {
-                    background: rgba(0, 0, 0, 0.2);
-                    border-radius: 4px;
-                }
-
-                &::-webkit-scrollbar-thumb:hover {
-                    background: rgba(0, 0, 0, 0.3);
-                }
-
-                .buttonIcon,
-                .buttonIconActive {
-                    flex-shrink: 0;
-                }
+@media (max-height: 1000px) and (max-width: 768px) {
+    .main {
+        max-height: 42px;
+        padding: 6px 16px;
+        align-content: center;
+        .logoContainer {
+            &__image {
+                width: 25px;
+                height: 25px;
             }
+        }
+
+        .buttonMenu,
+        .buttonExit {
+            padding: 4px 2px;
         }
     }
 }
