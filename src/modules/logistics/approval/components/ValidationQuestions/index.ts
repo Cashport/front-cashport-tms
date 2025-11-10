@@ -1,4 +1,3 @@
 export { ValidationQuestions } from "./ValidationQuestions";
-export { SpecificTripQuestions } from "./SpecificTripQuestions";
-export { RecurringRateQuestions } from "./RecurringRateQuestions";
+export { CommonApprovalQuestions } from "./CommonApprovalQuestions";
 export { OutsourcingQuestions } from "./OutsourcingQuestions";

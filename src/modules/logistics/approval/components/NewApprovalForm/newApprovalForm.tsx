@@ -207,13 +207,14 @@ export function NewApprovalForm() {
       .filter((approver): approver is { id_user: number } => approver !== null);
 
     // Build the request object
+    const recommendedBySustainability = Number(data.proveedorRecomendado);
     const requestData: IApprovalRequest = {
       id_approval_type: approvalType.id,
       pricings,
       approvers: approversData,
       send_single_source: false,
       is_another_contract_active: data.validadoCoordinador === "si",
-      is_provider_recommended_by_sustainability: data.proveedorRecomendado === "si",
+      is_provider_recommended_by_sustainability: recommendedBySustainability,
       tercerization_motive: data.motivoTercerizacion || "",
       exists_another_provider_in_zone: data.existenProveedoresZona === "si",
       subcontractor_ensure: data.aseguroHabilitar,
