@@ -1,31 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Controller, Control } from "react-hook-form";
 import { Plus, X, ChevronDown, ChevronUp } from "lucide-react";
-import { Label } from "@/modules/chat/ui/label";
 import { Button } from "@/modules/chat/ui/button";
-import { Checkbox } from "@/modules/chat/ui/checkbox";
-import type { INewApprovalForm, ForecastItem, ComparisonRate } from "@/types/logistics/approval";
+import type { ForecastItem, ComparisonRate } from "@/types/logistics/approval";
 
 interface ComparativeAnalysisProps {
   forecastItems: ForecastItem[];
   comparisonRates: Record<string, ComparisonRate[]>;
-  control: Control<INewApprovalForm>;
   onRemoveComparisonRate: (forecastItemId: string, rateId: string) => void;
   onOpenModalCarrierPricing: (forecastItemId: string) => void;
   calculateGrandTotal: () => number;
-  tipoAprobacion: string;
 }
 
 export function ComparativeAnalysis({
   forecastItems,
   comparisonRates,
-  control,
   onRemoveComparisonRate,
   onOpenModalCarrierPricing,
-  calculateGrandTotal,
-  tipoAprobacion
+  calculateGrandTotal
 }: ComparativeAnalysisProps) {
   // Local state for expanded accordion items
   const [expandedAnalysis, setExpandedAnalysis] = useState<Record<string, boolean>>({});
@@ -65,10 +58,6 @@ export function ComparativeAnalysis({
       formattedPercentage: `${percentage > 0 ? "+" : ""}${percentage.toFixed(1)}%`
     };
   };
-
-  if (tipoAprobacion !== "tarifa-recurrente") {
-    return null;
-  }
 
   return (
     <div className="mb-8 pb-8 border-t border-gray-200 pt-8">
