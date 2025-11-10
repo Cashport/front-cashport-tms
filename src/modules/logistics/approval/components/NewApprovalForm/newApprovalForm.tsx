@@ -535,11 +535,9 @@ export function NewApprovalForm() {
         <ComparativeAnalysis
           forecastItems={forecastItems}
           comparisonRates={comparisonRates}
-          control={control}
           onRemoveComparisonRate={removeComparisonRate}
           onOpenModalCarrierPricing={handleOpenModalCarrierPricing}
           calculateGrandTotal={calculateGrandTotal}
-          tipoAprobacion={tipoAprobacion}
         />
 
         {/* Observaciones section */}
