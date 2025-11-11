@@ -1,3 +1,4 @@
+import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -5,5 +6,5 @@ export const metadata: Metadata = {
   description: "Seguimiento mapa"
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <ViewWrapper headerTitle="Dashboard">{children}</ViewWrapper>;
 }

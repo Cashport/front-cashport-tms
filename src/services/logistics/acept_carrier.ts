@@ -130,7 +130,10 @@ export const postCarrierRequest = async (
   accept_conditions: string,
   observation: string,
   fare?: number,
-  file?: File
+  file?: File,
+  association_cost?: number,
+  association_name?: number,
+  association_file?: File
 ): Promise<Data> => {
   try {
     const form = new FormData();
@@ -141,12 +144,18 @@ export const postCarrierRequest = async (
       id_drivers: id_drivers,
       accept_conditions: accept_conditions,
       observation: observation,
-      ...(fare !== undefined && { fare })
+      ...(fare !== undefined && { fare }),
+      ...(association_cost !== undefined && { association_cost }),
+      ...(association_name && { association_name })
     };
 
     form.append("request", JSON.stringify(body));
     if (file) {
       form.append("file", file);
+    }
+
+    if (association_file) {
+      form.append("association_file", association_file);
     }
 
     const response: Data = await API.post(`/carrier/request/accept`, form, {
