@@ -37,6 +37,14 @@ export enum FormMode {
   EDIT = "EDIT"
 }
 
+export interface IQuote {
+  auction_amount?: number;
+  auction_file?: File[];
+  association_cost?: number;
+  association_name?: number;
+  association_file?: File[];
+}
+
 export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrierDetailProps>) {
   const [isLoading, setIsLoading] = useState<{
     generalView: boolean;
@@ -53,6 +61,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [entityType, setEntityType] = useState<"otherRequirement" | "trip">("trip");
   const [observation, setObservation] = useState<any>(null);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [quote, setQuote] = useState<IQuote>();
   const router = useRouter();
 
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
@@ -138,10 +147,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   };
 
   const handleAcceptCR = async (
-    carrierId: string,
-    requestId: string,
-    vehicleId: string,
-    driverIds: string[],
+    carrierId: number,
+    requestId: number,
+    vehicleId: number,
+    driverIds: number[],
     status: string,
     observation: string
   ) => {
@@ -150,15 +159,24 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         ...isLoading,
         generalView: true
       });
-      await postCarrierRequest(carrierId, requestId, vehicleId, driverIds, status, observation);
-      messageApi.open({
-        content: "Aceptado"
-      });
+      await postCarrierRequest(
+        carrierId,
+        requestId,
+        vehicleId,
+        driverIds,
+        status,
+        observation,
+        quote?.auction_amount,
+        quote?.auction_file?.[0],
+        quote?.association_cost,
+        quote?.association_name,
+        quote?.association_file?.[0]
+      );
+      message.success(" Aceptado");
+
       router.push("/logistics/acept_carrier");
     } catch (error) {
-      messageApi.open({
-        content: "Hubo un problema aceptando la orden"
-      });
+      message.error("Hubo un problema aceptando la orden");
     } finally {
       setIsLoading({
         ...isLoading,
@@ -197,10 +215,10 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const handleSubmit = async () => {
     if (formMode === FormMode.CREATE) {
       await handleAcceptCR(
-        String(carrier?.id_carrier),
-        params.id,
-        String(vehicleSelected),
-        driversSelected.map(String),
+        carrier?.id_carrier!,
+        Number(params.id),
+        vehicleSelected!,
+        driversSelected as number[],
         "1",
         observation
       );
@@ -285,6 +303,9 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
             showRejectButton={canBeRejected}
             handleReject={handleOpenRejectModal}
             entityType={entityType}
+            quote={quote}
+            setQuote={setQuote}
+            formMode={formMode}
           />
         );
       case "asignation":

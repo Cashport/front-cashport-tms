@@ -80,6 +80,12 @@ export interface CarriersPricingModal extends CarriersPricing {
   checked?: boolean;
 }
 
+export interface ICarriersPricingModalComparison
+  extends Omit<
+    CarriersPricing,
+    "units" | "communities" | "pricing_description" | "valid_from" | "valid_to" | "pricingScore"
+  > {}
+
 export interface Trip {
   id_trip: number;
   vehicle_type: number;

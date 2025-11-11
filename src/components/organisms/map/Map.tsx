@@ -1,29 +1,29 @@
-'use client'
-import React, { useEffect, useRef } from 'react';
-import io from 'socket.io-client';
-import styles from './Map.module.scss'
+"use client";
+import React, { useEffect, useRef } from "react";
+import io from "socket.io-client";
+import styles from "./Map.module.scss";
 import { useState } from "react";
 import { CaretDown, CaretUp, CheckCircle, Eye } from "phosphor-react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { SideBar } from '@/components/molecules/SideBar/SideBar';
-import { ISocketTrip } from '@/types/logistics/trips/TripsSchema';
-import Image from 'next/image';
-import dayjs from 'dayjs';
-import { TripState } from '@/utils/constants/tripState';
-import DetailTripMap from './detail/Detail';
-import { IDriverMap } from '@/types/logistics/driver/driver';
-import { API } from '@/utils/api/api';
-import { AxiosResponse } from 'axios';
-import { MAPS_ACCESS_TOKEN, SOCKET_URI } from '@/utils/constants/globalConstants';
+import { SideBar } from "@/components/molecules/SideBar/SideBar";
+import { ISocketTrip } from "@/types/logistics/trips/TripsSchema";
+import Image from "next/image";
+import dayjs from "dayjs";
+import { TripState } from "@/utils/constants/tripState";
+import DetailTripMap from "./detail/Detail";
+import { IDriverMap } from "@/types/logistics/driver/driver";
+import { API } from "@/utils/api/api";
+import { AxiosResponse } from "axios";
+import { MAPS_ACCESS_TOKEN, SOCKET_URI } from "@/utils/constants/globalConstants";
 
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 const mapStyles = {
-  width: '100%',
-  height: '100%',
-  borderRadius: '16px',
+  width: "100%",
+  height: "100%",
+  borderRadius: "0 0 8px 8px"
 };
 
 interface ISocketData {
@@ -36,8 +36,8 @@ interface ISocketData {
 }
 
 interface IMark {
-  socketInfo: ISocketData,
-  mark: mapboxgl.Marker | null
+  socketInfo: ISocketData;
+  mark: mapboxgl.Marker | null;
 }
 
 const MapComponent = () => {
@@ -55,29 +55,29 @@ const MapComponent = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const mapsAccessToken = MAPS_ACCESS_TOKEN;
-  const socket = io(SOCKET_URI || '');
+  const socket = io(SOCKET_URI || "");
 
   const getStateColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);
-    return getState ? getState.bgColor : '#CBE71E';
-  }
+    return getState ? getState.bgColor : "#CBE71E";
+  };
 
   const getStateTextColor = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);
-    return getState ? getState.textColor : '#141414';
-  }
+    return getState ? getState.textColor : "#141414";
+  };
 
   const getIconUrl = (stateId: string) => {
     const getState = TripState.find((f) => f.id === stateId);
-    return getState ? getState.urlMap : '#141414';
-  }
+    return getState ? getState.urlMap : "#141414";
+  };
 
   const btnAction = (data: ISocketData) => {
     setTrip(data.trip);
     setTripLat(data.latitude);
     setTripLong(data.longitude);
     getDriverFromTrip(data.trip.id, data.userId);
-  }
+  };
 
   const updateUserLocation = (data: ISocketData) => {
     if (!mapRef.current || !data.trip) {
@@ -85,13 +85,15 @@ const MapComponent = () => {
     }
 
     setSocketInfo((prevSocketInfo) => {
-      const getUser = prevSocketInfo.find(f => f.socketInfo.userId === data.userId);
+      const getUser = prevSocketInfo.find((f) => f.socketInfo.userId === data.userId);
 
       const popup = new mapboxgl.Popup({
         offset: 25,
         closeButton: true,
         className: styles.customPopup
-      }).setHTML(`
+      })
+        .setHTML(
+          `
         <div style="display:flex;justify-content:space-between">
             <div style="display:flex;column-gap:16px">
             <img src="${data.trip.imgUrl}" style="width:51px;height:51px;border-radius:6px" />
@@ -109,7 +111,7 @@ const MapComponent = () => {
                   </div>
                   <div>
                   <div style="color:#fff;font-size:14px;font-weight:600;line-height:20px">${data.trip.startAddress}</div>
-                  <div style="color:#fff;font-size:14px;font-weight:400;line-height:20px">${dayjs.utc(data.trip.initRoute).format('DD MMM. YYYY')} - ${dayjs.utc(data.trip.initRoute).format('HH:mm')}</div>
+                  <div style="color:#fff;font-size:14px;font-weight:400;line-height:20px">${dayjs.utc(data.trip.initRoute).format("DD MMM. YYYY")} - ${dayjs.utc(data.trip.initRoute).format("HH:mm")}</div>
                   </div>
                 </div>
                 <div style="display:flex;column-gap:17px;">
@@ -118,7 +120,7 @@ const MapComponent = () => {
                   </div>
                   <div>
                   <div style="color:#6f7a90;font-size:14px;font-weight:600;line-height:20px">${data.trip.endAddress}</div>
-                  <div style="color:#6f7a90;font-size:14px;font-weight:400;line-height:20px">${dayjs.utc(data.trip.endRoute).format('DD MMM. YYYY')} - ${dayjs.utc(data.trip.endRoute).format('HH:mm')}</div>
+                  <div style="color:#6f7a90;font-size:14px;font-weight:400;line-height:20px">${dayjs.utc(data.trip.endRoute).format("DD MMM. YYYY")} - ${dayjs.utc(data.trip.endRoute).format("HH:mm")}</div>
                   </div>
                 </div>
                 </div>
@@ -148,50 +150,54 @@ const MapComponent = () => {
               </div>
             </div>
           </div>
-      `).on('open', () => {
-        const btnElement = document.getElementById('btnAction');
-        if (btnElement && btnElement.parentNode) {
-          const clone = btnElement.cloneNode(true);
-          btnElement.parentNode.replaceChild(clone, btnElement);
-          clone.addEventListener('click', () => {
-            btnAction(data)
-            popup.remove(); 
-          });
-        }
-      });
+      `
+        )
+        .on("open", () => {
+          const btnElement = document.getElementById("btnAction");
+          if (btnElement && btnElement.parentNode) {
+            const clone = btnElement.cloneNode(true);
+            btnElement.parentNode.replaceChild(clone, btnElement);
+            clone.addEventListener("click", () => {
+              btnAction(data);
+              popup.remove();
+            });
+          }
+        });
 
-      const el = document.createElement('div');
+      const el = document.createElement("div");
       const width = 42;
       const height = 42;
-      el.className = 'marker';
+      el.className = "marker";
       el.style.backgroundImage = `url(${getIconUrl(data.trip.stateId)})`;
       el.style.width = `${width}px`;
       el.style.height = `${height}px`;
-      el.style.backgroundSize = '100%';
-      el.style.display = 'block';
-      el.style.border = 'none';
-      el.style.borderRadius = '50%';
-      el.style.cursor = 'pointer';
+      el.style.backgroundSize = "100%";
+      el.style.display = "block";
+      el.style.border = "none";
+      el.style.borderRadius = "50%";
+      el.style.cursor = "pointer";
 
       if (getUser) {
         return prevSocketInfo.map((item) => {
           if (getUser.socketInfo.userId === item.socketInfo.userId) {
-
             const markerElement = item.mark!.getElement();
 
             markerElement.style.backgroundImage = `url(${getIconUrl(data.trip.stateId)})`;
 
             item.mark!.remove();
             return {
-              mark: item.mark!.setLngLat([data.longitude, data.latitude]).setPopup(popup).addTo(mapRef.current!),
+              mark: item
+                .mark!.setLngLat([data.longitude, data.latitude])
+                .setPopup(popup)
+                .addTo(mapRef.current!),
               socketInfo: {
                 ...item.socketInfo,
                 latitude: data.latitude,
                 longitude: data.longitude,
                 timestamp: data.timestamp,
                 distance: data.distance,
-                trip: data.trip,
-              },
+                trip: data.trip
+              }
             };
           }
           return item;
@@ -210,9 +216,9 @@ const MapComponent = () => {
   };
 
   useEffect(() => {
-    socket.on('changeLocation', (data) => {
-      console.log('Ubicación recibida:', data);
-      updateUserLocation(data)
+    socket.on("changeLocation", (data) => {
+      console.log("Ubicación recibida:", data);
+      updateUserLocation(data);
     });
 
     if (!mapContainerRef.current) return;
@@ -223,14 +229,14 @@ const MapComponent = () => {
       style: "mapbox://styles/mapbox/streets-v12",
       center: { lon: -74.07231699675322, lat: 4.66336863727521 },
       zoom: 12,
-      attributionControl: false,
+      attributionControl: false
     });
 
     mapRef.current = map;
 
     map.on("style.load", () => {
       const compassControl = new mapboxgl.NavigationControl({
-        showCompass: true,
+        showCompass: true
       });
       map.addControl(compassControl, "top-right");
       setMapLoaded(true);
@@ -311,43 +317,51 @@ const MapComponent = () => {
         setTripLat(getInfo.socketInfo.latitude);
         setTripLong(getInfo.socketInfo.longitude);
         getDriverFromTrip(getInfo.socketInfo.trip.id, getInfo.socketInfo.userId);
-        setDistancePercent(getInfo.socketInfo.distance)
+        setDistancePercent(getInfo.socketInfo.distance);
       }
     }
-  }, [socketInfo])
+  }, [socketInfo]);
 
   const getDriverFromTrip = async (tripId: string, userId: string) => {
     try {
-      const findDriver: AxiosResponse<IDriverMap, any> = await API.get(`/cashport/map-detail/${tripId}/${userId}`);
+      const findDriver: AxiosResponse<IDriverMap, any> = await API.get(
+        `/cashport/map-detail/${tripId}/${userId}`
+      );
       setDriver(findDriver.data);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   return (
     <div className={styles.mainMap}>
-      <SideBar />
       <div className={styles.content}>
         <div className={styles.titleContainer}>
-          <div className={styles.title}>Dashboard</div>
           <div className={styles.swithComponent}>
-            <div onClick={() => setIsActive(false)} className={`${styles.switchItem} ${!isActive && styles.active}`}>Gastos operativos</div>
-            <div onClick={() => setIsActive(true)} className={`${styles.switchItem} ${isActive && styles.active}`}>Live Tracking</div>
+            <div
+              onClick={() => setIsActive(false)}
+              className={`${styles.switchItem} ${!isActive && styles.active}`}
+            >
+              Gastos operativos
+            </div>
+            <div
+              onClick={() => setIsActive(true)}
+              className={`${styles.switchItem} ${isActive && styles.active}`}
+            >
+              Live Tracking
+            </div>
           </div>
           <div />
         </div>
         <div className={styles.mapContainer}>
-          <div
-            ref={mapContainerRef}
-            style={mapStyles}
-          >
+          <div ref={mapContainerRef} style={mapStyles}>
             {trip && (
               <div className={styles.overlayCard}>
                 <div className={styles.mainCard}>
                   <DetailTripMap
-                    trip={trip} onClose={() => {
-                      setTrip(null)
+                    trip={trip}
+                    onClose={() => {
+                      setTrip(null);
                       setTripLat(null);
                       setTripLong(null);
                       setDriver(null);
@@ -363,61 +377,113 @@ const MapComponent = () => {
             {!trip && (
               <div className={styles.overlayCard}>
                 <div className={styles.mainCard}>
-                  <div className={`${styles.titleContainer} ${styles.cursor}`} onClick={() => setShowCards(!showCards)}>
+                  <div
+                    className={`${styles.titleContainer} ${styles.cursor}`}
+                    onClick={() => setShowCards(!showCards)}
+                  >
                     <div className={styles.titleCard}>Estado de los viajes</div>
-                    {showCards ? <CaretUp size={20} color="#FFFFFF" /> : <CaretDown size={20} color="#FFFFFF" />}
+                    {showCards ? (
+                      <CaretUp size={20} color="#FFFFFF" />
+                    ) : (
+                      <CaretDown size={20} color="#FFFFFF" />
+                    )}
                   </div>
                   {showCards && (
                     <div className={styles.cardContainer}>
                       {socketInfo.map((item, index) => (
-                        <div className={`${styles.card} ${index !== 7 && styles.bottomDivider}`} key={item.socketInfo.trip.id}>
+                        <div
+                          className={`${styles.card} ${index !== 7 && styles.bottomDivider}`}
+                          key={item.socketInfo.trip.id}
+                        >
                           <div className={styles.leftSection}>
                             {item.socketInfo.trip.imgUrl && (
-                              <Image width={51} height={51} className={styles.img} alt='' src={item.socketInfo.trip.imgUrl} />
+                              <Image
+                                width={51}
+                                height={51}
+                                className={styles.img}
+                                alt=""
+                                src={item.socketInfo.trip.imgUrl}
+                              />
                             )}
-                            {!item.socketInfo.trip.imgUrl && (
-                              <div className={styles.img} />
-                            )}
+                            {!item.socketInfo.trip.imgUrl && <div className={styles.img} />}
                             <div>
                               <div className={styles.cardTitleContainer}>
-                                <div className={styles.cardTitle}>{item.socketInfo.trip.vehicle.behicleType}</div>
-                                <div className={styles.cardSubtitle}>{item.socketInfo.trip.vehicle.plateNumber}</div>
+                                <div className={styles.cardTitle}>
+                                  {item.socketInfo.trip.vehicle.behicleType}
+                                </div>
+                                <div className={styles.cardSubtitle}>
+                                  {item.socketInfo.trip.vehicle.plateNumber}
+                                </div>
                               </div>
                               <div className={styles.cardBody}>
                                 <div className={styles.cardMarkContainer}>
                                   <div className={styles.cardMark} />
                                   <div className={styles.line}></div>
                                   <div>
-                                    <div className={styles.cardDescription}>{item.socketInfo.trip.startAddress}</div>
-                                    <div className={styles.cardDate}>{dayjs.utc(item.socketInfo.trip.initRoute).format('DD MMM. YYYY')} - {dayjs.utc(item.socketInfo.trip.initRoute).format('HH:mm')}</div>
+                                    <div className={styles.cardDescription}>
+                                      {item.socketInfo.trip.startAddress}
+                                    </div>
+                                    <div className={styles.cardDate}>
+                                      {dayjs
+                                        .utc(item.socketInfo.trip.initRoute)
+                                        .format("DD MMM. YYYY")}{" "}
+                                      - {dayjs.utc(item.socketInfo.trip.initRoute).format("HH:mm")}
+                                    </div>
                                   </div>
                                 </div>
                                 <div className={styles.cardMarkContainer}>
                                   <div className={styles.cardMark} />
                                   <div>
-                                    <div className={styles.cardDescriptionStep}>{item.socketInfo.trip.endAddress}</div>
-                                    <div className={styles.cardDateStep}>{dayjs.utc(item.socketInfo.trip.endRoute).format('DD MMM. YYYY')} - {dayjs.utc(item.socketInfo.trip.endRoute).format('HH:mm')}</div>
+                                    <div className={styles.cardDescriptionStep}>
+                                      {item.socketInfo.trip.endAddress}
+                                    </div>
+                                    <div className={styles.cardDateStep}>
+                                      {dayjs
+                                        .utc(item.socketInfo.trip.endRoute)
+                                        .format("DD MMM. YYYY")}{" "}
+                                      - {dayjs.utc(item.socketInfo.trip.endRoute).format("HH:mm")}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div className={styles.rightSection}>
-                            <a href={`/logistics/transfer-orders/details/${item.socketInfo.trip.transferRequestId}`}>
-                              <div className={styles.rightTitle}>TR {item.socketInfo.trip.transferRequestId}</div>
+                            <a
+                              href={`/logistics/transfer-orders/details/${item.socketInfo.trip.transferRequestId}`}
+                            >
+                              <div className={styles.rightTitle}>
+                                TR {item.socketInfo.trip.transferRequestId}
+                              </div>
                             </a>
-                            <div className={styles.stateTag} style={{ backgroundColor: getStateColor(item.socketInfo.trip.stateId) }}>
-                              <CheckCircle size={16} color={getStateTextColor(item.socketInfo.trip.stateId)} />
-                              <div className={styles.state} style={{ color: getStateTextColor(item.socketInfo.trip.stateId) }}>{item.socketInfo.trip.state.name}</div>
+                            <div
+                              className={styles.stateTag}
+                              style={{
+                                backgroundColor: getStateColor(item.socketInfo.trip.stateId)
+                              }}
+                            >
+                              <CheckCircle
+                                size={16}
+                                color={getStateTextColor(item.socketInfo.trip.stateId)}
+                              />
+                              <div
+                                className={styles.state}
+                                style={{ color: getStateTextColor(item.socketInfo.trip.stateId) }}
+                              >
+                                {item.socketInfo.trip.state.name}
+                              </div>
                             </div>
-                            <div onClick={() => {
-                              setTrip(item.socketInfo.trip);
-                              setTripLat(item.socketInfo.latitude);
-                              setTripLong(item.socketInfo.longitude);
-                              getDriverFromTrip(item.socketInfo.trip.id, item.socketInfo.userId);
-                              setDistancePercent(item.socketInfo.distance)
-                            }} className={styles.showBtn}>
-                              <Eye size={20} color='#CBE71E' />
+                            <div
+                              onClick={() => {
+                                setTrip(item.socketInfo.trip);
+                                setTripLat(item.socketInfo.latitude);
+                                setTripLong(item.socketInfo.longitude);
+                                getDriverFromTrip(item.socketInfo.trip.id, item.socketInfo.userId);
+                                setDistancePercent(item.socketInfo.distance);
+                              }}
+                              className={styles.showBtn}
+                            >
+                              <Eye size={20} color="#CBE71E" />
                             </div>
                           </div>
                         </div>
@@ -431,7 +497,7 @@ const MapComponent = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default MapComponent
+export default MapComponent;

@@ -188,7 +188,7 @@
                 }
             }
             .collapseCaret {
-                transition: transform .25s;
+                transition: transform 0.25s;
                 transform: rotate(180deg);
 
                 &.collapseRotate {
@@ -645,7 +645,7 @@
     align-items: center;
     cursor: pointer;
     &:disabled {
-      background-color: transparent; 
-      cursor: not-allowed;
+        background-color: transparent;
+        cursor: not-allowed;
     }
-  }
+}

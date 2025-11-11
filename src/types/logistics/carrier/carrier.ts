@@ -1,6 +1,6 @@
 import { Pagination } from "@/types/global/IGlobal";
 import { Config, WelcomeHeaders } from "../schema";
-import { IPricingScore } from "../trips/TripsSchema";
+import { ICarriersPricingModalComparison, IPricingScore } from "../trips/TripsSchema";
 
 export interface SendCarrierRequest {
   carrierRequest: CarrierRequest[];
@@ -150,6 +150,8 @@ export interface IAceptCarrierAPI {
   declared_cargo_value?: number;
   entity: "otherRequirement" | "trip";
   other_requirement?: OtherReq;
+  isAuction: boolean;
+  isTercerization: boolean;
 }
 
 export interface Data {
@@ -184,6 +186,7 @@ export interface CarrierRequestAPI {
   amount: number; // Monto asociado al servicio
   order_nro: number; // Número de orden
   id_transfer_request: number; // ID de la solicitud de transferencia
+  isAuction: boolean;
 }
 
 export interface CarrierCollapseAPI {
@@ -192,4 +195,20 @@ export interface CarrierCollapseAPI {
   statusid: string;
   carrierrequests: CarrierRequestAPI[];
   page: Pagination;
+}
+
+export interface ICreateCarrierRequestAuction {
+  carrierId: number;
+  vehicleTypeId: number;
+  tripId: number;
+}
+
+export interface ICreateCarrierRequestAuctionBody {
+  auctions: ICreateCarrierRequestAuction[];
+  transferRequestId: number;
+}
+
+export interface IGetCarrierRequestsByTransferRequestId {
+  id_carrier_request: number;
+  pricingComparison: ICarriersPricingModalComparison[];
 }

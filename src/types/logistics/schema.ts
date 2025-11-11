@@ -4045,3 +4045,39 @@ export interface ISuggestedVehiclesByMaterials {
   materialCalculated: IMaterialCalculated[];
   vehiclesSelectedWithOcupation: IVehicleWithOccupation[];
 }
+
+export interface IGetCarrier {
+  id: number;
+  description: string;
+  nit: string;
+  icon: string;
+  active: number;
+  created_at: string;
+  created_by: string;
+  modified_at: string;
+  modified_by: string;
+  carrier_type: any | null;
+  id_carrier_type: number | null;
+  business_name: string;
+  billing_email: string;
+  communication_email: string;
+  contact_name: string;
+  phone_number: number;
+  id_vendor: number;
+  subject_id: number;
+  drivers: number;
+  vehicles: number;
+  status: IStatusWithStyling;
+}
+
+export interface IApprovalType {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface IApprover {
+  id: number;
+  name: string;
+  email: string;
+}

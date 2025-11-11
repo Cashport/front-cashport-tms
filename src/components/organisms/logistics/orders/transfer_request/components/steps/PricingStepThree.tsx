@@ -27,12 +27,16 @@ export default function PricingStepThree({ data, control }: Props) {
         (j) =>
           j.trips.some((t) =>
             t.carriers_pricing.some(
-              (c) => c.id === cp.id_carrier_request && c.status === STATUS.CR.EN_REVISÓN
+              (c) =>
+                c.id === cp.id_carrier_request &&
+                (c.status === STATUS.CR.EN_REVISÓN || c.status === STATUS.CR.COTIZADO)
             )
           ) ||
           j.otherRequirements.some((ot) =>
             ot.carriers_pricing.some(
-              (c) => c.id === cp.id_carrier_request && c.status === STATUS.CR.EN_REVISÓN
+              (c) =>
+                c.id === cp.id_carrier_request &&
+                (c.status === STATUS.CR.EN_REVISÓN || c.status === STATUS.CR.COTIZADO)
             )
           )
       )

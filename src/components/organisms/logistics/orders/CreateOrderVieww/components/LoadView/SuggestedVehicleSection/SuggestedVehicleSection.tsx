@@ -353,7 +353,7 @@ const SuggestedVehicleSection: React.FC<ISuggestedVehicleSectionProps> = ({
           loading={isLoading}
         />
 
-        <Button className="addButton" onClick={handleAddVehicleRow} icon={<Plus size={16} />}>
+        <Button className="addButton" onClick={handleAddVehicleRow}>
           Agregar
           <Plus size={16} />
         </Button>
