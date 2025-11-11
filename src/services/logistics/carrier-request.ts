@@ -26,6 +26,16 @@ export const sendTenderProposalToCarriers = async (data: ICreateCarrierRequestAu
   }
 };
 
+export const sendTercerizationProposalToCarriers = async (data: ICreateCarrierRequestAuctionBody) => {
+  try {
+    const response: GenericResponse = await API.post("/carrier/create/request/tercerization", data);
+    if (response.success) return response.data;
+  } catch (error) {
+    console.error("Error sending tender proposal:", error);
+    throw error;
+  }
+};
+
 export const getPricingComparisonByTransferRequestId = async (carrierRequestIds: number[]) => {
   try {
     const response: GenericResponse<IGetCarrierRequestsByTransferRequestId[]> = await API.post(

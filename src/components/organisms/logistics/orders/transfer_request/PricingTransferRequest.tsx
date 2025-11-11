@@ -145,6 +145,7 @@ export default function PricingTransferRequest({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [optionsVehicles, setOptionsVehicles] = useState<any>([]);
   const [modalTender, setModalTender] = useState(false);
+  const [modalType, setModalType] = useState<"tender" | "tercerization" | null>(null);
   const [isModalMultiStepOpen, setIsModalMultiStepOpen] = useState(false);
   const [isModalModifyTripOpen, setIsModalModifyTripOpen] = useState<{
     open: boolean;
@@ -1063,7 +1064,14 @@ export default function PricingTransferRequest({
                   {view === "carrier" && (
                     <GenerateActionButton
                       onProvidersClick={handleOpenModalCarrierPricing}
-                      onTenderClick={() => setModalTender(true)}
+                      onTenderClick={() => {
+                        setModalType("tender");
+                        setModalTender(true);
+                      }}
+                      onTercerizationClick={() => {
+                        setModalType("tercerization");
+                        setModalTender(true);
+                      }}
                       onApprovalClick={handleSendCarriersToApproval}
                     />
                   )}
@@ -1199,10 +1207,9 @@ export default function PricingTransferRequest({
           </Flex>
         </Flex>
       </Flex>
-      <ModalSelectTender
-        open={modalTender}
-        handleModalTender={(val: boolean) => setModalTender(val)}
-      />
+      {modalType && (
+        <ModalSelectTender open={modalTender} handleModalTender={setModalTender} type={modalType} />
+      )}
       <ModalCreateJourney
         visible={isModalMultiStepOpen}
         onClose={() => {
