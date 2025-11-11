@@ -107,10 +107,7 @@ const MaterialSection: React.FC<IMaterialSectionProps> = ({ control, allMaterial
                 option ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
               allowClear
-              options={materialOptions?.filter(
-                (option) =>
-                  !selectedMaterials.some((row, idx) => row.id === option.value && idx !== index)
-              )}
+              options={materialOptions}
               onChange={(value) => {
                 field.onChange(value);
                 // Al seleccionar, setea automáticamente todos los datos en la fila

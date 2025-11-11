@@ -34,21 +34,24 @@ const { Text } = Typography;
 type Props = {
   open: boolean;
   // eslint-disable-next-line no-unused-vars
-  handleModalCarrier: (value: boolean) => void;
+  onClose: () => void;
   // eslint-disable-next-line no-unused-vars
-  mutateStepthree: (journey: ITransferRequestJourneyReview[]) => void;
-  view: string;
-  setView: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
+  transferRequestId: number;
+  mutateStepthree?: (journey: ITransferRequestJourneyReview[]) => void;
+  view?: string;
+  setView?: React.Dispatch<React.SetStateAction<"solicitation" | "vehicles" | "carrier">>;
+  extractCreatedCarriers?: (_: { journey: ITransferRequestJourneyReview[] }) => void;
+  useGetPricingComparison?: boolean;
 };
 export default function ModalSelectCarrierPricing({
   open,
-  handleModalCarrier,
+  onClose,
+  transferRequestId,
   mutateStepthree,
   view,
-  setView
+  setView,
+  extractCreatedCarriers
 }: Readonly<Props>) {
-  const params = useParams();
-  const id = parseInt(params.id as string);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [tripsList, setTripsList] = useState<ServiceTab[]>([]);
@@ -57,14 +60,12 @@ export default function ModalSelectCarrierPricing({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { data, isLoading, isValidating } = useSWR(
-    { idTransferRequest: id, open, showAll },
-    ({ idTransferRequest, open }) =>
-      open ? getTransferRequestPricing({ idTransferRequest, showAll }) : undefined,
+    { idTransferRequest: transferRequestId, showAll },
+    ({ idTransferRequest, showAll }) => getTransferRequestPricing({ idTransferRequest, showAll }),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      revalidateIfStale: true,
-      revalidateOnMount: false
+      revalidateIfStale: true
     }
   );
 
@@ -121,7 +122,6 @@ export default function ModalSelectCarrierPricing({
       );
     }
   }, [data]);
-  console.log("TRIP LIST", tripsList);
   const selectedTrip = tripsList[selectedTabIndex];
 
   const journey = selectedTrip?.journey;
@@ -136,23 +136,45 @@ export default function ModalSelectCarrierPricing({
       );
     }) || [];
 
-  const handleSubmitForm = async () => {
+  const postCarrierRequest = async (trips: ServiceTab[], id: number, showAll: boolean) => {
     try {
       setIsSubmitting(true);
-      const formatedData = convertToSendCarrierRequest(tripsList, id, showAll);
+      const formatedData = convertToSendCarrierRequest(trips, id, showAll);
       const response = await sendCarrierRequest(formatedData);
+
       if (response) {
-        setIsSubmitting(false);
-        handleModalCarrier(false);
         message.success("Solicitudes enviadas");
-        mutateStepthree(response.journey);
-        if (view === "vehicles") setView("carrier");
+        mutateStepthree && mutateStepthree(response.journey);
+        extractCreatedCarriers && extractCreatedCarriers(response);
+        onClose();
+        if (view === "vehicles") setView && setView("carrier");
       }
     } catch (error) {
-      setIsSubmitting(false);
       if (error instanceof Error) message.error(error.message);
       else message.error("Error al enviar solicitud");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const hasPricingsSelected = () => {
+    return tripsList.some((t) =>
+      t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
+    );
+  };
+
+  const handleSubmitForm = async () => {
+    if (view === "vehicles") {
+      if (hasPricingsSelected()) {
+        await postCarrierRequest(tripsList, transferRequestId, showAll);
+      } else {
+        setView && setView("carrier");
+        onClose();
+      }
+      return;
+    }
+
+    await postCarrierRequest(tripsList, transferRequestId, showAll);
   };
 
   const handleCheck = (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
@@ -234,9 +256,7 @@ export default function ModalSelectCarrierPricing({
   };
   const isConfirmEnabled = () => {
     if (view === "vehicles") {
-      return tripsList.every((t) =>
-        t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
-      );
+      return true;
     } else
       return tripsList.some((t) =>
         t.service.carriers_pricing.some((pricing: CarriersPricingModal) => pricing.checked)
@@ -255,15 +275,20 @@ export default function ModalSelectCarrierPricing({
 
   return (
     <Modal
-      title={<Header />}
+      title={
+        <Header
+          title="Proveedores"
+          description="Seleccione los proveedores a los que les enviará la solicitud de los viajes creados"
+        />
+      }
       open={open}
-      onCancel={() => handleModalCarrier(false)}
+      onCancel={onClose}
       width={686}
       centered
       footer={
         <Footer
-          view={view}
-          handleCancel={() => handleModalCarrier(false)}
+          view={view || ""}
+          handleCancel={onClose}
           handleSubmit={handleSubmitForm}
           isSubmitting={isSubmitting}
           disabledContinue={!isConfirmEnabled()}

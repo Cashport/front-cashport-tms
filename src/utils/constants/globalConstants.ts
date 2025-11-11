@@ -28,7 +28,8 @@ export const STATUS = {
     POR_CONFIRMAR: "e2210921-8650-44a2-8c3a-b96d9cd492b4",
     EN_REVISÓN: "ae986b0b-071b-479d-a7ee-79160dae7fc9",
     ASIGNADAS: "6f793cd8-6203-4287-8941-b3ee90a55194",
-    RECHAZADO: "64869ad8-70c1-4a2c-81c3-4d7f4879cb3a"
+    RECHAZADO: "64869ad8-70c1-4a2c-81c3-4d7f4879cb3a",
+    COTIZADO: "d1f1f236-7bae-480d-8814-631c61f04295"
   },
   BNG: {
     POR_ACEPTAR: "a9a0e7cd-96e3-4738-806d-225641117a62",
@@ -78,6 +79,11 @@ export const STATUS = {
     RECHAZADO_IA: "cdc3af46-5ba3-416b-bc76-0aa825efb1aa",
     PENDIENTE: "c02b3475-f59a-4222-bb28-9dbb51cf02c1",
     APROBADO: "dcf4e68b-11cb-4352-8ea7-f6356fa98db9"
+  },
+  PRICING_APPROVAL: {
+    PENDIENTE: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    APROBADO: "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+    RECHAZADO: "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f"
   }
 };
 
