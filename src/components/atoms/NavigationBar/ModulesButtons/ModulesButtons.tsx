@@ -22,6 +22,7 @@ import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import "./modulesButtons.scss";
+import { ChatCircleDots } from "@phosphor-icons/react";
 
 interface ModulesButtonsProps {
   isSideBarLarge: boolean;
@@ -229,7 +230,7 @@ export const ModulesButtons = ({
           </Button>
         </Link>
       )}
-      {/* {true && (
+      {checkUserViewPermissions(project, "TMS-Whatsapp") && (
         <Link href="/chat" passHref legacyBehavior>
           <Button
             type="primary"
@@ -240,7 +241,7 @@ export const ModulesButtons = ({
             {isSideBarLarge && "Ajustes"}
           </Button>
         </Link>
-      )} */}
+      )}
     </div>
   );
 };
