@@ -3,6 +3,7 @@ import { Col, Flex } from "antd";
 import AditionalInfo from "../AditionalInfo/AditionalInfo";
 import Materials from "../Materials/Materials";
 import AuctionForm from "../AuctionForm/AuctionForm";
+import TercerizationForm from "../TercerizationForm/TercerizationForm";
 import styles from "./solicitationDetail.module.scss";
 import { ICarrierRequestContacts } from "@/types/logistics/schema";
 import { Dispatch, SetStateAction } from "react";
@@ -57,17 +58,40 @@ export default function SolicitationDetail({
   const router = useRouter();
 
   const handleQuoteAmountChange = (value: number | undefined) => {
-    const amount = value || 0;
     setQuote({
-      amount,
-      files: quote?.files || []
+      ...quote,
+      auction_amount: value || 0
     });
   };
 
   const handleFileChange = (file: File) => {
     setQuote({
-      amount: quote?.amount || 0,
-      files: [file]
+      ...quote,
+      auction_file: [file]
+    });
+    return false;
+  };
+
+  const handleAssociationCostChange = (value: number | undefined) => {
+    const association_cost = value || 0;
+    setQuote({
+      ...quote,
+      association_cost
+    });
+  };
+
+  const handleAssociationNameChange = (value: number | undefined) => {
+    const association_name = value || 0;
+    setQuote({
+      ...quote,
+      association_name
+    });
+  };
+
+  const handleAssociationFileChange = (file: File) => {
+    setQuote({
+      ...quote,
+      association_file: [file]
     });
     return false; // Prevent automatic upload
   };
@@ -75,14 +99,36 @@ export default function SolicitationDetail({
   return (
     <Flex className={styles.wrapper}>
       {/* If its auction */}
-      {providerDetail?.isAuction && formMode === FormMode.CREATE ? (
-        <AuctionForm
-          quote={quote}
-          onQuoteAmountChange={handleQuoteAmountChange}
-          onFileChange={handleFileChange}
-          formMode={formMode}
-        />
-      ) : null}
+      {formMode === FormMode.CREATE && (
+        <>
+          {providerDetail?.isTercerization ? (
+            // Si es tercerización, mostrar ambos formularios
+            <>
+              <TercerizationForm
+                quote={quote}
+                onQuoteAmountChange={handleAssociationCostChange}
+                onQuoteAssociationAmountChange={handleAssociationNameChange}
+                onFileChange={handleAssociationFileChange}
+                formMode={formMode}
+              />
+              <AuctionForm
+                quote={quote}
+                onQuoteAmountChange={handleQuoteAmountChange}
+                onFileChange={handleFileChange}
+                formMode={formMode}
+              />
+            </>
+          ) : providerDetail?.isAuction ? (
+            // Si solo es subasta, mostrar solo AuctionForm
+            <AuctionForm
+              quote={quote}
+              onQuoteAmountChange={handleQuoteAmountChange}
+              onFileChange={handleFileChange}
+              formMode={formMode}
+            />
+          ) : null}
+        </>
+      )}
 
       <Flex className={styles.sectionWrapper} vertical>
         <Flex>
@@ -165,8 +211,24 @@ export default function SolicitationDetail({
       <Buttons
         canContinue={true}
         isRightButtonActive={
-          providerDetail?.isAuction && formMode === FormMode.CREATE
-            ? !!(quote?.amount && quote?.files && quote.files.length > 0)
+          formMode === FormMode.CREATE
+            ? providerDetail?.isTercerization
+              ? !!(
+                  quote?.association_cost &&
+                  quote?.association_name &&
+                  quote?.association_file &&
+                  quote.association_file.length > 0 &&
+                  quote?.auction_amount &&
+                  quote?.auction_file &&
+                  quote.auction_file.length > 0
+                )
+              : providerDetail?.isAuction
+                ? !!(
+                    quote?.auction_amount &&
+                    quote?.auction_file &&
+                    quote.auction_file.length > 0
+                  )
+                : true
             : true
         }
         isLeftButtonActive={true}

@@ -8,12 +8,14 @@ interface GenerateActionButtonProps {
   onProvidersClick: () => void;
   onTenderClick: () => void;
   onApprovalClick: () => void;
+  onTercerizationClick: () => void;
 }
 
 export default function GenerateActionButton({
   onProvidersClick,
   onTenderClick,
-  onApprovalClick
+  onApprovalClick,
+  onTercerizationClick,
 }: GenerateActionButtonProps) {
   const customDropdown = (menu: ReactNode) => <div className="dropdownGenerateAction">{menu}</div>;
 
@@ -29,6 +31,12 @@ export default function GenerateActionButton({
       icon: <TipJar size={12} />,
       label: "Enviar licitación",
       onClick: onTenderClick
+    },
+    {
+      key: "Enviar tercerización",
+      icon: <TipJar size={12} />,
+      label: "Enviar tercerización",
+      onClick: onTercerizationClick,
     },
     {
       key: "Solicitar aprobación",

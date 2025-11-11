@@ -38,8 +38,11 @@ export enum FormMode {
 }
 
 export interface IQuote {
-  amount?: number;
-  files?: File[];
+  auction_amount?: number;
+  auction_file?: File[];
+  association_cost?: number;
+  association_name?: number;
+  association_file?: File[];
 }
 
 export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrierDetailProps>) {
@@ -163,8 +166,11 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
         driverIds,
         status,
         observation,
-        quote?.amount,
-        quote?.files?.[0]
+        quote?.auction_amount,
+        quote?.auction_file?.[0],
+        quote?.association_cost,
+        quote?.association_name,
+        quote?.association_file?.[0]
       );
       message.success(" Aceptado");
 
