@@ -9,7 +9,10 @@ import { Trash } from "@phosphor-icons/react";
 
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
 import { getAllCarriers } from "@/services/logistics/users";
-import { sendTenderProposalToCarriers } from "@/services/logistics/carrier-request";
+import {
+  sendTenderProposalToCarriers,
+  sendTercerizationProposalToCarriers
+} from "@/services/logistics/carrier-request";
 import { getServiceType } from "./utils/utils";
 
 import CommunityIcon from "../communityIcon/CommunityIcon";
@@ -34,9 +37,10 @@ interface SelectedCarrier {
 type Props = {
   open: boolean;
   handleModalTender: (value: boolean) => void;
+  type: "tender" | "tercerization";
 };
 
-export default function ModalSelectTender({ open, handleModalTender }: Readonly<Props>) {
+export default function ModalSelectTender({ open, handleModalTender, type }: Readonly<Props>) {
   const params = useParams();
   const id = parseInt(params.id as string);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -198,7 +202,11 @@ export default function ModalSelectTender({ open, handleModalTender }: Readonly<
     };
 
     try {
-      await sendTenderProposalToCarriers(auctionBody);
+      if (type === "tender") {
+        await sendTenderProposalToCarriers(auctionBody);
+      } else {
+        await sendTercerizationProposalToCarriers(auctionBody);
+      }
       handleModalTender(false);
       message.success("Solicitudes enviadas");
     } catch (error) {
@@ -215,8 +223,12 @@ export default function ModalSelectTender({ open, handleModalTender }: Readonly<
     <Modal
       title={
         <Header
-          title="Licitación"
-          description="Selecciones los proveedores a los que les enviará la solicitud para licitar"
+          title={type === "tender" ? "Licitación" : "Tercerización"}
+          description={
+            type === "tender"
+              ? "Seleccione los proveedores a los que enviará la solicitud para licitar"
+              : "Seleccione los proveedores a los que enviará la solicitud de tercerización"
+          }
         />
       }
       open={open}

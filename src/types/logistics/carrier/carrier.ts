@@ -151,6 +151,7 @@ export interface IAceptCarrierAPI {
   entity: "otherRequirement" | "trip";
   other_requirement?: OtherReq;
   isAuction: boolean;
+  isTercerization: boolean;
 }
 
 export interface Data {

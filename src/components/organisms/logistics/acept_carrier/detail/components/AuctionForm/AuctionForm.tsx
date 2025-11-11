@@ -41,7 +41,7 @@ export default function AuctionForm({
           className={styles.inputCostContainer}
         >
           <NumericFormat
-            value={quote?.amount}
+            value={quote?.auction_amount}
             onValueChange={(values) => {
               onQuoteAmountChange(values.floatValue);
             }}
@@ -71,9 +71,9 @@ export default function AuctionForm({
           <p style={{ fontWeight: 400 }}>PDF Cotización</p>
         </Flex>
         <Flex gap="0.5rem" align="flex-end" justify="space-between" vertical style={{ flex: 1 }}>
-          {quote?.files?.[0] && (
+          {quote?.auction_file?.[0] && (
             <span style={{ fontSize: "0.875rem" }} className={styles.fileName}>
-              {quote.files[0].name}
+              {quote.auction_file[0].name}
             </span>
           )}
           <Upload accept=".pdf" showUploadList={false} beforeUpload={onFileChange} maxCount={1}>
