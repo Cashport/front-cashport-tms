@@ -174,6 +174,18 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
     approval.status === STATUS.PRICING_APPROVAL.APROBADO ||
     approval.status === STATUS.PRICING_APPROVAL.RECHAZADO;
 
+  const actionButtonStyle: React.CSSProperties = {
+    background: "white",
+    border: "1px solid #D9D9D9",
+    borderRadius: "8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "9px",
+    gap: "5px",
+    fontWeight: 600
+  };
+
   return (
     <div style={{ overflowY: "auto" }}>
       <Container>
@@ -199,39 +211,11 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           <Space size={8}>
             {!isApprovedOrRejected && (
               <>
-                <Button
-                  type="text"
-                  onClick={handleReject}
-                  style={{
-                    background: "white",
-                    border: "1px solid #D9D9D9",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "9px",
-                    gap: "5px",
-                    fontWeight: 600
-                  }}
-                >
+                <Button type="text" onClick={handleReject} style={actionButtonStyle}>
                   <XCircle size={18} color="#E00F0F" />
                   Rechazar
                 </Button>
-                <Button
-                  type="text"
-                  onClick={handleApprove}
-                  style={{
-                    background: "white",
-                    border: "1px solid #D9D9D9",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "9px",
-                    gap: "5px",
-                    fontWeight: 600
-                  }}
-                >
+                <Button type="text" onClick={handleApprove} style={actionButtonStyle}>
                   <CheckCircle size={18} color="#CBE71E" />
                   Aprobar
                 </Button>
