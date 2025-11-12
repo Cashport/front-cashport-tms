@@ -14,11 +14,9 @@ import {
   Col,
   Space,
   Flex,
-  Tooltip,
   message
 } from "antd";
 import {
-  ArrowLeftOutlined,
   CheckOutlined,
   CloseOutlined,
   PaperClipOutlined,
@@ -28,7 +26,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import Container from "@/components/atoms/Container/Container";
-import { CheckCircle, XCircle, Clock } from "phosphor-react";
+import { CheckCircle, XCircle, Clock, CaretLeft } from "phosphor-react";
 import { getTaskDetail, updatePricingApprovalStatus } from "@/services/tasks/tasks";
 import { STATUS } from "@/utils/constants/globalConstants";
 import { ITaskDetail } from "@/types/tasks/ITasks";
@@ -185,18 +183,57 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
           style={{ marginBottom: 24, borderBottom: "1px solid #f0f0f0", paddingBottom: 12 }}
         >
           <Space>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
-              Volver
+            <Button
+              type="text"
+              onClick={() => router.back()}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px"
+              }}
+            >
+              <CaretLeft size={20} />
             </Button>
           </Space>
-          <Space>
+          <Space size={8}>
             {!isApprovedOrRejected && (
               <>
-                <Button type="primary" onClick={handleApprove}>
-                  Aprobar
-                </Button>
-                <Button danger onClick={handleReject}>
+                <Button
+                  type="text"
+                  onClick={handleReject}
+                  style={{
+                    background: "white",
+                    border: "1px solid #D9D9D9",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "9px",
+                    gap: "5px",
+                    fontWeight: 600
+                  }}
+                >
+                  <XCircle size={18} color="#E00F0F" />
                   Rechazar
+                </Button>
+                <Button
+                  type="text"
+                  onClick={handleApprove}
+                  style={{
+                    background: "white",
+                    border: "1px solid #D9D9D9",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "9px",
+                    gap: "5px",
+                    fontWeight: 600
+                  }}
+                >
+                  <CheckCircle size={18} color="#CBE71E" />
+                  Aprobar
                 </Button>
               </>
             )}
