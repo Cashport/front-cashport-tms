@@ -5,6 +5,7 @@ import { ColumnsType } from "antd/es/table";
 import { Eye } from "phosphor-react";
 
 import { formatDate } from "@/utils/utils";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
@@ -25,6 +26,8 @@ type DocumentsTableProps = {
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
+  const width = useScreenWidth();
+  const isMobile = width && width <= 768;
   const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const {
@@ -63,21 +66,24 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
     {
       title: "Descripción",
       dataIndex: "description",
-      key: "description"
+      key: "description",
+      responsive: ["md"]
     },
     {
       title: "Fecha cargue",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (_: string, record: any) => (record.createdAt ? formatDate(record.createdAt) : "-"),
-      width: 130
+      width: 130,
+      responsive: ["md"]
     },
     {
       title: "Vencimiento",
       dataIndex: "expiryDate",
       key: "expiryDate",
       render: (expiryDate) => (expiryDate ? formatDate(expiryDate) : "-"),
-      width: 125
+      width: 125,
+      responsive: ["md"]
     },
     {
       title: "Obligatorio",
@@ -88,7 +94,8 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
         return <p>{isMandatory ? "Sí" : "No"}</p>;
       },
       width: 113,
-      align: "center"
+      align: "center",
+      responsive: ["md"]
     },
     {
       title: "Estado",

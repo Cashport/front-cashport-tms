@@ -260,7 +260,7 @@ export const DriverFormTab = ({
             {" "}
             {/* Fila Documentos */}
             <Col span={24}>
-              <Flex justify="space-between" align="center">
+              <div className="documentsTitle">
                 <Title className="title" level={4}>
                   Documentos
                 </Title>
@@ -299,7 +299,7 @@ export const DriverFormTab = ({
                     </Col>
                   </Row>
                 )}
-              </Flex>
+              </div>
             </Col>
             <Col span={24} style={{ marginTop: "1.5rem" }}>
               {(statusForm === "review" || statusForm === "edit") && (
