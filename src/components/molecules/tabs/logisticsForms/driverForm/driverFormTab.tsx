@@ -35,12 +35,7 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { auditWithCashportAI } from "@/services/logistics/documents/documents";
 
 //types
-import {
-  IFormDriver,
-  IFormGeneralDriver,
-  IGeneralDriverSubmit,
-  IProviderDocument
-} from "@/types/logistics/schema";
+import { IFormDriver, IGeneralDriverSubmit, IProviderDocument } from "@/types/logistics/schema";
 
 //styles
 import "./driverformtab.scss";
