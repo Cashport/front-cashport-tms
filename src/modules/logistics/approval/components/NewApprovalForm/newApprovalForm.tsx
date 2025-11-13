@@ -101,7 +101,7 @@ export function NewApprovalForm() {
             descripcionTarifa: carrier.service_type,
             tarifa: carrier.amount,
             cantidadUsos: 1,
-            cotizacionUrl: ""
+            cotizacionUrl: carrier.url_evidence
           }))
         : [];
 
@@ -442,7 +442,7 @@ export function NewApprovalForm() {
       link.download = `cotizacion_${proveedor.replace(/\s+/g, "_")}.pdf`;
       link.target = "_blank";
       link.click();
-      message.success(`Descargando cotización de ${proveedor}`);
+      message.success(`Descargada cotización de ${proveedor}`);
     } catch (error) {
       console.error("Error al descargar cotización:", error);
       message.error("Error al descargar la cotización");
