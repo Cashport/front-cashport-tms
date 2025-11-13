@@ -14,6 +14,7 @@ import {
   DriverFormTabProps
 } from "./driverFormTab.mapper";
 import { bloodTypesOptions, licencesOptions } from "../formSelectOptions";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 // components
 import { Button, Col, Flex, Form, message, Row, Typography } from "antd";
@@ -73,6 +74,9 @@ export const DriverFormTab = ({
   const [resetTrigger, setResetTrigger] = useState<boolean>(false);
   const [imageError, setImageError] = useState(false);
   const [loadingRequest, setLoadingRequest] = useState(false);
+
+  const width = useScreenWidth();
+  const isMobile = width && width <= 768;
 
   const defaultValues =
     statusForm === "create" ? {} : data && dataToProjectFormData(data, vehiclesTypesList || []);
@@ -234,6 +238,7 @@ export const DriverFormTab = ({
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });
                 }}
+                icon={isMobile ? null : undefined}
               />
             </Flex>
           )}

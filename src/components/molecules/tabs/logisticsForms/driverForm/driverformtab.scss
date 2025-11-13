@@ -229,3 +229,12 @@
         color: $secondary-gray;
     }
 }
+
+@media (max-width: 768px) {
+    .driverForm {
+        .headerProyectsForm {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+}
