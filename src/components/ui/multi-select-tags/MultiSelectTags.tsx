@@ -26,9 +26,9 @@ interface PropsGeneralSelect<T extends FieldValues> {
   options: { value: number; label: string }[] | undefined;
   loading?: boolean;
   customStyleContainer?: React.CSSProperties;
-  defaultValue?: OptionType[] | null 
-  disabled?: boolean
-  layout?:string
+  defaultValue?: OptionType[] | null;
+  disabled?: boolean;
+  layout?: string;
 }
 
 const MultiSelectTags = <T extends FieldValues>({
@@ -39,33 +39,31 @@ const MultiSelectTags = <T extends FieldValues>({
   options,
   loading = false,
   customStyleContainer,
-  defaultValue, 
+  defaultValue,
   disabled = false,
-  layout='horizontal'
+  layout = "horizontal"
 }: PropsGeneralSelect<T>) => {
+  const layoutspan = layout == "horizontal" ? [6, 18] : [24, 24];
+  const tagmargintop = layout == "horizontal" ? 0 : 10;
 
-  const layoutspan = (layout == 'horizontal' ? [6,18] : [24,24]);
-  const tagmargintop = (layout == 'horizontal' ? 0 : 10);
-  
   const [selectedOptions, setSelectedOptions] = useState<OptionType[]>([]);
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
 
   useEffect(() => {
-    if (field.value) {      
-      const newSelectedOptions = options?.filter(option =>
-        field.value.some((selected: any) => selected.value === option.value)
-      ) || [];
+    if (field.value) {
+      const newSelectedOptions =
+        options?.filter((option) =>
+          field.value.some((selected: any) => selected.value === option.value)
+        ) || [];
       setSelectedOptions(newSelectedOptions);
     }
 
-    if (Array.isArray(defaultValue) && defaultValue.length > 0 
-        && isFirstLoad ){
-     //const newSelectedOptions = defaultValue as unknown as OptionType[];
-     //setSelectedOptions(newSelectedOptions);
-     setIsFirstLoad(false);
-     field.onChange(defaultValue)
+    if (Array.isArray(defaultValue) && defaultValue.length > 0 && isFirstLoad) {
+      //const newSelectedOptions = defaultValue as unknown as OptionType[];
+      //setSelectedOptions(newSelectedOptions);
+      setIsFirstLoad(false);
+      field.onChange(defaultValue);
     }
-    
   }, [field.value, options]);
 
   const handleChange = (value: OptionType[]) => {
@@ -89,8 +87,8 @@ const MultiSelectTags = <T extends FieldValues>({
     field.onChange(newSelectedOptions);
   };
 
-return (
-    <Row gutter={16} style={{ width: '100%' }}>
+  return (
+    <Row gutter={16} style={{ width: "100%" }}>
       <Col span={layoutspan[0]}>
         <label className="textTitle">{title}</label>
         <Select
@@ -101,7 +99,7 @@ return (
           placeholder={placeholder}
           showSearch={false}
           className={errors ? "inputError" : "inputRegular"}
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
           popupClassName="selectDrop"
           loading={loading}
           optionLabelProp="label"
@@ -110,22 +108,33 @@ return (
           options={usedOptions}
           defaultValue={defaultValue}
           labelInValue
-        >
-        </Select>
-        {errors && <Typography.Text className="textError">{title} es obligatorio *</Typography.Text>}
+        ></Select>
+        {errors && (
+          <Typography.Text className="textError">{title} es obligatorio *</Typography.Text>
+        )}
       </Col>
-      <Col span={layoutspan[1]} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: "flex-end" }}>
-          {selectedOptions.map((option) => (
-            <Tag
-              key={option.value}
-              closable={!disabled}
-              color="#3D3D3D"
-              onClose={() => handleDeleteSelected(option)}
-              style={{paddingLeft: 12, paddingRight: 12, paddingTop: 6, paddingBottom: 6, borderRadius: 8, marginTop: tagmargintop}}
-            >
-              {option.label}
-            </Tag>
-          ))}
+      <Col
+        span={layoutspan[1]}
+        style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "flex-end" }}
+      >
+        {selectedOptions.map((option) => (
+          <Tag
+            key={option.value}
+            closable={!disabled}
+            color="#3D3D3D"
+            onClose={() => handleDeleteSelected(option)}
+            style={{
+              paddingLeft: 12,
+              paddingRight: 12,
+              paddingTop: 6,
+              paddingBottom: 6,
+              borderRadius: 8,
+              marginTop: tagmargintop
+            }}
+          >
+            {option.label}
+          </Tag>
+        ))}
       </Col>
     </Row>
   );

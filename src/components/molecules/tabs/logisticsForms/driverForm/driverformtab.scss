@@ -170,6 +170,13 @@
         }
     }
 
+    .documentsTitle {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
     .iaButton {
         border-radius: 42px;
         height: 42px;
@@ -227,5 +234,18 @@
 
     &::placeholder {
         color: $secondary-gray;
+    }
+}
+
+@media (max-width: 768px) {
+    .driverForm {
+        .headerProyectsForm {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .documentsTitle {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 }
