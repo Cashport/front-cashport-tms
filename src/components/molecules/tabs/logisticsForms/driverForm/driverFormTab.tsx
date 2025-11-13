@@ -222,7 +222,7 @@ export const DriverFormTab = ({
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver Conductores
+              {isMobile ? "" : "Ver Conductores"}
             </Button>
           </Link>
           {statusForm !== "create" && (
@@ -238,7 +238,7 @@ export const DriverFormTab = ({
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });
                 }}
-                icon={isMobile ? null : undefined}
+                label={isMobile ? "" : undefined}
               />
             </Flex>
           )}

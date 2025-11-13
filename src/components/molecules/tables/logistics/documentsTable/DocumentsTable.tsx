@@ -5,7 +5,6 @@ import { ColumnsType } from "antd/es/table";
 import { Eye } from "phosphor-react";
 
 import { formatDate } from "@/utils/utils";
-import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
@@ -26,8 +25,6 @@ type DocumentsTableProps = {
 };
 
 export const DocumentsTable = (props: DocumentsTableProps) => {
-  const width = useScreenWidth();
-  const isMobile = width && width <= 768;
   const [selectedDocument, setSelectedDocument] = useState<IProviderDocument>();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const {
@@ -120,7 +117,8 @@ export const DocumentsTable = (props: DocumentsTableProps) => {
         />
       ),
       align: "right",
-      width: 50
+      width: 50,
+      className: "seeMore-column"
     }
   ];
 
