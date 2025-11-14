@@ -16,11 +16,7 @@ import {
   VehicleFormTabProps
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
-import {
-  IFormGeneralVehicle,
-  IFormVehicle,
-  IProviderDocument
-} from "@/types/logistics/schema";
+import { IFormGeneralVehicle, IFormVehicle, IProviderDocument } from "@/types/logistics/schema";
 
 import Link from "next/link";
 import dayjs from "dayjs";
@@ -39,6 +35,7 @@ import ModalAuditRequirements from "@/components/organisms/logistics/proveedores
 import { deleteDocumentById } from "@/services/logistics/providers/providers";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { auditWithCashportAI } from "@/services/logistics/documents/documents";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 const { Title } = Typography;
 
@@ -93,6 +90,9 @@ export const VehicleFormTab = ({
     disabled: statusForm === "review",
     mode: "onChange"
   });
+
+  const width = useScreenWidth();
+  const isMobile = width && width <= 768;
 
   useEffect(() => {
     if (data) {
@@ -210,7 +210,7 @@ export const VehicleFormTab = ({
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver vehículos
+              {isMobile ? "" : "Ver vehículos"}
             </Button>
           </Link>
           {statusForm !== "create" && (
@@ -225,6 +225,7 @@ export const VehicleFormTab = ({
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });
                 }}
+                label={isMobile ? "" : undefined}
               />
             </Flex>
           )}
@@ -249,7 +250,7 @@ export const VehicleFormTab = ({
             {" "}
             {/* Fila Documentos */}
             <Col span={24}>
-              <Flex justify="space-between" align="center">
+              <div className="documentsTitle">
                 <Title className="title" level={4}>
                   Documentos
                 </Title>
@@ -288,7 +289,7 @@ export const VehicleFormTab = ({
                     </Col>
                   </Row>
                 )}
-              </Flex>
+              </div>
             </Col>
             <Col span={24} style={{ marginTop: "1.5rem" }}>
               {(statusForm === "review" || statusForm === "edit") && (
