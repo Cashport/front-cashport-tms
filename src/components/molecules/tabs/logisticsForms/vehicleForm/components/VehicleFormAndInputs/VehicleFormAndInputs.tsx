@@ -126,7 +126,9 @@ export const VehicleFormAndInputs: React.FC<VehicleFormAndInputsProps> = ({
                   }
                 }}
               />
-              {imageError && <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>}
+              {imageError && (
+                <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>
+              )}
             </div>
             {/* Mini photos */}
             <div className="vehicle-form-inputs__mini-photos">
@@ -146,7 +148,9 @@ export const VehicleFormAndInputs: React.FC<VehicleFormAndInputsProps> = ({
                         setValue(`images.${index + 1}`, file);
                       }
                       setImages((prev) =>
-                        prev.map((img, imgIndex) => (imgIndex === index + 1 ? { ...img, file } : img))
+                        prev.map((img, imgIndex) =>
+                          imgIndex === index + 1 ? { ...img, file } : img
+                        )
                       );
                       if (file) {
                         setImageError(false);
@@ -337,6 +341,7 @@ export const VehicleFormAndInputs: React.FC<VehicleFormAndInputsProps> = ({
                   errors={errors?.general?.trip_type}
                   options={features.map((f) => ({ label: f.description, value: f.id }))}
                   disabled={statusForm === "review"}
+                  layout={isMobile ? "vertical" : undefined}
                 />
               )}
             />
