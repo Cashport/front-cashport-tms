@@ -238,7 +238,7 @@ export const DriverFormTab = ({
             </Flex>
           )}
         </Flex>
-        <Flex component={"main"} flex="1" vertical style={{ paddingRight: "1rem" }}>
+        <Flex component={"main"} flex="1" vertical>
           <DriverFormAndInputs
             control={control}
             errors={errors}

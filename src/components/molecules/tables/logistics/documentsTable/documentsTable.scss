@@ -12,3 +12,15 @@
         }
     }
 }
+
+@media (max-width: 768px) {
+    .documentsTable {
+        .ant-table-cell {
+            padding: 10px !important;
+        }
+        .seeMore-column {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
+}
