@@ -336,7 +336,7 @@ export const DriverFormAndInputs: React.FC<DriverFormAndInputsProps> = ({
                   errors={errors?.general?.vehicle_type}
                   options={convertToSelectOptions(vehiclesTypesList || [])}
                   disabled={statusForm === "review"}
-                  layout="vertical"
+                  layout={isMobile ? "vertical" : undefined}
                 />
               )}
             />
@@ -361,7 +361,7 @@ export const DriverFormAndInputs: React.FC<DriverFormAndInputsProps> = ({
                     value: tripType.id
                   }))}
                   disabled={statusForm === "review"}
-                  layout="vertical"
+                  layout={isMobile ? "vertical" : undefined}
                 />
               )}
             />

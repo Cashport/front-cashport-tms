@@ -35,12 +35,7 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { auditWithCashportAI } from "@/services/logistics/documents/documents";
 
 //types
-import {
-  IFormDriver,
-  IFormGeneralDriver,
-  IGeneralDriverSubmit,
-  IProviderDocument
-} from "@/types/logistics/schema";
+import { IFormDriver, IGeneralDriverSubmit, IProviderDocument } from "@/types/logistics/schema";
 
 //styles
 import "./driverformtab.scss";
@@ -222,7 +217,7 @@ export const DriverFormTab = ({
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver Conductores
+              {isMobile ? "" : "Ver Conductores"}
             </Button>
           </Link>
           {statusForm !== "create" && (
@@ -238,12 +233,12 @@ export const DriverFormTab = ({
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });
                 }}
-                icon={isMobile ? null : undefined}
+                label={isMobile ? "" : undefined}
               />
             </Flex>
           )}
         </Flex>
-        <Flex component={"main"} flex="1" vertical style={{ paddingRight: "1rem" }}>
+        <Flex component={"main"} flex="1" vertical>
           <DriverFormAndInputs
             control={control}
             errors={errors}
