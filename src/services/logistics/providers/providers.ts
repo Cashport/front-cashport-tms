@@ -8,7 +8,8 @@ export const auditRequirements = async (documents: IAuditTableRow[]) => {
       documents: documents.map((doc) => ({
         documentTypeSubjectId: doc.id,
         accept: doc.audit?.toLowerCase() === "aprobar" ? true : false,
-        comments: doc.commentary ?? ""
+        comments: doc.commentary ?? "",
+        expiryDate: doc.expiryDate || null
       }))
     };
 
