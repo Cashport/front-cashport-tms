@@ -181,7 +181,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           )}
         />
       ),
-      width: 200
+      width: 118
     },
     {
       title: "",
@@ -213,7 +213,6 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   return (
     <Modal
       className="modalAuditRequirements"
-      width="80%"
       footer={null}
       open={isOpen}
       closable={false}
