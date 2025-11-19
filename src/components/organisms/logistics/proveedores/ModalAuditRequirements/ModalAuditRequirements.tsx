@@ -86,8 +86,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       await auditRequirements(data.rows);
       message.success("Requerimientos auditados correctamente");
       onClose();
-    } catch (error) {
-      message.error("Error al auditar requerimientos");
+    } catch (error: any) {
+      message.error(error);
     }
     setIsSubmitting(false);
   };

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { IAuditTableRow } from "@/components/organisms/logistics/proveedores/ModalAuditRequirements/ModalAuditRequirements";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
@@ -17,6 +18,12 @@ export const auditRequirements = async (documents: IAuditTableRow[]) => {
     return response;
   } catch (error) {
     console.error("Error al auditar requerimientos:", error);
+
+    // Extract error message from Axios error response
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.message || "Error al auditar requerimientos";
+      throw errorMessage;
+    }
     throw error;
   }
 };
