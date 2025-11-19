@@ -5,14 +5,16 @@ import { Button, Input, Modal, Select, Table, TableProps, Typography, message } 
 import { DownloadSimple, Sparkle } from "phosphor-react";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+import { auditRequirements } from "@/services/logistics/providers/providers";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
+import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
+import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
+
+import { IProviderDocument } from "@/types/logistics/schema";
 
 import "./modalAuditRequirements.scss";
-import { IProviderDocument } from "@/types/logistics/schema";
-import { auditRequirements } from "@/services/logistics/providers/providers";
-import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
 const { Title } = Typography;
 
 export interface IAuditTableRow {
@@ -22,6 +24,8 @@ export interface IAuditTableRow {
   audit?: string;
   commentary?: string;
   document?: any;
+  expiryDate?: string;
+  validity?: boolean;
 }
 
 interface IAuditFormValues {
@@ -57,9 +61,10 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         requrementType: doc.name,
         requirementsState: doc.statusId,
         audit: undefined,
-        commentary: undefined
+        commentary: undefined,
+        expiryDate: doc.expiryDate || undefined,
+        validity: doc.validity.expiry || false
       }));
-
       reset({ rows: defaultRows });
     }
   }, [selectedRows, reset]);
@@ -74,14 +79,15 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   };
 
   const onSubmit = async (data: IAuditFormValues) => {
+    console.log("data", data);
     setIsSubmitting(true);
 
     try {
       await auditRequirements(data.rows);
       message.success("Requerimientos auditados correctamente");
       onClose();
-    } catch (error) {
-      message.error("Error al auditar requerimientos");
+    } catch (error: any) {
+      message.error(error);
     }
     setIsSubmitting(false);
   };
@@ -99,6 +105,27 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       render: (requirementsState) => {
         return <BadgeDocumentStatus statusId={requirementsState} />;
       }
+    },
+    {
+      title: "Vencimiento",
+      dataIndex: "expiryDate",
+      key: "expiryDate",
+      render: (_: any, record, index: number) => {
+        const isExpiryRequired = record.validity;
+        return (
+          <InputDateForm
+            titleInput="Fecha de vencimiento"
+            nameInput={`rows.${index}.expiryDate`}
+            control={control}
+            error={undefined}
+            hiddenTitle={true}
+            placeholder={!isExpiryRequired ? "No requerido" : "Selecciona fecha"}
+            disabled={!isExpiryRequired}
+            validationRules={{ required: isExpiryRequired }}
+          />
+        );
+      },
+      width: 200
     },
     {
       title: "Comentario",
@@ -154,7 +181,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           )}
         />
       ),
-      width: 200
+      width: 118
     },
     {
       title: "",
@@ -178,14 +205,14 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     return selectedRows.map((doc) => ({
       id: doc.id,
       requrementType: doc.name,
-      requirementsState: doc.statusId || ""
+      requirementsState: doc.statusId || "",
+      validity: doc.validity.expiry
     }));
   }, [selectedRows]);
 
   return (
     <Modal
       className="modalAuditRequirements"
-      width="80%"
       footer={null}
       open={isOpen}
       closable={false}

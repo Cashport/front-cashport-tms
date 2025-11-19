@@ -2,6 +2,7 @@
 
 .modalAuditRequirements {
     max-height: 90%;
+    width: 80% !important;
     .ant-modal-content {
         padding: 2rem !important;
 
@@ -55,6 +56,7 @@
 
         .selectAuditRequirements {
             height: 42px;
+            width: 100px !important;
         }
     }
 
