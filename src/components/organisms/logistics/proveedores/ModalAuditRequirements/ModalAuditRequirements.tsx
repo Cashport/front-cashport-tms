@@ -3,8 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Modal, Select, Table, TableProps, Typography, message } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
+import dayjs from "dayjs";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { auditRequirements } from "@/services/logistics/providers/providers";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -24,7 +26,7 @@ export interface IAuditTableRow {
   audit?: string;
   commentary?: string;
   document?: any;
-  expiryDate?: string;
+  expiryDate?: dayjs.Dayjs;
   validity?: boolean;
 }
 
@@ -43,6 +45,9 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localSelectedRows, setLocalSelectedRows] = useState<IProviderDocument[]>([]);
   const height = useScreenHeight();
+  const width = useScreenWidth();
+
+  const isWideScreen = width && width >= 1400;
 
   const { control, handleSubmit, reset, watch } = useForm<IAuditFormValues>();
 
@@ -62,7 +67,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         requirementsState: doc.statusId,
         audit: undefined,
         commentary: undefined,
-        expiryDate: doc.expiryDate || undefined,
+        expiryDate: doc.expiryDate ? dayjs(doc.expiryDate) : undefined,
         validity: doc.validity.expiry || false
       }));
       reset({ rows: defaultRows });
@@ -79,7 +84,6 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   };
 
   const onSubmit = async (data: IAuditFormValues) => {
-    console.log("data", data);
     setIsSubmitting(true);
 
     try {
@@ -96,7 +100,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     {
       title: "Tipo de requerimiento",
       dataIndex: "requrementType",
-      key: "requrementType"
+      key: "requrementType",
+      width: isWideScreen ? 270 : undefined
     },
     {
       title: "Estado",
@@ -104,7 +109,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       key: "requirementsState",
       render: (requirementsState) => {
         return <BadgeDocumentStatus statusId={requirementsState} />;
-      }
+      },
+      width: isWideScreen ? 180 : undefined
     },
     {
       title: "Vencimiento",
@@ -124,8 +130,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
             validationRules={{ required: isExpiryRequired }}
           />
         );
-      },
-      width: 200
+      }
     },
     {
       title: "Comentario",
@@ -157,7 +162,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           />
         );
       },
-      width: 300
+      width: isWideScreen ? undefined : 300
     },
     {
       title: "Auditar",
@@ -181,7 +186,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           )}
         />
       ),
-      width: 118
+      width: isWideScreen ? undefined : 118
     },
     {
       title: "",

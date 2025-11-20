@@ -95,3 +95,13 @@
         max-width: 300px;
     }
 }
+
+@media (min-width: 1400px) {
+    .modalAuditRequirements {
+        &__documentsTable {
+            .selectAuditRequirements {
+                width: 100% !important;
+            }
+        }
+    }
+}
