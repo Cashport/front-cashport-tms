@@ -55,7 +55,6 @@ export interface FileObject {
 }
 
 export const normalizeVehicleData = (data: IVehicle): any => {
-  console.log("dataVehicle", data);
   if (!data) return {};
 
   const documents = data.documents.map((doc) => ({

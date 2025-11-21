@@ -1,0 +1,69 @@
+.driver-form-inputs {
+    // Main container with photo and general info (2 columns: 20% and 80%)
+    &__container {
+        display: grid;
+        grid-template-columns: 20% 1fr;
+        gap: 16px;
+    }
+
+    // Photo column
+    &__photo-column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // Info column
+    &__info-column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // Info fields grid (3 equal columns for span={8})
+    &__fields-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    // License section title
+    &__license-title {
+        margin-top: 1rem;
+    }
+
+    // Full width sections (vehicles, trip types, contact)
+    &__section {
+        width: 100%;
+        margin-top: 2rem;
+    }
+
+    // Contact fields grid (2 columns for span={6})
+    &__contact-fields-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    // Show more/less button
+}
+
+.show-more-btn {
+    margin: 1rem 0;
+    align-self: flex-end;
+    border: none !important;
+    box-shadow: none !important;
+    width: fit-content;
+    font-size: 1rem !important;
+}
+
+@media (max-width: 768px) {
+    .driver-form-inputs {
+        &__container {
+            grid-template-columns: 1fr;
+        }
+
+        &__fields-grid,
+        &__contact-fields-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}

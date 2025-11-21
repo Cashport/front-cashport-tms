@@ -1,7 +1,26 @@
+.documentsTable {
+    .seeMore-column {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
 @media (min-width: 1350px) {
     .documentsTable {
         .status-column {
             width: 200px;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .documentsTable {
+        .ant-table-cell {
+            padding: 10px !important;
+        }
+        .seeMore-column {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
     }
 }

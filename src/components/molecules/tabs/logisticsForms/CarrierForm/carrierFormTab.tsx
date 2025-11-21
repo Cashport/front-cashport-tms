@@ -44,7 +44,7 @@ const { Title, Text } = Typography;
 export const CarrierFormTab = ({
   onSubmitForm = () => {},
   statusForm = "review",
-  data = {} as ICarrierById,
+  data,
   handleFormState = () => {},
   tripTypes,
   onActiveProvider = () => {},
@@ -65,7 +65,7 @@ export const CarrierFormTab = ({
   const { locationTypes, isloadingTripTypes, groupLocations, availableCommunityCarrierTypes } =
     useCarrierFormTabTypes();
 
-  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data);
+  const defaultValues = statusForm === "create" ? {} : data ? dataToProjectFormData(data) : {};
   const {
     watch,
     control,

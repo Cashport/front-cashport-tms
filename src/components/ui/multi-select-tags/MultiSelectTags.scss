@@ -1,81 +1,5 @@
 @import "@styles/_variables.scss";
 
-.selectOuterTagsLogistics {
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    .inputTitle {
-        position: absolute;
-        top: -1.3rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: $gray;
-    }
-
-    .textError {
-        color: $error;
-        font-size: 0.875rem;
-        font-weight: 400;
-    }
-
-    .selectPlaceholder {
-        position: absolute;
-        top: 50%;
-        left: 0.7rem;
-        top: 0.8rem;
-        color: $dark-gray;
-        font-size: 1rem;
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    .selectDrop {
-        background-color: $background !important;
-        font-size: 1rem;
-
-        .selectOptions {
-            background-color: $background !important;
-            border-top: 1px solid $white;
-            padding: 0.7rem !important;
-            font-size: 1rem !important;
-            font-size: 1rem;
-        }
-    }
-
-    .selectedOptions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-
-        &__tag {
-            width: fit-content;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            background-color: $gray;
-            border-radius: 6px;
-            color: $white;
-            padding: 4px 8px;
-
-            p {
-                white-space: nowrap;
-            }
-
-            .deleteTag {
-                border-radius: 50%;
-                cursor: pointer;
-
-                &:hover {
-                    opacity: 0.7;
-                }
-            }
-        }
-    }
-}
-
 .inputRegular {
     height: 3rem !important;
     background-color: $background;
@@ -124,22 +48,4 @@
             font-size: 1rem;
         }
     }
-}
-
-.selectPlaceholder {
-    position: absolute;
-    top: 32%;
-    left: 8%;
-    color: $dark-gray;
-    font-size: 1rem;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.textTitle {
-    color: #909090;
-    font-size: 0.75rem;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
 }

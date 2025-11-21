@@ -1,0 +1,111 @@
+.vehicle-form-inputs {
+    // Main container with photo and general info (2 columns: 25% and 75%)
+    &__container {
+        display: grid;
+        grid-template-columns: 25% 1fr;
+        gap: 16px;
+    }
+
+    // Photo column
+    &__photo-column {
+        display: flex;
+        flex-direction: column;
+
+        .ant-upload-wrapper {
+            width: 100% !important;
+        }
+
+        .uploadText {
+            display: none !important;
+        }
+    }
+
+    // Main photo container
+    &__main-photo {
+        margin-bottom: 16px;
+        min-height: 250px;
+        max-height: 460px;
+        overflow: hidden;
+
+        .ant-upload-select,
+        .ant-upload {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 250px !important;
+            max-height: 500px !important;
+            border-radius: 8px;
+        }
+    }
+
+    // Mini photos grid (4 photos in 2x2 grid)
+    &__mini-photos {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        // justify-content: space-between;
+    }
+
+    // Individual mini photo
+    &__mini-photo {
+        width: fit-content;
+
+        .ant-upload-select {
+            width: 60px !important;
+            height: 60px !important;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: #f7f7f7;
+        }
+    }
+
+    // Info column
+    &__info-column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // Info fields grid (3 equal columns for span={8})
+    &__fields-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    // GPS switch section
+    &__gps-switch {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    // Full width sections (trip types, additional info)
+    &__section {
+        width: 100%;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+}
+
+.show-more-btn {
+    margin: 1rem 0;
+    align-self: flex-end;
+    border: none !important;
+    box-shadow: none !important;
+    width: fit-content;
+    font-size: 1rem !important;
+}
+
+@media (max-width: 768px) {
+    .vehicle-form-inputs {
+        &__container {
+            grid-template-columns: 1fr;
+        }
+
+        &__fields-grid {
+            grid-template-columns: 1fr;
+        }
+
+        &__mini-photos {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}

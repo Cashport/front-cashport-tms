@@ -29,3 +29,19 @@
         }
     }
 }
+
+@media (max-width: 768px) {
+    .drawerComponentProviders {
+        .ant-drawer-header {
+            padding: 1rem !important;
+        }
+
+        .ant-drawer-body {
+            padding: 1rem !important;
+        }
+
+        .ant-drawer-footer {
+            padding: 1rem !important;
+        }
+    }
+}

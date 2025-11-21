@@ -32,6 +32,7 @@ const ColumnText: React.FC<ColumnTextProps> = ({
           fontWeight: 400,
           color: "#7B7B7B",
           margin: 0,
+          whiteSpace: 'nowrap',
           ...titleStyle // Permite sobrescribir el estilo
         }}
       >

@@ -3,16 +3,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Modal, Select, Table, TableProps, Typography, message } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
+import dayjs from "dayjs";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
+import { auditRequirements } from "@/services/logistics/providers/providers";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
+import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
+import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
+
+import { IProviderDocument } from "@/types/logistics/schema";
 
 import "./modalAuditRequirements.scss";
-import { IProviderDocument } from "@/types/logistics/schema";
-import { auditRequirements } from "@/services/logistics/providers/providers";
-import BadgeDocumentStatus from "@/components/atoms/BadgeDocumentStatus/BadgeDocumentStatus";
 const { Title } = Typography;
 
 export interface IAuditTableRow {
@@ -22,6 +26,8 @@ export interface IAuditTableRow {
   audit?: string;
   commentary?: string;
   document?: any;
+  expiryDate?: dayjs.Dayjs;
+  validity?: boolean;
 }
 
 interface IAuditFormValues {
@@ -39,6 +45,9 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localSelectedRows, setLocalSelectedRows] = useState<IProviderDocument[]>([]);
   const height = useScreenHeight();
+  const width = useScreenWidth();
+
+  const isWideScreen = width && width >= 1400;
 
   const { control, handleSubmit, reset, watch } = useForm<IAuditFormValues>();
 
@@ -57,9 +66,10 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         requrementType: doc.name,
         requirementsState: doc.statusId,
         audit: undefined,
-        commentary: undefined
+        commentary: undefined,
+        expiryDate: doc.expiryDate ? dayjs(doc.expiryDate) : undefined,
+        validity: doc.validity.expiry || false
       }));
-
       reset({ rows: defaultRows });
     }
   }, [selectedRows, reset]);
@@ -80,8 +90,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       await auditRequirements(data.rows);
       message.success("Requerimientos auditados correctamente");
       onClose();
-    } catch (error) {
-      message.error("Error al auditar requerimientos");
+    } catch (error: any) {
+      message.error(error);
     }
     setIsSubmitting(false);
   };
@@ -90,7 +100,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     {
       title: "Tipo de requerimiento",
       dataIndex: "requrementType",
-      key: "requrementType"
+      key: "requrementType",
+      width: isWideScreen ? 270 : undefined
     },
     {
       title: "Estado",
@@ -98,6 +109,27 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       key: "requirementsState",
       render: (requirementsState) => {
         return <BadgeDocumentStatus statusId={requirementsState} />;
+      },
+      width: isWideScreen ? 180 : undefined
+    },
+    {
+      title: "Vencimiento",
+      dataIndex: "expiryDate",
+      key: "expiryDate",
+      render: (_: any, record, index: number) => {
+        const isExpiryRequired = record.validity;
+        return (
+          <InputDateForm
+            titleInput="Fecha de vencimiento"
+            nameInput={`rows.${index}.expiryDate`}
+            control={control}
+            error={undefined}
+            hiddenTitle={true}
+            placeholder={!isExpiryRequired ? "No requerido" : "Selecciona fecha"}
+            disabled={!isExpiryRequired}
+            validationRules={{ required: isExpiryRequired }}
+          />
+        );
       }
     },
     {
@@ -130,7 +162,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           />
         );
       },
-      width: 300
+      width: isWideScreen ? undefined : 300
     },
     {
       title: "Auditar",
@@ -154,7 +186,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           )}
         />
       ),
-      width: 200
+      width: isWideScreen ? undefined : 118
     },
     {
       title: "",
@@ -178,14 +210,14 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     return selectedRows.map((doc) => ({
       id: doc.id,
       requrementType: doc.name,
-      requirementsState: doc.statusId || ""
+      requirementsState: doc.statusId || "",
+      validity: doc.validity.expiry
     }));
   }, [selectedRows]);
 
   return (
     <Modal
       className="modalAuditRequirements"
-      width="80%"
       footer={null}
       open={isOpen}
       closable={false}

@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
-import { Button, Col, Flex, Form, message, Row, Switch, Typography } from "antd";
-import { Controller, useForm } from "react-hook-form";
+import { Button, Col, Flex, Form, message, Row, Typography } from "antd";
+import { useForm } from "react-hook-form";
 import { CaretLeft, Sparkle } from "phosphor-react";
 import utc from "dayjs/plugin/utc";
 import { mutate } from "swr";
 
 // components
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
-import { UploadImg } from "@/components/atoms/UploadImg/UploadImg";
-
-//interfaces
-import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
+import { VehicleFormAndInputs } from "./components/VehicleFormAndInputs/VehicleFormAndInputs";
 
 import {
   _onSubmitVehicle,
@@ -19,22 +16,15 @@ import {
   VehicleFormTabProps
 } from "./vehicleFormTab.mapper";
 import "./vehicleformtab.scss";
-import {
-  IFormGeneralVehicle,
-  IFormVehicle,
-  IProviderDocument,
-  VehicleType
-} from "@/types/logistics/schema";
+import { IFormGeneralVehicle, IFormVehicle, IProviderDocument } from "@/types/logistics/schema";
 
 import Link from "next/link";
 import dayjs from "dayjs";
 import SubmitFormButton from "@/components/atoms/SubmitFormButton/SubmitFormButton";
-import { SelectInputForm } from "@/components/molecules/logistics/SelectInputForm/SelectInputForm";
 import ModalConfirmAudit from "../driverForm/components/ModalConfirmAudit";
 import CustomTag from "@/components/atoms/CustomTag";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import React from "react";
-import MultiSelectTags from "@/components/ui/multi-select-tags/MultiSelectTags";
 import { DocumentsTable } from "@/components/molecules/tables/logistics/documentsTable/DocumentsTable";
 import ModalUploadRequirements, {
   IUploadRequirementstTableRow
@@ -45,8 +35,9 @@ import ModalAuditRequirements from "@/components/organisms/logistics/proveedores
 import { deleteDocumentById } from "@/services/logistics/providers/providers";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { auditWithCashportAI } from "@/services/logistics/documents/documents";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 dayjs.extend(utc);
 interface ImageState {
@@ -99,6 +90,9 @@ export const VehicleFormTab = ({
     disabled: statusForm === "review",
     mode: "onChange"
   });
+
+  const width = useScreenWidth();
+  const isMobile = width && width <= 768;
 
   useEffect(() => {
     if (data) {
@@ -172,15 +166,6 @@ export const VehicleFormTab = ({
     setLoadingRequest(false);
   };
 
-  const convertToSelectOptions = (vehicleTypes: VehicleType[]) => {
-    if (!Array.isArray(vehicleTypes)) return [];
-    const newValues = vehicleTypes?.map((vehicleType) => ({
-      value: vehicleType.description,
-      id: Number(vehicleType.id)
-    }));
-    return newValues;
-  };
-
   useEffect(() => {
     if (data?.id_vehicle_type) {
       setValue("general.id_vehicle_type", data?.id_vehicle_type);
@@ -225,7 +210,7 @@ export const VehicleFormTab = ({
               className="buttonGoBack"
               icon={<CaretLeft size={"1.45rem"} />}
             >
-              Ver vehículos
+              {isMobile ? "" : "Ver vehículos"}
             </Button>
           </Link>
           {statusForm !== "create" && (
@@ -240,254 +225,32 @@ export const VehicleFormTab = ({
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });
                 }}
+                label={isMobile ? "" : undefined}
               />
             </Flex>
           )}
         </Flex>
         <Flex component={"main"} flex="3" vertical>
-          <Row gutter={[16, 16]}>
-            <Col span={6}>
-              {" "}
-              {/* Columna Fotos del Vehiculo */}
-              <Title className="title" level={4}>
-                Fotos de vehículo
-              </Title>
-              {/* ------------Image Project-------------- */}
-              <Row>
-                <Col span={24} className="colfoto">
-                  <UploadImg
-                    disabled={statusForm === "review"}
-                    imgDefault={formImages ? formImages[0]?.url_archive : undefined}
-                    setImgFile={(file) => {
-                      const currentUrlArchive = formImages ? formImages[0]?.url_archive : undefined; // obtener el valor actual de url_archive
-                      if (currentUrlArchive) {
-                        (file as any).url_archive = currentUrlArchive;
-                        setValue(`images.${0}`, file);
-                      } else {
-                        setValue(`images.${0}`, file);
-                      }
-                      setImages((prev) =>
-                        prev.map((img, index) => (index === 0 ? { ...img, file } : img))
-                      );
-                      if (file) {
-                        setImageError(false);
-                      }
-                    }}
-                  />
-                  {imageError && (
-                    <Text className="textError">{"Al menos 1 imagen debe ser cargada *"}</Text>
-                  )}
-                </Col>
-              </Row>
-              <Row gutter={16}>
-                {images.slice(1).map((image, index) => (
-                  <Col xs={24} sm={12} lg={6} className="colfotomin" key={index + 1}>
-                    <UploadImg
-                      disabled={statusForm === "review"}
-                      imgDefault={formImages ? formImages[index + 1]?.url_archive : undefined}
-                      setImgFile={(file) => {
-                        const currentUrlArchive = formImages
-                          ? formImages[index + 1]?.url_archive
-                          : undefined; // obtener el valor actual de url_archive
-                        if (currentUrlArchive) {
-                          (file as any).url_archive = currentUrlArchive;
-                          setValue(`images.${index + 1}`, file);
-                        } else {
-                          setValue(`images.${index + 1}`, file);
-                        }
-                        setImages((prev) =>
-                          prev.map((img, imgIndex) =>
-                            imgIndex === index + 1 ? { ...img, file } : img
-                          )
-                        );
-                        if (file) {
-                          setImageError(false);
-                        }
-                      }}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </Col>
-            <Col span={18}>
-              {" "}
-              {/* Columna Informacion general */}
-              <Title className="title" level={4}>
-                Información General
-              </Title>
-              <Row gutter={[16, 16]}>
-                <Col span={8} className="selectButton">
-                  <Title className="title" level={5}>
-                    Tipo de vehículo
-                  </Title>
-                  <Controller
-                    name="general.id_vehicle_type"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <SelectInputForm
-                        placeholder="Selecciona tipo de vehículo"
-                        error={errors?.general?.id_vehicle_type}
-                        field={field}
-                        options={convertToSelectOptions(vehiclesTypesList || [])}
-                      />
-                    )}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Placa"
-                    nameInput="general.plate_number"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors.general?.plate_number}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Marca"
-                    nameInput="general.brand"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors?.general?.brand}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Modelo"
-                    nameInput="general.model"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors?.general?.model}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Linea"
-                    nameInput="general.line"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors.general?.line}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Año"
-                    nameInput="general.year"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors.general?.year}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Color"
-                    nameInput="general.color"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors.general?.color}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Ciudad"
-                    nameInput="general.country"
-                    control={control}
-                    disabled={statusForm === "review"}
-                    error={errors.general?.country}
-                  />
-                </Col>
-              </Row>
-              <Flex
-                component={"section"}
-                className="generalProject"
-                justify="flex-start"
-                align="center"
-                style={{ marginTop: "2rem", marginBottom: "2rem" }}
-              >
-                <Switch
-                  disabled={statusForm === "review"}
-                  checked={hasGPS}
-                  onChange={() => setHasGPS(!hasGPS)}
-                />
-                <h5 className="ant-typography input-form-title">&nbsp;&nbsp;Equipado por GPS</h5>
-              </Flex>
-              <Row gutter={16}>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Usuario"
-                    nameInput="general.gps_user"
-                    control={control}
-                    disabled={statusForm === "review" || !hasGPS}
-                    error={errors.general?.gps_user}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Contraseña"
-                    nameInput="general.gps_password"
-                    control={control}
-                    disabled={statusForm === "review" || !hasGPS}
-                    error={errors.general?.gps_password}
-                  />
-                </Col>
-                <Col span={8}>
-                  <InputForm
-                    titleInput="Link"
-                    nameInput="general.gps_link"
-                    control={control}
-                    disabled={statusForm === "review" || !hasGPS}
-                    error={errors.general?.gps_link}
-                  />
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-          {/* ----------------------------------Tipos de viaje--------------------------------- */}
-          <Row style={{ width: "100%", marginBottom: "2rem" }}>
-            <Title className="title" level={4}>
-              Tipos de viaje
-            </Title>
-            <Controller
-              name="general.trip_type"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <MultiSelectTags
-                  field={field}
-                  placeholder="Seleccione"
-                  title="Tipos de viaje que esta autorizado"
-                  errors={errors?.general?.trip_type}
-                  options={features.map((f) => ({ label: f.description, value: f.id }))}
-                  disabled={statusForm === "review"}
-                />
-              )}
-            />
-          </Row>
-          <Row gutter={[16, 16]}>
-            {" "}
-            {/* Fila Informacion Adicional */}
-            <Col span={24}>
-              <Title className="title" level={4}>
-                Informacion Adicional
-              </Title>
-              <InputForm
-                placeholder="Escribir información adicional"
-                titleInput=""
-                nameInput="general.aditional_info"
-                control={control}
-                validationRules={{ required: false }}
-                disabled={statusForm === "review"}
-                error={errors.general?.aditional_info}
-              />
-            </Col>
-          </Row>
+          <VehicleFormAndInputs
+            control={control}
+            errors={errors}
+            watch={watch}
+            setValue={setValue}
+            statusForm={statusForm}
+            vehiclesTypesList={vehiclesTypesList || []}
+            features={features}
+            images={images}
+            setImages={setImages}
+            imageError={imageError}
+            setImageError={setImageError}
+            hasGPS={hasGPS}
+            setHasGPS={setHasGPS}
+          />
           <Row style={{ marginTop: "2rem", marginBottom: "2rem" }}>
             {" "}
             {/* Fila Documentos */}
             <Col span={24}>
-              <Flex justify="space-between" align="center">
+              <div className="documentsTitle">
                 <Title className="title" level={4}>
                   Documentos
                 </Title>
@@ -526,7 +289,7 @@ export const VehicleFormTab = ({
                     </Col>
                   </Row>
                 )}
-              </Flex>
+              </div>
             </Col>
             <Col span={24} style={{ marginTop: "1.5rem" }}>
               {(statusForm === "review" || statusForm === "edit") && (
