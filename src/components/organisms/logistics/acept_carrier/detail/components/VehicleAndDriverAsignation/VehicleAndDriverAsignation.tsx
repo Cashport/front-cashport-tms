@@ -100,14 +100,26 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
     if (!isFormCompleted) return false;
 
     const vehicleStatus = getVehicleStatus();
-    if (selectedVehicle && vehicleStatus && vehicleStatus.id !== VALID_STATUS) {
+    const selectedVehicleData = getSelectedVehicle();
+
+    // Check if vehicle is invalid or has expiring documents
+    if (
+      selectedVehicle &&
+      vehicleStatus &&
+      (vehicleStatus.id !== VALID_STATUS || selectedVehicleData?.documents_expiry)
+    ) {
       return false;
     }
 
+    // Check if any driver is invalid or has expiring documents
     const hasInvalidDriver = selectedDrivers.some((driver) => {
       if (driver.driverId) {
         const driverStatus = getDriverStatus(driver.driverId);
-        return driverStatus && driverStatus.id !== VALID_STATUS;
+        const driverData = getSelectedDriver(driver.driverId);
+
+        if (driverStatus && (driverStatus.id !== VALID_STATUS || driverData?.documents_expiry)) {
+          return true;
+        }
       }
       return false;
     });
