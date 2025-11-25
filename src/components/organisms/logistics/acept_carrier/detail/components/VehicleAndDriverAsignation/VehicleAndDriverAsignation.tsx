@@ -159,18 +159,26 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
     setSelectedFiles(docsWithLink);
   }, [documentsTypes]);
 
-  // Función helper para obtener el status del vehículo seleccionado
-  const getVehicleStatus = () => {
+  // helper selected vehicle
+  const getSelectedVehicle = () => {
     if (!selectedVehicle || !vehicles) return null;
-    const vehicle = vehicles.find((v) => v.id === selectedVehicle);
-    return vehicle?.status;
+    return vehicles.find((v) => v.id === selectedVehicle);
   };
 
-  // Función helper para obtener el status del conductor seleccionado
-  const getDriverStatus = (driverId: number | null) => {
+  // helper selected vehicle status
+  const getVehicleStatus = () => {
+    return getSelectedVehicle()?.status;
+  };
+
+  // helper selected driver
+  const getSelectedDriver = (driverId: number | null) => {
     if (!driverId || !drivers) return null;
-    const driver = drivers.find((d) => d.id === driverId);
-    return driver?.status;
+    return drivers.find((d) => d.id === driverId);
+  };
+
+  // helper selected driver status
+  const getDriverStatus = (driverId: number | null) => {
+    return getSelectedDriver(driverId)?.status;
   };
 
   return (
@@ -239,7 +247,7 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
               )}
             </Flex>
 
-            {getVehicleStatus() && getVehicleStatus()?.id !== VALID_STATUS && (
+            {getVehicleStatus() && getVehicleStatus()?.id !== VALID_STATUS ? (
               <p>
                 El vehículo no se puede seleccionar para este viaje por documentación incompleta.{" "}
                 <Link
@@ -249,7 +257,22 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                   Ir a corregir documentación.
                 </Link>
               </p>
-            )}
+            ) : null}
+
+            {getVehicleStatus() &&
+            getVehicleStatus()?.id === VALID_STATUS &&
+            getSelectedVehicle()?.documents_expiry ? (
+              <p>
+                El vehículo no se puede seleccionar para este viaje porque la documentación vence
+                antes del viaje.{" "}
+                <Link
+                  href={`/logistics/providers/${carrier?.id_carrier}/vehicle/${selectedVehicle}`}
+                  target="_blank"
+                >
+                  Ir a actualizar documentación.
+                </Link>
+              </p>
+            ) : null}
           </Flex>
         </div>
         {fields.map((field, indexField: number) => (
@@ -344,18 +367,33 @@ const VehicleAndDriverAsignation = forwardRef(function VehicleAndDriverAsignatio
                   </Flex>
 
                   {getDriverStatus(selectedDrivers[indexField]?.driverId) &&
-                    getDriverStatus(selectedDrivers[indexField]?.driverId)?.id !== VALID_STATUS && (
-                      <p>
-                        El conductor no se puede seleccionar para este viaje por documentación
-                        incompleta.{" "}
-                        <Link
-                          href={`/logistics/providers/${carrier?.id_carrier}/driver/${selectedDrivers[indexField]?.driverId}`}
-                          target="_blank"
-                        >
-                          Ir a corregir documentación.
-                        </Link>
-                      </p>
-                    )}
+                  getDriverStatus(selectedDrivers[indexField]?.driverId)?.id !== VALID_STATUS ? (
+                    <p>
+                      El conductor no se puede seleccionar para este viaje por documentación
+                      incompleta.{" "}
+                      <Link
+                        href={`/logistics/providers/${carrier?.id_carrier}/driver/${selectedDrivers[indexField]?.driverId}`}
+                        target="_blank"
+                      >
+                        Ir a corregir documentación.
+                      </Link>
+                    </p>
+                  ) : null}
+
+                  {getDriverStatus(selectedDrivers[indexField]?.driverId) &&
+                  getDriverStatus(selectedDrivers[indexField]?.driverId)?.id === VALID_STATUS &&
+                  getSelectedDriver(selectedDrivers[indexField]?.driverId)?.documents_expiry ? (
+                    <p>
+                      El conductor no se puede seleccionar para este viaje porque la documentación
+                      vence antes del viaje.{" "}
+                      <Link
+                        href={`/logistics/providers/${carrier?.id_carrier}/driver/${selectedDrivers[indexField]?.driverId}`}
+                        target="_blank"
+                      >
+                        Ir a actualizar documentación.
+                      </Link>
+                    </p>
+                  ) : null}
                 </Flex>
 
                 {indexField === fields.length - 1 && (
