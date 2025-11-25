@@ -214,11 +214,10 @@ export const changeClientStatus = async (
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void
 ) => {
-
   try {
     const response: AxiosResponse | AxiosError = await API.put(
       `/client/change-status/${clientId}`,
-      { status: newStatus },
+      { status: newStatus }
     );
 
     if (response.status === 200) {
@@ -231,5 +230,19 @@ export const changeClientStatus = async (
     console.warn("Error cambiando el estado del cliente: ", error);
     showMessage("error", "Oops, ocurrió un error cambiando el estado del cliente.");
     return error as AxiosError;
+  }
+};
+
+export const getPayloadByTicket = async (ticketId: string): Promise<any> => {
+  try {
+    const response = await API.get(`${config.API_HOST}/client/get-payload-by-ticket`, {
+      params: { ticketId, templateId: "estado_de_cuenta" }
+    });
+    const data = response?.data?.data || response?.data || response;
+
+    return data;
+  } catch (error) {
+    console.warn("error getting payload by ticket: ", error);
+    return null;
   }
 };

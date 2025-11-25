@@ -7,16 +7,18 @@ interface IViewWrapper {
   headerTitle: string;
   showNotifications?: boolean;
   children: React.ReactNode;
+  gapTitle?: string;
 }
 export default function ViewWrapper({
   headerTitle,
   showNotifications = false,
-  children
+  children,
+  gapTitle = "1rem"
 }: Readonly<IViewWrapper>) {
   return (
     <main className={styles.mainWrapper}>
       <SideBar />
-      <Flex vertical className={styles.rightContent} gap={"1rem"}>
+      <Flex vertical className={styles.rightContent} gap={gapTitle}>
         <Header title={headerTitle} showNotifications={showNotifications} />
         {children}
       </Flex>

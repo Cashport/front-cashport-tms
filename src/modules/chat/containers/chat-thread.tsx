@@ -1,27 +1,11 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/modules/chat/ui/button";
-import { Textarea } from "@/modules/chat/ui/textarea";
-import { ScrollArea } from "@/modules/chat/ui/scroll-area";
-import { Separator } from "@/modules/chat/ui/separator";
-import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
-import { Badge } from "@/modules/chat/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
-import { Input } from "@/modules/chat/ui/input";
-import type { Conversation, Message } from "@/modules/chat/lib/mock-data";
-import { formatRelativeTime, conversationsMock } from "@/modules/chat/lib/mock-data";
-import TemplateDialog from "./template-dialog";
-import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
-import { useToast } from "@/modules/chat/hooks/use-toast";
-import { cn } from "@/utils/utils";
+import { useEffect, useRef, useState, useMemo } from "react";
+import Image from "next/image";
 import {
   ArrowsOut,
   CaretDown,
   CodesandboxLogo,
-  EnvelopeSimple,
   FileArrowDown,
-  FileText,
   Microphone,
   Paperclip,
   PaperPlaneRight,
@@ -30,13 +14,31 @@ import {
   X
 } from "@phosphor-icons/react";
 
+import { getWhatsAppTemplates, sendMessage } from "@/services/chat/chat";
+
+import { Button } from "@/modules/chat/ui/button";
+import { Textarea } from "@/modules/chat/ui/textarea";
+import { ScrollArea } from "@/modules/chat/ui/scroll-area";
+import { Separator } from "@/modules/chat/ui/separator";
+import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
+import { Badge } from "@/modules/chat/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
+import { Input } from "@/modules/chat/ui/input";
+import type { Conversation } from "@/modules/chat/lib/mock-data";
+import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
+import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
+import TemplateDialog from "./template-dialog";
+import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
+import { useToast } from "@/modules/chat/hooks/use-toast";
+
+import { cn } from "@/utils/utils";
+import { useSocket } from "@/context/ChatContext";
+import useTicketMessages from "@/hooks/useTicketMessages";
+
 type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
-  onSend?: (message: string) => void;
-  onSendAudio?: (audioUrl: string) => void;
-  onSendEmail?: (subject: string, body: string, files?: FileItem[], images?: string[]) => void;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
 };
@@ -54,14 +56,7 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({
-  conversation,
-  onSend,
-  onSendAudio,
-  onSendEmail,
-  onShowDetails,
-  detailsOpen
-}: Props) {
+export default function ChatThread({ conversation, onShowDetails, detailsOpen }: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -75,6 +70,11 @@ export default function ChatThread({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const { data: ticketData, mutate } = useTicketMessages({ ticketId: conversation.id, page: 1 });
+  const ticketMessages = useMemo(
+    () => ticketData?.messages?.slice().reverse() || [],
+    [ticketData?.messages]
+  );
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -82,11 +82,74 @@ export default function ChatThread({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
+
+  const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom, isConnected } =
+    useSocket();
 
   useEffect(() => {
-    const el = viewportRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    // Connect to current ticket room and subscribe to messages
+    if (!conversation.id || !isConnected) return;
+    connectTicketRoom(conversation.id);
+    subscribeToMessages((msg: IMessageSocket) => {
+      // Transform socket message to IMessage format
+      const newMessage: IMessage = {
+        id: msg.id,
+        content: msg.content,
+        type: msg.type,
+        direction: msg.direction,
+        status: msg.status as "DELIVERED" | "SENT" | "FAILED" | "READ",
+        timestamp: msg.timestamp,
+        mediaUrl: msg.mediaUrl
+      };
+
+      // Update the SWR cache by adding the new message only if it doesn't exist
+      mutate((currentData) => {
+        if (!currentData) return currentData;
+
+        // Check if message with same ID already exists
+        const messageExists = currentData.messages.some(
+          (existingMsg) => existingMsg.id === newMessage.id
+        );
+
+        if (messageExists) {
+          console.info("Message with ID already exists, skipping:", newMessage.id);
+          return currentData;
+        }
+
+        return {
+          ...currentData,
+          messages: [newMessage, ...currentData.messages]
+        };
+      }, false);
+
+      // Auto-scroll when new messages arrive via socket
+      setTimeout(scrollToBottom, 100);
+    });
+
+    // Cleanup function: runs when conversation.id changes or component unmounts
+    // This ensures we unsubscribe from the previous room before connecting to the new one
+    return () => {
+      desubscribeTicketRoom(conversation.id);
+    };
+  }, [conversation.id, mutate, isConnected]);
+
+  const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+      const el = viewportRef.current;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [conversation.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [ticketMessages.length]);
 
   useEffect(() => {
     // Cleanup ObjectURLs en unmount
@@ -96,6 +159,17 @@ export default function ChatThread({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (channel === "whatsapp") {
+      getWhatsAppTemplates()
+        .then((res) => {
+          console.log("Templates cargadas:", res);
+          setWaTemplates(res);
+        })
+        .catch((err) => console.error("Error cargando plantillas:", err));
+    }
+  }, [channel]);
 
   async function sendWhatsapp() {
     const text = message.trim();
@@ -111,22 +185,31 @@ export default function ChatThread({
     }
     try {
       setIsSendingWA(true);
-      const res = await fetch("/api/whatsapp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to, text, preview_url: false })
-      });
-      const data = await res.json();
-      if (!res.ok || !data?.ok) {
-        throw new Error(typeof data?.error === "string" ? data.error : "Fallo en el envío");
-      }
-      onSend?.(text);
+      await sendMessage(conversation.customerId, text);
       setMessage("");
+
+      // Create a temporary message for immediate UI feedback
+      const tempMessage: IMessage = {
+        id: `temp_${Date.now()}_${Math.random()}`, // Temporary ID until we get the real one from socket
+        content: text,
+        type: "TEXT",
+        direction: "OUTBOUND",
+        status: "SENT",
+        timestamp: new Date().toISOString(),
+        mediaUrl: null
+      };
+
+      // Add the sent message immediately to ticketMessages (at beginning of array since we reverse it)
+      mutate((currentData) => {
+        if (!currentData) return currentData;
+        return {
+          ...currentData,
+          messages: [tempMessage, ...currentData.messages]
+        };
+      }, false);
+
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
-      requestAnimationFrame(() => {
-        const el = viewportRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
-      });
+      scrollToBottom();
     } catch (err: any) {
       toast({
         title: "Error al enviar",
@@ -150,24 +233,7 @@ export default function ChatThread({
     const images = emailImages.map((i) => i.url);
     const files = emailFiles.map((f) => ({ url: f.url, name: f.name, size: f.size }));
 
-    if (onSendEmail) {
-      onSendEmail(s, b, files, images);
-    } else {
-      const conv = conversationsMock.find((c) => c.id === conversation.id);
-      if (conv) {
-        conv.messages.push({
-          id: String(Date.now()),
-          from: "agent",
-          channel: "email",
-          email: { subject: s, body: b },
-          attachments: files,
-          imageUrls: images,
-          timestamp: new Date().toISOString()
-        });
-        conv.lastMessage = `Email: ${s}`;
-        conv.updatedAt = new Date().toISOString();
-      }
-    }
+    console.info("Sending email:", { subject: s, body: b, images, files });
 
     setSubject("");
     setBody("");
@@ -175,10 +241,7 @@ export default function ChatThread({
     setEmailImages([]);
     setEmailFiles([]);
     setChannel("whatsapp");
-    requestAnimationFrame(() => {
-      const el = viewportRef.current;
-      if (el) el.scrollTop = el.scrollHeight;
-    });
+    scrollToBottom();
   }
 
   async function startRecording() {
@@ -190,14 +253,10 @@ export default function ChatThread({
         if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
       mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
-        onSendAudio?.(url);
+        //const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        //const url = URL.createObjectURL(blob);
         stream.getTracks().forEach((t) => t.stop());
-        requestAnimationFrame(() => {
-          const el = viewportRef.current;
-          if (el) el.scrollTop = el.scrollHeight;
-        });
+        scrollToBottom();
       };
       mediaRecorderRef.current = mr;
       mr.start();
@@ -267,8 +326,22 @@ export default function ChatThread({
     });
   }
 
-  function renderBubble(m: Message) {
-    const mine = m.from === "agent";
+  function formatWhatsAppText(text: string): string {
+    if (!text) return "";
+
+    return text
+      .replace(/_\*(.*?)\*_/g, "<b><i>$1</i></b>")
+      .replace(/\*(.*?)\*/g, "<b>$1</b>")
+      .replace(/_(.*?)_/g, "<i>$1</i>")
+      .replace(/~(.*?)~/g, "<s>$1</s>")
+      .replace(/```(.*?)```/g, "<code>$1</code>")
+      .replace(/`(.*?)`/g, "<code>$1</code>")
+      .replace(/\n/g, "<br/>");
+  }
+
+  function renderBubble(m: IMessage) {
+    const mine = m.direction === "OUTBOUND";
+    const status = m.status;
     const wrapper = "max-w-[80%] md:max-w-[70%]";
     const bubble =
       "rounded-2xl border px-3 py-2 text-sm " +
@@ -276,21 +349,25 @@ export default function ChatThread({
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
-    if (m.imageUrl) {
+    if (m.type === "IMAGE" && m.mediaUrl) {
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
             <div className={bubble + " p-2"}>
               <button
-                onClick={() => setPreviewImage(m.imageUrl!)}
+                onClick={() => setPreviewImage(m.mediaUrl!)}
                 className="group relative block overflow-hidden rounded-lg"
                 aria-label="Ver imagen"
               >
-                <img
-                  src={m.imageUrl || "/placeholder.svg"}
-                  alt="Imagen enviada"
-                  className="max-h-72 rounded-lg object-cover"
-                />
+                <div className="relative w-full max-h-72 aspect-video">
+                  <Image
+                    src={m.mediaUrl || "/placeholder.svg"}
+                    alt="Imagen enviada"
+                    fill
+                    unoptimized
+                    className="rounded-lg object-cover"
+                  />
+                </div>
                 <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
                   <ArrowsOut className="h-4 w-4" />
                 </div>
@@ -304,113 +381,84 @@ export default function ChatThread({
       );
     }
 
-    if (m.fileUrl) {
+    if (m.type === "DOCUMENT" && m.mediaUrl) {
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
-            <div className={bubble}>
-              <a href={m.fileUrl} className="flex items-center gap-2 hover:underline" download>
-                <FileArrowDown className="h-4 w-4" />
-                <span className="font-medium">{m.fileName ?? "Archivo"}</span>
-                <span className="text-xs opacity-80">· {formatBytes(m.fileSize)}</span>
+            <div className={bubble + " p-3"}>
+              <button
+                onClick={() => window.open(m.mediaUrl!, "_blank")}
+                className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
+                aria-label="Abrir documento"
+              >
+                <div className="rounded-lg bg-[#F7F7F7] p-3">
+                  <FileArrowDown className="h-6 w-6 text-[#141414]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
+                  <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
+                </div>
+              </button>
+            </div>
+            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+              {formatRelativeTime(m.timestamp)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (m.type === "TEMPLATE") {
+      let parsedData: any = null;
+      try {
+        parsedData =
+          typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
+      } catch {
+        parsedData = null;
+      }
+
+      const template = waTemplates.find((t) => t.name === m.templateName);
+      if (!template) {
+        return <div className="text-red-500">Plantilla "{m.templateName}" no encontrada</div>;
+      }
+
+      const templateComponents = JSON.parse(template.components || "[]");
+      const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
+      const buttonComponent = templateComponents.find(
+        (c: any) => c.type === "BUTTON" && c.sub_type === "URL"
+      );
+
+      // Renderizamos los parámetros reales del mensaje
+      const bodyParams =
+        parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
+      let bodyText = bodyComponent?.text || "";
+
+      bodyParams.forEach((p: any, i: number) => {
+        bodyText = bodyText.replace(`{{${i + 1}}}`, p.text || "");
+      });
+
+      const buttonParam = parsedData?.components?.find((c: any) => c.type === "button")
+        ?.parameters?.[0]?.text;
+      const buttonText = buttonParam || null;
+
+      return (
+        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+          <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
+            <div
+              className="text-sm text-[#141414] whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+            />
+
+            {buttonText && (
+              <a
+                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+              >
+                Ver detalle
               </a>
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.audioUrl) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble}>
-              <audio controls src={m.audioUrl} className="w-full" aria-label="Nota de voz" />
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.email) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-3"}>
-              <div className="mb-1 flex items-center gap-2 text-xs opacity-90">
-                <EnvelopeSimple className="h-3.5 w-3.5" />
-                <span>Correo</span>
-              </div>
-              <div className="font-semibold">{m.email.subject}</div>
-              <div className="mt-2 whitespace-pre-wrap">{m.email.body}</div>
-
-              {m.imageUrls && m.imageUrls.length > 0 && (
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {m.imageUrls.map((url, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setPreviewImage(url)}
-                      className="group relative overflow-hidden rounded-md"
-                      aria-label="Ver imagen adjunta"
-                    >
-                      <img
-                        src={url || "/placeholder.svg"}
-                        alt="Imagen adjunta"
-                        className="h-32 w-full object-cover"
-                      />
-                      <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
-                        <ArrowsOut className="h-4 w-4" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {m.attachments && m.attachments.length > 0 && (
-                <div className="mt-3 space-y-1">
-                  {m.attachments.map((a, idx) => (
-                    <a
-                      key={idx}
-                      href={a.url}
-                      download
-                      className="flex items-center gap-2 text-sm hover:underline"
-                    >
-                      <FileArrowDown className="h-4 w-4" />
-                      <span className="font-medium">{a.name}</span>
-                      <span className="text-xs opacity-80">· {formatBytes(a.size)}</span>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.template) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-3"}>
-              <div className="mb-1 flex items-center gap-2 text-xs opacity-90">
-                <FileText className="h-3.5 w-3.5" />
-                <span>{"Plantilla: " + m.template.name}</span>
-              </div>
-              <div className="whitespace-pre-wrap">{m.text ?? m.template.content ?? ""}</div>
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
+            )}
           </div>
         </div>
       );
@@ -418,10 +466,19 @@ export default function ChatThread({
 
     // Texto por defecto
     return (
-      <div className={"flex " + (m.from === "agent" ? "justify-end" : "justify-start")}>
+      <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
         <div className={wrapper}>
-          <div className={bubble}>{m.text}</div>
-          <div className={"mt-1 text-[11px] " + (m.from === "agent" ? "text-right" : "text-left")}>
+          <div className="flex items-center gap-1">
+            <div className={bubble}>{m.content}</div>
+            {mine && status === "DELIVERED" && (
+              <div className="text-[10px] text-muted-foreground self-end">✓</div>
+            )}
+            {mine && status === "READ" && (
+              <div className="text-[10px] text-muted-foreground self-end">✓✓</div>
+            )}
+            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+          </div>
+          <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
             {formatRelativeTime(m.timestamp)}
           </div>
         </div>
@@ -473,9 +530,9 @@ export default function ChatThread({
       </div>
 
       {/* History */}
-      <ScrollArea className="flex-1 min-h-0" ref={viewportRef}>
+      <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
         <div className="space-y-6 px-4 py-6">
-          {conversation.messages.map((m) => (
+          {ticketMessages.map((m) => (
             <div key={m.id}>{renderBubble(m)}</div>
           ))}
         </div>
@@ -607,17 +664,19 @@ export default function ChatThread({
                     {emailImages.map((img, idx) => (
                       <div
                         key={idx}
-                        className="relative overflow-hidden rounded-md border"
+                        className="relative overflow-hidden rounded-md border h-20"
                         style={{ borderColor: "#DDDDDD" }}
                       >
-                        <img
+                        <Image
                           src={img.url || "/placeholder.svg"}
                           alt={"Adjunto " + img.name}
-                          className="h-20 w-full object-cover"
+                          fill
+                          unoptimized
+                          className="object-cover"
                         />
                         <button
                           onClick={() => removeEmailImage(idx)}
-                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white z-10"
                           aria-label={"Quitar imagen " + img.name}
                         >
                           <X className="h-3.5 w-3.5" />
@@ -720,6 +779,7 @@ export default function ChatThread({
         open={templateOpen}
         onOpenChange={setTemplateOpen}
         channel={channel}
+        ticketId={conversation.id}
         onUse={(payload) => {
           if (payload.channel === "email") {
             setSubject((prev) => (prev ? prev : payload.subject));
@@ -734,11 +794,15 @@ export default function ChatThread({
       <Dialog open={!!previewImage} onOpenChange={(o) => !o && setPreviewImage(null)}>
         <DialogContent className="max-w-3xl">
           {previewImage && (
-            <img
-              src={previewImage || "/placeholder.svg"}
-              alt="Vista previa"
-              className="max-h-[70dvh] w-auto rounded-xl object-contain"
-            />
+            <div className="relative w-full h-[70dvh]">
+              <Image
+                src={previewImage || "/placeholder.svg"}
+                alt="Vista previa"
+                fill
+                unoptimized
+                className="rounded-xl object-contain"
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
