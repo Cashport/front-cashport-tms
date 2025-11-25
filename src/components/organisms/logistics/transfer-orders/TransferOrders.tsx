@@ -21,6 +21,7 @@ import Filter from "@/components/atoms/Filters/FilterOrders";
 import { ModalCancelTR } from "@/components/molecules/modals/ModalCancelTR/ModalCancelTR";
 import { DataTypeForTransferOrderTable } from "@/components/molecules/tables/TransferOrderTable/TransferOrderTable";
 import { ModalPostponeTR } from "@/components/molecules/modals/ModalPostponeTR/ModalPostponeTR";
+import { ModalAddTR2TO } from "@/components/molecules/modals/ModalAddTR2TO/ModalAddTR2TO";
 
 import styles from "./transferOrders.module.scss";
 
@@ -291,6 +292,21 @@ export const TransferOrders = () => {
 
         <ModalPostponeTR
           isOpen={isModalOpen.selected === 3}
+          onCancel={() => setIsModalOpen({ selected: 1 })}
+          onClose={() => {
+            setOrdersId([]);
+            setTrsIds([]);
+            setChildOrdersId([]);
+            setAllSelectedRows([]);
+
+            setMutate((prev) => !prev);
+            setIsModalOpen({ selected: 0 });
+          }}
+          allSelectedRows={allSelectedRows}
+        />
+
+        <ModalAddTR2TO
+          isOpen={isModalOpen.selected === 4}
           onCancel={() => setIsModalOpen({ selected: 1 })}
           onClose={() => {
             setOrdersId([]);

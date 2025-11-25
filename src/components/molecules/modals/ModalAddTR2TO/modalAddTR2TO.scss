@@ -1,0 +1,11 @@
+@import "@/styles/variables";
+
+.ModalAddTR2TO {
+    .ant-modal-content {
+        padding: 2rem !important;
+    }
+
+    &__header {
+        font-size: 1rem;
+    }
+}

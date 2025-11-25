@@ -61,8 +61,6 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, allSelectedRows }: 
   const onPostponeTR = async (data: IFormModalPostponeTR) => {
     setLoading(true);
 
-    console.log("data", data);
-
     try {
       await postponeTR(
         allSelectedRows?.map((row) => Number(row.tr)) ?? [],

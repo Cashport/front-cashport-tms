@@ -422,3 +422,23 @@ export const getModifyOptions = async (): Promise<IModifyOption[]> => {
     return error as any;
   }
 };
+
+export const addTOToOngoingTR = async (
+  transferOrderId: number,
+  transferRequestId: number
+): Promise<any> => {
+  const body = {
+    id_tr: transferRequestId,
+    id_to: transferOrderId
+  };
+  try {
+    const response: GenericResponse<any> = await API.post(`transfer-request/add-to-in-tr`, body);
+    if (response.success) return response.data;
+    throw new Error(
+      response?.message || "Error al agregar la orden de transferencia a la TR en curso"
+    );
+  } catch (error) {
+    console.error("Error addTOToOngoingTR: ", error);
+    throw error;
+  }
+};
