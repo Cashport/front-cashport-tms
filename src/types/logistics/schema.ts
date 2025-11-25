@@ -568,6 +568,7 @@ export interface ICarrierRequestDrivers {
   rh: string;
   status: IStatusWithStyling;
   subject_id: number;
+  documents_expiry: boolean;
 }
 /**
  * Exposes all fields present in carrier_request_vehicles as a typescript
@@ -582,6 +583,7 @@ export interface ICarrierRequestVehicles {
   country: string;
   created_at: string;
   created_by: string;
+  documents_expiry: boolean;
   gps_link: string;
   gps_password: string;
   gps_user: string;
