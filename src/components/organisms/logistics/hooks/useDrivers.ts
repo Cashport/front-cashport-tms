@@ -1,10 +1,13 @@
 import { getDriverByCarrierId } from "@/services/logistics/acept_carrier";
 import useSWR from "swr";
 
-export const useDrivers = (carrierId: number | undefined) => {
+export const useDrivers = (
+  carrierId: number | undefined,
+  transferRequestId: number | undefined
+) => {
   const { data, error, isLoading, mutate } = useSWR(
-    carrierId ? `/driver/provider-active/${carrierId}` : null,
-    () => getDriverByCarrierId(carrierId || 0),
+    carrierId ? `/driver/provider-active/${carrierId}/${transferRequestId}` : null,
+    () => getDriverByCarrierId(carrierId || 0, transferRequestId || 0),
     {
       revalidateOnFocus: true,
       revalidateOnReconnect: true
