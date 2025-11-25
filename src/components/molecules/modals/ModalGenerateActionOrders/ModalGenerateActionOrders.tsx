@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flex, message, Modal } from "antd";
 import { ArrowsClockwise, Download, LinkBreak, PauseCircle, Trash, X } from "phosphor-react";
-import { MinusCircle } from "@phosphor-icons/react";
+import { MinusCircle, Plus } from "@phosphor-icons/react";
 
 import {
   deleteOrders,
@@ -91,6 +91,13 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
     }
   };
 
+  const handleAddToOngoingTR = async () => {
+    if (allSelectedRows && allSelectedRows?.length > 1) {
+      return message.error("Solo puedes seleccionar una orden a la vez");
+    }
+    setIsModalOpen({ selected: 4 });
+  };
+
   const validStatus4Postpone = [TR.ASIGNANDO_VEHICULO, TR.ESPERANDO_PROVEEDOR];
 
   return (
@@ -176,6 +183,12 @@ export default function ModalGenerateActionOrders(props: Readonly<PropsModalGene
               : "Eliminar servicio"
           }
           onClick={handleDeleteOrders}
+        />
+        <ButtonGenerateAction
+          disabled={allSelectedRows?.length === 0}
+          icon={<Plus size={20} />}
+          title="Añadir TO a TR en curso"
+          onClick={handleAddToOngoingTR}
         />
       </Flex>
     </Modal>
