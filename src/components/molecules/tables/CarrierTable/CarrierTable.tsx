@@ -139,7 +139,13 @@ export default function CarrierTable({
       dataIndex: "amount",
       render: (amount, row) => (
         <Text style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-          {!row.isAuction ? (amount ? formatMoney(amount) : "$ 0") : "Cotización"}
+          {row.isAuction === 1
+            ? "Cotización"
+            : row.isAuction === 2
+              ? "Tercerización"
+              : amount
+                ? formatMoney(amount)
+                : "$ 0"}
         </Text>
       ),
       sorter: (a, b) => a.amount - b.amount,

@@ -186,7 +186,7 @@ export interface CarrierRequestAPI {
   amount: number; // Monto asociado al servicio
   order_nro: number; // Número de orden
   id_transfer_request: number; // ID de la solicitud de transferencia
-  isAuction: boolean;
+  isAuction: number;
 }
 
 export interface CarrierCollapseAPI {
