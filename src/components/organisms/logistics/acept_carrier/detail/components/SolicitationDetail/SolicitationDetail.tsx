@@ -116,6 +116,7 @@ export default function SolicitationDetail({
                 onQuoteAmountChange={handleQuoteAmountChange}
                 onFileChange={handleFileChange}
                 formMode={formMode}
+                isAuction={true}
               />
             </>
           ) : providerDetail?.isAuction ? (
