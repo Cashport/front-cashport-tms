@@ -80,8 +80,8 @@ export default function SolicitationDetail({
     });
   };
 
-  const handleAssociationNameChange = (value: number | undefined) => {
-    const association_name = value || 0;
+  const handleAssociationNameChange = (value: string | undefined) => {
+    const association_name = value || "";
     setQuote({
       ...quote,
       association_name
@@ -107,7 +107,7 @@ export default function SolicitationDetail({
               <TercerizationForm
                 quote={quote}
                 onQuoteAmountChange={handleAssociationCostChange}
-                onQuoteAssociationAmountChange={handleAssociationNameChange}
+                onQuoteAssociationNameChange={handleAssociationNameChange}
                 onFileChange={handleAssociationFileChange}
                 formMode={formMode}
               />
@@ -223,11 +223,7 @@ export default function SolicitationDetail({
                   quote.auction_file.length > 0
                 )
               : providerDetail?.isAuction
-                ? !!(
-                    quote?.auction_amount &&
-                    quote?.auction_file &&
-                    quote.auction_file.length > 0
-                  )
+                ? !!(quote?.auction_amount && quote?.auction_file && quote.auction_file.length > 0)
                 : true
             : true
         }

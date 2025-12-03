@@ -134,7 +134,7 @@ export const postCarrierRequest = async (
   fare?: number,
   file?: File,
   association_cost?: number,
-  association_name?: number,
+  association_name?: string,
   association_file?: File
 ): Promise<Data> => {
   try {

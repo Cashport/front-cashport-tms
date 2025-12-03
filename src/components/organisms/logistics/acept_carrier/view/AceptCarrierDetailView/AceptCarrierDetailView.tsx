@@ -41,7 +41,7 @@ export interface IQuote {
   auction_amount?: number;
   auction_file?: File[];
   association_cost?: number;
-  association_name?: number;
+  association_name?: string;
   association_file?: File[];
 }
 

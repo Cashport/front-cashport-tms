@@ -1,6 +1,6 @@
 "use client";
 import { Flex, Input, Button, Upload } from "antd";
-import { Money, Files, PlusCircle } from "@phosphor-icons/react";
+import { Money, Files, PlusCircle, UsersThree } from "@phosphor-icons/react";
 import { NumericFormat } from "react-number-format";
 import { FormMode, IQuote } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 import styles from "./TercerizationForm.module.scss";
@@ -8,7 +8,7 @@ import styles from "./TercerizationForm.module.scss";
 interface TercerizationFormProps {
   quote?: IQuote;
   onQuoteAmountChange: (value: number | undefined) => void;
-  onQuoteAssociationAmountChange: (value: number | undefined) => void;
+  onQuoteAssociationNameChange: (value: string | undefined) => void;
   onFileChange: (file: File) => boolean;
   formMode: FormMode;
 }
@@ -16,21 +16,17 @@ interface TercerizationFormProps {
 export default function TercerizationForm({
   quote,
   onQuoteAmountChange,
-  onQuoteAssociationAmountChange,
+  onQuoteAssociationNameChange,
   onFileChange,
   formMode
 }: Readonly<TercerizationFormProps>) {
   return (
     <Flex vertical gap="2rem" style={{ padding: "2rem 0 3rem 0" }}>
-      {/* Primera fila: Costo + PDF Cotización */}
+      <h3>Cotización asociación</h3>
       <Flex gap="3.125rem" align="flex-start" justify="space-between">
         {/* Costo */}
-        <Flex
-          align="center"
-          justify="space-between"
-          gap="0.5rem"
-          style={{ flex: "1 1 50%", minWidth: 0 }}
-        >
+        <div className={styles.leftColumn}>
+          {/* Primera fila: Costo + PDF Cotización */}
           <Flex align="center" gap="0.8rem" style={{ color: "#666666" }}>
             <Money size={20} />
             <p style={{ fontWeight: 400 }}>Costo</p>
@@ -56,7 +52,28 @@ export default function TercerizationForm({
               disabled={formMode !== FormMode.CREATE}
             />
           </div>
-        </Flex>
+
+          {/* Segunda fila: Nombre Asociación */}
+          <Flex className={styles.inputTitle}>
+            <UsersThree size={20} style={{ flexShrink: 0 }} />
+            <p style={{ fontWeight: 400 }}>Nombre Asociación</p>
+          </Flex>
+          <div
+            style={{ alignSelf: "flex-end", justifySelf: "flex-end" }}
+            className={styles.inputCostContainer}
+          >
+            <Input
+              value={(quote as any)?.association_name}
+              onChange={(e) => {
+                onQuoteAssociationNameChange(e.target.value);
+              }}
+              placeholder="Nombre de la asociación"
+              style={{ width: "100%" }}
+              className={styles.inputCost}
+              disabled={formMode !== FormMode.CREATE}
+            />
+          </div>
+        </div>
 
         {/* PDF Cotización */}
         <Flex
@@ -86,42 +103,6 @@ export default function TercerizationForm({
               </Button>
             </Upload>
           </Flex>
-        </Flex>
-      </Flex>
-
-      {/* Segunda fila: Costo Asociación */}
-      <Flex gap="3.125rem" align="center" justify="space-between">
-        <Flex
-          align="center"
-          justify="space-between"
-          gap="0.5rem"
-          style={{ flex: "1 1 50%", minWidth: 0 }}
-        >
-          <Flex align="center" gap="0.8rem" style={{ color: "#666666" }}>
-            <Money size={20} />
-            <p style={{ fontWeight: 400 }}>Costo Asociación</p>
-          </Flex>
-          <div
-            style={{ alignSelf: "flex-end", justifySelf: "flex-end" }}
-            className={styles.inputCostContainer}
-          >
-            <NumericFormat
-              value={(quote as any)?.association_name}
-              onValueChange={(values) => {
-                onQuoteAssociationAmountChange(values.floatValue);
-              }}
-              thousandSeparator="."
-              decimalSeparator=","
-              prefix="$ "
-              placeholder="$0"
-              customInput={Input}
-              style={{ width: "100%" }}
-              allowNegative={false}
-              decimalScale={0}
-              className={styles.inputCost}
-              disabled={formMode !== FormMode.CREATE}
-            />
-          </div>
         </Flex>
       </Flex>
     </Flex>
