@@ -176,7 +176,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
       router.push("/logistics/acept_carrier");
     } catch (error) {
-      message.error("Hubo un problema aceptando la orden");
+      if (error instanceof Error) messageApi.error(error.message);
+      else message.error("Hubo un problema aceptando la orden");
     } finally {
       setIsLoading({
         ...isLoading,
