@@ -39,3 +39,19 @@
     gap: 0.25rem !important;
     justify-self: flex-end !important;
 }
+
+.leftColumn {
+    flex: 1 1 50%;
+    min-width: 0;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+}
+
+.inputTitle {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    color: #666666;
+    width: fit-content;
+}
