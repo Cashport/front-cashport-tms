@@ -409,55 +409,103 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     }
 
     if (m.type === "TEMPLATE") {
+      type TemplateButton = {
+        url: string;
+        text: string;
+        type: string;
+        index?: number;
+        finalUrl?: string;
+      };
+
       let parsedData: any = null;
       try {
         parsedData =
-          typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
+          typeof m.templateData === "string"
+            ? JSON.parse(m.templateData)
+            : m.templateData;
       } catch {
         parsedData = null;
       }
 
       const template = waTemplates.find((t) => t.name === m.templateName);
       if (!template) {
-        return <div className="text-red-500">Plantilla "{m.templateName}" no encontrada</div>;
+        return (
+          <div className="text-red-500">
+            Plantilla "{m.templateName}" no encontrada
+          </div>
+        );
       }
 
-      const templateComponents = template.components
-      const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
-      const buttonComponent = templateComponents.find(
-        (c: any) => c.type === "BUTTON" && c.sub_type === "URL"
+      const templateComponents = template.components;
+
+      // --- BODY ---
+      const bodyComponent = templateComponents.find(
+        (c: any) => c.type === "BODY"
       );
 
-      // Renderizamos los parámetros reales del mensaje
       const bodyParams =
-        parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
+        parsedData?.components?.find((c: any) => c.type === "body")
+          ?.parameters || [];
+
       let bodyText = bodyComponent?.text || "";
 
       bodyParams.forEach((p: any, i: number) => {
         bodyText = bodyText.replace(`{{${i + 1}}}`, p.text || "");
       });
 
-      const buttonParam = parsedData?.components?.find((c: any) => c.type === "button")
-        ?.parameters?.[0]?.text;
-      const buttonText = buttonParam || null;
+      // --- BUTTONS ---
+      const rawButtonContainer = templateComponents.find(
+        (c: any) => c.type === "BUTTONS"
+      );
 
+      const buttonContainer = rawButtonContainer as unknown as {
+        buttons?: { url: string; text: string; type: string }[];
+      } | null;
+
+      const templateButtons: TemplateButton[] =
+        buttonContainer?.buttons?.map((btn, i) => ({
+          ...btn,
+          index: i,
+        })) ?? [];
+
+      const finalButtons = templateButtons.map((btn) => {
+        let finalUrl = btn.url;
+
+        const buttonParams =
+          parsedData?.components?.find(
+            (c: any) => c.type === "button" && c.index === btn.index
+          )?.parameters || [];
+
+        buttonParams.forEach((p: any, i: number) => {
+          finalUrl = finalUrl.replace(`{{${i + 1}}}`, p.text || "");
+        });
+
+        return { ...btn, finalUrl };
+      });
+
+      // --- Render ---
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
             <div
               className="text-sm text-[#141414] whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+              dangerouslySetInnerHTML={{
+                __html: formatWhatsAppText(bodyText),
+              }}
             />
 
-            {buttonText && (
-              <a
-                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-              >
-                Ver detalle
-              </a>
+            {finalButtons.map((btn, i) =>
+              btn.finalUrl ? (
+                <a
+                  key={btn.index}
+                  href={btn.finalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 mr-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+                >
+                  {btn.text || "Abrir"}
+                </a>
+              ) : null
             )}
           </div>
         </div>
