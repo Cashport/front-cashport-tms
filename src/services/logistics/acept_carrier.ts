@@ -47,11 +47,12 @@ export const getAceptCarrierRequestById = async (id: string): Promise<IAceptCarr
 };
 
 export const getVehiclesByCarrierId = async (
-  id: number
+  id: number,
+  transferRequestId: number
 ): Promise<GenericResponse<ICarrierRequestVehicles[]>> => {
   try {
     const response: GenericResponse<ICarrierRequestVehicles[]> = await API.get(
-      `/vehicle/provider-active/${id}`
+      `/vehicle/provider-active/${id}/${transferRequestId}`
     );
     return response;
   } catch (error) {
@@ -61,11 +62,12 @@ export const getVehiclesByCarrierId = async (
 };
 
 export const getDriverByCarrierId = async (
-  id: number
+  id: number,
+  transferRequestId: number
 ): Promise<GenericResponse<ICarrierRequestDrivers[]>> => {
   try {
     const response: GenericResponse<ICarrierRequestDrivers[]> = await API.get(
-      `/driver/provider-active/${id}`
+      `/driver/provider-active/${id}/${transferRequestId}`
     );
     return response;
   } catch (error) {
@@ -132,7 +134,7 @@ export const postCarrierRequest = async (
   fare?: number,
   file?: File,
   association_cost?: number,
-  association_name?: number,
+  association_name?: string,
   association_file?: File
 ): Promise<Data> => {
   try {

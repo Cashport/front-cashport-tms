@@ -41,7 +41,7 @@ export interface IQuote {
   auction_amount?: number;
   auction_file?: File[];
   association_cost?: number;
-  association_name?: number;
+  association_name?: string;
   association_file?: File[];
 }
 
@@ -67,8 +67,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
   const [carrier, setCarrier] = useState<IAceptCarrierAPI>();
 
   // swr hooks used for revalidateOnFocus capability
-  const { vehicles: vehiclesData } = useVehicles(carrier?.id_carrier);
-  const { drivers: driversData } = useDrivers(carrier?.id_carrier);
+  const { vehicles: vehiclesData } = useVehicles(carrier?.id_carrier, carrier?.id_transfer_request);
+  const { drivers: driversData } = useDrivers(carrier?.id_carrier, carrier?.id_transfer_request);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -176,7 +176,8 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
       router.push("/logistics/acept_carrier");
     } catch (error) {
-      message.error("Hubo un problema aceptando la orden");
+      if (error instanceof Error) messageApi.error(error.message);
+      else message.error("Hubo un problema aceptando la orden");
     } finally {
       setIsLoading({
         ...isLoading,

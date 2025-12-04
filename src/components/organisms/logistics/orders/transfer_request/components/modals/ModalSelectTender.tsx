@@ -61,14 +61,12 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
   );
 
   const { data, isLoading, isValidating } = useSWR(
-    { idTransferRequest: id, open },
-    ({ idTransferRequest, open }) =>
-      open ? getTransferRequestPricing({ idTransferRequest }) : undefined,
+    open ? `/transfer-request/pricing/${id}` : null,
+    () => getTransferRequestPricing({ idTransferRequest: id }),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      revalidateIfStale: true,
-      revalidateOnMount: false
+      revalidateIfStale: false
     }
   );
 
