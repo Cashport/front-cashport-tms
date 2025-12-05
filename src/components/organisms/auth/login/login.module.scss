@@ -37,15 +37,19 @@
 
 //media queries
 @media (max-width: 1024px) {
-    .container {
+    .containerLogin {
         display: flex;
         gap: 3rem;
         flex-direction: column;
     }
+
+    .loginSection {
+        margin-top: 2rem;
+    }
 }
 
 @media (max-width: 680px) {
-    .container {
+    .containerLogin {
         padding: 0.2rem;
         padding-bottom: 1rem;
     }
