@@ -349,7 +349,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
-    if (m.type === "IMAGE" && m.mediaUrl) {
+    if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
@@ -361,6 +361,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
               >
                 <div className="relative w-full max-h-72 aspect-video">
                   <Image
+                    style={{ position: "relative" }}
                     src={m.mediaUrl || "/placeholder.svg"}
                     alt="Imagen enviada"
                     fill
@@ -420,32 +421,23 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       let parsedData: any = null;
       try {
         parsedData =
-          typeof m.templateData === "string"
-            ? JSON.parse(m.templateData)
-            : m.templateData;
+          typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
       } catch {
         parsedData = null;
       }
 
       const template = waTemplates.find((t) => t.name === m.templateName);
       if (!template) {
-        return (
-          <div className="text-red-500">
-            Plantilla "{m.templateName}" no encontrada
-          </div>
-        );
+        return <div className="text-red-500">Plantilla "{m.templateName}" no encontrada</div>;
       }
 
       const templateComponents = template.components;
 
       // --- BODY ---
-      const bodyComponent = templateComponents.find(
-        (c: any) => c.type === "BODY"
-      );
+      const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
 
       const bodyParams =
-        parsedData?.components?.find((c: any) => c.type === "body")
-          ?.parameters || [];
+        parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
 
       let bodyText = bodyComponent?.text || "";
 
@@ -454,9 +446,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       });
 
       // --- BUTTONS ---
-      const rawButtonContainer = templateComponents.find(
-        (c: any) => c.type === "BUTTONS"
-      );
+      const rawButtonContainer = templateComponents.find((c: any) => c.type === "BUTTONS");
 
       const buttonContainer = rawButtonContainer as unknown as {
         buttons?: { url: string; text: string; type: string }[];
@@ -465,16 +455,15 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       const templateButtons: TemplateButton[] =
         buttonContainer?.buttons?.map((btn, i) => ({
           ...btn,
-          index: i,
+          index: i
         })) ?? [];
 
       const finalButtons = templateButtons.map((btn) => {
         let finalUrl = btn.url;
 
         const buttonParams =
-          parsedData?.components?.find(
-            (c: any) => c.type === "button" && c.index === btn.index
-          )?.parameters || [];
+          parsedData?.components?.find((c: any) => c.type === "button" && c.index === btn.index)
+            ?.parameters || [];
 
         buttonParams.forEach((p: any, i: number) => {
           finalUrl = finalUrl.replace(`{{${i + 1}}}`, p.text || "");
@@ -490,7 +479,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
             <div
               className="text-sm text-[#141414] whitespace-pre-wrap"
               dangerouslySetInnerHTML={{
-                __html: formatWhatsAppText(bodyText),
+                __html: formatWhatsAppText(bodyText)
               }}
             />
 
