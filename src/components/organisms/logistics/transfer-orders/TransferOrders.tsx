@@ -183,7 +183,7 @@ export const TransferOrders = () => {
   };
 
   return (
-    <SearchProvider debounceDelay={500}>
+    <SearchProvider debounceDelay={2000}>
       <Container>
         <Flex
           justify="space-between"
