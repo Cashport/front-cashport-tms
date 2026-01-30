@@ -293,7 +293,12 @@ export const downloadCsvTransferOrders = async () => {
   const response = (await API.get(endpoint)) as GenericResponse<{ url: string }>;
   if (response.success) {
     const url = response.data.url;
-    window.open(url, "_blank");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = ""; // opcional: nombre del archivo
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 };
 
