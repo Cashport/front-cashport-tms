@@ -289,7 +289,17 @@ export const updateTransferRequestStatus = async (
 };
 
 export const downloadCsvTransferOrders = async () => {
-  await downloadCSVFromEndpoint(`transfer-order/download-orders`, "transfer orders.xlsx");
+  const endpoint = "/transfer-order/download-orders";
+  const response = (await API.get(endpoint)) as GenericResponse<{ url: string }>;
+  if (response.success) {
+    const url = response.data.url;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = ""; // opcional: nombre del archivo
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 };
 
 export const deleteOrders = async (trIds: string[], toIds: string[]): Promise<any> => {
