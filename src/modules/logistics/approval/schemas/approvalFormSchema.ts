@@ -37,7 +37,7 @@ export const approvalFormSchema = yup.object({
     .nullable()
     .when(["tipoAprobacion", "proveedorRecomendado"], {
       is: (tipo: string, recomendado: string) =>
-        (tipo === "viaje-especifico" || tipo === "tarifa-recurrente") && recomendado === "si",
+        (tipo === "viaje-especifico" || tipo === "tarifa-recurrente") && recomendado === "1",
       then: (schema) =>
         schema.test(
           "required-file",
