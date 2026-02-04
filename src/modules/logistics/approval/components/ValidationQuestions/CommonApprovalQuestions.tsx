@@ -130,7 +130,7 @@ export function CommonApprovalQuestions({
           )}
         />
 
-        {proveedorRecomendado === "si" && (
+        {proveedorRecomendado === "1" && (
           <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <Label
               htmlFor={`emailConfirmacion-${idPrefix}`}
