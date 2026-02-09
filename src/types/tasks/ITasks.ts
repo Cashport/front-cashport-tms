@@ -77,7 +77,7 @@ export interface ITaskApproval {
   evidence_file_name?: string;
   send_single_source: number;
   is_another_contract_active: number;
-  is_provider_recommended_by_sustainability: number;
+  is_provider_recommended_by_sustainability: 0 | 1 | 2;
   tercerization_motive?: string | null;
   exists_another_provider_in_zone: number;
   subcontractor_ensure: number;

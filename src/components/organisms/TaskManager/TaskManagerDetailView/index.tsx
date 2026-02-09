@@ -266,11 +266,20 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div
                   style={{
-                    color: approval.is_provider_recommended_by_sustainability ? "green" : "red",
+                    color:
+                      approval.is_provider_recommended_by_sustainability === 2
+                        ? "gray"
+                        : approval.is_provider_recommended_by_sustainability === 1
+                          ? "green"
+                          : "red",
                     fontWeight: 600
                   }}
                 >
-                  {approval.is_provider_recommended_by_sustainability ? "Sí" : "No"}
+                  {approval.is_provider_recommended_by_sustainability === 2
+                    ? "No aplica"
+                    : approval.is_provider_recommended_by_sustainability === 1
+                      ? "Sí"
+                      : "No"}
                 </div>
                 {approval.evidence_file_url && (
                   <Button
