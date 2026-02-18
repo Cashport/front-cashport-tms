@@ -41,7 +41,6 @@ import type {
 } from "@/types/logistics/approval";
 import { IApprovalType, IApprover, ITransferRequestJourneyReview } from "@/types/logistics/schema";
 
-import "@/modules/chat/styles/chatStyles.css";
 
 dayjs.extend(utc);
 

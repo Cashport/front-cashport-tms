@@ -1,5 +1,11 @@
 import config from "@/config";
-import { ICreateEditContact, IGetContacts } from "@/types/contacts/IContacts";
+import {
+  IContact,
+  IContactOptions,
+  ICreateEditContact,
+  IGetContacts
+} from "@/types/contacts/IContacts";
+import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
 interface genericResponse {
@@ -7,7 +13,7 @@ interface genericResponse {
   message: string;
 }
 
-export const getContact = async (clientId: number, contactId: number): Promise<IGetContacts> => {
+export const getContact = async (clientId: string, contactId: number): Promise<IGetContacts> => {
   try {
     const response: IGetContacts = await API.get(
       `${config.API_HOST}/client/${clientId}/contact/${contactId}`
@@ -20,34 +26,24 @@ export const getContact = async (clientId: number, contactId: number): Promise<I
 };
 
 export const postContact = async (contact: ICreateEditContact): Promise<genericResponse> => {
-  try {
-    const response: genericResponse = await API.post(`${config.API_HOST}/client/contact`, contact);
+  const response: genericResponse = await API.post(`/client/contact`, contact);
 
-    return response;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return response;
 };
 
 export const putContact = async (
   contact: ICreateEditContact,
   contactId: number
 ): Promise<genericResponse> => {
-  try {
-    const response: genericResponse = await API.put(
-      `${config.API_HOST}/client/contact/${contactId}`,
-      contact
-    );
+  const response: genericResponse = await API.put(`/client/contact/${contactId}`, contact);
 
-    return response;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return response;
 };
 
 export const deleteContact = async (
   contactsIds: { contacts_ids: number[] },
-  clientId: number
+  clientId: string,
+  projectId: number
 ): Promise<genericResponse> => {
   try {
     const customConfig = {
@@ -55,12 +51,36 @@ export const deleteContact = async (
     };
 
     const response: genericResponse = await API.delete(
-      `${config.API_HOST}/client/${clientId}/contact`,
+      `${config.API_HOST}/client/${clientId}/contact/project/${projectId}`,
       customConfig
     );
 
     return response;
   } catch (error) {
     return Promise.reject(error);
+  }
+};
+
+export const getContactOptions = async (): Promise<IContactOptions> => {
+  try {
+    const response: GenericResponse<IContactOptions> = await API.get(
+      `${config.API_HOST}/client/contact/options`
+    );
+
+    return response.data;
+  } catch (error) {
+    throw Promise.reject(error);
+  }
+};
+
+export const getContactByClientId = async (clientId: string): Promise<IContact[]> => {
+  try {
+    const response: GenericResponse<IContact[]> = await API.get(
+      `${config.API_HOST}/client/${clientId}/contact`
+    );
+
+    return response.data;
+  } catch (error) {
+    throw Promise.reject(error);
   }
 };

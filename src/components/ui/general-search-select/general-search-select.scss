@@ -1,0 +1,144 @@
+@import "@styles/variables.scss";
+
+.selectTitleAndError {
+    .selectSearchCustom {
+        height: 3rem !important;
+        background-color: $background !important;
+        border-radius: 0.25rem;
+        width: 100% !important;
+        font-size: 1rem !important;
+        padding: 0 0.75rem !important;
+
+        .ant-select-selector {
+            font-size: 1rem !important;
+
+            .ant-select-selection-search {
+                font-weight: 300 !important;
+                font-size: 1rem;
+            }
+
+            .ant-select-selection-placeholder {
+                color: $dark-gray;
+                font-weight: 300 !important;
+            }
+        }
+
+        &.ant-select-disabled {
+            background-color: $dark-gray !important;
+
+            .ant-select-selector {
+                background-color: inherit !important;
+            }
+
+            .customTag {
+                color: $darker-gray;
+                border: 1px solid $gray;
+            }
+        }
+
+        .customTag {
+            background-color: transparent;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+            font-size: 0.875rem;
+            font-weight: 300;
+            padding: 0.12rem 0.5rem;
+
+            &__closebtn {
+                background-color: $dark-gray;
+                width: 1rem;
+                height: 1rem;
+                border: none;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }
+        }
+    }
+    .selectSearchCustomError {
+        width: 100%;
+        border: 1px dashed $error;
+        height: 3rem !important;
+        margin-bottom: 0.2rem;
+        background-color: $background;
+        padding: 0.45rem;
+        border-radius: 0.25rem;
+        font-weight: 300;
+
+        .ant-select-selector {
+            .ant-select-selection-placeholder {
+                color: $dark-gray;
+                font-size: 1rem;
+            }
+        }
+    }
+
+    .inputTitle {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $gray;
+        margin-bottom: 0.25rem;
+    }
+
+    .textError {
+        color: $error;
+        font-size: 0.875rem;
+        font-weight: 400;
+    }
+}
+
+.selectSearchCustomDrop {
+    background-color: $white !important;
+    padding: 0.5rem !important;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 300px !important;
+
+    .rc-virtual-list-holder-inner {
+        gap: 0.25rem;
+
+        .ant-select-item-option {
+            background-color: $background;
+            padding: 12px;
+            font-weight: 300;
+        }
+
+        .ant-select-item-option-selected {
+            background-color: $dark-gray !important;
+
+            .option {
+                background-color: $dark-gray !important;
+            }
+        }
+
+        .ant-select-item-option-active {
+            background-color: $dark-gray !important;
+            .option {
+                background-color: $dark-gray !important;
+            }
+        }
+    }
+
+    .option {
+        background-color: $background !important;
+        font-size: 1rem;
+        transition: all 0.19s ease-in-out;
+
+        .label {
+            font-size: 0.875rem;
+        }
+
+        .value {
+            font-weight: 300;
+            font-size: 0.625rem;
+            color: $gray;
+        }
+    }
+}

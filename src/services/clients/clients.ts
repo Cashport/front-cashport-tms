@@ -4,7 +4,6 @@ import { API, getIdToken } from "@/utils/api/api";
 import {
   ClientFormType,
   IClient,
-  IClientAxios,
   IClientFullResponse,
   ICreateClient,
   IUpdateClient
@@ -33,7 +32,7 @@ export const createClient = async (
   const formatLocations = JSON.stringify([locationResponse]);
 
   const modelData: ICreateClient = {
-    nit: parseInt(data.nit),
+    nit: data.nit,
     project_id: parseInt(idProject),
     client_name: data.client_name,
     business_name: data.business_name,
@@ -44,8 +43,7 @@ export const createClient = async (
     document_type: data.document_type.value,
     locations: formatLocations,
     documents: documents,
-    client_type_id:
-      typeof data.client_type === "number" ? data.client_type : parseInt(data.client_type),
+    client_type_id: data.client_type?.value,
     holding_id: data.holding_id?.value === 0 ? undefined : data.holding_id?.value,
     day_flag: typeof billingPeriod === "string" ? undefined : billingPeriod.day_flag === "true",
     day: typeof billingPeriod === "string" ? undefined : billingPeriod.day,

@@ -17,6 +17,7 @@ interface Props {
   validationRules?: RegisterOptions;
   className?: string;
   readOnly?: boolean;
+  defaultValue?: string;
   // eslint-disable-next-line no-unused-vars
   changeInterceptor?: (value: any) => void;
   // eslint-disable-next-line no-unused-vars
@@ -38,6 +39,7 @@ export const InputForm = ({
   validationRules,
   className,
   readOnly,
+  defaultValue,
   changeInterceptor,
   oninputInterceptor,
   suffix,
@@ -55,6 +57,7 @@ export const InputForm = ({
         rules={{ required: true, maxLength: 123, ...validationRules }}
         control={control}
         disabled={disabled}
+        defaultValue={defaultValue}
         render={({ field: { onChange, ...field } }) => (
           <Input
             readOnly={readOnly}
