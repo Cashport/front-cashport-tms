@@ -730,12 +730,13 @@ export default function ChatThread({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Tabs value={channel} onValueChange={(v) => setChannel(v as typeof channel)}>
+          {/* TO DO: Uncomment when channel is implemented */}
+          {/* <Tabs value={channel} onValueChange={(v) => setChannel(v as typeof channel)}>
             <TabsList className="grid grid-cols-2 bg-[#F7F7F7]">
               <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
               <TabsTrigger value="email">Correo</TabsTrigger>
             </TabsList>
-          </Tabs>
+          </Tabs> */}
 
           {/* TO DO: Uncomment when details functionality is implemented */}
           {/* {!detailsOpen ? (
