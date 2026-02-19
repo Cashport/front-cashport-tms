@@ -83,8 +83,8 @@ export const ClientProjectForm = ({
         city:
           data?.locations && data.locations.length > 0
             ? {
-                value: data.locations[0].id,
-                label: data.locations[0].city
+                value: data.locations[0]!.id,
+                label: data.locations[0]!.city
               }
             : {
                 value: undefined,
@@ -185,8 +185,8 @@ export const ClientProjectForm = ({
         data: finalData
       });
 
-      setClientDocuments(finalData.documents);
-      setBillingPeriod(finalData.billing_period_config);
+      setClientDocuments(finalData.documents ?? []);
+      setBillingPeriod(finalData.billing_period_config ?? undefined);
     })();
   }, [isViewDetailsClient, idProject]);
 
@@ -564,7 +564,7 @@ export const ClientProjectForm = ({
         isOpen={isUploadDocument}
         setIsOpenUpload={setIsUploadDocument}
         setClientDocuments={setClientDocuments}
-        clientTypeId={watchClientType}
+        clientTypeId={watchClientType?.value}
       />
       <ModalBillingPeriod
         isOpen={isBillingPeriodOpen}

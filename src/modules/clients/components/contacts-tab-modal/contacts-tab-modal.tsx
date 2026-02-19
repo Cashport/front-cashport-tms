@@ -61,7 +61,7 @@ const ContactsTabModal = ({
     }
     const fetchData = async () => {
       if (showContactModal.contactId) {
-        const response = await getContact(clientId, showContactModal.contactId);
+        const response = await getContact(String(clientId), showContactModal.contactId);
         setContactDetails(response.data[0]);
       }
     };

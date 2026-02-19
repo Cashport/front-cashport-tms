@@ -2,7 +2,6 @@ import { FileText, Download } from "lucide-react";
 import { Input } from "@/modules/chat/ui/input";
 import type { ForecastItem } from "@/types/logistics/approval";
 
-import "@/modules/chat/styles/chatStyles.css";
 
 interface CarriersFeeTableProps {
   forecastItems: ForecastItem[];

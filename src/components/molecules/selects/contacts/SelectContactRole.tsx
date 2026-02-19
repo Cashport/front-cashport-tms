@@ -16,26 +16,44 @@ type ExtendedFieldError =
   | OriginalFieldError
   | Merge<OriginalFieldError, FieldErrorsImpl<{ value: number; label: string }>>;
 
+interface SelectOption {
+  value: string | number;
+  label: string;
+  className?: string;
+}
+
 interface Props<T extends FieldValues> {
   errors: ExtendedFieldError | undefined;
   field: ControllerRenderProps<T, any>;
   readOnly?: boolean;
+  options?: SelectOption[];
+  isLoading?: boolean;
 }
 
-export const SelectContactRole = <T extends FieldValues>({ errors, field, readOnly }: Props<T>) => {
-  const { data, isLoading } = useSWR<IResponseContactOptions>(
-    "/client/contact/options",
+export const SelectContactRole = <T extends FieldValues>({
+  errors,
+  field,
+  readOnly,
+  options: externalOptions,
+  isLoading: externalLoading
+}: Props<T>) => {
+  const { data, isLoading: swrLoading } = useSWR<IResponseContactOptions>(
+    externalOptions ? null : "/client/contact/options",
     fetcher,
     {}
   );
 
-  const options = data?.data.contact_position.map((option) => {
-    return {
-      value: option.id,
-      label: option.name,
-      className: "selectOptions"
-    };
-  });
+  const isLoading = externalLoading ?? swrLoading;
+
+  const options =
+    externalOptions ??
+    (data?.data && !Array.isArray(data.data)
+      ? data.data.contact_position.map((option) => ({
+          value: option.id,
+          label: option.name,
+          className: "selectOptions"
+        }))
+      : []);
 
   return (
     <>
