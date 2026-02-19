@@ -139,14 +139,7 @@ export default function AllChats({
       >
         <h2 style={{ fontSize: 30, fontWeight: 600 }}>Chats</h2>
         <div className="self-end">
-          <ChatActions
-            items={[
-              { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
-              { key: "account-statement", label: "Estado de cuenta", onClick: onAccountStatement },
-              { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
-              { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
-            ]}
-          />
+          <ChatActions />
         </div>
       </div>
 

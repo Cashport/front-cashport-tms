@@ -48,7 +48,7 @@ export default function ChatInbox() {
   }, [mutate]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [massOpen, setMassOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);

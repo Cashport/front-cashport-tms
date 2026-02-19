@@ -16,26 +16,34 @@ interface ChatActionItem {
 }
 
 interface ChatActionsProps {
-  items: ChatActionItem[];
+  items?: ChatActionItem[];
   triggerClassName?: string;
   align?: "start" | "center" | "end";
+  noDropDown?: boolean;
 }
 
 export default function ChatActions({
   items,
   triggerClassName = "h-8 p-0 font-semibold italic",
-  align = "end"
+  align = "end",
+  noDropDown
 }: ChatActionsProps) {
+  const trigger = (
+    <Button variant="ghost" className={triggerClassName}>
+      Acciones
+      <ArrowUpRight size={16} />
+    </Button>
+  );
+
+  if (noDropDown) {
+    return trigger;
+  }
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className={triggerClassName}>
-          Acciones
-          <ArrowUpRight size={16} />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align={align}>
-        {items.map((item) => {
+        {items?.map((item) => {
           const IconComponent = item.icon;
           return (
             <DropdownMenuItem key={item.key} onClick={item.onClick} className="cursor-pointer">

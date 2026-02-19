@@ -737,11 +737,12 @@ export default function ChatThread({
             </TabsList>
           </Tabs>
 
-          {!detailsOpen ? (
+          {/* TO DO: Uncomment when details functionality is implemented */}
+          {/* {!detailsOpen ? (
             <button onClick={() => onShowDetails?.()} aria-label="Ocultar información del cliente">
               <CaretDoubleLeft size={20} />
             </button>
-          ) : null}
+          ) : null} */}
         </div>
       </div>
 
