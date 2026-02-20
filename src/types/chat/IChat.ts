@@ -3,6 +3,7 @@ export interface ITicketCustomer {
   name: string;
   clientName: string;
   phoneNumber: string;
+  customerCashportUUID: string | null;
 }
 
 export interface ITicketAgent {
@@ -28,6 +29,8 @@ export interface ITicket {
   metadata: any | null;
   closedAt: string | null;
   lastMessageAt: string;
+  lastViewedAt: string | null;
+  lastViewedBy: string | null;
   createdAt: string;
   updatedAt: string;
   customer: ITicketCustomer;
@@ -41,11 +44,12 @@ export interface IMessage {
   content: string;
   type: "TEXT" | "MEDIA" | "TEMPLATE" | string;
   direction: "INBOUND" | "OUTBOUND";
-  status: "DELIVERED" | "SENT" | "FAILED" | "READ";
+  status: "DELIVERED" | "SENT" | "FAILED" | "READ" | "PENDING";
   timestamp: string;
   mediaUrl: string | null;
   templateName?: string;
   templateData?: any;
+  metadata: any;
 }
 
 interface IPagination {
@@ -146,4 +150,48 @@ export interface ITicketUpdate {
   ticketId: string;
   message: IMessageSocketExtended;
   customer: ICustomerSocketExtended;
+}
+
+interface ISelectType {
+  value: string | number;
+  label: string;
+}
+
+export interface IAddClientForm {
+  name: string;
+  lastname?: string;
+  position: string;
+  role: ISelectType;
+  indicative: ISelectType;
+  phone: string;
+  email: string;
+  client: ISelectType;
+}
+
+interface TemplateParameter {
+  type: string;
+  text: string;
+}
+
+interface TemplateComponent {
+  type: "body" | "button";
+  parameters: TemplateParameter[];
+  sub_type?: string;
+  index?: string;
+}
+
+interface TemplateData {
+  components: TemplateComponent[];
+}
+
+export interface PayloadByTicket {
+  ticketId: string;
+  templateId: string;
+  senderId: string;
+  templateData: TemplateData;
+}
+
+export interface IDigitalRecordFile {
+  fileName: string;
+  url: string;
 }

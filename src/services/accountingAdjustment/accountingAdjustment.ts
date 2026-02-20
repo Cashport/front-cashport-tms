@@ -1,6 +1,25 @@
 import { DiscountRequestBody } from "@/types/accountingAdjustment/IAccountingAdjustment";
+import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
 import { API } from "@/utils/api/api";
 import { AxiosResponse } from "axios";
+import config from "@/config";
+
+export interface IUser {
+  label: string;
+  value: string;
+  full_phone: string;
+}
+
+interface IAttachments {
+  id: number;
+  name: string;
+}
+
+interface DigitalRecordResponse {
+  usuarios: IUser[];
+  asunto: string;
+  attachments: IAttachments[];
+}
 
 interface RadicationData {
   invoices_id: number[];
@@ -126,6 +145,34 @@ export const reportInvoiceIncident = async (
     }
   );
   return response;
+};
+
+export const getDigitalRecordFormInfo = async (
+  projectId: number,
+  clientId: string
+): Promise<DigitalRecordResponse> => {
+  try {
+    const response: DigitalRecordResponse = await API.get(
+      `${config.API_HOST}/client/digital-record?projectId=${projectId}&clientId=${clientId}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting digital record form info", error);
+    throw error;
+  }
+};
+
+export const sendDigitalRecord = async (clientUUID: string, data: IFormDigitalRecordModal) => {
+  try {
+    const response = await API.post(`${config.API_HOST}/client/digital-record-background`, {
+      clientUUID,
+      to: data.forward_to.map((user) => user.value)
+    });
+    return response;
+  } catch (error) {
+    console.error("Error sending digital record", error);
+    throw error;
+  }
 };
 
 export const radicateInvoice = async (

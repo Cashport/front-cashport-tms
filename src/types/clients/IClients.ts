@@ -1,15 +1,4 @@
-import { AxiosHeaders } from "axios";
-import { Config } from "../users/IUser";
 import { IBillingPeriodForm } from "../billingPeriod/IBillingPeriod";
-
-export interface IClientAxios {
-  data: IClientFullResponse;
-  status: number;
-  statusText: string;
-  headers: AxiosHeaders;
-  config: Config;
-  request: Request;
-}
 
 export interface IClientFullResponse {
   status: number;
@@ -32,35 +21,27 @@ export interface IClientLocationResponse {
   message: string;
 }
 
-export interface IClientLocationResponse {
-  data: IClientLocation[];
-  error: boolean;
-  message: string;
-}
-
 interface IDocument {
   URL: string;
 }
 
 export interface IClient {
   billing_period: string;
-  billing_period_config: IBillingPeriodForm;
+  billing_period_config: IBillingPeriodForm | null;
   business_name: string;
   client_name: string;
   cliet_type: string;
   client_type_id: number;
   condition_payment: number;
   condition_payment_id: number;
-  documents: IDocument[];
+  documents: IDocument[] | null;
   document_type: string;
   email: string;
-  holding_id: number;
-  holding_name: string;
+  holding_id: number | null;
+  holding_name: string | null;
   is_deleted: number;
-  key: number;
-  locations: IClientLocation[];
+  locations: IClientLocation[] | null[];
   nit: number;
-  payment_condition: number;
   phone: string;
   project_id: number;
   radication_type: number;
@@ -85,7 +66,7 @@ export interface IClients {
 
 export interface ICreateClient {
   [key: string]: any;
-  nit: number;
+  nit: string;
   project_id: number;
   client_name: string;
   business_name: string;
@@ -127,7 +108,7 @@ export type ClientFormType = {
     nit: string;
     client_name: string;
     business_name: string;
-    client_type: string | number;
+    client_type: ISelectType;
     holding_id: ISelectType;
     phone: string;
     email: string;
@@ -143,4 +124,75 @@ export type ClientFormType = {
 export interface ISelectType {
   value: number;
   label: string;
+}
+
+export interface IClientInvoice {
+  invoice: string;
+  emission_date: string;
+  value: number;
+  expiration_date: string;
+  status: string;
+}
+
+export interface IClientWalletData {
+  total_debt: number;
+  total_to_pay: number;
+  early_payment_discount: number;
+  payment_link?: string | null;
+  invoices_list: IClientInvoice[];
+  credit_balances: CreditBalance[];
+  payments: CreditBalancePayments[];
+}
+
+export interface CreditBalance {
+  reason: string;
+  value: number;
+  creation_date: string;
+}
+
+export interface CreditBalancePayments {
+  id: number;
+  current_value: number;
+  id_status: number;
+  description: string;
+  color: string;
+  status_description: string;
+  payment_date: string;
+}
+
+export interface InvoiceFormated {
+  id: string;
+  code: string;
+  date: string;
+  amount: number;
+  formattedAmount: string;
+  originalAmount?: number;
+  formattedOriginalAmount?: string;
+  isPastDue?: boolean;
+  status?: "overdue" | "dueToday" | "dueTomorrow" | "normal";
+}
+
+export interface CreditBalanceFormated {
+  id: string;
+  description: string;
+  date: string;
+  formattedAmount: string;
+}
+
+export interface IClientSegmentationDetail {
+  client: {
+    uuid: string;
+    business_name: string;
+    phone: string;
+    email: string;
+    segment: string;
+    contact_id: number;
+  };
+  portfolio: {
+    total_portfolio: number;
+    past_due_amount: number;
+    unapplied_payments: number;
+    last_payment_date: string;
+    dso: number | null;
+  };
 }
