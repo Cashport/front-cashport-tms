@@ -781,7 +781,8 @@ export default function ChatThread({
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
-                  <Button
+                  {/* TO DO: Uncomment when image attachment, emojis, and audio functionality is implemented */}
+                  {/* <Button
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground"
@@ -818,7 +819,7 @@ export default function ChatThread({
                       <Square className="h-4 w-4" />
                       {recordSecs}s
                     </Button>
-                  )}
+                  )} */}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
