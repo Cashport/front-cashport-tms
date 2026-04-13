@@ -139,7 +139,7 @@ export default function AllChats({
       >
         <h2 style={{ fontSize: 30, fontWeight: 600 }}>Chats</h2>
         <div className="self-end">
-          <ChatActions />
+          <ChatActions noDropDown />
         </div>
       </div>
 
