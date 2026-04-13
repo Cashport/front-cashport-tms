@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Flex, Spin } from "antd";
+import { useEffect, useState } from "react";
+import { Flex, Pagination, Spin } from "antd";
 
 import UiSearchInput from "@/components/ui/search-input";
 import Container from "@/components/atoms/Container/Container";
@@ -15,13 +15,18 @@ import { useTasks } from "@/hooks/useTasks";
 
 const TaskManagerView = () => {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<ITask[] | undefined>(undefined);
   const [selectedFilters, setSelectedFilters] = useState<ISelectFilterTasks>({
     statuses: [],
     taskTypes: []
   });
 
-  const { data, isLoading } = useTasks(selectedFilters, search);
+  useEffect(() => {
+    setPage(1);
+  }, [search, selectedFilters]);
+
+  const { data, pagination, isLoading } = useTasks(selectedFilters, search, page);
 
   return (
     <div style={{ overflowY: "auto" }}>
@@ -45,10 +50,19 @@ const TaskManagerView = () => {
               <Spin />
             </Flex>
           ) : (
-            <TaskTable
-              data={data}
-              setSelectedRows={setSelectedRows}
-            />
+            <TaskTable data={data} setSelectedRows={setSelectedRows} />
+          )}
+
+          {pagination && (
+            <Flex justify="end" style={{ paddingBottom: "0.5rem" }}>
+              <Pagination
+                current={page}
+                pageSize={pagination.rowsperpage}
+                total={pagination.totalRows}
+                onChange={(newPage) => setPage(newPage)}
+                showSizeChanger={false}
+              />
+            </Flex>
           )}
         </Flex>
       </Container>
