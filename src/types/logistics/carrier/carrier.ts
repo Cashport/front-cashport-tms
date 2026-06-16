@@ -200,7 +200,7 @@ export interface CarrierCollapseAPI {
 export interface ICreateCarrierRequestAuction {
   carrierId: number;
   vehicleTypeId?: number;
-  tripId: number;
+  tripId?: number;
   otherRequirementId?: number;
 }
 
