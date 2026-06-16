@@ -31,7 +31,10 @@ const { Text } = Typography;
 interface SelectedCarrier {
   carrierId: number;
   carrierName: string;
-  vehicleTypeId: number;
+  vehicleTypeId?: number;
+  serviceType: "trip" | "other_requirement";
+  tripId?: number;
+  otherRequirementId?: number;
 }
 
 type Props = {
@@ -152,18 +155,22 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
     const carrier = carriersData?.data?.find((c) => c.id === carrierId);
     if (!carrier || !selectedTrip) return;
 
-    const tripId = selectedTrip.service.id;
+    const serviceId = selectedTrip.service.id;
     const vehicleTypeId = selectedTrip.service.service_id;
-    const currentSelections = selectedCarriersByTrip[tripId] || [];
+    const serviceType = selectedTrip.service.type;
+    const currentSelections = selectedCarriersByTrip[serviceId] || [];
 
     setSelectedCarriersByTrip({
       ...selectedCarriersByTrip,
-      [tripId]: [
+      [serviceId]: [
         ...currentSelections,
         {
           carrierId: carrier.id,
           carrierName: carrier.business_name,
-          vehicleTypeId: vehicleTypeId
+          vehicleTypeId: vehicleTypeId,
+          serviceType: serviceType,
+          tripId: serviceType === "trip" ? serviceId : undefined,
+          otherRequirementId: serviceType === "other_requirement" ? serviceId : undefined
         }
       ]
     });
@@ -181,16 +188,22 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
     if (!data) return;
     setIsSubmitting(true);
 
-    // Build the auction body
     const auctions: ICreateCarrierRequestAuctionBody["auctions"] = [];
 
-    Object.entries(selectedCarriersByTrip).forEach(([tripId, carriers]) => {
+    Object.entries(selectedCarriersByTrip).forEach(([serviceId, carriers]) => {
       carriers.forEach((carrier) => {
-        auctions.push({
-          carrierId: carrier.carrierId,
-          vehicleTypeId: carrier.vehicleTypeId,
-          tripId: parseInt(tripId)
-        });
+        if (carrier.serviceType === "trip") {
+          auctions.push({
+            carrierId: carrier.carrierId,
+            vehicleTypeId: carrier.vehicleTypeId,
+            tripId: carrier.tripId!
+          });
+        } else {
+          auctions.push({
+            carrierId: carrier.carrierId,
+            otherRequirementId: carrier.otherRequirementId!
+          });
+        }
       });
     });
 
