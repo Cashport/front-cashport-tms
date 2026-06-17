@@ -199,8 +199,9 @@ export interface CarrierCollapseAPI {
 
 export interface ICreateCarrierRequestAuction {
   carrierId: number;
-  vehicleTypeId: number;
-  tripId: number;
+  vehicleTypeId?: number;
+  tripId?: number;
+  otherRequirementId?: number;
 }
 
 export interface ICreateCarrierRequestAuctionBody {
