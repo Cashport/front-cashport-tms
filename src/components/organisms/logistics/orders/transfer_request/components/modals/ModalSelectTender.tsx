@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import dayjs from "dayjs";
@@ -137,19 +137,38 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
     return tab.service?.service_description;
   });
 
-  // Get selected carrier IDs for the current trip only
-  const getCurrentTripSelectedCarrierIds = (): number[] => {
-    if (!selectedTrip) return [];
+  // Filter available carriers for current trip (excluding already selected ones in this tab).
+  // Memoizado: evita recomputar 11k filter cada render del Select.
+  const availableCarriers = useMemo(() => {
+    if (!selectedTrip) return carriersData?.data ?? [];
     const tripId = selectedTrip.service.id;
     const currentSelections = selectedCarriersByTrip[tripId] || [];
-    return currentSelections.map((carrier) => carrier.carrierId);
-  };
+    const selectedSet = new Set(currentSelections.map((c) => c.carrierId));
+    return (carriersData?.data ?? []).filter((carrier) => !selectedSet.has(carrier.id));
+  }, [carriersData, selectedCarriersByTrip, selectedTrip]);
 
-  // Filter available carriers for current trip (excluding already selected ones in this tab)
-  const getAvailableCarriers = () => {
-    const selectedIds = getCurrentTripSelectedCarrierIds();
-    return carriersData?.data?.filter((carrier) => !selectedIds.includes(carrier.id)) || [];
-  };
+  // Opciones memoizadas con el label en minúsculas precomputado (searchLabel) para que
+  // filterOption NO haga toLowerCase() por cada opción en cada pulsación.
+  const carrierOptions = useMemo(
+    () =>
+      availableCarriers.map((carrier) => ({
+        label: carrier.business_name,
+        value: carrier.id,
+        searchLabel: (carrier.business_name ?? "").toLowerCase()
+      })),
+    [availableCarriers]
+  );
+
+  // Filtro optimizado: estable por referencia, salta el trabajo si el término tiene < 3 letras,
+  // y evita el toLowerCase() por iteración gracias a searchLabel.
+  const filterOption = useCallback(
+    (input: string, option?: { searchLabel?: string }) => {
+      const term = input.trim();
+      if (term.length < 3) return true; // sin filtro hasta 3 caracteres
+      return (option?.searchLabel ?? "").includes(term.toLowerCase());
+    },
+    []
+  );
 
   const handleSelectCarrier = (carrierId: number) => {
     const carrier = carriersData?.data?.find((c) => c.id === carrierId);
@@ -340,15 +359,10 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
               className={styles.selectCarrier}
               onChange={handleSelectCarrier}
               value={null}
-              options={getAvailableCarriers().map((carrier) => ({
-                label: carrier.business_name,
-                value: carrier.id
-              }))}
-              disabled={getAvailableCarriers().length === 0 || isLoadingCarriers}
+              options={carrierOptions}
+              disabled={availableCarriers.length === 0 || isLoadingCarriers}
               showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-              }
+              filterOption={filterOption}
             />
 
             {currentTripSelections.length > 0 && (

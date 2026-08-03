@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import dayjs from "dayjs";
@@ -126,15 +126,37 @@ export default function ModalSelectCarrierPricing({
 
   const journey = selectedTrip?.journey;
 
-  const filteredPricing =
-    selectedTrip?.service?.carriers_pricing?.filter((pricing) => {
-      const { description, fee_description, price } = pricing;
-      return (
-        (description && description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (fee_description && fee_description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (price && price.toString().includes(searchTerm))
-      );
-    }) || [];
+  // Pre-normalize the search haystack once per trip change (11k records → avoid lowercase() per filter iteration)
+  const pricingSearchIndex = useMemo(() => {
+    const pricings = selectedTrip?.service?.carriers_pricing ?? [];
+    return pricings.map((pricing) => ({
+      pricing,
+      description: pricing?.description?.toLowerCase() ?? "",
+      feeDescription: pricing?.fee_description?.toLowerCase() ?? "",
+      priceString: pricing?.price != null ? String(pricing.price) : ""
+    }));
+  }, [selectedTrip?.service?.carriers_pricing]);
+
+  // Defer the search term so typing stays responsive while the heavy filter runs
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const normalizedSearch = deferredSearchTerm.trim().toLowerCase();
+  const isSearchActive = normalizedSearch.length >= 3;
+
+  const filteredPricing = useMemo(() => {
+    // Sin término válido (menos de 3 letras) → devolvemos la lista completa sin filtrar
+    if (!isSearchActive) {
+      return pricingSearchIndex.map((entry) => entry.pricing);
+    }
+
+    return pricingSearchIndex
+      .filter(
+        ({ description, feeDescription, priceString }) =>
+          description.includes(normalizedSearch) ||
+          feeDescription.includes(normalizedSearch) ||
+          priceString.includes(deferredSearchTerm.trim())
+      )
+      .map((entry) => entry.pricing);
+  }, [pricingSearchIndex, normalizedSearch, deferredSearchTerm, isSearchActive]);
 
   const postCarrierRequest = async (trips: ServiceTab[], id: number, showAll: boolean) => {
     try {
