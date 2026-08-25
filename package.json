@@ -83,6 +83,8 @@
     "react-mapbox-gl": "^5.1.1",
     "react-number-format": "^5.4.1",
     "react-resizable-panels": "^3.0.4",
+    "react-virtualized-auto-sizer": "^2.0.3",
+    "react-window": "^2.3.0",
     "react-zlib-js": "^1.0.5",
     "recharts": "^2.12.7",
     "runes2": "^1.1.4",

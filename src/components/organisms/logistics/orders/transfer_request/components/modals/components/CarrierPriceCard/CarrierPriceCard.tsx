@@ -109,4 +109,4 @@ const CarrierPriceCard: React.FC<CarrierPriceCardProps> = ({
   );
 };
 
-export default CarrierPriceCard;
+export default React.memo(CarrierPriceCard);

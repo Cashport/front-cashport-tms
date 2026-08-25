@@ -6988,6 +6988,16 @@ react-transition-group@^4.4.5:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
+react-virtualized-auto-sizer@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/react-virtualized-auto-sizer/-/react-virtualized-auto-sizer-2.0.3.tgz#28b30f5dacc807ee6edc9116564cc3f815e88e97"
+  integrity sha512-nonmCSUIh5HtbzazGcQ1NhnMFps/ZBu/UKJyhCt0Fhi7ondLAUZNETtRCWM8RWYZDzVlMYOQGgBmIxUutIhqgw==
+
+react-window@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-window/-/react-window-2.3.0.tgz#92fefee75b7de56a31204dfffc492b84136e4783"
+  integrity sha512-FW6TIpaOH646k51X7yE+LSCWGkt5Pfsnc1fVyq/sCI9h0pTqmMiBXM04pzFKg3Bt7NGkeV6kqbU8d/QjmFS7Ug==
+
 react-zlib-js@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/react-zlib-js/-/react-zlib-js-1.0.5.tgz#7bb433e1a4ae53a8e6f361b3d36166baf5bbc60f"
