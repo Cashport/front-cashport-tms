@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import dayjs from "dayjs";
@@ -6,6 +6,8 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { Flex, message, Modal, Select, Spin, Tag, Typography } from "antd";
 import { Trash } from "@phosphor-icons/react";
+import { List } from "react-window";
+import { AutoSizer } from "react-virtualized-auto-sizer";
 
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
 import { getAllCarriers } from "@/services/logistics/users";
@@ -13,6 +15,7 @@ import {
   sendTenderProposalToCarriers,
   sendTercerizationProposalToCarriers
 } from "@/services/logistics/carrier-request";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { getServiceType } from "./utils/utils";
 
 import CommunityIcon from "../communityIcon/CommunityIcon";
@@ -137,19 +140,44 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
     return tab.service?.service_description;
   });
 
-  // Get selected carrier IDs for the current trip only
-  const getCurrentTripSelectedCarrierIds = (): number[] => {
-    if (!selectedTrip) return [];
+  // Filter available carriers for current trip (excluding already selected ones in this tab).
+  // Memoizado: evita recomputar 11k filter cada render del Select.
+  const availableCarriers = useMemo(() => {
+    if (!selectedTrip) return carriersData?.data ?? [];
     const tripId = selectedTrip.service.id;
     const currentSelections = selectedCarriersByTrip[tripId] || [];
-    return currentSelections.map((carrier) => carrier.carrierId);
-  };
+    const selectedSet = new Set(currentSelections.map((c) => c.carrierId));
+    return (carriersData?.data ?? []).filter((carrier) => !selectedSet.has(carrier.id));
+  }, [carriersData, selectedCarriersByTrip, selectedTrip]);
 
-  // Filter available carriers for current trip (excluding already selected ones in this tab)
-  const getAvailableCarriers = () => {
-    const selectedIds = getCurrentTripSelectedCarrierIds();
-    return carriersData?.data?.filter((carrier) => !selectedIds.includes(carrier.id)) || [];
-  };
+  // Opciones memoizadas con el label en minúsculas precomputado (searchLabel) para que
+  // filterOption NO haga toLowerCase() por cada opción en cada pulsación.
+  const carrierOptions = useMemo(
+    () =>
+      availableCarriers.map((carrier) => ({
+        label: carrier.business_name,
+        value: carrier.id,
+        searchLabel: (carrier.business_name ?? "").toLowerCase()
+      })),
+    [availableCarriers]
+  );
+
+  // Estado controlado del input de búsqueda + debounce 1s.
+  // El texto se ve al instante en el campo, pero la lista se filtra 1s después de la última tecla.
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 1000);
+
+  // Filtro optimizado: estable por referencia cuando el debounced no cambia,
+  // salta el trabajo si el término tiene < 3 letras, y evita el toLowerCase() por iteración
+  // gracias a searchLabel. Lee `debouncedSearch` (no el `input` en vivo de AntD).
+  const filterOption = useCallback(
+    (_input: string, option?: { searchLabel?: string }) => {
+      const term = debouncedSearch.trim();
+      if (term.length < 3) return true; // sin filtro hasta 3 caracteres
+      return (option?.searchLabel ?? "").includes(term.toLowerCase());
+    },
+    [debouncedSearch]
+  );
 
   const handleSelectCarrier = (carrierId: number) => {
     const carrier = carriersData?.data?.find((c) => c.id === carrierId);
@@ -340,45 +368,61 @@ export default function ModalSelectTender({ open, handleModalTender, type }: Rea
               className={styles.selectCarrier}
               onChange={handleSelectCarrier}
               value={null}
-              options={getAvailableCarriers().map((carrier) => ({
-                label: carrier.business_name,
-                value: carrier.id
-              }))}
-              disabled={getAvailableCarriers().length === 0 || isLoadingCarriers}
+              options={carrierOptions}
+              disabled={availableCarriers.length === 0 || isLoadingCarriers}
               showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-              }
+              searchValue={searchInput}
+              onSearch={setSearchInput}
+              filterOption={filterOption}
             />
 
             {currentTripSelections.length > 0 && (
-              <Flex vertical gap={8}>
-                {currentTripSelections.map((carrier) => (
-                  <Flex
-                    key={`${selectedTrip?.service.id}-${carrier.carrierId}`}
-                    align="center"
-                    justify="space-between"
-                    style={{
-                      padding: "8px",
-                      borderRadius: "4px",
-                      backgroundColor: "#F7F7F7",
-                      minHeight: "40px"
-                    }}
-                  >
-                    <Flex align="center" gap={8}>
-                      <Text strong>{carrier.carrierName}</Text>
-                    </Flex>
-                    <Trash
-                      color="#141414"
-                      size={20}
-                      style={{ cursor: "pointer", marginRight: "4px", flexShrink: 0 }}
-                      onClick={() =>
-                        handleRemoveCarrier(selectedTrip.service.id, carrier.carrierId)
+              <div className={styles.virtualListContainer}>
+                <AutoSizer
+                  renderProp={({ height, width }) => (
+                    <List
+                      style={{ height: height ?? 400, width: width ?? 600 }}
+                      rowCount={currentTripSelections.length}
+                      rowHeight={48}
+                      rowKey={(index) =>
+                        `${selectedTrip?.service.id ?? 0}-${currentTripSelections[index]?.carrierId}-${index}`
                       }
+                      rowProps={{
+                        selections: currentTripSelections,
+                        serviceId: selectedTrip.service.id,
+                        handleRemoveCarrier
+                      }}
+                      rowComponent={({ index, style, selections, serviceId, handleRemoveCarrier: hc }) => {
+                        const carrier = selections[index];
+                        return (
+                          <div style={style}>
+                            <Flex
+                              align="center"
+                              justify="space-between"
+                              style={{
+                                padding: "8px",
+                                borderRadius: "4px",
+                                backgroundColor: "#F7F7F7",
+                                minHeight: "40px"
+                              }}
+                            >
+                              <Flex align="center" gap={8}>
+                                <Text strong>{carrier.carrierName}</Text>
+                              </Flex>
+                              <Trash
+                                color="#141414"
+                                size={20}
+                                style={{ cursor: "pointer", marginRight: "4px", flexShrink: 0 }}
+                                onClick={() => hc(serviceId, carrier.carrierId)}
+                              />
+                            </Flex>
+                          </div>
+                        );
+                      }}
                     />
-                  </Flex>
-                ))}
-              </Flex>
+                  )}
+                />
+              </div>
             )}
           </Flex>
         </div>

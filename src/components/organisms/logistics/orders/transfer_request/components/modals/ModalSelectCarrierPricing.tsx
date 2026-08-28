@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import dayjs from "dayjs";
@@ -7,9 +7,12 @@ dayjs.extend(utc);
 import { Check } from "phosphor-react";
 import { Checkbox, Flex, message, Modal, Spin, Switch, Typography } from "antd";
 import { X } from "@phosphor-icons/react";
+import { List } from "react-window";
+import { AutoSizer } from "react-virtualized-auto-sizer";
 
 import { sendCarrierRequest } from "@/services/logistics/carrier-request";
 import { getTransferRequestPricing } from "@/services/logistics/transfer-request";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { convertToSendCarrierRequest, getServiceType } from "./utils/utils";
 
 import CommunityIcon from "../communityIcon/CommunityIcon";
@@ -126,15 +129,38 @@ export default function ModalSelectCarrierPricing({
 
   const journey = selectedTrip?.journey;
 
-  const filteredPricing =
-    selectedTrip?.service?.carriers_pricing?.filter((pricing) => {
-      const { description, fee_description, price } = pricing;
-      return (
-        (description && description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (fee_description && fee_description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (price && price.toString().includes(searchTerm))
-      );
-    }) || [];
+  // Pre-normalize the search haystack once per trip change (11k records → avoid lowercase() per filter iteration)
+  const pricingSearchIndex = useMemo(() => {
+    const pricings = selectedTrip?.service?.carriers_pricing ?? [];
+    return pricings.map((pricing) => ({
+      pricing,
+      description: pricing?.description?.toLowerCase() ?? "",
+      feeDescription: pricing?.fee_description?.toLowerCase() ?? "",
+      priceString: pricing?.price != null ? String(pricing.price) : ""
+    }));
+  }, [selectedTrip?.service?.carriers_pricing]);
+
+  // Debounce del término: la búsqueda solo arranca 1s después de la última pulsación.
+  // El guard de 3 letras se evalúa contra el valor debounced para no filtrar con typos intermedios.
+  const isSearchActive = searchTerm.length >= 3;
+  const debouncedSearchTerm = useDebounce(isSearchActive ? searchTerm : "", 1000);
+  const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
+
+  const filteredPricing = useMemo(() => {
+    // Sin término válido (menos de 3 letras) → devolvemos la lista completa sin filtrar
+    if (!isSearchActive) {
+      return pricingSearchIndex.map((entry) => entry.pricing);
+    }
+
+    return pricingSearchIndex
+      .filter(
+        ({ description, feeDescription, priceString }) =>
+          description.includes(normalizedSearch) ||
+          feeDescription.includes(normalizedSearch) ||
+          priceString.includes(debouncedSearchTerm.trim())
+      )
+      .map((entry) => entry.pricing);
+  }, [pricingSearchIndex, normalizedSearch, debouncedSearchTerm]);
 
   const postCarrierRequest = async (trips: ServiceTab[], id: number, showAll: boolean) => {
     try {
@@ -177,66 +203,72 @@ export default function ModalSelectCarrierPricing({
     await postCarrierRequest(tripsList, transferRequestId, showAll);
   };
 
-  const handleCheck = (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
-    setTripsList((prev) =>
-      prev.map((tab) => {
-        if (tab.service.id === selectedTripId) {
-          return {
-            ...tab,
-            service: {
-              ...tab.service,
-              carriers_pricing: tab.service.carriers_pricing.map((carrier) => {
-                if (
-                  carrier.id_carrier_pricing === id_carrier_pricing &&
-                  carrier.id_carrier === id_carrier
-                ) {
-                  return {
-                    ...carrier,
-                    checked: !isChecked
-                  };
-                }
-                return carrier;
-              })
-            }
-          };
-        }
-        return tab;
-      })
-    );
-  };
+  const handleCheck = useCallback(
+    (id_carrier_pricing: number, id_carrier: number, isChecked: boolean) => {
+      setTripsList((prev) =>
+        prev.map((tab) => {
+          if (tab.service.id === selectedTripId) {
+            return {
+              ...tab,
+              service: {
+                ...tab.service,
+                carriers_pricing: tab.service.carriers_pricing.map((carrier) => {
+                  if (
+                    carrier.id_carrier_pricing === id_carrier_pricing &&
+                    carrier.id_carrier === id_carrier
+                  ) {
+                    return {
+                      ...carrier,
+                      checked: !isChecked
+                    };
+                  }
+                  return carrier;
+                })
+              }
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [selectedTripId]
+  );
 
-  const handleMasiveCheck = (newState: boolean) => {
-    setTripsList((prev) =>
-      prev.map((tab) => {
-        if (tab.service.id === selectedTripId) {
-          return {
-            ...tab,
-            service: {
-              ...tab.service,
-              carriers_pricing: tab.service.carriers_pricing.map((carrier) => {
-                if (searchTerm !== "") {
-                  const isFiltered = filteredPricing.some(
-                    (filteredCarrier) =>
-                      filteredCarrier.id_carrier_pricing === carrier.id_carrier_pricing
-                  );
-                  return {
-                    ...carrier,
-                    checked: isFiltered && newState
-                  };
-                } else {
-                  return {
-                    ...carrier,
-                    checked: newState
-                  };
-                }
-              })
-            }
-          };
-        }
-        return tab;
-      })
-    );
-  };
+  const handleMasiveCheck = useCallback(
+    (newState: boolean) => {
+      setTripsList((prev) =>
+        prev.map((tab) => {
+          if (tab.service.id === selectedTripId) {
+            return {
+              ...tab,
+              service: {
+                ...tab.service,
+                carriers_pricing: tab.service.carriers_pricing.map((carrier) => {
+                  if (searchTerm !== "") {
+                    const isFiltered = filteredPricing.some(
+                      (filteredCarrier) =>
+                        filteredCarrier.id_carrier_pricing === carrier.id_carrier_pricing
+                    );
+                    return {
+                      ...carrier,
+                      checked: isFiltered && newState
+                    };
+                  } else {
+                    return {
+                      ...carrier,
+                      checked: newState
+                    };
+                  }
+                })
+              }
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [selectedTripId, filteredPricing, searchTerm]
+  );
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -399,17 +431,42 @@ export default function ModalSelectCarrierPricing({
             >
               <Text style={{ fontWeight: "500" }}>Seleccionar todos</Text>
             </Checkbox>
-            {filteredPricing?.map((carrier, index) => (
-              <CarrierPriceCard
-                key={`trip-${selectedTripId}-carrier-${carrier?.id_carrier_pricing}-${index}`}
-                carrier={carrier}
-                currentTripId={selectedTripId}
-                isChecked={carrier?.checked ?? false}
-                handleCheck={handleCheck}
-                type={selectedTrip.service.type}
-                journey={journey}
+            <div className={styles.virtualListContainer}>
+              <AutoSizer
+                renderProp={({ height, width }) => (
+                  <List
+                    style={{ height: height ?? 400, width: width ?? 600 }}
+                    rowCount={filteredPricing.length}
+                    rowHeight={76}
+                    rowKey={(index) =>
+                      `trip-${selectedTripId ?? 0}-carrier-${filteredPricing[index]?.id_carrier_pricing}-${index}`
+                    }
+                    rowProps={{
+                      carriers: filteredPricing,
+                      selectedTripId,
+                      serviceType: selectedTrip?.service.type,
+                      journey,
+                      handleCheck
+                    }}
+                    rowComponent={({ index, style, carriers, selectedTripId: tripId, serviceType, journey: j, handleCheck: hc }) => {
+                      const carrier = carriers[index];
+                      return (
+                        <div style={style}>
+                          <CarrierPriceCard
+                            carrier={carrier}
+                            currentTripId={tripId}
+                            isChecked={carrier?.checked ?? false}
+                            handleCheck={hc}
+                            type={serviceType}
+                            journey={j}
+                          />
+                        </div>
+                      );
+                    }}
+                  />
+                )}
               />
-            ))}
+            </div>
           </Flex>
         </div>
       )}

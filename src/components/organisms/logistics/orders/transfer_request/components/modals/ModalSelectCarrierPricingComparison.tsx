@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { Checkbox, Flex, message, Modal, Spin, Typography } from "antd";
+import { List } from "react-window";
+import { AutoSizer } from "react-virtualized-auto-sizer";
 
 import { getPricingComparisonByTransferRequestId } from "@/services/logistics/carrier-request";
 
@@ -196,17 +198,39 @@ export default function ModalSelectCarrierPricingComparison({
                 <Text type="secondary">No se encontraron proveedores</Text>
               </Flex>
             ) : (
-              filteredPricing.map((carrier, index) => (
-                <CarrierPriceCard
-                  key={`carrier-${carrier.id_carrier_pricing}-${carrier.id_carrier}-${index}`}
-                  carrier={carrier as any}
-                  currentTripId={carrier.id_carrier_pricing}
-                  isChecked={carrier?.checked ?? false}
-                  handleCheck={handleCheck}
-                  type="trip"
-                  journey={undefined}
+              <div className={styles.virtualListContainer}>
+                <AutoSizer
+                  renderProp={({ height, width }) => (
+                    <List
+                      style={{ height: height ?? 400, width: width ?? 600 }}
+                      rowCount={filteredPricing.length}
+                      rowHeight={76}
+                      rowKey={(index) =>
+                        `carrier-${filteredPricing[index]?.id_carrier_pricing}-${filteredPricing[index]?.id_carrier}-${index}`
+                      }
+                      rowProps={{
+                        pricings: filteredPricing,
+                        handleCheck
+                      }}
+                      rowComponent={({ index, style, pricings, handleCheck: hc }) => {
+                        const carrier = pricings[index];
+                        return (
+                          <div style={style}>
+                            <CarrierPriceCard
+                              carrier={carrier as any}
+                              currentTripId={carrier.id_carrier_pricing}
+                              isChecked={carrier?.checked ?? false}
+                              handleCheck={hc}
+                              type="trip"
+                              journey={undefined}
+                            />
+                          </div>
+                        );
+                      }}
+                    />
+                  )}
                 />
-              ))
+              </div>
             )}
           </Flex>
         </div>
