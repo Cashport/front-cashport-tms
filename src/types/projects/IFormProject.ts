@@ -22,6 +22,13 @@ export interface General {
   accept_date: string;
   DSO_currenly_year: string;
   DSO_days: number | undefined;
+  // Política de seguridad del proyecto. Los selects manejan "Sí" / "No" como
+  // el resto del formulario; el mapeo a booleano ocurre en services/projects.
+  otp_required: string;
+  otp_revalidation_days: number | undefined;
+  password_expiration_days: number | undefined;
+  trusted_devices_enabled: string;
+  trusted_device_days: number | undefined;
 }
 
 export interface Personalization {
