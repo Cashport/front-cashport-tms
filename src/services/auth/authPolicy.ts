@@ -10,7 +10,7 @@ import {
 import { getDeviceToken, setDeviceToken } from "@/utils/auth/trustedDevice";
 
 /**
- * A diferencia del wrapper de Cashboard, el interceptor de `API` en este repo
+ * A diferencia del wrapper de Cashport, el interceptor de `API` en este repo
  * deja que axios lance en 4xx/5xx. Estas funciones normalizan el error a la
  * misma forma `{ status, message }` de la respuesta exitosa, para que los
  * componentes puedan leer `result.status !== 200` sin envolver todo en
