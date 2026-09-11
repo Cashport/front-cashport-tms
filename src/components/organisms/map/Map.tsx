@@ -217,7 +217,7 @@ const MapComponent = () => {
 
   useEffect(() => {
     socket.on("changeLocation", (data) => {
-      console.log("Ubicación recibida:", data);
+      console.log("Ubicación recibida: ", data);
       updateUserLocation(data);
     });
 
