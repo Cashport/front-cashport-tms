@@ -36,7 +36,12 @@ export const addProject = async (data: IFormProject): Promise<WelcomeData> => {
     day: billingPeriod.day_flag === "true" ? billingPeriod.day : undefined,
     order: billingPeriod.day_flag === "true" ? undefined : billingPeriod.order.toLowerCase(),
     day_of_week:
-      billingPeriod.day_flag === "true" ? undefined : billingPeriod.day_of_week.toLowerCase()
+      billingPeriod.day_flag === "true" ? undefined : billingPeriod.day_of_week.toLowerCase(),
+    otp_required: data.general.otp_required === "Sí",
+    otp_revalidation_days: data.general.otp_revalidation_days,
+    password_expiration_days: data.general.password_expiration_days,
+    trusted_devices_enabled: data.general.trusted_devices_enabled === "Sí",
+    trusted_device_days: data.general.trusted_device_days
   };
   const formData = new FormData();
   formData.append("logo", finalData.logo);
@@ -67,6 +72,19 @@ export const addProject = async (data: IFormProject): Promise<WelcomeData> => {
   }
   if (finalData.day_of_week) {
     formData.append("day_of_week", finalData.day_of_week);
+  }
+  // Los booleanos viajan como "true"/"false"; el backend los parsea con
+  // parseFormBoolean, no con Boolean(), que convertiría "false" en true.
+  formData.append("otp_required", (!!finalData.otp_required).toString());
+  if (finalData.otp_revalidation_days) {
+    formData.append("otp_revalidation_days", finalData.otp_revalidation_days.toString());
+  }
+  if (finalData.password_expiration_days) {
+    formData.append("password_expiration_days", finalData.password_expiration_days.toString());
+  }
+  formData.append("trusted_devices_enabled", (!!finalData.trusted_devices_enabled).toString());
+  if (finalData.trusted_device_days) {
+    formData.append("trusted_device_days", finalData.trusted_device_days.toString());
   }
 
   try {
@@ -115,7 +133,12 @@ export const updateProject = async (
     day: billingPeriod.day_flag === "true" ? billingPeriod.day : undefined,
     order: billingPeriod.day_flag === "true" ? undefined : billingPeriod.order.toLowerCase(),
     day_of_week:
-      billingPeriod.day_flag === "true" ? undefined : billingPeriod.day_of_week.toLowerCase()
+      billingPeriod.day_flag === "true" ? undefined : billingPeriod.day_of_week.toLowerCase(),
+    otp_required: data.general.otp_required === "Sí",
+    otp_revalidation_days: data.general.otp_revalidation_days,
+    password_expiration_days: data.general.password_expiration_days,
+    trusted_devices_enabled: data.general.trusted_devices_enabled === "Sí",
+    trusted_device_days: data.general.trusted_device_days
   };
 
   const formData = new FormData();
@@ -149,6 +172,19 @@ export const updateProject = async (
   }
   if (finalData.day_of_week) {
     formData.append("day_of_week", finalData.day_of_week);
+  }
+  // Los booleanos viajan como "true"/"false"; el backend los parsea con
+  // parseFormBoolean, no con Boolean(), que convertiría "false" en true.
+  formData.append("otp_required", (!!finalData.otp_required).toString());
+  if (finalData.otp_revalidation_days) {
+    formData.append("otp_revalidation_days", finalData.otp_revalidation_days.toString());
+  }
+  if (finalData.password_expiration_days) {
+    formData.append("password_expiration_days", finalData.password_expiration_days.toString());
+  }
+  formData.append("trusted_devices_enabled", (!!finalData.trusted_devices_enabled).toString());
+  if (finalData.trusted_device_days) {
+    formData.append("trusted_device_days", finalData.trusted_device_days.toString());
   }
 
   try {
