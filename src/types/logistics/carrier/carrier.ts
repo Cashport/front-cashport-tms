@@ -107,6 +107,21 @@ export interface OtherReq {
   serviceTime: string;
 }
 
+export interface ITransferRequestCostCenter {
+  id: number;
+  id_costcenter: number;
+  percentage: number;
+  id_transfer_request: number;
+  cost_center_desc: string;
+  id_psl: number;
+}
+
+export interface ITransferRequestPsl {
+  id: number;
+  description: string;
+  transfer_request_cost_center: ITransferRequestCostCenter[];
+}
+
 export interface IAceptCarrierAPI {
   id: number;
   id_carrier: number;
@@ -143,6 +158,8 @@ export interface IAceptCarrierAPI {
   carrier_request_documents: any[]; // Asumiendo que es un array vacío o podría ser un array de algún tipo de objeto
   geometry: Geometry[];
   carrier_request_persons: any[]; // Asumiendo que es un array vacío o podría ser un array de algún tipo de objeto
+  //responsables: psl y centros de costo de la solicitud de transferencia
+  transfer_request_psl?: ITransferRequestPsl[];
   observation?: string;
   special_instructions?: string;
   id_service_type: number;
