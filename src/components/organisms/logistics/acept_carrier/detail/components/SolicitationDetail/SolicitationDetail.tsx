@@ -16,6 +16,7 @@ import { DataCarga, IAceptCarrierAPI } from "@/types/logistics/carrier/carrier";
 import Buttons from "../Buttons/Buttons";
 import { useRouter } from "next/navigation";
 import { RequirementSummaryData } from "@/components/organisms/logistics/orders/DetailsOrderView/components/RequirementSummaryData.tsx/RequirementSummaryData";
+import { Responsibles } from "@/components/organisms/logistics/orders/DetailsOrderView/components/Responsibles/Responsibles";
 import { FormMode, IQuote } from "../../../view/AceptCarrierDetailView/AceptCarrierDetailView";
 
 dayjs.locale("es");
@@ -193,6 +194,15 @@ export default function SolicitationDetail({
             <RouteMap mapContainerRef={mapContainerRef} />
           </Col>
         </Flex>
+      </Flex>
+      <Flex vertical>
+        <Responsibles
+          title="Responsables"
+          psls={(providerDetail?.transfer_request_psl ?? []).map((psl) => ({
+            ...psl,
+            transfer_order_cost_center: psl.transfer_request_cost_center ?? []
+          }))}
+        />
       </Flex>
       <AditionalInfo
         title="Información adicional"
