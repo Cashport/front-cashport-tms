@@ -20,6 +20,8 @@ import { TabEnum } from "@/components/organisms/logistics/transfer-orders/Transf
 
 interface PAtrip {
   idTR: string;
+  /** numero visible de la TR; si no viene se muestra idTR */
+  trNumber?: number | null;
   carrier: BillingByCarrier;
   onClose: () => void;
   messageApi: MessageInstance;
@@ -33,7 +35,7 @@ const defaultPA: Preauthorization = {
 const defaultValueForm = {
   preauthorizations: [defaultPA]
 };
-const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
+const PreauthorizeTrip = ({ idTR, trNumber, carrier, onClose, messageApi }: PAtrip) => {
   const { subtotal: totalValue, id: billingId, carrier: carrierName } = carrier;
   const [isLoading, setIsLoading] = useState(false);
   const [defaultValues, setDefaultValues] = useState<PreauthorizeTripForm>(defaultValueForm);
@@ -63,7 +65,7 @@ const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
       if (response) {
         setIsLoading(false);
         onClose();
-        message.success(`TR No. ${idTR} preautorizada`, 2, () =>
+        message.success(`TR No. ${trNumber ?? idTR} preautorizada`, 2, () =>
           push(`/logistics/transfer-orders?tab=${TabEnum.COMPLETED}`)
         );
       }
@@ -118,7 +120,7 @@ const PreauthorizeTrip = ({ idTR, carrier, onClose, messageApi }: PAtrip) => {
 
   const handleDownloadCsv = async () => {
     const endpoint = `logistic-billing/export-csv/${billingId}`;
-    await downloadCSVFromEndpoint(endpoint, `TR-${idTR}_Billing.xlsx`);
+    await downloadCSVFromEndpoint(endpoint, `TR-${trNumber ?? idTR}_Billing.xlsx`);
   };
 
   if (isLoading) {

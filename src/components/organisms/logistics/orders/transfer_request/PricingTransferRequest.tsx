@@ -110,6 +110,9 @@ export default function PricingTransferRequest({
     defaultValues: { id, providers: [] }
   });
 
+  // numero visible de la TR (el id de la URL sigue siendo el interno)
+  const trNumber = transferRequest?.stepOne?.transferRequest?.[0]?.id_tr ?? id;
+
   /* Data first page*/
   const ordersId = useMemo(
     () => transferRequest?.stepOne?.transferOrders.map((a) => a.id) || [],
@@ -474,7 +477,7 @@ export default function PricingTransferRequest({
       const res = await createTransferRequest(ordersId, tracking);
       if (res?.stepOne?.transferRequest?.length) {
         const newTRid = res.stepOne.transferRequest[0].id;
-        message.success(`TR No. ${newTRid} creada`);
+        message.success(`TR No. ${res.stepOne.transferRequest[0].id_tr ?? newTRid} creada`);
         router.replace("/logistics/transfer-request/" + newTRid);
       }
     } catch (error) {
@@ -536,7 +539,7 @@ export default function PricingTransferRequest({
 
     try {
       await finishTransferRequest(data);
-      message.success(`TR No. ${id} asignada`);
+      message.success(`TR No. ${trNumber} asignada`);
       router.push("/logistics/transfer-orders");
     } catch (error) {
       if (error instanceof Error) message.error(error.message);
@@ -991,7 +994,7 @@ export default function PricingTransferRequest({
           <Flex vertical>
             <BackButton
               href={`/logistics/transfer-orders?tab=${TabEnum.REQUESTS}`}
-              title={`Detalle de TR ${view !== "solicitation" ? id : ""}`}
+              title={`Detalle de TR ${view !== "solicitation" ? trNumber : ""}`}
             />
             <Flex style={{ width: "100%", justifyContent: "center" }}>
               <Flex style={{ padding: "16px 0" }}>
@@ -1227,6 +1230,7 @@ export default function PricingTransferRequest({
       />
       <ModalModifyTrip
         isOpen={isModalModifyTripOpen.open}
+        trNumber={trNumber}
         onCancel={() =>
           setIsModalModifyTripOpen({
             open: false,

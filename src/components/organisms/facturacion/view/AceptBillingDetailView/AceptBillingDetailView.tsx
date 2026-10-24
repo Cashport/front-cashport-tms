@@ -268,7 +268,9 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
         <div className={styles.linkButtonsContainer}>
           <BackButton
             href="/facturacion"
-            title={`Detalle de TR ${billingData?.billing?.idTransferRequest ?? ""}`}
+            title={`Detalle de TR ${
+              billingData?.billing?.idTr ?? billingData?.billing?.idTransferRequest ?? ""
+            }`}
           />
           {canMakeAnAction && (
             <Button
@@ -324,7 +326,8 @@ export default function AceptBillingDetailView({ params }: AceptBillingDetailPro
       <ModalBillingAction
         isOpen={isModalVisible}
         onClose={() => setIsModalVisible(false)}
-        idTR={billingData?.billing?.idTransferRequest ?? 0}
+        // idTR solo se usa en los mensajes: se pasa el numero visible
+        idTR={billingData?.billing?.idTr ?? billingData?.billing?.idTransferRequest ?? 0}
         totalValue={billingData?.billing?.fare ?? 0}
         billingStatus={billingData?.billing?.statusDesc}
         messageApi={messageApi}
