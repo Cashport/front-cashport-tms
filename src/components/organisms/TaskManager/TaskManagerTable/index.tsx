@@ -84,10 +84,11 @@ const TaskTable: React.FC<{
           className="text-blue-600 hover:underline"
           onClick={(e) => {
             e.stopPropagation();
-            if (value) router.push(`/logistics/orders/details/${value}`);
+            // value puede traer varias TO separadas por coma: se abre la primera
+            if (value) router.push(`/logistics/orders/details/${String(value).split(",")[0]}`);
           }}
         >
-          {value || "-"}
+          {row.transfer_order_id_tos ?? (value || "-")}
         </a>
       )
     },
@@ -106,7 +107,7 @@ const TaskTable: React.FC<{
             if (value) router.push(`/logistics/transfer-orders/details/${value}`);
           }}
         >
-          {value || "-"}
+          {row.transfer_request_id_tr ?? (value || "-")}
         </a>
       )
     },

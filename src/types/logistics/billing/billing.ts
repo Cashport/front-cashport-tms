@@ -21,6 +21,8 @@ export interface IBillingsRequestList {
 export interface IBillingRequestsListDetail {
   id: number;
   idTransferRequest: number;
+  /** numero visible de la TR */
+  idTr?: number | null;
   idCarrier: number;
   carrier: string;
   startLocation: string;

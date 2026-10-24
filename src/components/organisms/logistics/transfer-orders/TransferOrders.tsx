@@ -286,6 +286,7 @@ export const TransferOrders = () => {
             setIsModalOpen({ selected: 0 });
           }}
           trID={trsIds[0]}
+          trNumber={allSelectedRows?.find((row) => row.tr === String(trsIds[0]))?.number}
           toIDs={childOrdersId}
           trStatus={TRStatusId}
         />

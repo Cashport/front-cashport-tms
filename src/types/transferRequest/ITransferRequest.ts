@@ -2,6 +2,10 @@ import { ILocation } from "../logistics/schema";
 
 export interface ITransferRequest {
   id: number;
+  // numero visible por proyecto: id_to en filas de TO, id_tr en filas de TR
+  // (en filas de TO, id_tr es el numero de su TR)
+  id_to?: number | null;
+  id_tr?: number | null;
   is_materials_problem: boolean;
   is_people_problem: boolean;
   is_rejected: 1 | 0;
@@ -51,6 +55,8 @@ export interface IGeometryResponse {
 
 export interface ITransferRequestDetail {
   id: number;
+  /** numero visible de la TR en su proyecto */
+  id_tr?: number | null;
   status: string;
   status_id: string;
   start_date: Date;
@@ -67,6 +73,8 @@ export interface ITransferRequestDetail {
   steps: IStep[];
   geometry: IGeometryResponse;
   transfer_orders: number[];
+  /** id interno (enlaces) y numero visible de cada TO */
+  transfer_orders_detail?: { id: number; id_to: number | null }[];
   id_end_location: number;
   id_start_location: number;
   fixed_rate: 0 | 1;

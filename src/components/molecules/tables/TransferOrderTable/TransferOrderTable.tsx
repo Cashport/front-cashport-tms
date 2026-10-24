@@ -10,7 +10,11 @@ dayjs.extend(utc);
 export interface DataTypeForTransferOrderTable {
   key: number;
   tr: string;
+  /** numero visible de la fila (TO o TR); tr sigue siendo el id interno */
+  number: string;
   id_transfer_request?: number;
+  /** numero visible de la TR asociada a una TO */
+  trNumber?: number;
   validator: {
     ismaterialsproblem: boolean;
     ispeopleproblem: boolean;
@@ -77,6 +81,7 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
     const mappedData = items.map((item) => ({
       key: item.id,
       tr: String(item.id),
+      number: String((item.transferType === "TO" ? item.id_to : item.id_tr) ?? item.id),
       origendestino: {
         origin: item.start_location,
         destination: item.end_location
@@ -87,6 +92,8 @@ export const TransferOrdersTable: FC<ITransferOrdersTable> = ({
       },
       tipodeviaje: item.type,
       id_transfer_request: item.id_transfer_request ?? undefined,
+      // solo las filas de TO traen id_transfer_request; su id_tr es el de esa TR
+      trNumber: item.id_transfer_request ? item.id_tr ?? item.id_transfer_request : undefined,
       tiempodeviaje: String(item.created_at),
       valor: item?.total_value ?? 0,
       validator: {

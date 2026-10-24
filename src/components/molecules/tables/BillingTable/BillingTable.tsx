@@ -69,10 +69,10 @@ export default function BillingTable({
       key: "idTransferRequest",
       render: (idTransferRequest, record) => (
         <Link href={getLink(record)} style={{ color: "blue", textDecorationLine: "underline" }}>
-          {idTransferRequest}
+          {record.idTr ?? idTransferRequest}
         </Link>
       ),
-      sorter: (a, b) => a.idTransferRequest - b.idTransferRequest,
+      sorter: (a, b) => (a.idTr ?? a.idTransferRequest) - (b.idTr ?? b.idTransferRequest),
       showSorterTooltip: false
     },
     {

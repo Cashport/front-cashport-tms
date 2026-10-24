@@ -90,6 +90,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
         return (
           <PreauthorizeTrip
             idTR={idTR}
+            trNumber={transferRequest?.id_tr}
             carrier={carriersData.find((cd) => cd.id == selectedCarrier) as BillingByCarrier}
             messageApi={messageApi}
             onClose={onClose}
@@ -99,6 +100,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
         return (
           <FinalizeTrip
             idTR={idTR}
+            trNumber={transferRequest?.id_tr}
             messageApi={messageApi}
             onClose={onClose}
             statusTrId={statusTrId}
@@ -114,6 +116,7 @@ export default function ModalGenerateActionTO(props: Readonly<PropsModalGenerate
             onClose={onClose}
             noModal
             trID={transferRequest?.id}
+            trNumber={transferRequest?.id_tr}
             toIDs={transferRequest?.transfer_orders}
             trStatus={transferRequest?.status_id}
           />

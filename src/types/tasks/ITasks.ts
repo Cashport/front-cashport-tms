@@ -20,10 +20,14 @@ export interface ITask {
   amount: number | null;
   task_type_name: string;
   transfer_request_id: number;
+  /** numero visible de la TR */
+  transfer_request_id_tr?: number | null;
   carrier_request_id: number;
   start_location_name: string;
   end_location_name: string;
   transfer_order_ids: string;
+  /** numeros visibles de las TO */
+  transfer_order_id_tos?: string | null;
   start_date: string;
   end_date: string;
   carriers: string[];
@@ -85,6 +89,8 @@ export interface ITaskApproval {
   destination: string;
   vp: string;
   id_transfer_request: number;
+  /** numero visible de la TR */
+  id_tr?: number | null;
 }
 
 export interface ITaskDetail {
