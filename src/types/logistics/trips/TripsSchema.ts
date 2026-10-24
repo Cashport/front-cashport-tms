@@ -184,6 +184,10 @@ export interface ISocketTrip {
   id: string;
   tripId: number;
   transferRequestId: number;
+  /** numero visible de la TR (si el servidor de sockets lo envia) */
+  transferRequestNumber?: number | null;
+  /** proyecto de la TR (si el servidor de sockets lo envia) */
+  projectId?: number | null;
   observations: string;
   stateId: string;
   imgUrl: any;
