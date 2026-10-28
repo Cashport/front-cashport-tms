@@ -17,6 +17,8 @@ interface Props {
   modalWidth?: string;
   noModal?: boolean;
   trID?: string | number;
+  /** numero visible de la TR; si no viene se muestra trID */
+  trNumber?: string | number | null;
   toIDs?: string[] | number[];
   trStatus?: string;
 }
@@ -28,6 +30,7 @@ export const ModalCancelTR = ({
   modalWidth,
   noModal,
   trID,
+  trNumber,
   toIDs,
   trStatus
 }: Props) => {
@@ -98,7 +101,7 @@ export const ModalCancelTR = ({
             )}
 
             <p>
-              ¿Está seguro de cancelar la <strong>TR {trID}</strong>?
+              ¿Está seguro de cancelar la <strong>TR {trNumber ?? trID}</strong>?
             </p>
 
             {toIDs && toIDs?.length > 0 && (

@@ -263,13 +263,13 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
     new Date(transferRequest?.end_date || "").getTime() -
     new Date(transferRequest?.start_date || "").getTime();
 
-  const OrderList = ({ orders }: { orders: number[] }) => {
+  const OrderList = ({ orders }: { orders: { id: number; id_to: number | null }[] }) => {
     return (
       <div style={{ color: "gray" }}>
         {orders.map((order, index) => (
-          <React.Fragment key={order}>
-            <Link href={`/logistics/orders/details/${order}`} passHref target="_blank">
-              <span className={styles.trackSubtitle}>TO-{order}</span>
+          <React.Fragment key={order.id}>
+            <Link href={`/logistics/orders/details/${order.id}`} passHref target="_blank">
+              <span className={styles.trackSubtitle}>TO-{order.id_to ?? order.id}</span>
             </Link>
             {index < orders.length - 1 && <span>, </span>}
           </React.Fragment>
@@ -284,11 +284,16 @@ export const MainDescription: FC<IMainDescriptionProps> = ({
           <div className={styles.trackTitleContainer}>
             <Flex gap={8}>
               <Text className={styles.trackTitle}>
-                TR-{transferRequest?.id}
+                TR-{transferRequest?.id_tr ?? transferRequest?.id}
                 {transferRequest?.fixed_rate === 1 ? " (Renta fija)" : ""}
               </Text>
               {!!transferRequest?.transfer_orders?.length && (
-                <OrderList orders={transferRequest?.transfer_orders ?? []} />
+                <OrderList
+                  orders={
+                    transferRequest?.transfer_orders_detail ??
+                    transferRequest.transfer_orders.map((id) => ({ id, id_to: null }))
+                  }
+                />
               )}
             </Flex>
             <ConfigProvider

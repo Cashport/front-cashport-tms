@@ -271,7 +271,11 @@ export default function PricingStepOne({ ordersId, orders }: Readonly<PricingSte
       <Flex style={{ flexDirection: "column" }}>
         <Tabs defaultActiveKey={String(ordersId[0])}>
           {ordersId.map((a) => (
-            <TabPane key={a} tab={<h4>{a}</h4>} style={{ padding: "24px 0" }}>
+            <TabPane
+              key={a}
+              tab={<h4>{orders?.orders.find((ord) => ord.id === a)?.id_to ?? a}</h4>}
+              style={{ padding: "24px 0" }}
+            >
               <Flex style={{ flexDirection: "column" }}>
                 <Collapse
                   defaultActiveKey={"0"}

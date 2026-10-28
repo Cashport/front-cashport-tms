@@ -435,11 +435,13 @@ export const getModifyOptions = async (): Promise<IModifyOption[]> => {
 
 export const addTOToOngoingTR = async (
   transferOrderId: number,
-  transferRequestId: number
+  transferRequestNumber: number
 ): Promise<any> => {
+  // id_tr: numero visible de la TR que escribe el usuario (el back lo busca
+  // en el proyecto activo); id_transfer_order: id interno de la TO
   const body = {
-    id_tr: transferRequestId,
-    id_to: transferOrderId
+    id_tr: transferRequestNumber,
+    id_transfer_order: transferOrderId
   };
   try {
     const response: GenericResponse<any> = await API.post(`transfer-request/add-to-in-tr`, body);

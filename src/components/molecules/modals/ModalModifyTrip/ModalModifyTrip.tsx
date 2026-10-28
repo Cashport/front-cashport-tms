@@ -16,6 +16,8 @@ interface Props {
   onCancel: () => void;
   isOpen?: boolean;
   TRData?: TransferRequestFinish;
+  /** numero visible de la TR; si no viene se muestra TRData.id */
+  trNumber?: number | null;
 }
 
 interface IFormValues {
@@ -28,7 +30,7 @@ type IFormValuesOptional = {
   [K in keyof IFormValues]?: IFormValues[K];
 };
 
-export const ModalModifyTrip = ({ onCancel, isOpen, TRData }: Props) => {
+export const ModalModifyTrip = ({ onCancel, isOpen, TRData, trNumber }: Props) => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -66,7 +68,7 @@ export const ModalModifyTrip = ({ onCancel, isOpen, TRData }: Props) => {
     try {
       if (TRData) {
         await finishTransferRequest(TRData, data);
-        message.success(`TR No. ${TRData.id} asignada`);
+        message.success(`TR No. ${trNumber ?? TRData.id} asignada`);
         router.push("/logistics/transfer-orders");
       } else {
         message.error("No se encontró la información de la TR.");
