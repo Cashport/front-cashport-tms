@@ -6,12 +6,44 @@
     margin: 0;
 }
 
+// Zoom global, el mismo de Cashport (DESIGN.md §0). Los portátiles de 14" (Windows al 125–150%)
+// dejan el navegador en ~1280–1440 px CSS: a 100% la app se ve sobredimensionada, así que se
+// reduce todo el documento. `zoom` también reduce vh/vw: para medidas del viewport usar
+// calc(N * var(--vh)) / calc(N * var(--vw)) y, en JS que mezcla px de pantalla y de CSS,
+// getAppZoom() de @/utils/utils.
+:root {
+    --app-zoom: 1;
+    --vh: calc(1vh / var(--app-zoom));
+    --vw: calc(1vw / var(--app-zoom));
+}
+
+@media (min-width: 1024px) and (max-width: 1700px) {
+    :root {
+        --app-zoom: 0.85;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+    :root {
+        --app-zoom: 0.75;
+    }
+}
+
+html {
+    zoom: var(--app-zoom);
+}
+
 html,
 body {
-    max-width: 100vw;
+    max-width: calc(100 * var(--vw));
     margin: 0;
     overflow-x: hidden;
-    height: 100vh;
+    height: calc(100 * var(--vh));
+}
+
+// Ant Design limita los modales a calc(100vw - 32px), que el zoom reduciría.
+html .ant-modal {
+    max-width: calc(100 * var(--vw) - 32px);
 }
 
 body {

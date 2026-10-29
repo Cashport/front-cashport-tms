@@ -6,6 +6,16 @@ import { IComponentPermission } from "@/types/userPermissions/IUserPermissions";
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * Zoom global de la app (`--app-zoom` en globals.scss). window.inner*, clientX y
+ * getBoundingClientRect vienen en px de pantalla; dividir por este valor para pasarlos
+ * a los px CSS del layout.
+ */
+export const getAppZoom = (): number => {
+  if (typeof window === "undefined") return 1;
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("zoom")) || 1;
+};
+
 interface Subline {
   id: number;
   description: string;

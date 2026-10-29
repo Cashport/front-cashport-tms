@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Empty, Flex, Typography } from "antd";
+import { Empty, Typography } from "antd";
 import { DotsThree, Plus } from "phosphor-react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import { Request } from "./request/Request";
 import { InProcess } from "./in-process/InProcess";
@@ -11,8 +12,7 @@ import { SearchProvider } from "@/context/SearchContext";
 import { useAppStore } from "@/lib/store/store";
 import { TMS_COMPONENTS, TMSMODULES } from "@/utils/constants/globalConstants";
 
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import Container from "@/components/atoms/Container/Container";
+import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import ProtectedComponent from "@/components/molecules/protectedComponent/ProtectedComponent";
 import { checkUserComponentPermissions } from "@/utils/utils";
 import ModalGenerateActionOrders from "@/components/molecules/modals/ModalGenerateActionOrders/ModalGenerateActionOrders";
@@ -182,145 +182,146 @@ export const TransferOrders = () => {
     }
   };
 
+  // DESIGN.md §4: Filtrar, buscador, ⋯ y la acción primaria van en el header compartido.
+  const headerActions = (
+    <>
+      <Filter />
+      <UiSearchInput
+        surface="page"
+        className="w-[var(--search-w)] shrink"
+        placeholder="Buscar viaje, TO o TR…"
+      />
+      <button
+        type="button"
+        className={`cp-control-fill ${styles.headerButton}`}
+        onClick={() => setIsModalOpen({ selected: 1 })}
+      >
+        <DotsThree size={18} weight="bold" />
+        Generar acción
+      </button>
+      <ProtectedComponent
+        componentName={TMS_COMPONENTS[viewName].REQUESTS}
+        viewName={viewName}
+        checkFunction={({ create_permission }) => create_permission}
+      >
+        <Link href="/logistics/orders/new" className={styles.primaryButton}>
+          <Plus weight="bold" size={14} />
+          Crear viaje
+        </Link>
+      </ProtectedComponent>
+    </>
+  );
+
   return (
     <SearchProvider debounceDelay={2000}>
-      <Container>
-        <Flex
-          justify="space-between"
-          className={styles.stickyHeader}
-          style={{ marginBottom: "1rem" }}
-        >
-          <div className={styles.filterContainer}>
-            <UiSearchInput className="search" placeholder="Buscar" />
-            <Filter />
-            <PrincipalButton
-              type="default"
-              icon={<DotsThree size={"1.5rem"} />}
-              disabled={false}
-              loading={false}
-              onClick={() => setIsModalOpen({ selected: 1 })}
+      <ViewWrapper headerTitle="Viajes" headerActions={headerActions}>
+        <div className={`cp-card ${styles.boardCard}`}>
+          <div className={styles.tabContainer}>
+            <ProtectedComponent
+              componentName={TMS_COMPONENTS[viewName].REQUESTS}
+              viewName={viewName}
             >
-              Generar acción
-            </PrincipalButton>
+              <Text
+                onClick={() => setTab(TabEnum.REQUESTS)}
+                className={`${styles.tab} ${tab === TabEnum.REQUESTS && styles.active}`}
+              >
+                Solicitudes
+              </Text>
+            </ProtectedComponent>
+            <ProtectedComponent
+              componentName={TMS_COMPONENTS[viewName].IN_PROCESS}
+              viewName={viewName}
+            >
+              <Text
+                onClick={() => setTab(TabEnum.IN_PROCESS)}
+                className={`${styles.tab} ${tab === TabEnum.IN_PROCESS && styles.active}`}
+              >
+                En curso
+              </Text>
+            </ProtectedComponent>
+            <ProtectedComponent
+              componentName={TMS_COMPONENTS[viewName].COMPLETED}
+              viewName={viewName}
+            >
+              <Text
+                onClick={() => setTab(TabEnum.COMPLETED)}
+                className={`${styles.tab} ${tab === TabEnum.COMPLETED && styles.active}`}
+              >
+                Finalizados
+              </Text>
+            </ProtectedComponent>
           </div>
-          <ProtectedComponent
-            componentName={TMS_COMPONENTS[viewName].REQUESTS}
-            viewName={viewName}
-            checkFunction={({ create_permission }) => create_permission}
-          >
-            <PrincipalButton
-              type="primary"
-              className="buttonNewProject"
-              size="large"
-              href="/logistics/orders/new"
-            >
-              Crear Nuevo Viaje
-              {<Plus weight="bold" size={14} />}
-            </PrincipalButton>
-          </ProtectedComponent>
-        </Flex>
-        <div className={styles.tabContainer} style={{ marginBottom: "0.5rem" }}>
-          <ProtectedComponent componentName={TMS_COMPONENTS[viewName].REQUESTS} viewName={viewName}>
-            <Text
-              onClick={() => setTab(TabEnum.REQUESTS)}
-              className={`${styles.tab} ${tab === TabEnum.REQUESTS && styles.active}`}
-            >
-              Solicitudes
-            </Text>
-          </ProtectedComponent>
-          <ProtectedComponent
-            componentName={TMS_COMPONENTS[viewName].IN_PROCESS}
-            viewName={viewName}
-          >
-            <Text
-              onClick={() => setTab(TabEnum.IN_PROCESS)}
-              className={`${styles.tab} ${tab === TabEnum.IN_PROCESS && styles.active}`}
-            >
-              En curso
-            </Text>
-          </ProtectedComponent>
-          <ProtectedComponent
-            componentName={TMS_COMPONENTS[viewName].COMPLETED}
-            viewName={viewName}
-          >
-            <Text
-              onClick={() => setTab(TabEnum.COMPLETED)}
-              className={`${styles.tab} ${tab === TabEnum.COMPLETED && styles.active}`}
-            >
-              Finalizados
-            </Text>
-          </ProtectedComponent>
+          <div>{isHy && renderView()}</div>
+          <ModalGenerateActionOrders
+            isOpen={isModalOpen.selected === 1}
+            onClose={() => {
+              setIsModalOpen({ selected: 0 });
+
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+              setAllSelectedRows([]);
+            }}
+            ordersId={ordersId}
+            trsIds={trsIds}
+            setIsModalOpen={setIsModalOpen}
+            allSelectedRows={allSelectedRows}
+          />
+          <ModalCancelTR
+            isOpen={isModalOpen.selected === 2}
+            onCancel={() =>
+              setIsModalOpen({
+                selected: 1
+              })
+            }
+            onClose={() => {
+              // clean states
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+              setAllSelectedRows([]);
+
+              // causw reloading of the data
+              setMutate((prev) => !prev);
+              setIsModalOpen({ selected: 0 });
+            }}
+            trID={trsIds[0]}
+            trNumber={allSelectedRows?.find((row) => row.tr === String(trsIds[0]))?.number}
+            toIDs={childOrdersId}
+            trStatus={TRStatusId}
+          />
+
+          <ModalPostponeTR
+            isOpen={isModalOpen.selected === 3}
+            onCancel={() => setIsModalOpen({ selected: 1 })}
+            onClose={() => {
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+              setAllSelectedRows([]);
+
+              setMutate((prev) => !prev);
+              setIsModalOpen({ selected: 0 });
+            }}
+            allSelectedRows={allSelectedRows}
+          />
+
+          <ModalAddTR2TO
+            isOpen={isModalOpen.selected === 4}
+            onCancel={() => setIsModalOpen({ selected: 1 })}
+            onClose={() => {
+              setOrdersId([]);
+              setTrsIds([]);
+              setChildOrdersId([]);
+              setAllSelectedRows([]);
+
+              setMutate((prev) => !prev);
+              setIsModalOpen({ selected: 0 });
+            }}
+            allSelectedRows={allSelectedRows}
+          />
         </div>
-        <div>{isHy && renderView()}</div>
-        <ModalGenerateActionOrders
-          isOpen={isModalOpen.selected === 1}
-          onClose={() => {
-            setIsModalOpen({ selected: 0 });
-
-            setOrdersId([]);
-            setTrsIds([]);
-            setChildOrdersId([]);
-            setAllSelectedRows([]);
-          }}
-          ordersId={ordersId}
-          trsIds={trsIds}
-          setIsModalOpen={setIsModalOpen}
-          allSelectedRows={allSelectedRows}
-        />
-        <ModalCancelTR
-          isOpen={isModalOpen.selected === 2}
-          onCancel={() =>
-            setIsModalOpen({
-              selected: 1
-            })
-          }
-          onClose={() => {
-            // clean states
-            setOrdersId([]);
-            setTrsIds([]);
-            setChildOrdersId([]);
-            setAllSelectedRows([]);
-
-            // causw reloading of the data
-            setMutate((prev) => !prev);
-            setIsModalOpen({ selected: 0 });
-          }}
-          trID={trsIds[0]}
-          trNumber={allSelectedRows?.find((row) => row.tr === String(trsIds[0]))?.number}
-          toIDs={childOrdersId}
-          trStatus={TRStatusId}
-        />
-
-        <ModalPostponeTR
-          isOpen={isModalOpen.selected === 3}
-          onCancel={() => setIsModalOpen({ selected: 1 })}
-          onClose={() => {
-            setOrdersId([]);
-            setTrsIds([]);
-            setChildOrdersId([]);
-            setAllSelectedRows([]);
-
-            setMutate((prev) => !prev);
-            setIsModalOpen({ selected: 0 });
-          }}
-          allSelectedRows={allSelectedRows}
-        />
-
-        <ModalAddTR2TO
-          isOpen={isModalOpen.selected === 4}
-          onCancel={() => setIsModalOpen({ selected: 1 })}
-          onClose={() => {
-            setOrdersId([]);
-            setTrsIds([]);
-            setChildOrdersId([]);
-            setAllSelectedRows([]);
-
-            setMutate((prev) => !prev);
-            setIsModalOpen({ selected: 0 });
-          }}
-          allSelectedRows={allSelectedRows}
-        />
-      </Container>
+      </ViewWrapper>
     </SearchProvider>
   );
 };

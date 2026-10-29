@@ -2,20 +2,24 @@
 
 .mainWrapper {
     width: 100%;
-    height: 100vh;
+    // Alto del viewport compensado por el zoom global (DESIGN.md §0).
+    height: calc(100 * var(--vh));
     display: flex;
     flex-direction: row;
     overflow: hidden;
     background-color: $background;
 
+    // DESIGN.md §3: fondo #f7f7f7 y sin margen superior (el header es sticky).
     .rightContent {
         height: 100%;
         width: 100%;
-        // margin: 0 0 32px 0;
+        min-width: 0;
         background-color: $background;
-        padding: 1rem;
-        padding-left: 2rem;
+        padding: 0 var(--page-pad-x) var(--page-pad-bottom);
         overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: #d6d8de transparent;
     }
 }
 
