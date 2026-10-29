@@ -41,9 +41,11 @@ const Filter: React.FC = () => {
         )}
         loading={isLoading}
         removeIcon
-        size="large"
-        style={{ width: "120px", height: "46px" }}
-        placement="bottomLeft"
+        // Botón Filtrar del header (DESIGN.md §4.5): sin borde, relleno blanco, 36px.
+        // Pendiente: reemplazarlo por el modal Filtros Avanzados (§6).
+        className="filterCascaderHeader"
+        style={{ width: "170px" }}
+        placement="bottomRight"
         maxTagCount="responsive"
       />
     </div>

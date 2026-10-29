@@ -1,4 +1,4 @@
-@import "@/styles/variables.scss"; 
+@import "@/styles/variables.scss";
 .filterCascader {
     height: 100%;
 
@@ -16,9 +16,7 @@
     .ant-select-arrow {
         color: #141414 !important;
     }
-
 }
-
 
 .actionButton {
     font-family: inherit;
@@ -26,7 +24,7 @@
     align-items: center;
     background-color: $white;
     padding: 8px;
-  
+
     border: none;
     box-shadow: none;
     cursor: pointer;
@@ -42,9 +40,9 @@
 .cascader-menu-container {
     max-height: 200px; /* Ajusta según tus necesidades */
     overflow-y: auto;
-  }
-  
-  .cascader-buttons {
+}
+
+.cascader-buttons {
     display: flex;
     justify-content: flex-start; /* Centra los botones */
     gap: 2.5rem; /* Espaciado fijo entre los botones */
@@ -56,4 +54,35 @@
     z-index: 10;
     width: 100%; /* Asegura que ocupe todo el ancho del Cascader */
     box-sizing: border-box; /* Incluye el padding en el tamaño total */
-  }
+}
+// Filtrar del header (DESIGN.md §4.5): sin borde, relleno blanco sobre el gris, radio 8,
+// 36px, texto #8a8a8a 13px/500.
+.filterCascaderHeader.ant-select {
+    height: var(--control-h);
+
+    .ant-select-selector {
+        height: var(--control-h) !important;
+        border: 0 !important;
+        border-radius: 8px !important;
+        background-color: rgb(var(--cp-surface)) !important;
+        box-shadow: none !important;
+        font-size: 13px;
+        font-weight: 500;
+
+        .ant-select-selection-overflow {
+            flex-wrap: nowrap !important;
+        }
+    }
+
+    .ant-select-selection-placeholder {
+        color: rgb(var(--cp-ink-4));
+    }
+
+    &:hover .ant-select-selection-placeholder {
+        color: rgb(var(--cp-ink));
+    }
+
+    .ant-select-arrow {
+        color: rgb(var(--cp-ink-4)) !important;
+    }
+}

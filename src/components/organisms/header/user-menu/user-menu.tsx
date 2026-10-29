@@ -1,0 +1,171 @@
+"use client";
+import { useState } from "react";
+import { message, Popover } from "antd";
+import { ChevronDown, User } from "lucide-react";
+
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useAppStore } from "@/lib/store/store";
+import { sendEmailResetPassword } from "@/services/users/users";
+import { cn } from "@/utils/utils";
+import { LogoutIcon, useLogoutConfirm } from "./logout-confirm";
+
+const initialsOf = (name: string, email: string) => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length)
+    return parts
+      .slice(0, 2)
+      .map((p) => p[0]!.toUpperCase())
+      .join("");
+  return email.slice(0, 2).toUpperCase();
+};
+
+const Avatar = ({ initials, className }: { initials: string; className?: string }) => (
+  <span
+    className={cn(
+      "flex shrink-0 items-center justify-center rounded-full bg-[#141414] font-semibold text-white",
+      className
+    )}
+  >
+    {initials || <User size={18} strokeWidth={2} />}
+  </span>
+);
+
+interface MenuItemProps {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+}
+
+const MenuItem = ({ icon, label, onClick, danger, disabled }: MenuItemProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={cn(
+      "flex h-10 w-full cursor-pointer items-center gap-3 rounded-lg border-0 bg-transparent px-2.5 text-left text-[13.5px] hover:bg-cp-bg disabled:cursor-default disabled:opacity-50",
+      danger ? "text-cp-magenta" : "text-cp-ink"
+    )}
+  >
+    <span className="flex shrink-0">{icon}</span>
+    {label}
+  </button>
+);
+
+const MenuIcon = ({ d }: { d: string }) => (
+  <svg
+    width={17}
+    height={17}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.7}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d={d} />
+  </svg>
+);
+
+const ICON_LOCK = "M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3";
+const ICON_PROJECT = "M4 5h16v14H4zM4 9h16";
+
+/**
+ * Avatar del header y su menú (DESIGN.md §4.9): nombre y correo, proyecto actual,
+ * cambiar contraseña y cerrar sesión con confirmación. El TMS no tiene modo oscuro,
+ * así que el selector de tema de Cashport no se incluye.
+ */
+export default function UserMenu() {
+  const user = useCurrentUser();
+  const project = useAppStore((state) => state.selectedProject);
+  const [open, setOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+  const { askLogout, logoutModal } = useLogoutConfirm();
+
+  const name = user?.name ?? "";
+  const email = user?.email ?? "";
+  const initials = user ? initialsOf(name, email) : "";
+
+  const handleChangePassword = async () => {
+    if (!email) return;
+    setSending(true);
+    try {
+      await sendEmailResetPassword(email);
+      message.success(`Te enviamos un correo a ${email} para cambiar tu contraseña`);
+      setOpen(false);
+    } catch {
+      message.error("No pudimos enviar el correo. Intenta de nuevo.");
+    }
+    setSending(false);
+  };
+
+  const content = (
+    <div className="flex w-[300px] flex-col p-2 text-cp-ink">
+      <div className="flex items-center gap-3 p-2.5">
+        <Avatar initials={initials} className="h-[38px] w-[38px] text-[13px]" />
+        <div className="flex min-w-0 flex-col gap-px">
+          {name && <span className="truncate text-[14.5px] font-semibold">{name}</span>}
+          <span className="truncate text-[13px] text-cp-ink-3">{email}</span>
+        </div>
+      </div>
+      {project?.NAME && (
+        <div className="flex items-center gap-3 px-2.5 pb-2 text-[13px] text-cp-ink-2">
+          <MenuIcon d={ICON_PROJECT} />
+          <span className="truncate">{project.NAME}</span>
+        </div>
+      )}
+      <div className="my-1 h-px bg-cp-line" />
+      <MenuItem
+        icon={<MenuIcon d={ICON_LOCK} />}
+        label={sending ? "Enviando correo…" : "Cambiar contraseña"}
+        onClick={handleChangePassword}
+        disabled={sending || !email}
+      />
+      <div className="my-1 h-px bg-cp-line" />
+      <MenuItem
+        danger
+        icon={<LogoutIcon />}
+        label="Cerrar sesión"
+        onClick={() => {
+          setOpen(false);
+          askLogout();
+        }}
+      />
+    </div>
+  );
+
+  return (
+    <>
+      <Popover
+        open={open}
+        onOpenChange={setOpen}
+        trigger="click"
+        placement="bottomRight"
+        arrow={false}
+        content={content}
+        overlayInnerStyle={{
+          padding: 0,
+          borderRadius: 14,
+          background: "#ffffff",
+          boxShadow: "0 12px 32px rgba(0,0,0,.16)"
+        }}
+      >
+        <button
+          type="button"
+          aria-label="Menú de usuario"
+          className="ml-1 flex shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-cp-ink"
+        >
+          <Avatar initials={initials} className="h-[var(--avatar)] w-[var(--avatar)] text-[13px]" />
+          <ChevronDown
+            size={14}
+            strokeWidth={2}
+            className={cn("transition-transform", open && "rotate-180")}
+          />
+        </button>
+      </Popover>
+      {logoutModal}
+    </>
+  );
+}
