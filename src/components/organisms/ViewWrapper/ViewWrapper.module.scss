@@ -21,6 +21,16 @@
         scrollbar-width: thin;
         scrollbar-color: #d6d8de transparent;
     }
+
+    // Modo oscuro (DESIGN.md §8): fondo de la página con el token oscuro.
+    &:global(.dark) {
+        background-color: rgb(var(--cp-bg));
+
+        .rightContent {
+            background-color: rgb(var(--cp-bg));
+            scrollbar-color: rgb(var(--cp-line-2)) transparent;
+        }
+    }
 }
 
 // media queries

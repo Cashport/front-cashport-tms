@@ -12,7 +12,8 @@ import {
   Truck,
   CurrencyCircleDollar,
   Receipt,
-  ClipboardText
+  ClipboardText,
+  SquaresFour
 } from "phosphor-react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
@@ -23,6 +24,10 @@ import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import "./modulesButtons.scss";
 import { ChatCircleDots } from "@phosphor-icons/react";
+
+// Torre de control: oculta en el menú mientras se valida con datos de producción.
+// Se entra solo por URL (/logistics/control-tower). Para publicarla, poner en true.
+const SHOW_CONTROL_TOWER = false;
 
 interface ModulesButtonsProps {
   isSideBarLarge: boolean;
@@ -147,6 +152,21 @@ export const ModulesButtons = ({
             className={path.startsWith("/logistics/providers") ? "buttonIcon" : "buttonIconActive"}
           >
             {isSideBarLarge && "Clientes"}
+          </Button>
+        </Link>
+      )}
+      {SHOW_CONTROL_TOWER && checkUserViewPermissions(project, "TMS-Dashboard") && (
+        <Link href="/logistics/control-tower" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<SquaresFour size={iconSize} />}
+            title="Torre de control"
+            className={
+              path.startsWith("/logistics/control-tower") ? "buttonIcon" : "buttonIconActive"
+            }
+          >
+            {isSideBarLarge && "Torre de control"}
           </Button>
         </Link>
       )}
