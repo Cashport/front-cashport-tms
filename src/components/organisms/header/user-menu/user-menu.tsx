@@ -3,6 +3,7 @@ import { useState } from "react";
 import { message, Popover } from "antd";
 import { ChevronDown, User } from "lucide-react";
 
+import { useThemeMenu, type ThemePreference } from "@/context/ThemeMenuContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAppStore } from "@/lib/store/store";
 import { sendEmailResetPassword } from "@/services/users/users";
@@ -53,14 +54,15 @@ const MenuItem = ({ icon, label, onClick, danger, disabled }: MenuItemProps) => 
   </button>
 );
 
-const MenuIcon = ({ d }: { d: string }) => (
+/* Íconos del diseño "Corte y Proyeccion" (17px el de la fila, 14px los del selector de tema). */
+const MenuIcon = ({ d, size = 17 }: { d: string; size?: number }) => (
   <svg
-    width={17}
-    height={17}
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth={1.7}
+    strokeWidth={size === 17 ? 1.7 : 1.8}
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden
@@ -71,15 +73,27 @@ const MenuIcon = ({ d }: { d: string }) => (
 
 const ICON_LOCK = "M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3";
 const ICON_PROJECT = "M4 5h16v14H4zM4 9h16";
+const ICON_THEME = "M12 3a9 9 0 1 0 0 18zM12 3a9 9 0 0 1 0 18";
+
+const THEME_OPTIONS: { key: ThemePreference; label: string; d: string }[] = [
+  {
+    key: "light",
+    label: "Claro",
+    d: "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+  },
+  { key: "dark", label: "Oscuro", d: "M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" },
+  { key: "system", label: "Sistema", d: "M4 5h16v11H4zM2 19h20" }
+];
 
 /**
- * Avatar del header y su menú (DESIGN.md §4.9): nombre y correo, proyecto actual,
- * cambiar contraseña y cerrar sesión con confirmación. El TMS no tiene modo oscuro,
- * así que el selector de tema de Cashport no se incluye.
+ * Avatar del header y su menú (DESIGN.md §4.9): nombre y correo, proyecto actual, tema
+ * (solo en módulos con modo oscuro, que lo publican con ThemeMenuContext), cambiar
+ * contraseña y cerrar sesión con confirmación.
  */
 export default function UserMenu() {
   const user = useCurrentUser();
   const project = useAppStore((state) => state.selectedProject);
+  const themeMenu = useThemeMenu();
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const { askLogout, logoutModal } = useLogoutConfirm();
@@ -117,6 +131,37 @@ export default function UserMenu() {
         </div>
       )}
       <div className="my-1 h-px bg-cp-line" />
+      {themeMenu && (
+        <div className="flex flex-col gap-2 px-2.5 pb-2.5 pt-2">
+          <span className="flex items-center gap-3 text-[13.5px]">
+            <MenuIcon d={ICON_THEME} />
+            Tema
+          </span>
+          <div className="grid grid-cols-3 gap-0.5 rounded-lg bg-cp-bg p-[3px]">
+            {THEME_OPTIONS.map(({ key, label, d }) => {
+              const active = themeMenu.theme === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  title={label}
+                  aria-pressed={active}
+                  onClick={() => themeMenu.setTheme(key)}
+                  className={cn(
+                    "flex h-[30px] min-w-0 cursor-pointer items-center justify-center gap-[5px] rounded-md border-0 text-[13px] text-cp-ink",
+                    active
+                      ? "bg-cp-surface font-semibold shadow-[0_1px_3px_rgba(0,0,0,.12)]"
+                      : "bg-transparent font-normal"
+                  )}
+                >
+                  <MenuIcon d={d} size={14} />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <MenuItem
         icon={<MenuIcon d={ICON_LOCK} />}
         label={sending ? "Enviando correo…" : "Cambiar contraseña"}
@@ -148,7 +193,7 @@ export default function UserMenu() {
         overlayInnerStyle={{
           padding: 0,
           borderRadius: 14,
-          background: "#ffffff",
+          background: "rgb(var(--cp-surface))",
           boxShadow: "0 12px 32px rgba(0,0,0,.16)"
         }}
       >

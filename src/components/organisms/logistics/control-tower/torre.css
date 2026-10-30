@@ -1,0 +1,664 @@
+/* Generado desde el prototipo aprobado (torre-control-tms-front/src/styles/app.css), encerrado bajo .torre. */
+/* Layout: shell Cashport (riel 48px + header 58px sticky) → fila de KPIs → serie de costo + composición → usuarios → contratos / proveedores / VP. Medidas en px CSS: las del prototipo (px visibles a zoom 0.75) ×4/3, mínimo 13px de letra y sin mayúsculas (DESIGN.md §0 y §1). */
+.torre{
+  --bg:#f7f7f7; --surface:#ffffff; --surface-2:#fafafa; --muted:#f2f2f2;
+  --line:#ececec; --line-2:#e3e3e3;
+  --ink:#141414; --ink-2:#4a4a4a; --ink-3:#6b6b6b; --ink-4:#8a8a8a;
+  --pl-orange:#ff5500; /* naranja Profitline */
+  /* sankey: rampa pizarra por categoría del primer tramo */
+  --sk1:#011722; --sk2:#2b4a5f; --sk3:#47697d; --sk4:#6a8ea3; --sk5:#93afc0; --sk6:#5a6b75; --sk7:#8a979f; --sko:#c9d0d4; --sknode:#334455;
+  --tm4:#011822; --tm4-ink:#FFFFFF; /* treemap: azul Cashport en claro, gris en oscuro (igual que Sales Intelligence) */
+  --skt1:#fff; --skt2:#fff; --skt3:#fff; --skt4:#fff; --skt5:#011722; --skt6:#fff; --skt7:#011722; --skto:#334455;
+  --kmline:#b1bbc1; --kmtext:#334455; --costbar:#011722; /* PL Gray y PL Dark Gray: costo por km */
+  --lime:#cbe71e; --lime-dark:#9bb514; --lime-tint:#f4f9d2;
+  --blue:#1677ff; --blue-hover:#0b5bd3; --orange:#ff5500; --navy:#011722; /* PL Dark Blue: barra de costo */ --magenta:#e0007a;
+  --red:#e5262b; --amber:#f5b700; --teal:#0e9aa7; --violet:#7b3fe4; --grey:#8a8a8a;
+  --ctrl:#ffffff; --ctrl-in-card:#f7f7f7; --tip-bg:#141414; --tip-ink:#ffffff;
+  --overlay:rgba(20,20,20,.38); --shadow-pop:0 16px 42.5px rgba(0,0,0,.16);
+  /* estados de TR y tipos de servicio: una sola familia azul pizarra, de oscuro (más urgente) a claro */
+  --st-sinp:#0f2a3a; --st-asig:#1f4458; --st-curso:#2f5e76; --st-leg:#477a93;
+  --st-acep1:#6595ad; --st-acep2:#8bb2c5; --st-pre:#b5cfdc; --st-fact:#d9e6ec;
+  --ty1:#1f4458; --ty2:#477a93; --ty3:#8bb2c5; --ty4:#c3d7e1;
+  --on-lime:#141414; --good:#cbe71e; --on-good:#141414;
+  /* paletas categóricas (treemap, estados de TR, líneas por tipología): Sales Intelligence */
+  --c1:#FF5500; --c1i:#011822; --c2:#CBE71E; --c2i:#011822; --c3:#00B3C6; --c3i:#011822; --c4:var(--tm4); --c4i:var(--tm4-ink); --c5:#2563EB; --c5i:#FFFFFF; --c6:#F5A00B; --c6i:#011822;
+  --c7:#7C3AED; --c7i:#FFFFFF; --c8:#16B985; --c8i:#011822; --c9:#E11D48; --c9i:#FFFFFF; --c10:#DB2777; --c10i:#FFFFFF;
+  --s-esp:#F5A00B; --s-esp-i:#011822; --s-asig:#7C3AED; --s-asig-i:#fff; --s-apl:var(--tm4); --s-apl-i:var(--tm4-ink); --s-sin:var(--tm4); --s-sin-i:var(--tm4-ink);
+  --s-carg:#00B3C6; --s-carg-i:#011822; --s-ruta:#16B985; --s-ruta-i:#011822; --s-desc:#CBE71E; --s-desc-i:#011822; --s-stb:#FF5500; --s-stb-i:#011822; --s-det:#E11D48; --s-det-i:#fff;
+  --s-leg:#DB2777; --s-leg-i:#fff; --s-porac:#2563EB; --s-porac-i:#fff; --s-acep:#16B985; --s-acep-i:#011822; --s-pre:#7C3AED; --s-pre-i:#fff;
+  --lt1:#00B3C6; --lt2:#7C3AED; --lt3:#16B985; --lt4:#F5A00B;
+  --font:"Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --rail-w:64px; --header-h:77.5px; --gap:12px; --radius:14px; --pad:14px 18px; --control-h:36px;
+}
+/* Oscuro: mismos tokens que el modo oscuro de Cashport (.dark en tailwind.css): fondo #09090b, tarjeta #011822. */
+.torre[data-theme="dark"]{
+  --bg:#09090b; --surface:#011822; --surface-2:#18181b; --muted:#27272a;
+  --line:#27272a; --line-2:#3f3f46;
+  --ink:#fafafa; --ink-2:#d4d4d8; --ink-3:#a1a1aa; --ink-4:#71717a;
+  --lime-tint:#2a3510; --blue:#4c9aff; --blue-hover:#7cb4ff; --navy:#6f9bb8;
+  --ctrl:#1c3240; --ctrl-in-card:#09090b; --kmtext:#c3ccd1; --costbar:#4a565e; --sk1:#e6eef2; --sk2:#b5cfdc; --sk3:#8bb2c5; --sk4:#6595ad; --sk5:#477a93; --sk6:#a3b0b8; --sk7:#73828b; --sko:#3a4c56; --sknode:#c3ccd1; --tm4:#B1BBC1; --tm4-ink:#011822; --skt1:#09090b; --skt2:#09090b; --skt3:#09090b; --skt4:#09090b; --skt5:#fff; --skt6:#09090b; --skt7:#fff; --skto:#fafafa; --tip-bg:#fafafa; --tip-ink:#09090b;
+  --overlay:rgba(0,0,0,.55); --shadow-pop:0 16px 42.5px rgba(0,0,0,.5);
+  --st-sinp:#e6f0f4; --st-asig:#c2d9e4; --st-curso:#9dc1d3; --st-leg:#7aa8c0; --st-acep1:#5c8ea9; --st-acep2:#477790; --st-pre:#386277; --st-fact:#2b4f61; --ty1:#c2d9e4; --ty2:#8db4c9; --ty3:#5c8ea9; --ty4:#3f6b82;
+  color-scheme:dark;
+}
+/* Tema "Sistema": colores del cliente (Halliburton). Principal #FFFFFF · secundario #000000 · resaltar #CE1126.
+   Alertas en tonos rojos, lo controlado en verde y el resto en grises. */
+.torre[data-theme="hal"]{
+  --bg:#f4f4f4; --surface:#ffffff; --surface-2:#fafafa; --muted:#f0f0f0;
+  --line:#e6e6e6; --line-2:#d9d9d9;
+  --ink:#000000; --ink-2:#333333; --ink-3:#5c5c5c; --ink-4:#8c8c8c;
+  --pl-orange:#ce1126; --orange:#ce1126; --red:#8f0b1a; --magenta:#ce1126; --amber:#ec8a93; --teal:#5c5c5c; --violet:#3d3d3d; --grey:#8c8c8c;
+  --lime:#ce1126; --lime-dark:#2e7d32; --lime-tint:#fbe7e9; --on-lime:#ffffff; --good:#2e7d32; --on-good:#ffffff;
+  --blue:#ce1126; --blue-hover:#a50e1f; --navy:#000000; --costbar:#2b2b2b; --kmline:#9e9e9e; --kmtext:#333333;
+  --ctrl:#ffffff; --ctrl-in-card:#f2f2f2; --tip-bg:#000000; --tip-ink:#ffffff;
+  --overlay:rgba(0,0,0,.38); --shadow-pop:0 16px 42.5px rgba(0,0,0,.16);
+  --sk1:#000; --sk2:#2b2b2b; --sk3:#4d4d4d; --sk4:#6e6e6e; --sk5:#9e9e9e; --sk6:#5c5c5c; --sk7:#8c8c8c; --sko:#d0d0d0; --sknode:#333;
+  --tm4:#000000; --tm4-ink:#ffffff;
+  --st-sinp:#1a1a1a; --st-asig:#3d3d3d; --st-curso:#5c5c5c; --st-leg:#7a7a7a; --st-acep1:#999; --st-acep2:#b3b3b3; --st-pre:#cccccc; --st-fact:#e6e6e6;
+  --ty1:#1a1a1a; --ty2:#5c5c5c; --ty3:#999999; --ty4:#cccccc;
+  /* treemap: misma paleta que en Claro (Sales Intelligence) */
+  --c4:#011822; --c4i:#FFFFFF; --c5:#ce1126; --c5i:#FFFFFF; /* el azul #2563EB se reemplaza por el rojo Halliburton */
+  --s-esp:#f4c3c8; --s-esp-i:#5c0712; --s-asig:#5c5c5c; --s-asig-i:#fff; --s-apl:#d0d0d0; --s-apl-i:#000; --s-sin:#9e9e9e; --s-sin-i:#000;
+  --s-carg:#81c784; --s-carg-i:#0d2e10; --s-ruta:#2e7d32; --s-ruta-i:#fff; --s-desc:#c8e6c9; --s-desc-i:#0d2e10; --s-stb:#ce1126; --s-stb-i:#fff; --s-det:#8f0b1a; --s-det-i:#fff;
+  --s-leg:#ec8a93; --s-leg-i:#3d0510; --s-porac:#7a7a7a; --s-porac-i:#fff; --s-acep:#2e7d32; --s-acep-i:#fff; --s-pre:#3d3d3d; --s-pre-i:#fff;
+  --lt1:#000000; --lt2:#ce1126; --lt3:#7a7a7a; --lt4:#b3b3b3;
+  color-scheme:light;
+}
+.torre [hidden]{display:none !important}
+.torre *{box-sizing:border-box; scrollbar-width:none}
+.torre *::-webkit-scrollbar{width:0;height:0;display:none}
+.torre,.torre{background:var(--bg)}
+.torre{margin:0; color:var(--ink); font-family:var(--font); font-size:16.5px; line-height:1.45; -webkit-font-smoothing:antialiased}
+.torre button{font:inherit; color:inherit; cursor:pointer; background:none; border:0; padding:0}
+.torre input{font:inherit; color:inherit}
+.torre :focus-visible{outline:2.5px solid var(--blue); outline-offset:2.5px; border-radius:8px}
+.torre .num{font-variant-numeric:tabular-nums}
+.torre a, .torre .link{color:var(--blue); text-decoration:none; cursor:pointer}
+.torre a:hover, .torre .link:hover{color:var(--blue-hover); text-decoration:underline}
+
+/* ---------- shell ---------- */
+.torre .app{display:flex; min-height:100vh}
+.torre .rail{width:var(--rail-w); flex:none; background:var(--surface); border-right:1px solid var(--line);
+  position:sticky; top:0; height:100vh; display:flex; flex-direction:column; align-items:center; padding:13.5px 0; gap:2.5px}
+.torre .rail .logo{width:48px; height:48px; border-radius:10.5px; display:grid; place-items:center; margin-bottom:10.5px;
+  font-weight:700; font-size:14.5px; background:var(--ink); color:var(--surface)}
+.torre .rail .sep{width:37.5px; height:1px; background:var(--line); margin:8px 0}
+.torre .rail button{width:40px; height:40px; border-radius:10.5px; display:grid; place-items:center; color:var(--ink)}
+.torre .rail button:hover{background:var(--muted)}
+.torre .rail button.on{background:var(--lime); color:var(--on-lime)}
+.torre .rail svg{width:22.5px; height:22.5px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round}
+.torre .rail .foot{margin-top:auto}
+.torre .main{flex:1; min-width:0; padding-left:max(0px, env(safe-area-inset-left,0px)); padding-right:max(0px, env(safe-area-inset-right,0px))}
+
+/* ---------- header ---------- */
+.torre .header{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg); min-height:var(--header-h);
+  display:flex; align-items:center; gap:10.5px; padding-block:0; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+.torre .h-title{display:flex; align-items:center; gap:20px; min-width:0}
+.torre .h-title h1{font-size:18px; font-weight:600; margin:0; white-space:nowrap}
+.torre .cut{display:flex; align-items:center; gap:9.5px}
+.torre .chip-cut{height:32px; border-radius:8px; background:var(--ctrl); display:inline-flex; align-items:center; gap:9.5px;
+  padding:0 0 0 12px; font-size:15.5px; color:var(--ink-2); position:relative; white-space:nowrap}
+.torre .chip-cut .dot{width:8px; height:8px; border-radius:50%; background:var(--lime-dark)}
+.torre .chip-cut .bar{width:1px; height:16px; background:var(--line)}
+.torre .chip-cut .rf{width:32px; height:32px; display:grid; place-items:center; color:var(--ink-2); border-radius:0 8px 8px 0}
+.torre .chip-cut .rf svg{width:17.5px; height:17.5px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; transition:transform .5s}
+.torre .chip-cut .rf.spin svg{transform:rotate(360deg)}
+.torre .pill{height:32px; border-radius:16px; padding:0 14.5px; font-size:15.5px; background:var(--ctrl); color:var(--ink-3); white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
+.torre .pill[aria-pressed="true"]{background:var(--lime); color:var(--on-lime); font-weight:600}
+.torre .hover-card{position:absolute; top:calc(100% + 10.5px); left:0; width:320px; max-width:calc(100vw - 53.5px); background:var(--surface); border-radius:12px; box-shadow:var(--shadow-pop);
+  padding:13.5px 16px; font-size:15.5px; color:var(--ink-2); white-space:normal; line-height:1.45; opacity:0; pointer-events:none; transition:opacity .12s; z-index:30}
+.torre .hover-card b{display:block; color:var(--ink); font-weight:600; margin-bottom:4px}
+.torre .has-card{position:relative}
+.torre .has-card:hover .hover-card, .torre .has-card:focus-within .hover-card{opacity:1}
+.torre .sample{font-size:14px; color:var(--ink-3); border:1px dashed var(--line-2); border-radius:6.5px; padding:1px 8px; white-space:nowrap}
+.torre .spacer{flex:1}
+.torre .fchips{display:flex; gap:6.5px; min-width:0; overflow:hidden; justify-content:flex-end}
+.torre .fchip{height:29.5px; border-radius:8px; background:var(--ctrl); font-size:14px; display:inline-flex; align-items:center; gap:6.5px; padding:0 5.5px 0 10.5px; white-space:nowrap; color:var(--ink-2)}
+.torre .fchip button{width:21.5px; height:21.5px; color:var(--ink-4); font-size:16px; line-height:21.5px}
+.torre .hbtn{height:var(--control-h); border-radius:9.5px; background:var(--ctrl); color:var(--ink-4); font-size:16px; font-weight:500;
+  display:inline-flex; align-items:center; gap:8px; padding:0 14.5px; white-space:nowrap}
+.torre .hbtn:hover{color:var(--ink)}
+.torre .hbtn svg{width:14.5px; height:14.5px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
+.torre .badge{min-width:21.5px; height:21.5px; border-radius:10.5px; background:var(--lime); color:var(--on-lime); font-size:13.5px; font-weight:700; display:inline-grid; place-items:center; padding:0 5.5px}
+.torre .search{position:relative; width:320px; flex:none}
+.torre .search input{width:100%; height:var(--control-h); border:0; border-radius:9.5px; background:var(--ctrl); padding:0 34.5px 0 40px; font-size:16px; font-weight:500}
+.torre .search input::placeholder{color:#9a9a9a; font-weight:400}
+.torre .search svg{position:absolute; left:13.5px; top:50%; transform:translateY(-50%); width:17.5px; height:17.5px; fill:none; stroke:var(--ink); stroke-width:2; stroke-linecap:round}
+.torre .search .x{position:absolute; right:8px; top:50%; transform:translateY(-50%); width:24px; height:24px; color:var(--ink-4); font-size:18.5px}
+.torre .search.in-card input{background:var(--ctrl-in-card)}
+.torre .avatar{display:flex; align-items:center; gap:5.5px; flex:none; position:relative; border-radius:21.5px}
+.torre .avatar span{width:37.5px; height:37.5px; border-radius:50%; background:var(--ink); color:var(--surface); font-size:14px; font-weight:600; display:grid; place-items:center}
+.torre .avatar svg{width:14.5px; height:14.5px; fill:none; stroke:var(--ink); stroke-width:2.2; stroke-linecap:round}
+
+.torre .umenu{position:absolute; right:0; top:calc(100% + 10.5px); width:373.5px; background:var(--surface); border-radius:18.5px; box-shadow:var(--shadow-pop); padding:16px; z-index:40; text-align:left; cursor:default}
+.torre .umenu .who b{display:block; font-size:18px; font-weight:600}
+.torre .umenu .who span{font-size:15.5px; color:var(--ink-3)}
+.torre .umenu hr{border:0; height:1px; background:var(--line); margin:13.5px 0}
+.torre .umenu .lbl{font-size:15.5px; color:var(--ink-3); margin-bottom:8px}
+.torre .thm{position:relative; flex:none}
+.torre .hbtn.ico{width:var(--control-h); padding:0; justify-content:center; color:var(--ink-2)}
+.torre .hbtn.ico svg{width:20px; height:20px; stroke-width:1.8}
+.torre .thmenu{position:absolute; right:0; top:calc(100% + 10.5px); width:170.5px; background:var(--surface); border-radius:13.5px; box-shadow:var(--shadow-pop); padding:8px; z-index:40; display:flex; flex-direction:column; gap:2.5px}
+.torre .thmenu button{display:flex; align-items:center; gap:13.5px; height:42.5px; padding:0 13.5px; border-radius:9.5px; text-align:left; font-size:17.5px; color:var(--ink)}
+.torre .thmenu button:hover{background:var(--muted)}
+.torre .thmenu button svg{width:20px; height:20px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.torre .thmenu button[aria-checked="true"]{color:var(--lime-dark); font-weight:600}
+.torre .themeseg{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:var(--muted); border-radius:10.5px; padding:4px; gap:2.5px}
+.torre .themeseg button{height:37.5px; border-radius:8px; font-size:16px; color:var(--ink-3); display:flex; align-items:center; justify-content:center; gap:6.5px}
+.torre .themeseg button svg{width:17.5px; height:17.5px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.torre .themeseg button[aria-pressed="true"]{background:var(--surface); color:var(--ink); font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.torre .umenu .item{display:block; width:100%; text-align:left; height:42.5px; font-size:16.5px; border-radius:9.5px; padding:0 10.5px}
+.torre .umenu .item:hover{background:var(--muted)}
+.torre .umenu .item.out{color:var(--magenta); font-weight:600}
+
+/* ---------- page ---------- */
+.torre .page{display:flex; flex-direction:column; gap:var(--gap); padding-block:0 16px; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+.torre .card{background:var(--surface); border-radius:var(--radius); padding:var(--pad); min-width:0}
+.torre .card-row{display:grid; gap:var(--gap)}
+.torre .kpis{grid-template-columns:repeat(4, minmax(0,1fr)) minmax(0,1.75fr)}
+.torre .row2{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); align-items:stretch} /* misma proporción que la Torre de control de recaudo */
+.torre .row4{grid-template-columns:repeat(3, minmax(0,1fr))}
+.torre .row4>.card{display:flex; flex-direction:column; height:586.5px; min-height:0}
+.torre .row4 .c-scroll{flex:1; min-height:0; overflow-y:auto; margin-right:-10.5px; padding-right:10.5px; scrollbar-width:thin; scrollbar-color:var(--line-2) transparent}
+.torre .row4 .c-scroll::-webkit-scrollbar{width:8px}
+.torre .row4 .c-scroll::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:4px}
+.torre .row4 .rule-note{flex:none}
+.torre .dl{width:34.5px; height:34.5px; flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; border-radius:8px; color:var(--ink-3); cursor:pointer; padding:0; margin-left:-5.5px}
+.torre .dl[hidden]{display:none}
+.torre .dl:hover{color:var(--ink); background:var(--muted)}
+.torre .dl:focus-visible{outline:2.5px solid var(--pl-orange); outline-offset:1px}
+.torre .dl svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.torre .dl.busy{opacity:.4; pointer-events:none}
+.torre table.pkt{width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px}
+.torre table.pkt thead th{position:sticky; top:0; z-index:1; background:var(--surface); font-size:14px; font-weight:600; color:var(--ink-2); text-align:left; padding:0 5.5px 8px; border-bottom:1px solid var(--line); white-space:nowrap; cursor:pointer; user-select:none; vertical-align:bottom; line-height:1.25}
+.torre table.pkt .th2{display:inline-block; text-align:right; vertical-align:bottom}
+.torre table.pkt th.r, .torre table.pkt td.r{text-align:right}
+.torre table.pkt th:first-child, .torre table.pkt td:first-child{padding-left:0}
+.torre table.pkt th:last-child, .torre table.pkt td:last-child{padding-right:0}
+.torre table.pkt td{padding:8px 5.5px; border-bottom:1px solid var(--line); font-size:16px; font-weight:400; font-variant-numeric:tabular-nums; vertical-align:middle}
+.torre table.pkt tr:last-child td{border-bottom:0}
+.torre table.pkt .l1{display:block; font-size:16px; font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre table.pkt .l2{display:block; font-size:14px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre table.pkt td.bad{color:var(--pl-orange); font-weight:600}
+.torre table.pk-tot{flex:none; border-top:1px solid var(--line-2)}
+.torre table.pk-tot td{border-bottom:0; padding-top:10.5px; font-weight:600}
+.torre table.pk-tot .l1{font-weight:600}
+.torre table.pk-tot .l2{font-weight:400}
+.torre .kpi{display:flex; flex-direction:column; min-height:149.5px}
+.torre .k-label{font-size:15.5px; color:var(--ink-3); display:flex; align-items:center; gap:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .k-main{display:flex; align-items:flex-end; justify-content:space-between; gap:10.5px; margin-top:2.5px}
+.torre .k-value{font-size:29.5px; font-weight:600; line-height:1.15; white-space:nowrap; font-variant-numeric:tabular-nums}
+.torre .k-value small{font-size:14.5px; color:var(--ink-3); font-weight:500; margin-left:2.5px}
+.torre .k-top{display:flex; align-items:center; justify-content:space-between; gap:5.5px; min-width:0}
+.torre .k-top .k-label{flex:none}
+.torre .k-cmp{font-size:14px; color:var(--ink-3); white-space:nowrap; display:flex; justify-content:flex-end; align-items:center; gap:5.5px; min-width:0; flex:1 1 auto}
+.torre .k-cmp .t{min-width:0; overflow:hidden; text-overflow:ellipsis}
+.torre .k-cmp .pct{flex:none}
+.torre .k-value.full{font-size:clamp(21.5px, 1.45vw, 26.5px); margin-top:8px}
+.torre .k-side{text-align:right; font-size:14px; color:var(--ink-3); line-height:1.3; white-space:nowrap}
+.torre .k-side b{display:block; font-size:16.5px; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+.torre .k-hz{margin-top:auto; padding-top:10.5px; cursor:default; border-radius:8px}
+.torre .k-hz:hover .k-bar{height:9.5px}
+.torre .k-bar{height:6.5px; transition:height .12s; border-radius:4px; background:var(--muted); display:flex; overflow:hidden; gap:1px; position:relative}
+.torre .k-bar i{display:block; height:100%}
+.torre .k-bar .goal{position:absolute; top:-2.5px; bottom:-2.5px; width:2.5px; background:var(--ink); box-shadow:0 0 0 2px var(--surface)}
+.torre .k-foot{font-size:14px; color:var(--ink-3); margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .pct{font-size:14px; font-weight:600; padding:1px 8px; border-radius:6.5px; background:var(--muted); color:var(--ink-2); white-space:nowrap; font-variant-numeric:tabular-nums}
+.torre .pct.pos{background:var(--good); color:var(--on-good)}
+.torre .pct.risk{background:var(--magenta); color:#fff}
+.torre .pct.plo{background:var(--pl-orange); color:#fff}
+.torre .pct.warn{background:var(--amber); color:#141414}
+.torre .st-legend{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:4px 13.5px; margin-top:9.5px}
+.torre .st-legend button{display:flex; align-items:center; gap:6.5px; font-size:14px; color:var(--ink-3); min-width:0; text-align:left; border-radius:5.5px}
+.torre .st-legend button span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .st-legend button b{margin-left:auto; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+.torre .st-legend button.dim{opacity:.35}
+.torre .sw{width:10.5px; height:10.5px; border-radius:2.5px; flex:none; display:inline-block}
+.torre .stbar{height:12px; border-radius:5.5px; display:flex; gap:1px; overflow:hidden; margin-top:8px; background:var(--muted)}
+.torre .stbar i{display:block; height:100%; cursor:pointer}
+
+.torre .c-head{display:flex; align-items:center; gap:13.5px; min-height:34.5px; margin-bottom:10.5px; flex-wrap:wrap}
+.torre .c-head h2{font-size:18px; font-weight:600; margin:0; white-space:nowrap}
+.torre .ch-fix{flex-wrap:nowrap}
+.torre .ch-fix h2{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis}
+.torre .ch-fix .seg,.torre .ch-fix .psel{flex:none}
+@media (max-width:760px){.torre .ch-fix{flex-wrap:wrap} .torre .ch-fix h2{flex-basis:100%}}
+.torre .c-head .legend{display:flex; gap:16px; align-items:center; font-size:14.5px; color:var(--ink-3); flex-wrap:wrap}
+.torre .c-head .legend span{display:inline-flex; align-items:center; gap:6.5px; white-space:nowrap}
+.torre .c-head .count{margin-left:auto; font-size:14.5px; color:var(--ink-4); white-space:nowrap}
+.torre .sk-stages{display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; margin:0 0 16px}
+.torre .sk-root{height:37.5px; display:inline-flex; align-items:center; padding:0 13.5px; border-radius:9.5px; background:var(--navy); color:var(--surface); font-size:15.5px; font-weight:600; white-space:nowrap}
+.torre .sk-arrow{color:var(--ink-4); font-size:16px}
+.torre .sk-stage{display:inline-flex; align-items:center; gap:1px; background:var(--ctrl-in-card); border-radius:10.5px; padding:2.5px 4px 2.5px 8px; cursor:grab}
+.torre .sk-stage.drag{opacity:.4}
+.torre .sk-stage.over{box-shadow:inset 0 0 0 2px var(--lime-dark)}
+.torre .sk-grip{color:var(--ink-4); font-size:13.5px; margin-right:4px; user-select:none}
+.torre .sk-n{font-size:13.5px; color:var(--ink-4); margin-right:2.5px}
+.torre .psel.mini{margin-left:0}
+.torre .psel.mini select{height:32px; background:transparent; font-weight:600; padding:0 29.5px 0 2.5px}
+.torre .psel.mini svg{right:8px}
+.torre .sk-b{width:29.5px; height:29.5px; border-radius:6.5px; color:var(--ink-3); font-size:18.5px; line-height:1}
+.torre .sk-b:hover:not(:disabled){background:var(--surface); color:var(--ink)}
+.torre .sk-b:disabled{opacity:.3; cursor:default}
+.torre .sk-add{height:32px; padding:0 8px; border-radius:8px; color:var(--ink-4); font-size:14.5px; font-weight:500; background:none}
+.torre .sk-add:hover{color:var(--ink); background:var(--ctrl-in-card)}
+.torre .sk-focus{margin-left:auto}
+.torre .sk-wrap{overflow-x:auto}
+.torre .sk-crumbs{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:16px; margin:0 0 10.5px; min-height:29.5px}
+.torre .sk-crumbs button{color:var(--blue); font-weight:500; border-radius:5.5px}
+.torre .sk-crumbs button:hover{text-decoration:underline}
+.torre .sk-crumbs .sep{color:var(--ink-4)}
+.torre .sk-crumbs .cur{font-weight:600; color:var(--ink)}
+.torre .sk-crumbs .dim{color:var(--ink-3); font-weight:400}
+.torre #skChart{position:relative}
+.torre .tm{position:relative; width:100%}
+.torre .tm-g{position:absolute; overflow:hidden; border-radius:5.5px}
+.torre .tm-gh{position:absolute; left:0; right:0; top:0; height:29.5px; padding:5.5px 10.5px; font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--tm-ink); cursor:pointer}
+.torre .tm-gh span{font-weight:500; color:var(--tm-ink); opacity:.75; margin-left:8px; text-transform:none}
+.torre .tm-t{position:absolute; overflow:hidden; padding:6.5px 9.5px; color:var(--tm-ink); font-size:14px; line-height:1.3; box-shadow:inset 0 0 0 .5px rgba(255,255,255,.7); cursor:pointer}
+.torre .tm-t:hover{box-shadow:inset 0 0 0 2.5px var(--tm-ink)}
+.torre .tm-t b{display:block; font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:clip}
+.torre .tm-t span{display:block; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; opacity:.9}
+.torre .tm-t em{position:absolute; right:6.5px; bottom:4px; font-style:normal; font-size:13.5px; font-weight:600; opacity:.9; font-variant-numeric:tabular-nums; line-height:1.2}
+.torre .tm-t.sm{padding:2.5px 4px}
+.torre .tm-t.sm b, .torre .tm-t.sm span{font-size:13px !important; line-height:1.2}
+.torre .tm-t.sm em{right:4px; bottom:1px; font-size:13px}
+.torre .tm-t.leaf{cursor:default}
+.torre .tm-sg{position:absolute; overflow:hidden; box-shadow:inset 0 0 0 2px rgba(255,255,255,.85)}
+.torre .tm-sg .tm-t{box-shadow:inset 0 0 0 .5px rgba(255,255,255,.55)}
+.torre .tm-sg .tm-t:hover{box-shadow:inset 0 0 0 2.5px var(--tm-ink)}
+.torre .tm-sh{position:absolute; left:0; right:0; top:0; height:22.5px; padding:2.5px 9.5px; font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--tm-ink); cursor:pointer; background:rgba(255,255,255,.18)}
+.torre .tm-sh span{font-weight:500; opacity:.75; margin-left:6.5px; text-transform:none}
+.torre .tm-sh:hover{background:rgba(255,255,255,.32)}
+.torre #skChart svg{display:block}
+.torre .sk-link{opacity:.34; transition:opacity .12s}
+.torre #skChart.hl .sk-link{opacity:.07}
+.torre #skChart.hl .sk-link.on{opacity:.62}
+.torre .sk-node{cursor:pointer}
+.torre #skChart.hl .sk-node{opacity:.35}
+.torre #skChart.hl .sk-node.on{opacity:1}
+.torre .sk-lbl{font-size:14.5px; fill:var(--ink); font-family:var(--font); paint-order:stroke; stroke:var(--surface); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
+.torre .sk-lbl .n{font-weight:600}
+.torre .sk-lbl .v{fill:var(--ink-3)}
+.torre .sk-colh{font-size:13.5px; fill:var(--ink-3); font-family:var(--font); font-weight:600}
+.torre .cd-card{display:flex; flex-direction:column}
+.torre .cd-wrap{flex:1 1 0; min-height:320px; overflow-y:auto; margin:0 -18.5px; border-top:1px solid var(--line)}
+.torre .cd-card{padding-bottom:0; overflow:hidden}
+.torre table.cd-tot{width:calc(100% + 37.5px); margin:0 -18.5px; border-top:1px solid var(--line); background:var(--surface-2)}
+.torre table.cd-tot td{height:50.5px; font-weight:600; border-bottom:0}
+.torre table.cd{table-layout:fixed}
+.torre table.cd thead th{font-size:14.5px; height:40px; padding:0 6.5px}
+.torre table.ot thead th[data-ok]{cursor:pointer; user-select:none}
+.torre table.ot thead th[data-ok]:hover{color:var(--ink)}
+.torre table.cd tbody tr.click{cursor:pointer}
+.torre table.cd tbody tr.click:hover{background:var(--surface-2)}
+.torre table.cd tbody tr.selected, .torre table.cd tbody tr.selected:hover{background:color-mix(in srgb, var(--pl-orange) 12%, transparent)}
+.torre table.cd tbody tr.selected .cd-b i{background:var(--pl-orange)}
+.torre table.cd tbody tr.selected .cd-n{font-weight:600}
+.torre table.cd tbody tr.dim{opacity:.5}
+.torre table.cd tbody tr.dim:hover{opacity:.85}
+.torre table.cd thead th{cursor:pointer}
+.torre table.cd tbody td{height:50.5px; padding:0 8px; font-size:16px}
+.torre table.cd tfoot td{padding:0 8px; font-size:16px}
+.torre table.cd th:first-child, .torre table.cd td:first-child{padding-left:18.5px}
+.torre table.cd th:last-child, .torre table.cd td:last-child{padding-right:18.5px}
+.torre .cd-n{display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .cd-p{display:block; font-size:13px; line-height:1.1; margin-top:1px; color:var(--ink-4); font-weight:400; font-variant-numeric:tabular-nums}
+.torre .cd-b{display:block; height:4px; background:var(--muted); border-radius:2.5px; margin-top:4px; overflow:hidden}
+.torre .cd-b i{display:block; height:100%; background:var(--navy); border-radius:2.5px}
+.torre .cd-p{margin-right:5.5px}
+.torre table.cd .pct{padding:1px 5.5px}
+.torre .pct.new{background:var(--blue); color:#fff}
+.torre .ops .c-head{margin-bottom:13.5px}
+.torre .ops-pipe{display:grid; grid-template-columns:minmax(0,3fr) minmax(0,6fr) minmax(0,4fr); gap:13.5px; margin-bottom:16px}
+.torre .ops-stage{background:var(--bg); border-radius:12px; padding:10.5px 13.5px; min-width:0}
+.torre .ops-stage h4{margin:0 0 8px; font-size:14px; font-weight:600; color:var(--ink-3); display:flex; justify-content:space-between}
+.torre .ops-stage h4 b{color:var(--ink)}
+.torre .ops-sts{display:grid; gap:5.5px}
+.torre .ops-st{display:flex; align-items:center; gap:8px; text-align:left; background:var(--surface); border-radius:8px; padding:6.5px 10.5px; font-size:15.5px; min-width:0; cursor:pointer; border:1px solid transparent}
+.torre .ops-st:hover{border-color:var(--line-2)}
+.torre .ops-st.on{border-color:var(--pl-orange); background:color-mix(in srgb, var(--pl-orange) 8%, transparent)}
+.torre .ops-st .nm{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .ops-st .n{font-weight:700; font-variant-numeric:tabular-nums}
+.torre .ops-st .v{color:var(--ink-3); font-size:14px; font-variant-numeric:tabular-nums; min-width:69.5px; text-align:right}
+.torre .ops-st i{width:9.5px; height:9.5px; border-radius:2.5px; flex:none}
+.torre .ops-st i{background:var(--sc)}
+.torre .ops-sts.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.torre .ops-alerts{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10.5px; margin-bottom:16px}
+.torre .ops-al{border:1px solid var(--line); border-radius:12px; padding:12px 14.5px; text-align:left; display:flex; flex-direction:column; gap:2.5px; min-width:0; position:relative; background:var(--surface)}
+.torre .ops-al:hover{border-color:var(--line-2)}
+.torre .ops-al.on{border-color:var(--pl-orange); background:color-mix(in srgb, var(--pl-orange) 7%, transparent)}
+.torre .ops-al .t{font-size:14.5px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .ops-al .n{font-size:26.5px; font-weight:600; font-variant-numeric:tabular-nums; line-height:1.2}
+.torre .ops-al .n small{font-size:14.5px; font-weight:500; color:var(--ink-3); margin-left:4px}
+.torre .ops-al .d{font-size:14px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .ops-al .d b{color:var(--ink); font-weight:600}
+.torre .ops-al::before{content:""; position:absolute; left:0; top:12px; bottom:12px; width:4px; border-radius:0 2.5px 2.5px 0; background:var(--lv)}
+.torre .ops-al .t{display:flex; align-items:center; gap:8px}
+.torre .ops-al .tt{min-width:0; overflow:hidden; text-overflow:ellipsis}
+.torre .ops-al .lvt{margin-left:auto; flex:none; font-size:13px; font-weight:600; color:var(--lv)}
+.torre .ot .mc-more{margin-left:8px; font-size:13.5px; font-weight:600; color:var(--ink-3); background:var(--muted); border-radius:5.5px; padding:0 5.5px}
+.torre .ops-grid{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:stretch}
+.torre .ops-list{min-width:0; display:flex; flex-direction:column}
+.torre .c-head.sm{min-height:29.5px; margin-bottom:8px}
+.torre .c-head.sm h3{margin:0; font-size:16.5px; font-weight:600}
+.torre .ops-wrap{max-height:528px; overflow-y:auto; border-top:1px solid var(--line)}
+.torre table.ot{table-layout:fixed}
+.torre table.ot thead th{font-size:14.5px; height:40px; padding:0 8px; cursor:default}
+.torre table.ot tbody td{height:53.5px; padding:0 8px; font-size:16px}
+.torre table.ot th:first-child, .torre table.ot td:first-child{padding-left:0}
+.torre table.ot th:last-child, .torre table.ot td:last-child{padding-right:0}
+.torre .ot .tr-id{font-weight:600; color:var(--blue); font-variant-numeric:tabular-nums}
+.torre .ot .l1{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .ot .mc{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:16px}
+.torre .ot .mc i{width:9.5px; height:9.5px; border-radius:50%; flex:none}
+.torre .ot .l2{display:block; font-size:14px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .ot .tag{display:inline-block; font-size:13.5px; font-weight:600; border-radius:5.5px; padding:1px 8px; white-space:nowrap; background:var(--muted); color:var(--ink-2)}
+.torre .ot .tag.hot{background:var(--pl-orange); color:#fff}
+.torre table.ot col.c-st{width:181.5px}
+@media (max-width:760px){.torre table.ot col.c-st{width:24%} .torre .ot .tag{white-space:normal; max-width:100%; line-height:1.35}}
+.torre .cm-btn{display:inline-flex; align-items:center; gap:5.5px; height:32px; padding:0 9.5px; border-radius:8px; color:var(--ink-3); font-size:14.5px; font-weight:600; font-variant-numeric:tabular-nums}
+.torre .cm-btn svg{width:18.5px; height:18.5px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round}
+.torre .cm-btn:hover{background:var(--muted); color:var(--ink)}
+.torre .tr-idw{display:inline-flex; align-items:center; gap:2.5px}
+.torre .tr-idw .cm-btn{height:26.5px; padding:0 5.5px; font-size:13.5px; gap:2.5px}
+.torre .tr-idw .cm-btn svg{width:16px; height:16px}
+.torre .cm-pop{position:fixed; z-index:85; width:533.5px; max-width:calc(100vw - 32px); background:var(--surface); border-radius:16px; box-shadow:var(--shadow-pop); border:1px solid var(--line)}
+.torre .cp-h{padding:13.5px 18.5px 10.5px; border-bottom:1px solid var(--line)}
+.torre .cp-h b{display:block; font-size:16.5px; font-weight:600}
+.torre .cp-h span{font-size:14px; color:var(--ink-3)}
+.torre .cm-pop .cm-list{max-height:min(480px, calc(100vh - 186.5px)); padding:0 16px 8px; scrollbar-width:thin; scrollbar-color:var(--line-2) transparent}
+.torre .cm-pop .cm-list::-webkit-scrollbar{display:block; width:8px}
+.torre .cm-pop .cm-list::-webkit-scrollbar-track{background:transparent}
+.torre .cm-pop .cm-list::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:4px}
+.torre .cm-pop .cm-list::-webkit-scrollbar-thumb:hover{background:var(--ink-4)}
+.torre .cm-pop{width:480px}
+.torre .cm-pop .cp-h{padding:10.5px 16px 8px}
+.torre .cm-pop .cp-h b{font-size:15.5px}
+.torre .cm-pop .cp-h span{font-size:13.5px}
+.torre .cm-pop .cm-it{gap:9.5px; padding:8px 0}
+.torre .cm-pop .cm-av{width:26.5px; height:26.5px; font-size:13px}
+.torre .cm-pop .cm-h{font-size:14px; gap:6.5px}
+.torre .cm-pop .cm-r{font-size:13px; padding:0 5.5px}
+.torre .cm-pop .cm-t{font-size:13px}
+.torre .cm-pop .cm-x{font-size:14.5px; line-height:1.4; margin-top:1px}
+.torre .cm-att{display:flex; flex-direction:column; gap:5.5px; margin-top:6.5px}
+.torre .cm-file{display:flex; align-items:center; gap:9.5px; max-width:100%; padding:5.5px 10.5px 5.5px 5.5px; border:1px solid var(--line); border-radius:9.5px; background:var(--muted); color:var(--ink); text-decoration:none; font-size:14px}
+.torre .cm-file:hover{border-color:var(--line-2); background:var(--surface)}
+.torre .cm-fi{flex:none; width:34.5px; height:26.5px; border-radius:5.5px; display:grid; place-items:center; color:#fff; font-size:13px; font-weight:700}
+.torre .cm-fi.k-pdf{background:#D9452B} .torre .cm-fi.k-img{background:#0e9aa7} .torre .cm-fi.k-xls{background:#1E7A45} .torre .cm-fi.k-mail{background:#334455}
+.torre .cm-fn{min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500}
+.torre .cm-fs{flex:none; color:var(--ink-3); font-size:13px; font-variant-numeric:tabular-nums}
+.torre .cm-list{max-height:min(640px, calc(100vh - 213.5px)); overflow-y:auto; padding:8px 24px 18.5px; scrollbar-width:thin}
+.torre .cm-list::-webkit-scrollbar{display:block; width:8px}
+.torre .cm-list::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:4px}
+.torre .cm-it{display:flex; gap:13.5px; padding:13.5px 0; border-bottom:1px solid var(--line)}
+.torre .cm-it:last-child{border-bottom:0}
+.torre .cm-av{width:37.5px; height:37.5px; border-radius:50%; flex:none; display:grid; place-items:center; color:#fff; font-size:14px; font-weight:600}
+.torre .cm-b{min-width:0; flex:1}
+.torre .cm-h{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:16px}
+.torre .cm-h b{font-weight:600}
+.torre .cm-r{font-size:13.5px; color:var(--ink-3); background:var(--muted); border-radius:5.5px; padding:0 6.5px}
+.torre .cm-t{margin-left:auto; font-size:14px; color:var(--ink-4); font-variant-numeric:tabular-nums}
+.torre .cm-x{font-size:16.5px; color:var(--ink-2); margin-top:2.5px; line-height:1.45}
+.torre .ops-app{background:var(--bg); border-radius:12px; padding:13.5px 16px; min-width:0}
+.torre .ops-app h3{margin:0 0 10.5px; font-size:16.5px; font-weight:600}
+.torre .app-k{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:13.5px}
+.torre .app-k div{background:var(--surface); border-radius:9.5px; padding:9.5px 12px; min-width:0}
+.torre .app-k span{display:block; font-size:14px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .app-k b{font-size:21.5px; font-weight:600; font-variant-numeric:tabular-nums}
+.torre .app-row{display:grid; grid-template-columns:minmax(0,1fr) 58.5px; gap:2.5px 10.5px; align-items:center; padding:5.5px 0}
+.torre .app-row .nm{font-size:15.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .app-row .pc{font-size:15.5px; font-weight:600; text-align:right; font-variant-numeric:tabular-nums}
+.torre .app-row .tk{grid-column:1 / -1; height:6.5px; border-radius:4px; background:var(--surface); overflow:hidden; position:relative}
+.torre .app-row .tk i{display:block; height:100%; border-radius:4px; background:var(--navy)}
+.torre .app-row .tk i.low{background:var(--pl-orange)}
+.torre .app-row .tk b{position:absolute; top:-2.5px; bottom:-2.5px; width:2.5px; background:var(--ink); left:80%}
+.torre .app-row .mt{grid-column:1 / -1; font-size:13.5px; color:var(--ink-3)}
+@media (max-width:1180px){.torre .ops-alerts{grid-template-columns:repeat(3,minmax(0,1fr))} .torre .ops-pipe{grid-template-columns:minmax(0,1fr)} .torre .ops-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.torre .ops-alerts{grid-template-columns:repeat(2,minmax(0,1fr))} .torre .ops-sts.c2{grid-template-columns:minmax(0,1fr)} .torre .ot .h-sm{display:none}}
+.torre .chart-legend{display:flex; gap:16px; align-items:center; font-size:14.5px; color:var(--ink-3); flex-wrap:wrap; margin:-5.5px 0 8px}
+.torre .chart-legend span{display:inline-flex; align-items:center; gap:6.5px; white-space:nowrap}
+.torre .psel{margin-left:auto; position:relative; display:inline-flex; align-items:center}
+.torre .psel select{appearance:none; -webkit-appearance:none; height:37.5px; border:0; border-radius:9.5px; background:var(--ctrl-in-card); color:var(--ink); font:inherit; font-size:15.5px; font-weight:500; padding:0 37.5px 0 13.5px; cursor:pointer}
+.torre .psel svg{position:absolute; right:12px; width:14.5px; height:14.5px; fill:none; stroke:var(--ink-3); stroke-width:2.2; stroke-linecap:round; pointer-events:none}
+.torre .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+.torre .seg{display:inline-flex; background:var(--ctrl-in-card); border-radius:9.5px; padding:2.5px; margin-left:auto}
+.torre .seg button{height:29.5px; padding:0 12px; border-radius:6.5px; font-size:14.5px; color:var(--ink-3); font-weight:500}
+.torre .seg button[data-t]{display:inline-grid; justify-items:center; align-content:center; grid-template-rows:auto 0}
+.torre .seg button[data-t]::after{content:attr(data-t); font-weight:600; height:0; overflow:hidden; visibility:hidden}
+.torre .seg button[aria-pressed="true"]{background:var(--surface); color:var(--ink); font-weight:600; box-shadow:0 1px 2.5px rgba(0,0,0,.08)}
+.torre .ln{width:18.5px; height:2.5px; background:var(--kmline); display:inline-block; border-radius:1px}
+.torre .ghost-sw{width:12px; height:12px; border:2px dashed var(--ink-4); border-radius:2.5px; display:inline-block}
+.torre .insight{font-size:15.5px; color:var(--ink-2); margin-top:8px; display:flex; gap:9.5px; align-items:flex-start}
+.torre .insight .mark{width:4px; align-self:stretch; border-radius:2.5px; background:var(--orange); flex:none}
+.torre .ai-btn{margin-left:auto; height:37.5px; display:inline-flex; align-items:center; gap:8px; padding:0 14.5px; border-radius:9.5px; background:var(--ctrl-in-card); color:var(--ink); font-size:15.5px; font-weight:600; white-space:nowrap}
+.torre .ai-btn svg{width:17.5px; height:17.5px; fill:var(--pl-orange)}
+.torre .ai-btn:hover{background:var(--muted)}
+.torre .ai-modal{width:853.5px}
+.torre .ai-modal .m-head svg{width:21.5px; height:21.5px; fill:var(--pl-orange)}
+.torre #insight .ai-chip{display:none}
+.torre #insight .ai-head{margin-bottom:13.5px}
+.torre #insight{display:block; padding:18.5px 24px 24px; font-size:16.5px; color:var(--ink-2)}
+.torre .ai-load{display:flex; align-items:center; gap:13.5px; color:var(--ink-3); padding:24px 0}
+.torre .ai-dots{display:inline-flex; gap:5.5px}
+.torre .ai-dots i{width:8px; height:8px; border-radius:50%; background:var(--pl-orange); animation:aiP 1s infinite ease-in-out}
+.torre .ai-dots i:nth-child(2){animation-delay:.15s} .torre .ai-dots i:nth-child(3){animation-delay:.3s}
+@keyframes torre-aiP{0%,80%,100%{opacity:.25; transform:scale(.8)}40%{opacity:1; transform:scale(1)}}
+.torre #insight .ai-head{display:flex; align-items:center; gap:10.5px; margin-bottom:5.5px; flex-wrap:wrap}
+.torre .ai-chip{display:inline-flex; align-items:center; gap:5.5px; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface); border-radius:6.5px; padding:1px 9.5px}
+.torre .ai-chip svg{width:14.5px; height:14.5px; fill:var(--pl-orange)}
+.torre .ai-note{font-size:14px; color:var(--ink-4)}
+.torre #insight ul{margin:0; padding-left:24px; display:flex; flex-direction:column; gap:13.5px}
+.torre #insight li{line-height:1.55}
+.torre #insight b{color:var(--ink); font-weight:600}
+.torre #insight b.up{color:var(--pl-orange)} .torre #insight b.down{color:var(--lime-dark)}
+.torre #insight .tag{display:inline-block; font-size:13.5px; font-weight:600; border-radius:5.5px; padding:0 6.5px; margin-right:2.5px}
+.torre #insight .tag.up{background:var(--pl-orange); color:#fff}
+.torre #insight .tag.hold{background:var(--navy); color:var(--surface)}
+.torre #chart{width:100%; height:493.5px; position:relative}
+.torre #chart svg{display:block}
+.torre .axis{font-size:13.5px; fill:var(--ink-3); font-family:var(--font)}
+.torre .gridl{stroke:var(--line); stroke-width:1}
+.torre .dlbl{font-size:13px; font-weight:600; fill:var(--ink-2); font-family:var(--font); paint-order:stroke; stroke:var(--surface); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
+.torre .dlbl.in{fill:#fff; stroke:none}
+.torre .dlbl.k{fill:var(--kmtext); stroke-width:4.5px}
+/* modal de detalle del segmento */
+.torre .seg-modal .m-body2{padding:18.5px 24px; overflow-y:auto; display:flex; flex-direction:column; gap:16px}
+.torre .sm-stats{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10.5px}
+.torre .sm-stat{background:var(--bg); border-radius:12px; padding:10.5px 13.5px; min-width:0}
+.torre .sm-stat span{display:block; font-size:14px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .sm-stat b{display:block; font-size:18.5px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .sm-ctrl{display:flex; align-items:center; gap:13.5px; flex-wrap:wrap}
+.torre .sm-ctrl h4{margin:0; font-size:16.5px; font-weight:600; margin-right:auto}
+.torre .sm-ctrl .psel{margin-left:0}
+.torre .sm-wrap{max-height:min(746.5px, calc(100vh - 306.5px)); overflow:auto; scrollbar-width:thin}
+.torre .sm-wrap::-webkit-scrollbar{display:block; height:10.5px; width:10.5px}
+.torre .sm-wrap::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:5.5px}
+.torre .sm-tbl.trend th:first-child, .torre .sm-tbl.trend td:first-child{position:sticky; left:0; z-index:2; background:var(--surface); padding-right:13.5px; box-shadow:1px 0 0 var(--line)}
+.torre .sm-tbl.trend thead th:first-child{z-index:3}
+.torre .sm-tbl.trend tfoot td:first-child{background:var(--surface-2); z-index:3}
+.torre .sm-tbl.trend thead th{position:sticky; top:0; background:var(--surface); z-index:1; white-space:nowrap}
+.torre .sm-tbl.trend td{white-space:nowrap; font-variant-numeric:tabular-nums}
+.torre .sm-tbl.trend td.nm{overflow:hidden; text-overflow:ellipsis}
+.torre .sm-tbl.trend .sel{background:var(--bg); font-weight:600; color:var(--ink)}
+.torre .sm-tbl.trend tfoot td{font-weight:600; border-top:1px solid var(--line); position:sticky; bottom:0; background:var(--surface-2)}
+.torre .sm-tbl.trend tfoot td.sel{background:var(--muted)}
+.torre .sm-tbl.trend td svg{vertical-align:middle; overflow:visible}
+.torre .sm-tbl.trend th:last-child, .torre .sm-tbl.trend td:last-child{padding-right:10.5px !important}
+.torre .sm-tbl.trend .pc{text-align:center; border-left:1px solid var(--line); padding-left:10.5px; padding-right:10.5px}
+.torre .sm-tbl.trend th.pc{text-align:center}
+.torre .sm-tbl.trend th:last-child, .torre .sm-tbl.trend td:last-child{border-left:1px solid var(--line); padding-left:10.5px}
+.torre .sm-tbl.trend .pcw{display:grid; grid-template-columns:minmax(0,1fr) 45.5px; column-gap:4px; align-items:baseline}
+.torre .sm-tbl.trend .cv{text-align:right}
+.torre .sm-tbl.trend .vr{font-size:13px; font-weight:400; color:var(--ink-4); text-align:left; white-space:nowrap}
+.torre .sm-tbl.trend .vr.bad{color:var(--pl-orange)}
+.torre .sm-tbl.trend .vr.good{color:var(--lime-dark)}
+
+.torre .sm-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13.5px 29.5px}
+.torre .sm-grid h4{margin:0 0 2.5px; font-size:16.5px; font-weight:600}
+.torre .sm-tbl{width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px}
+.torre .sm-tbl th{font-size:14.5px; font-weight:600; text-align:left; padding:6.5px 8px; border-bottom:1px solid var(--line); color:var(--ink-3); position:static; height:auto; background:none; cursor:default}
+.torre .sm-tbl td{padding:8px; border-bottom:1px solid var(--muted); height:auto; font-size:16px}
+.torre .sm-tbl td:first-child, .torre .sm-tbl th:first-child{padding-left:0}
+.torre .sm-tbl td:last-child, .torre .sm-tbl th:last-child{padding-right:0}
+@media (max-width:760px){.torre .sm-stats{grid-template-columns:repeat(2,minmax(0,1fr))} .torre .sm-grid{grid-template-columns:minmax(0,1fr)}}
+
+.torre .mini-row{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2.5px 13.5px; align-items:center; padding:6.5px 0}
+.torre .mini-row .lbl{font-size:16px; display:flex; align-items:center; gap:8px; min-width:0}
+.torre .mini-row .lbl span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .mini-row .val{font-size:16px; font-weight:600; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+.torre .mini-row .track{grid-column:1 / -1; height:5.5px; border-radius:2.5px; background:var(--muted); overflow:hidden}
+.torre .mini-row .track i{display:block; height:100%; border-radius:2.5px}
+.torre .ct-lg{display:flex; gap:18.5px; align-items:center; margin:-2.5px 0 5.5px; font-size:14px; color:var(--ink-3)}
+.torre .ct-lg span{display:inline-flex; align-items:center; gap:6.5px}
+.torre .ct-tk{display:inline-block; width:2.5px; height:13.5px; background:var(--ink); border-radius:1px; vertical-align:-1px}
+.torre .mini-row .ct-oa{flex:none; font-size:13.5px; color:var(--ink-3)}
+.torre .mini-row .ct-track{position:relative; height:8px; border-radius:4px; overflow:visible}
+.torre .mini-row .ct-track i{border-radius:4px}
+.torre .mini-row .ct-track b{position:absolute; top:-4px; width:2.5px; height:16px; margin-left:-1px; background:var(--ink); border-radius:1px}
+.torre .ct .meta{align-items:center}
+.torre .ct .meta>span:first-child{min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .ct .meta .chip{flex:none}
+.torre .ct-ven{flex:none}
+.torre .ct-out{color:var(--magenta); font-weight:600}
+.torre .mini-row .meta{grid-column:1 / -1; font-size:14px; color:var(--ink-3); display:flex; justify-content:space-between; gap:10.5px}
+.torre .sub-h{font-size:14px; color:var(--ink-3); font-weight:600; margin:16px 0 2.5px}
+.torre .divider{height:1px; background:var(--line); margin:10.5px 0}
+
+/* ---------- tabla usuarios ---------- */
+.torre .tbl-wrap{max-height:626.5px; overflow-y:auto; margin:0 -18.5px; border-top:1px solid var(--line)}
+.torre table{width:100%; border-collapse:collapse; table-layout:fixed}
+.torre thead th{position:sticky; top:0; z-index:2; background:var(--surface); height:42.5px; font-size:16px; font-weight:600; color:var(--ink);
+  text-align:left; padding:0 10.5px; border-bottom:1px solid var(--line); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; user-select:none}
+.torre thead th.r{text-align:right}
+.torre thead th .ar{display:inline-block; width:9.5px; height:13.5px; margin-left:5.5px; vertical-align:-1px}
+.torre thead th .ar path{fill:var(--ink-4); opacity:.55}
+.torre thead th:hover .ar path{opacity:.9}
+.torre thead th.sorted .ar path.on{fill:var(--ink); opacity:1}
+.torre thead th.sorted .ar path:not(.on){opacity:.3}
+.torre tbody td{height:56px; padding:0 10.5px; border-bottom:1px solid var(--muted); font-size:16.5px; vertical-align:middle; overflow:hidden}
+.torre td.r{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+.torre th:first-child, .torre td:first-child{padding-left:21.5px}
+.torre th:last-child, .torre td:last-child{padding-right:21.5px}
+.torre .u-name{display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .u-sub{display:block; font-size:14px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .proj{display:flex; flex-direction:column; align-items:flex-end; gap:4px}
+.torre .proj .pt{height:5.5px; width:100%; max-width:160px; background:var(--muted); border-radius:2.5px; position:relative}
+.torre .proj .pt i{position:absolute; left:0; top:0; bottom:0; border-radius:2.5px}
+.torre .proj .pt b{position:absolute; top:-4px; bottom:-4px; width:2.5px; background:var(--ink); box-shadow:0 0 0 2px var(--surface)}
+.torre tfoot td{position:sticky; bottom:0; background:var(--surface-2); height:48px; font-weight:600; border-top:1px solid var(--line); padding:0 10.5px; font-size:16.5px}
+.torre .act{height:32px; border-radius:8px; padding:0 12px; font-size:14.5px; font-weight:600; background:var(--ctrl-in-card); color:var(--ink); white-space:nowrap}
+.torre .act:hover{background:var(--lime); color:var(--on-lime)}
+.torre .act.done{background:transparent; color:var(--ink-3); font-weight:500; cursor:default}
+.torre .btn-primary{height:37.5px; border-radius:10.5px; padding:0 16px; background:var(--lime); color:var(--on-lime); font-weight:600; font-size:15.5px; white-space:nowrap}
+.torre .btn-primary:hover{background:var(--lime-dark)}
+.torre .btn-primary:disabled{opacity:.5; cursor:default}
+.torre .rule-note{font-size:14px; color:var(--ink-3); margin-top:10.5px}
+
+.torre .chip{display:inline-flex; align-items:center; gap:5.5px; padding:1px 9.5px; border-radius:6.5px; font-size:14px; font-weight:600; white-space:nowrap}
+.torre .chip.crit{background:var(--magenta); color:#fff}
+.torre .chip.warn{background:var(--amber); color:#141414}
+.torre .chip.ok{background:var(--muted); color:var(--ink-2)}
+.torre .chip.new{background:var(--blue); color:#fff}
+
+/* ---------- datos ---------- */
+.torre details.data{background:var(--surface); border-radius:var(--radius); padding:var(--pad)}
+.torre details.data summary{cursor:pointer; font-weight:600; font-size:18px; list-style:none; display:flex; align-items:center; gap:10.5px}
+.torre details.data summary::-webkit-details-marker{display:none}
+.torre details.data summary .note{font-weight:400; font-size:14.5px; color:var(--ink-4); margin-left:auto}
+.torre .src{display:grid; grid-template-columns:minmax(0,240px) minmax(0,1fr); gap:8px 21.5px; margin-top:13.5px; font-size:15.5px}
+.torre .src dt{font-weight:600}
+.torre .src dd{margin:0; color:var(--ink-2)}
+.torre .src code{font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:14px; background:var(--muted); padding:0 5.5px; border-radius:5.5px}
+
+/* ---------- tooltip / toast / modal ---------- */
+.torre .tip{position:fixed; z-index:60; background:var(--tip-bg); color:var(--tip-ink); font-size:14.5px; padding:10.5px 13.5px; border-radius:9.5px;
+  pointer-events:none; opacity:0; transition:opacity .1s; min-width:226.5px; box-shadow:var(--shadow-pop)}
+.torre .tip.on{opacity:1}
+.torre .tip .tt{font-weight:600; margin-bottom:6.5px}
+.torre .tip .tr{display:flex; justify-content:space-between; gap:18.5px; align-items:center; padding:1px 0}
+.torre .tip .tr span{display:inline-flex; align-items:center; gap:8px}
+.torre .tip-tbl{border-collapse:collapse; width:auto; table-layout:auto; font-size:14.5px}
+.torre .tip-tbl th{position:static; background:none; height:auto; color:inherit; opacity:.65; font-size:13.5px; font-weight:500; border:0; padding:0 0 4px 18.5px; text-align:right; cursor:default}
+.torre .tip-tbl td{height:auto; border:0; padding:2.5px 0 2.5px 18.5px; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; font-size:14.5px}
+.torre .tip-tbl td:first-child, .torre .tip-tbl th:first-child{padding-left:0; text-align:left}
+.torre .tip-tbl td:first-child{display:flex; align-items:center; gap:8px}
+.torre .tip-tbl tfoot td{font-weight:600; border-top:1px solid rgba(127,127,127,.35); padding-top:5.5px; background:none; position:static}
+.torre .toast{position:fixed; right:max(21.5px, env(safe-area-inset-right,0px)); bottom:calc(21.5px + env(safe-area-inset-bottom,0px)); z-index:70; background:var(--tip-bg); color:var(--tip-ink);
+  padding:13.5px 18.5px; border-radius:12px; font-size:16px; max-width:453.5px; box-shadow:var(--shadow-pop); transform:translateY(16px); opacity:0; transition:all .18s}
+.torre .toast.on{transform:none; opacity:1}
+.torre .overlay{position:fixed; inset:0; background:var(--overlay); z-index:80; display:grid; place-items:center; padding:21.5px}
+.torre .modal{width:1200px; max-width:100%; max-height:calc(100vh - 42.5px); background:var(--surface); border-radius:21.5px; box-shadow:var(--shadow-pop); display:flex; flex-direction:column; overflow:hidden}
+.torre .m-head{display:flex; align-items:center; gap:13.5px; padding:18.5px 24px; border-bottom:1px solid var(--line)}
+.torre .m-ico{width:42.5px; height:42.5px; border-radius:10.5px; background:var(--lime-tint); display:grid; place-items:center}
+.torre .m-ico svg{width:20px; height:20px; fill:var(--lime-dark)}
+.torre .m-head h3{margin:0; font-size:20px; font-weight:600}
+.torre .m-head p{margin:0; font-size:15.5px; color:var(--ink-3)}
+.torre .m-x{margin-left:auto; width:37.5px; height:37.5px; border-radius:9.5px; font-size:24px; color:var(--ink-3)}
+.torre .m-body{display:grid; grid-template-columns:293.5px minmax(0,1fr); min-height:440px; overflow:hidden; flex:1}
+.torre .m-cats{border-right:1px solid var(--line); padding:8px 0}
+.torre .m-cats button{display:flex; width:100%; align-items:center; height:53.5px; padding:0 18.5px 0 22.5px; font-size:17.5px; color:var(--ink-2); position:relative; gap:10.5px}
+.torre .m-cats button .n{margin-left:auto; font-size:14px}
+.torre .m-cats button.on{background:var(--bg); color:var(--ink); font-weight:600}
+.torre .m-cats button.on::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--lime)}
+.torre .m-opts{padding:16px 21.5px; overflow-y:auto; display:flex; flex-direction:column; gap:10.5px; min-width:0}
+.torre .m-res{display:flex; justify-content:space-between; align-items:center; background:var(--bg); border-radius:8px; padding:6.5px 12px; font-size:13.5px; font-weight:600; color:var(--ink-3)}
+.torre .m-res button{color:var(--lime-dark); font-weight:600; text-transform:none; font-size:15.5px}
+.torre .opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:2.5px 16px}
+.torre .opt{display:flex; align-items:center; gap:12px; padding:9.5px 5.5px; font-size:16.5px; text-align:left; border-radius:8px; min-width:0}
+.torre .opt:hover{background:var(--bg)}
+.torre .opt .c{width:21.5px; height:21.5px; border-radius:5.5px; border:2px solid var(--line-2); flex:none; display:grid; place-items:center}
+.torre .opt:hover .c{border-color:var(--ink-4)}
+.torre .opt.on .c{background:var(--lime); border-color:var(--lime)}
+.torre .opt.on .c::after{content:""; width:5.5px; height:10.5px; border:solid var(--on-lime); border-width:0 2.5px 2.5px 0; transform:translateY(-1px) rotate(45deg)}
+.torre .opt span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.torre .m-foot{display:flex; align-items:center; gap:18.5px; padding:16px 24px; border-top:1px solid var(--line)}
+.torre .m-foot .txt{font-weight:600; font-size:16.5px; color:var(--ink-2)}
+.torre .m-foot .txt.k{color:var(--ink)}
+.torre .m-foot .btn-primary{height:48px; padding:0 21.5px; border-radius:13.5px; font-size:16.5px}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .torre .kpis{grid-template-columns:repeat(4, minmax(0,1fr))}
+  .torre .kpis .k-states{grid-column:1 / -1}
+  .torre .col-cps{display:none}
+}
+@media (max-width:1000px){
+  .torre .row2, .torre .row4{grid-template-columns:minmax(0,1fr)}
+  .torre .col-sob{display:none}
+  .torre .search{width:240px}
+  .torre .fchips{display:none}
+}
+@media (max-width:760px){
+  .torre .hover-card{width:266.5px}
+  .torre .rail{display:none}
+  .torre .header{flex-wrap:wrap; padding-block:10.5px; gap:10.5px}
+  .torre .h-title{flex-wrap:wrap; gap:10.5px; width:100%}
+  .torre .spacer{display:none}
+  .torre .search{flex:1; width:auto; min-width:0}
+  .torre .kpis{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .torre .col-srv, .torre .col-act{display:none}
+  .torre .m-body{grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr}
+  .torre .m-cats{display:flex; overflow-x:auto; border-right:0; border-bottom:1px solid var(--line); padding:0}
+  .torre .m-cats button{height:50.5px; width:auto; white-space:nowrap; padding:0 16px}
+  .torre .m-cats button.on::before{left:0; right:0; top:auto; height:4px; width:auto}
+  .torre .opts{grid-template-columns:minmax(0,1fr)}
+  .torre .src{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:460px){
+  .torre .col-vs{display:none}
+  .torre .k-value{font-size:25.5px}
+  .torre .st-legend{grid-template-columns:repeat(2, minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){.torre *{transition:none !important}}
+
+/* ---- Integración con el shell del TMS (ViewWrapper + Header) ---- */
+/* Las acciones del header y el chip de corte van en su propio contenedor .torre para tomar los tokens del tema. */
+.torre.torre-hdr{background:transparent; display:flex; align-items:center; gap:8px; min-width:0}
+.torre.torre-hdr .fchips{max-width:420px}
+/* El contenido usa el ancho del ViewWrapper, que ya pone el padding lateral de la página (en celular no lo pone). */
+.torre.torre-body{background:transparent; min-height:100%}
+@media (min-width:769px){.torre.torre-body .page{padding-left:0; padding-right:0}}
+/* DESIGN.md §4: buscador del header de 300px (--search-w) y controles de 36px. */
+.torre.torre-hdr .search{width:300px}

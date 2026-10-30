@@ -16,6 +16,8 @@ interface IViewWrapper {
   /** Espacio entre el header y el contenido. DESIGN.md §3: ninguno; el aire lo da el header. */
   gapTitle?: string;
   hideHeader?: boolean;
+  /** Clase del <main>: "dark" en módulos con modo oscuro (DESIGN.md §8). */
+  className?: string;
 }
 export default function ViewWrapper({
   headerTitle,
@@ -25,10 +27,11 @@ export default function ViewWrapper({
   showNotifications = false,
   children,
   gapTitle = "0",
-  hideHeader = false
+  hideHeader = false,
+  className
 }: Readonly<IViewWrapper>) {
   return (
-    <main className={styles.mainWrapper}>
+    <main className={`${styles.mainWrapper} ${className ?? ""}`}>
       <SideBar />
       <Flex vertical className={styles.rightContent} gap={gapTitle}>
         {!hideHeader ? (

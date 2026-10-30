@@ -41,3 +41,8 @@
         padding: 7px 16px;
     }
 }
+
+// Modo oscuro (DESIGN.md §8): íconos claros sobre el riel oscuro; el activo sigue en lima.
+.dark .containerButtons .buttonIconActive {
+    color: rgb(var(--sidebar-foreground));
+}

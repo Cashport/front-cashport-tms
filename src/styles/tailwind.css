@@ -94,6 +94,48 @@
   --table-total-h: 48px;
 }
 
+/* DESIGN.md §8 — modo oscuro, mismos tokens que Cashport. Solo en módulos con modo oscuro
+   (Torre de control): el layout pone .dark en el <main> y tms-dark en <body>. Se declaran
+   también en body.tms-dark para que modales, popovers y menús (portales fuera del <main>)
+   salgan oscuros. */
+.dark,
+body.tms-dark {
+  --background: 9 9 11;
+  --foreground: 250 250 250;
+  --card: 1 24 34;
+  --card-foreground: 250 250 250;
+  --popover: 1 24 34;
+  --popover-foreground: 250 250 250;
+  --primary: 203 231 30;
+  --primary-foreground: 9 9 11;
+  --secondary: 39 39 42;
+  --secondary-foreground: 250 250 250;
+  --muted: 39 39 42;
+  --muted-foreground: 161 161 170;
+  --accent: 39 39 42;
+  --accent-foreground: 250 250 250;
+  --border: 39 39 42;
+  --input: 39 39 42;
+  --ring: 203 231 30;
+  --sidebar: 1 24 34;
+  --sidebar-foreground: 250 250 250;
+  --sidebar-accent: 39 39 42;
+  --sidebar-accent-foreground: 250 250 250;
+  --sidebar-border: 39 39 42;
+
+  /* cp-* neutros en oscuro; los de marca/serie no cambian. */
+  --cp-ink: 250 250 250;
+  --cp-ink-2: 212 212 216;
+  --cp-ink-3: 161 161 170;
+  --cp-ink-4: 113 113 122;
+  --cp-line: 39 39 42;
+  --cp-line-2: 63 63 70;
+  --cp-bg: 9 9 11;
+  --cp-surface: 1 24 34;
+  --cp-muted: 39 39 42;
+  --cp-subtle: 24 24 27;
+}
+
 /* DESIGN.md §3 — piezas de página compartidas. Úsalas en vez de repetir clases a mano. */
 @layer components {
   /* Contenedor de una vista: columna con --section-gap entre bloques. */

@@ -122,3 +122,30 @@
         }
     }
 }
+
+// Modo oscuro (DESIGN.md §8): activo solo con un ancestro .dark (el ViewWrapper de un
+// módulo con modo oscuro, p. ej. Torre de control). El modo claro no cambia.
+.dark {
+    .main,
+    .mainLarge {
+        background-color: rgb(var(--sidebar));
+        box-shadow: none;
+        border-right: 1px solid rgb(var(--sidebar-border));
+
+        .logoContainer:hover {
+            border-color: rgb(var(--sidebar-foreground));
+        }
+    }
+
+    .mobileMenuWrapper {
+        background-color: rgb(var(--sidebar));
+        border-top-color: rgb(var(--sidebar-border));
+        box-shadow: 1px 25px 58px -29px rgba(0, 0, 0, 0.7);
+    }
+
+    // Los botones de texto de AntD quedan oscuros: se aclaran para que se vean sobre el riel.
+    .buttonMenu,
+    .buttonExit {
+        color: rgb(var(--sidebar-foreground)) !important;
+    }
+}

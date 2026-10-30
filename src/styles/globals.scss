@@ -50,6 +50,12 @@ body {
     margin: 0;
 }
 
+// Modo oscuro (DESIGN.md §8): el fondo de la página sigue al token oscuro. La clase la pone
+// el layout del módulo con modo oscuro (Torre de control) y la quita al salir.
+body.tms-dark {
+    background-color: rgb(9 9 11); // --cp-bg oscuro de tailwind.css
+}
+
 a {
     color: inherit;
     text-decoration: none;
@@ -79,6 +85,18 @@ a {
 
 .ant-select-item-option-selected {
     background-color: rgba(255, 255, 255, 0.37) !important;
+}
+
+// En oscuro el blanco !important de arriba esconde el texto claro de las opciones.
+// Mismo #1f1f1f que colorBgElevated del ConfigProvider oscuro (igual que Cashport).
+body.tms-dark {
+    .ant-select-dropdown {
+        background-color: #1f1f1f !important;
+    }
+
+    .ant-select-item-option-selected {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
 }
 
 .ant-cascader-menus,
