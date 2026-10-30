@@ -13,6 +13,12 @@ import "./torre.css";
 
 const THEME_KEY = "tms-theme";
 
+// Una sola instancia de cada {__html}: React reescribe el innerHTML cuando cambia la referencia
+// del objeto, y eso borraría lo que torre.ts ya pintó (pasaba al cambiar de tema).
+const CUT_HTML = { __html: HEADER_CUT_HTML };
+const ACTIONS_HTML = { __html: HEADER_ACTIONS_HTML };
+const BODY_HTML = { __html: PAGE_HTML };
+
 /** Tema guardado; por defecto "Sistema", que en la Torre son los colores del cliente (HU). */
 function temaGuardado(): ThemePreference {
   try {
@@ -130,7 +136,7 @@ export function ControlTower() {
                 key={`cut-${version}`}
                 className="torre torre-hdr"
                 data-theme={dataTheme}
-                dangerouslySetInnerHTML={{ __html: HEADER_CUT_HTML }}
+                dangerouslySetInnerHTML={CUT_HTML}
               />
             ) : null
           }
@@ -140,7 +146,7 @@ export function ControlTower() {
                 key={`act-${version}`}
                 className="torre torre-hdr"
                 data-theme={dataTheme}
-                dangerouslySetInnerHTML={{ __html: HEADER_ACTIONS_HTML }}
+                dangerouslySetInnerHTML={ACTIONS_HTML}
               />
             ) : null
           }
@@ -154,7 +160,7 @@ export function ControlTower() {
               key={`page-${version}`}
               className="torre torre-body"
               data-theme={dataTheme}
-              dangerouslySetInnerHTML={{ __html: PAGE_HTML }}
+              dangerouslySetInnerHTML={BODY_HTML}
             />
           )}
         </ViewWrapper>
