@@ -8,7 +8,6 @@ import { getControlTowerData } from "@/services/logistics/control-tower";
 import { IControlTowerApi } from "@/types/logistics/controlTower/controlTower";
 import { adaptarDatos } from "./adaptarDatos";
 import { HEADER_ACTIONS_HTML, HEADER_CUT_HTML, PAGE_HTML } from "./markup";
-// @ts-ignore: torre.js es el JS del prototipo aprobado (sin tipos)
 import { montarTorre } from "./torre";
 import "./torre.css";
 
@@ -31,8 +30,8 @@ interface TorreHandle {
 
 /**
  * Torre de control TMS (HU 1dfjxwuzq6d). El tablero es el prototipo aprobado en JS + SVG
- * propio (torre.js); este componente pone el shell del TMS, pide los datos y lo monta.
- * Cada carga usa un `version` nuevo para que React cree el DOM de cero y torre.js
+ * propio (torre.ts); este componente pone el shell del TMS, pide los datos y lo monta.
+ * Cada carga usa un `version` nuevo para que React cree el DOM de cero y torre.ts
  * no acumule listeners sobre el anterior.
  *
  * Tema (DESIGN.md §4.9 y §8): se elige en el menú del avatar. En Oscuro toda la vista

@@ -1,7 +1,7 @@
 import { IControlTowerApi } from "@/types/logistics/controlTower/controlTower";
 
 /*
- * Convierte la respuesta de GET /control-tower en las estructuras que consume torre.js
+ * Convierte la respuesta de GET /control-tower en las estructuras que consume torre.ts
  * (las mismas que entregaba mock.js en el prototipo; ver "Contrato de datos" de la HU).
  * Los meses van por índice: 12 meses que terminan en el mes del corte (CUR = 11).
  */

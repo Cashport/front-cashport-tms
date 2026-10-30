@@ -1,4 +1,4 @@
-/* Marcado del tablero, tomado del prototipo aprobado (index.html). torre.js lo llena por id. */
+/* Marcado del tablero, tomado del prototipo aprobado (index.html). torre.ts lo llena por id. */
 
 /** Chip de corte, junto al titulo del header. */
 export const HEADER_CUT_HTML = `<div class="cut">
