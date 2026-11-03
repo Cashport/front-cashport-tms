@@ -3,7 +3,8 @@ import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 
-import { message, Skeleton } from "antd";
+import { Alert, message, Skeleton } from "antd";
+import { showDriverVetoAlert } from "@/utils/logistics/driverVeto";
 
 import { ICreateVehicleForm } from "../../vehicles/createVehicle/createVehicle";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
@@ -68,6 +69,7 @@ export const DriverInfoView = ({ params }: Props) => {
         setStatusForm("review");
       });
     } catch (error) {
+      if (showDriverVetoAlert(error)) return;
       message.error(error instanceof Error ? error.message : "Error al editar conductor", 3);
     } finally {
       setIsLoadingSubmit(false);
@@ -86,6 +88,7 @@ export const DriverInfoView = ({ params }: Props) => {
         setStatusForm("review");
       });
     } catch (error) {
+      if (showDriverVetoAlert(error)) return;
       message.error(
         error instanceof Error ? error.message : "Error al editar estado del conductor",
         3
@@ -103,11 +106,15 @@ export const DriverInfoView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("getTripTypesDriver", getTripTypes, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR(
+    "getTripTypesDriver",
+    getTripTypes,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
   return (
     <Skeleton
       active
@@ -115,6 +122,21 @@ export const DriverInfoView = ({ params }: Props) => {
         isLoadingDocuments || isLoadingVehicles || isLoading || isValidating || isloadingTripTypes
       }
     >
+      {data?.veto_reason && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message="Conductor vetado en este proyecto: no puede activarse ni asignarse a ningún servicio"
+          description={`Motivo: ${data.veto_reason}${
+            data.veto_created_by ? ` · Registrado por ${data.veto_created_by}` : ""
+          }${
+            data.veto_created_at
+              ? ` el ${new Date(data.veto_created_at).toLocaleDateString("es-CO")}`
+              : ""
+          }`}
+        />
+      )}
       <DriverFormTab
         onSubmitForm={handleSubmitForm}
         data={data}

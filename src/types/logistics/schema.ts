@@ -1224,6 +1224,10 @@ export interface IAPIDriver {
     color: string;
     backgroundColor: string;
   };
+  // Veto activo del documento en el proyecto (driver_blacklist); null si no está vetado
+  veto_reason?: string | null;
+  veto_created_at?: string | null;
+  veto_created_by?: string | null;
 }
 export interface IFormGeneralDriver {
   id: number;
