@@ -899,8 +899,9 @@ document.getElementById('ops').addEventListener('mouseout',function(e: any){var 
 cmPop.addEventListener('mouseenter',function(){clearTimeout(cmT);});
 cmPop.addEventListener('mouseleave',hideCmSoon);
 document.getElementById('opsWrap').addEventListener('scroll',function(){cmPop.hidden=true;cmFor=null;});
-// en el TMS la página hace scroll dentro del contenedor, no en window: se escucha en captura
-document.addEventListener('scroll',function(){if(!cmPop.hidden){cmPop.hidden=true;cmFor=null;}},{passive:true,capture:true});
+// en el TMS la página hace scroll dentro del contenedor, no en window: se escucha en captura.
+// El scroll de la propia lista de comentarios no lo cierra.
+document.addEventListener('scroll',function(e: any){if(!cmPop.hidden&&!cmPop.contains(e.target)){cmPop.hidden=true;cmFor=null;}},{passive:true,capture:true});
 document.addEventListener('keydown',function(e: any){if(e.key==='Escape'&&!cmPop.hidden){cmPop.hidden=true;cmFor=null;}});
 
 document.getElementById('ops').addEventListener('mousedown',function(e: any){if(e.shiftKey&&e.target.closest('.ops-st'))e.preventDefault();});

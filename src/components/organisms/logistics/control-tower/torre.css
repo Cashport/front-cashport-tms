@@ -77,9 +77,9 @@
 .torre a:hover, .torre .link:hover{color:var(--blue-hover); text-decoration:underline}
 
 /* ---------- shell ---------- */
-.torre .app{display:flex; min-height:100vh}
+.torre .app{display:flex; min-height:calc(100 * var(--vh, 1vh))}
 .torre .rail{width:var(--rail-w); flex:none; background:var(--surface); border-right:1px solid var(--line);
-  position:sticky; top:0; height:100vh; display:flex; flex-direction:column; align-items:center; padding:13.5px 0; gap:2.5px}
+  position:sticky; top:0; height:calc(100 * var(--vh, 1vh)); display:flex; flex-direction:column; align-items:center; padding:13.5px 0; gap:2.5px}
 .torre .rail .logo{width:48px; height:48px; border-radius:10.5px; display:grid; place-items:center; margin-bottom:10.5px;
   font-weight:700; font-size:14.5px; background:var(--ink); color:var(--surface)}
 .torre .rail .sep{width:37.5px; height:1px; background:var(--line); margin:8px 0}
@@ -105,7 +105,7 @@
 .torre .chip-cut .rf.spin svg{transform:rotate(360deg)}
 .torre .pill{height:32px; border-radius:16px; padding:0 14.5px; font-size:15.5px; background:var(--ctrl); color:var(--ink-3); white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
 .torre .pill[aria-pressed="true"]{background:var(--lime); color:var(--on-lime); font-weight:600}
-.torre .hover-card{position:absolute; top:calc(100% + 10.5px); left:0; width:320px; max-width:calc(100vw - 53.5px); background:var(--surface); border-radius:12px; box-shadow:var(--shadow-pop);
+.torre .hover-card{position:absolute; top:calc(100% + 10.5px); left:0; width:320px; max-width:calc((100 * var(--vw, 1vw)) - 53.5px); background:var(--surface); border-radius:12px; box-shadow:var(--shadow-pop);
   padding:13.5px 16px; font-size:15.5px; color:var(--ink-2); white-space:normal; line-height:1.45; opacity:0; pointer-events:none; transition:opacity .12s; z-index:30}
 .torre .hover-card b{display:block; color:var(--ink); font-weight:600; margin-bottom:4px}
 .torre .has-card{position:relative}
@@ -152,7 +152,7 @@
 .torre .umenu .item.out{color:var(--magenta); font-weight:600}
 
 /* ---------- page ---------- */
-.torre .page{display:flex; flex-direction:column; gap:var(--gap); padding-block:0 16px; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+.torre .page{display:flex; flex-direction:column; gap:var(--gap); padding-block:0 32px; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
 .torre .card{background:var(--surface); border-radius:var(--radius); padding:var(--pad); min-width:0}
 .torre .card-row{display:grid; gap:var(--gap)}
 .torre .kpis{grid-template-columns:repeat(4, minmax(0,1fr)) minmax(0,1.75fr)}
@@ -194,7 +194,7 @@
 .torre .k-cmp{font-size:14px; color:var(--ink-3); white-space:nowrap; display:flex; justify-content:flex-end; align-items:center; gap:5.5px; min-width:0; flex:1 1 auto}
 .torre .k-cmp .t{min-width:0; overflow:hidden; text-overflow:ellipsis}
 .torre .k-cmp .pct{flex:none}
-.torre .k-value.full{font-size:clamp(21.5px, 1.45vw, 26.5px); margin-top:8px}
+.torre .k-value.full{font-size:clamp(21.5px, calc(1.45 * var(--vw, 1vw)), 26.5px); margin-top:8px}
 .torre .k-side{text-align:right; font-size:14px; color:var(--ink-3); line-height:1.3; white-space:nowrap}
 .torre .k-side b{display:block; font-size:16.5px; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
 .torre .k-hz{margin-top:auto; padding-top:10.5px; cursor:default; border-radius:8px}
@@ -363,11 +363,11 @@
 .torre .tr-idw{display:inline-flex; align-items:center; gap:2.5px}
 .torre .tr-idw .cm-btn{height:26.5px; padding:0 5.5px; font-size:13.5px; gap:2.5px}
 .torre .tr-idw .cm-btn svg{width:16px; height:16px}
-.torre .cm-pop{position:fixed; z-index:85; width:533.5px; max-width:calc(100vw - 32px); background:var(--surface); border-radius:16px; box-shadow:var(--shadow-pop); border:1px solid var(--line)}
+.torre .cm-pop{position:fixed; z-index:85; width:533.5px; max-width:calc((100 * var(--vw, 1vw)) - 32px); background:var(--surface); border-radius:16px; box-shadow:var(--shadow-pop); border:1px solid var(--line)}
 .torre .cp-h{padding:13.5px 18.5px 10.5px; border-bottom:1px solid var(--line)}
 .torre .cp-h b{display:block; font-size:16.5px; font-weight:600}
 .torre .cp-h span{font-size:14px; color:var(--ink-3)}
-.torre .cm-pop .cm-list{max-height:min(480px, calc(100vh - 186.5px)); padding:0 16px 8px; scrollbar-width:thin; scrollbar-color:var(--line-2) transparent}
+.torre .cm-pop .cm-list{max-height:min(480px, calc((100 * var(--vh, 1vh)) - 186.5px)); padding:0 16px 8px; scrollbar-width:thin; scrollbar-color:var(--line-2) transparent}
 .torre .cm-pop .cm-list::-webkit-scrollbar{display:block; width:8px}
 .torre .cm-pop .cm-list::-webkit-scrollbar-track{background:transparent}
 .torre .cm-pop .cm-list::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:4px}
@@ -389,7 +389,7 @@
 .torre .cm-fi.k-pdf{background:#D9452B} .torre .cm-fi.k-img{background:#0e9aa7} .torre .cm-fi.k-xls{background:#1E7A45} .torre .cm-fi.k-mail{background:#334455}
 .torre .cm-fn{min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500}
 .torre .cm-fs{flex:none; color:var(--ink-3); font-size:13px; font-variant-numeric:tabular-nums}
-.torre .cm-list{max-height:min(640px, calc(100vh - 213.5px)); overflow-y:auto; padding:8px 24px 18.5px; scrollbar-width:thin}
+.torre .cm-list{max-height:min(640px, calc((100 * var(--vh, 1vh)) - 213.5px)); overflow-y:auto; padding:8px 24px 18.5px; scrollbar-width:thin}
 .torre .cm-list::-webkit-scrollbar{display:block; width:8px}
 .torre .cm-list::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:4px}
 .torre .cm-it{display:flex; gap:13.5px; padding:13.5px 0; border-bottom:1px solid var(--line)}
@@ -472,7 +472,7 @@
 .torre .sm-ctrl{display:flex; align-items:center; gap:13.5px; flex-wrap:wrap}
 .torre .sm-ctrl h4{margin:0; font-size:16.5px; font-weight:600; margin-right:auto}
 .torre .sm-ctrl .psel{margin-left:0}
-.torre .sm-wrap{max-height:min(746.5px, calc(100vh - 306.5px)); overflow:auto; scrollbar-width:thin}
+.torre .sm-wrap{max-height:min(746.5px, calc((100 * var(--vh, 1vh)) - 306.5px)); overflow:auto; scrollbar-width:thin}
 .torre .sm-wrap::-webkit-scrollbar{display:block; height:10.5px; width:10.5px}
 .torre .sm-wrap::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:5.5px}
 .torre .sm-tbl.trend th:first-child, .torre .sm-tbl.trend td:first-child{position:sticky; left:0; z-index:2; background:var(--surface); padding-right:13.5px; box-shadow:1px 0 0 var(--line)}
@@ -589,7 +589,7 @@
   padding:13.5px 18.5px; border-radius:12px; font-size:16px; max-width:453.5px; box-shadow:var(--shadow-pop); transform:translateY(16px); opacity:0; transition:all .18s}
 .torre .toast.on{transform:none; opacity:1}
 .torre .overlay{position:fixed; inset:0; background:var(--overlay); z-index:80; display:grid; place-items:center; padding:21.5px}
-.torre .modal{width:1200px; max-width:100%; max-height:calc(100vh - 42.5px); background:var(--surface); border-radius:21.5px; box-shadow:var(--shadow-pop); display:flex; flex-direction:column; overflow:hidden}
+.torre .modal{width:1200px; max-width:100%; max-height:calc((100 * var(--vh, 1vh)) - 42.5px); background:var(--surface); border-radius:21.5px; box-shadow:var(--shadow-pop); display:flex; flex-direction:column; overflow:hidden}
 .torre .m-head{display:flex; align-items:center; gap:13.5px; padding:18.5px 24px; border-bottom:1px solid var(--line)}
 .torre .m-ico{width:42.5px; height:42.5px; border-radius:10.5px; background:var(--lime-tint); display:grid; place-items:center}
 .torre .m-ico svg{width:20px; height:20px; fill:var(--lime-dark)}
