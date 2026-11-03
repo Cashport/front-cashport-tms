@@ -1286,6 +1286,12 @@ export interface IVehicle {
     backgroundColor: string;
   };
   subject_id: number;
+  /** Modelo verificado por el auditor contra la tarjeta de propiedad */
+  verified_model_year?: number | null;
+  verified_model_year_by?: string | null;
+  verified_model_year_at?: string | null;
+  /** Motivo por el que incumple la antigüedad máxima del proyecto; null si cumple */
+  age_block_reason?: string | null;
   documents: IProviderDocument[];
   features?: { id: number }[];
   images?: { url_archive: string }[];

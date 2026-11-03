@@ -96,3 +96,15 @@ export const updateVehicleStatus = async (
   if (response.success) return response.data;
   throw new Error(response.message || "Error al actualizar el estado del vehiculo");
 };
+
+export const updateVehicleVerifiedYear = async (
+  id: string | number,
+  verifiedModelYear: number | null
+): Promise<{ compliant: boolean; reason?: string }> => {
+  const response: GenericResponse<{ compliant: boolean; reason?: string }> = await API.put(
+    `/vehicle/verified-year/${id}`,
+    { verified_model_year: verifiedModelYear }
+  );
+  if (response.success) return response.data;
+  throw new Error(response.message || "Error al registrar el modelo verificado");
+};

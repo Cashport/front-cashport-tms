@@ -1,6 +1,7 @@
 "use client";
 import { Col, Divider, Flex, message, Skeleton } from "antd";
 import { useRouter } from "next/navigation";
+import { showVehicleAgeAlert } from "@/utils/logistics/vehicleAge";
 import SolicitationDetail from "../../detail/components/SolicitationDetail/SolicitationDetail";
 import VehicleAndDriverAsignation from "../../detail/components/VehicleAndDriverAsignation/VehicleAndDriverAsignation";
 import { formatMoney } from "@/utils/utils";
@@ -176,6 +177,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
 
       router.push("/logistics/acept_carrier");
     } catch (error) {
+      if (showVehicleAgeAlert(error)) return;
       if (error instanceof Error) messageApi.error(error.message);
       else message.error("Hubo un problema aceptando la orden");
     } finally {
