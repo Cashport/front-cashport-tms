@@ -69,7 +69,7 @@ export default function CarrierTable({
           style={{ color: "blue", textDecorationLine: "none" }}
         >
           <Button type="link" style={{ padding: "0" }}>
-            {`${record.id_transfer_request} - ${record.order_nro}`}
+            {`${record.id_tr ?? record.id_transfer_request} - ${record.order_nro}`}
           </Button>
         </Link>
       ),

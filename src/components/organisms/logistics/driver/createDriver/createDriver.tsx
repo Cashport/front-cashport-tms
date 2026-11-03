@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { getVehicleType } from "@/services/logistics/vehicle";
 import { addDriver, getTripTypes } from "@/services/logistics/drivers";
 import { getDocumentsByEntityType } from "@/services/logistics/certificates";
+import { showDriverVetoAlert } from "@/utils/logistics/driverVeto";
 
 import { DriverFormTab } from "@/components/molecules/tabs/logisticsForms/driverForm/driverFormTab";
 
@@ -42,6 +43,7 @@ export const CreateDriverView = ({ params }: Props) => {
         });
       }
     } catch (error) {
+      if (showDriverVetoAlert(error)) return;
       message.error(error instanceof Error ? error.message : "Error al crear conductor", 3);
     } finally {
       setIsLoadingSubmit(false);
@@ -57,11 +59,15 @@ export const CreateDriverView = ({ params }: Props) => {
     getVehicleType,
     { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR("getTripTypesDriver", getTripTypes, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  const { data: tripTypes, isLoading: isloadingTripTypes } = useSWR(
+    "getTripTypesDriver",
+    getTripTypes,
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
   return (
     <Skeleton active loading={isLoadingDocuments || isLoadingVehicles || isloadingTripTypes}>
       <DriverFormTab

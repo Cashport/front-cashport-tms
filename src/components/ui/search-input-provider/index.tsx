@@ -1,54 +1,38 @@
 import { FC } from "react";
-import styles from "./search-input.module.scss";
-import { MagnifyingGlass, XCircle } from "phosphor-react";
 import { useSearchContext } from "@/context/SearchContext";
+import SearchField, { type SearchFieldSurface } from "@/components/ui/search-field/search-field";
 
 interface UiSearchInputProps {
   id?: string;
   name?: string;
   placeholder?: string;
   className?: string;
+  /** Sobre qué fondo va: tarjeta blanca (por defecto) o el gris de la página (header). */
+  surface?: SearchFieldSurface;
 }
 
+/** Buscador único (DESIGN.md §8) conectado al SearchContext. */
 const UiSearchInput: FC<UiSearchInputProps> = ({
   id = "ui-search-input",
   name,
   placeholder,
-  className
+  className,
+  surface = "card"
 }) => {
   const { searchTerm, handleChangeSearch } = useSearchContext();
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleChangeSearch(event);
-  };
-  const handleClear = () => {
-    // Crear un evento falso para resetear el searchTerm
-    const fakeEvent = { target: { value: "" } } as React.ChangeEvent<HTMLInputElement>;
-    handleChangeSearch(fakeEvent);
-  };
-
   return (
-    <label htmlFor={id} className={`${styles.inputBox} ${className}`}>
-      <MagnifyingGlass className={styles.icon} />
-      <input
-        type="text"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        value={searchTerm}
-        onChange={handleChange}
-      />
-      {searchTerm && (
-        <button
-          type="button"
-          className={styles.clearButton}
-          onClick={handleClear}
-          aria-label="Clear search"
-        >
-          <XCircle className={styles.clearIcon} />
-        </button>
-      )}
-    </label>
+    <SearchField
+      id={id}
+      name={name}
+      placeholder={placeholder}
+      surface={surface}
+      value={searchTerm ?? ""}
+      onChange={(value) =>
+        handleChangeSearch({ target: { value } } as React.ChangeEvent<HTMLInputElement>)
+      }
+      className={className}
+    />
   );
 };
 

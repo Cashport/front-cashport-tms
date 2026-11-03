@@ -750,6 +750,8 @@ export interface ICarrierRequestsListDetail {
   id: number;
   order_nro: number;
   id_transfer_request: number;
+  /** numero visible de la TR */
+  id_tr?: number | null;
   service_type: string;
   start_date: string;
   end_date: string;
@@ -1222,6 +1224,10 @@ export interface IAPIDriver {
     color: string;
     backgroundColor: string;
   };
+  // Veto activo del documento en el proyecto (driver_blacklist); null si no está vetado
+  veto_reason?: string | null;
+  veto_created_at?: string | null;
+  veto_created_by?: string | null;
 }
 export interface IFormGeneralDriver {
   id: number;
@@ -1664,6 +1670,8 @@ export interface ITrackingResponse extends ITrackingPartial {
  */
 export interface ITransferOrderRequest {
   id: number;
+  /** numero visible por proyecto */
+  id_to?: number | null;
   id_service_type: number;
   id_user: number;
   id_start_location: number;
@@ -1833,6 +1841,8 @@ export interface ITransferOrderRequestCostCenter {
  */
 export interface ITransferRequestStepOne {
   id: number;
+  /** numero visible por proyecto */
+  id_tr?: number | null;
   id_service_type: number;
   service_type: number | null;
   start_date: string;
@@ -2106,6 +2116,8 @@ export interface CarriersPricing {
  */
 export interface ITransferOrder {
   id: number;
+  /** numero visible por proyecto */
+  id_to?: number | null;
   id_service_type: string;
   service_type_desc: TripType;
   id_user: number;
@@ -3693,6 +3705,8 @@ export interface CreateOrderResponse {
 }
 export interface ITripSummaryAPI {
   id: number;
+  /** numero visible por proyecto */
+  id_to?: number | null;
   id_service_type: string;
   service_type_desc: TripType;
   id_user: number;

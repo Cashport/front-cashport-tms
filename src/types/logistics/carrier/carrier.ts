@@ -193,6 +193,7 @@ export interface DataCarga extends Material {
 export interface CarrierRequestAPI {
   status: string; // ID único para el estado del servicio
   id: number; // ID del servicio
+  id_tr?: number | null; // Numero visible de la TR en su proyecto
   service_type: string; // Tipo de servicio (ej. "Carga")
   start_date: string; // Fecha y hora de inicio (formato: DD/MM/YYYY HH:mm)
   end_date: string; // Fecha y hora de fin (formato: DD/MM/YYYY HH:mm)

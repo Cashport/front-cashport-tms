@@ -18,6 +18,7 @@ import { Confirmation } from "../../detail/components/Confirmation/Confirmation"
 import { useMapbox } from "@/utils/logistics/useMapBox";
 import { CustomStepper } from "@/components/atoms/CustomStepper/CustomStepper";
 import { getTravelFreightDuration } from "@/utils/logistics/maps";
+import { showDriverVetoAlert } from "@/utils/logistics/driverVeto";
 import { DataCarga, IAceptCarrierAPI, Material } from "@/types/logistics/carrier/carrier";
 import { BackButton } from "../../../orders/DetailsOrderView/components/BackButton/BackButton";
 import { MAPS_ACCESS_TOKEN } from "@/utils/constants/globalConstants";
@@ -178,6 +179,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       router.push("/logistics/acept_carrier");
     } catch (error) {
       if (showVehicleAgeAlert(error)) return;
+      if (showDriverVetoAlert(error)) return;
       if (error instanceof Error) messageApi.error(error.message);
       else message.error("Hubo un problema aceptando la orden");
     } finally {
@@ -205,6 +207,7 @@ export default function AceptCarrierDetailView({ params }: Readonly<AceptCarrier
       });
       router.push("/logistics/acept_carrier");
     } catch (error) {
+      if (showDriverVetoAlert(error)) return;
       if (error instanceof Error) messageApi.error(error.message);
       else messageApi.error("Hubo un problema editando la orden");
     } finally {

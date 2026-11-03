@@ -92,17 +92,17 @@ export const columns = (
                 className="row-text id"
                 href={`${redirect ?? "/logistics/transfer-orders/details"}/${id}`}
               >
-                {id}
+                {record.number}
               </Link>
               {trShouldRedirect ? (
                 <Link
                   className="row-text subId"
                   href={`${"/logistics/transfer-orders/details/"}${record.id_transfer_request}`}
                 >
-                  TR {record.id_transfer_request}
+                  TR {record.trNumber}
                 </Link>
               ) : (
-                <span className="row-text subId">TR {record.id_transfer_request}</span>
+                <span className="row-text subId">TR {record.trNumber}</span>
               )}
             </Flex>
           );
@@ -112,12 +112,12 @@ export const columns = (
             className="row-text id"
             href={`${redirect ?? "/logistics/transfer-orders/details"}/${id}`}
           >
-            {id}
+            {record.number}
           </Link>
         );
       },
       sorter: (a: DataTypeForTransferOrderTable, b: DataTypeForTransferOrderTable) =>
-        Number(a.tr) - Number(b.tr),
+        Number(a.number) - Number(b.number),
       showSorterTooltip: false,
       sortDirections: ["descend", "ascend"] as const,
       width: 84

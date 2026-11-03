@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { TripState } from "@/utils/constants/tripState";
 import DetailTripMap from "./detail/Detail";
 import { IDriverMap } from "@/types/logistics/driver/driver";
-import { API } from "@/utils/api/api";
+import { API, idProject } from "@/utils/api/api";
 import { AxiosResponse } from "axios";
 import { MAPS_ACCESS_TOKEN, SOCKET_URI } from "@/utils/constants/globalConstants";
 
@@ -33,6 +33,7 @@ interface ISocketData {
   timestamp: Date;
   trip: ISocketTrip;
   distance: number;
+  projectId?: number | null;
 }
 
 interface IMark {
@@ -128,7 +129,7 @@ const MapComponent = () => {
               </div>
               <div style="display:flex;flex-direction:column;row-gap:8px;align-items:flex-end">
               <a href="/logistics/transfer-orders/details/${data.trip.transferRequestId}">
-                <div style="color:#d0e4ff;text-decoration:underline">TR ${data.trip.transferRequestId}</div>
+                <div style="color:#d0e4ff;text-decoration:underline">TR ${data.trip.transferRequestNumber ?? data.trip.transferRequestId}</div>
               </a>
               <div style="background-color:${getStateColor(data.trip.stateId)};padding:4px 8px;display:flex;align-items: center;column-gap:4px;border-radius:8px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -216,8 +217,12 @@ const MapComponent = () => {
   };
 
   useEffect(() => {
-    socket.on("changeLocation", (data) => {
+    socket.on("changeLocation", (data: ISocketData) => {
       console.log("Ubicación recibida: ", data);
+      // Si el evento indica su proyecto y no es el seleccionado, no se muestra.
+      // El servidor de sockets hoy no filtra por proyecto (ver plan, fase 7).
+      const eventProjectId = data?.trip?.projectId ?? data?.projectId;
+      if (eventProjectId && idProject && Number(eventProjectId) !== Number(idProject)) return;
       updateUserLocation(data);
     });
 
@@ -453,7 +458,9 @@ const MapComponent = () => {
                               href={`/logistics/transfer-orders/details/${item.socketInfo.trip.transferRequestId}`}
                             >
                               <div className={styles.rightTitle}>
-                                TR {item.socketInfo.trip.transferRequestId}
+                                TR{" "}
+                                {item.socketInfo.trip.transferRequestNumber ??
+                                  item.socketInfo.trip.transferRequestId}
                               </div>
                             </a>
                             <div

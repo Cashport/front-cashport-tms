@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import config from "@/config";
 import { auth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -67,35 +67,43 @@ const API = axios.create({
 export const setProjectInApi = (projectId: number) => {
   idProject = projectId;
 };
-API.interceptors.request.use((request) => {
-  request.headers.set("projectId", `${idProject}`);
-  return request;
-});
-instance.interceptors.request.use((request) => {
-  request.headers.set("projectId", `${idProject}`);
-  return request;
-});
 
-// set tokens in instance
+// Proyecto seleccionado por el usuario. Si el store aun no se hidrato, se lee
+// del mismo almacenamiento que usa el store (localStorage, clave "project").
+// Nunca se toma el primer proyecto de la lista: solo el seleccionado, o el
+// unico si el usuario tiene uno solo.
+export const getProjectId = (): number => {
+  if (idProject) return idProject;
+  if (typeof window === "undefined") return 0;
+  try {
+    const project = JSON.parse(localStorage.getItem("project") || "{}");
+    const selected = Number(project?.state?.selectedProject?.ID) || 0;
+    if (selected) return selected;
+    const projects = project?.state?.projectsBasicInfo ?? [];
+    return projects.length === 1 ? Number(projects[0]?.ID) || 0 : 0;
+  } catch {
+    return 0;
+  }
+};
+
+const setProjectHeader = (request: InternalAxiosRequestConfig) => {
+  const projectId = getProjectId();
+  if (projectId) request.headers.set("projectId", `${projectId}`);
+  else request.headers.delete("projectId");
+};
+
+// Un solo interceptor por instancia: axios ejecuta los interceptores de
+// request en orden inverso al registro y antes uno pisaba al otro.
 instance.interceptors.request.use(async (request) => {
+  setProjectHeader(request);
   const token = (await getIdToken(false)) as string;
   request.headers.set("Authorization", `Bearer ${token}`);
   return request;
 });
 
-export const getProjectId = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  const project = JSON.parse(sessionStorage.getItem("project") || "{}");
-  const projectId = (project?.state?.projectsBasicInfo?.find(() => true)?.ID as number) || 0;
-  return projectId;
-};
-
 API.interceptors.request.use(async (request) => {
+  setProjectHeader(request);
   request.headers.set("Authorization", `Bearer ${await getIdToken()}`);
-  if (!request.headers.get("projectId") || request.headers.get("projectId") === "0") {
-    const projectId = await getProjectId();
-    request.headers.set("projectId", `${projectId}`);
-  }
   return request;
 });
 

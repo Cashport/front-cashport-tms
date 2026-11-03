@@ -14,6 +14,8 @@ import UiTab from "@/components/ui/ui-tab";
 
 interface FinalizeTrip {
   idTR: string;
+  /** numero visible de la TR; si no viene se muestra idTR */
+  trNumber?: number | null;
   onClose: () => void;
   messageApi: MessageInstance;
   statusTrId?: string;
@@ -44,7 +46,14 @@ export interface ICarrierAPI {
   Observation: string;
 }
 
-const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: FinalizeTrip) => {
+const FinalizeTrip = ({
+  idTR,
+  trNumber,
+  onClose,
+  messageApi,
+  statusTrId = "",
+  setNav
+}: FinalizeTrip) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -142,7 +151,7 @@ const FinalizeTrip = ({ idTR, onClose, messageApi, statusTrId = "", setNav }: Fi
       if (response) {
         setIsLoading(false);
         onClose();
-        message.success(`TR No. ${idTR} legalizada`, 2, () => setNav(NavEnum.BILLING));
+        message.success(`TR No. ${trNumber ?? idTR} legalizada`, 2, () => setNav(NavEnum.BILLING));
       }
     } catch (error: any) {
       setIsLoading(false);

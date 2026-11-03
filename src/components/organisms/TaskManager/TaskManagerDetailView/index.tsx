@@ -236,7 +236,9 @@ const TaskManagerDetailView = ({ moduleTitle, approvalId, onBack }: TaskManagerD
             <Col xs={24} md={12}>
               <Text type="secondary">TR o Proyecto asociado a esta solicitud</Text>
               <div style={{ color: "#1677ff", fontWeight: 600, cursor: "pointer" }}>
-                {approval.id_transfer_request ? `TR-${approval.id_transfer_request}` : "-"}
+                {approval.id_transfer_request
+                  ? `TR-${approval.id_tr ?? approval.id_transfer_request}`
+                  : "-"}
               </div>
             </Col>
           </Row>

@@ -1451,7 +1451,7 @@ export const CreateOrderView = () => {
     try {
       const newTO = await addTransferOrder(datato, data?.files || ([] as IDocumentCompleted[]));
       if (newTO) {
-        message.success(`TO No. ${newTO.id} ha sido creada`, 2, () =>
+        message.success(`TO No. ${newTO.id_to ?? newTO.id} ha sido creada`, 2, () =>
           push("/logistics/orders/details/" + newTO.id)
         );
       }

@@ -94,7 +94,7 @@ export const ModalPostponeTR = ({ isOpen, onCancel, onClose, allSelectedRows }: 
         <div className="ModalPostponeTR__content" style={{ height: "90%" }}>
           <p>
             Por favor confirma que estás aplazando los servicios{" "}
-            <strong>{allSelectedRows?.map((row) => `TR #${row.tr}`)?.join(", ")}</strong>
+            <strong>{allSelectedRows?.map((row) => `TR #${row.number}`)?.join(", ")}</strong>
           </p>
         </div>
 

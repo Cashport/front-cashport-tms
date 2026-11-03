@@ -235,7 +235,7 @@ export const CreateOrderVieww: React.FC = () => {
         const modeledData = mapFormToTransferOrder(data);
         try {
           const res = await addTransferOrderNew(modeledData, []);
-          message.success(`TO No. ${res.id} ha sido creada`, 2, () =>
+          message.success(`TO No. ${res.id_to ?? res.id} ha sido creada`, 2, () =>
             push("/logistics/orders/details/" + res.id)
           );
         } catch (error) {
