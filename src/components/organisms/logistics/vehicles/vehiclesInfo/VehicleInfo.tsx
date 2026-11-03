@@ -1,5 +1,7 @@
 "use client";
-import { message, Skeleton } from "antd";
+import { Alert, message, Skeleton } from "antd";
+import { showVehicleAgeAlert } from "@/utils/logistics/vehicleAge";
+import { VerifiedModelYear } from "./VerifiedModelYear";
 import "../../../../../styles/_variables_logistics.css";
 import "./vehicleInfo.scss";
 import { VehicleFormTab } from "@/components/molecules/tabs/logisticsForms/vehicleForm/vehicleFormTab";
@@ -56,6 +58,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
       }
     } catch (error) {
       setIsLoadingSubmit(false);
+      if (showVehicleAgeAlert(error)) return;
       message.error(error instanceof Error ? error.message : "Error al editar vehículo", 2);
     }
   };
@@ -72,6 +75,7 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
         setStatusForm("review");
       });
     } catch (error) {
+      if (showVehicleAgeAlert(error)) return;
       message.error(
         error instanceof Error ? error.message : "Error al editar estado del vehículo",
         3
@@ -101,6 +105,16 @@ export const VehicleInfoView = ({ idParam = "", params }: Props) => {
         isLoading || isValidating || isLoadingDocuments || isLoadingVehicles || isLoadingFeatures
       }
     >
+      {data?.age_block_reason && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message="Vehículo fuera de la antigüedad permitida en este proyecto: no puede activarse ni asignarse a ningún servicio"
+          description={data.age_block_reason}
+        />
+      )}
+      {data && <VerifiedModelYear vehicle={data} onSaved={() => mutate()} />}
       <VehicleFormTab
         statusForm={statusForm}
         handleFormState={handleFormState}

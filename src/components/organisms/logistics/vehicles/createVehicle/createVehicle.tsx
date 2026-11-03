@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { message, Skeleton } from "antd";
+import { showVehicleAgeAlert } from "@/utils/logistics/vehicleAge";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +40,7 @@ export const CreateVehicleView = ({ params }: Props) => {
         push(`/logistics/providers/${params.id}/vehicle`)
       );
     } catch (error) {
+      if (showVehicleAgeAlert(error)) return;
       message.error(error instanceof Error ? error.message : "Error al crear vehículo", 3);
     }
     setIsLoadingSubmit(false);
