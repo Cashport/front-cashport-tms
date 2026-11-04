@@ -1,6 +1,6 @@
 import { API } from "@/utils/api/api";
 import { RateType } from "@/enums/rates";
-import { IFormRate } from "@/app/rates/create/page";
+import { IFormRate } from "@/app/(platform)/rates/create/page";
 
 interface ICreateRateDTO {
   serviceItemSAP: string;

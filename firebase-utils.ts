@@ -120,6 +120,22 @@ export const continueLoginAfterAuth = async (
   return { step: "success" };
 };
 
+// Igual que signInWithPolicyCheck, pero deja propagar el error de Firebase para
+// que quien pinta su propio error (la tarjeta de acceso de la landing pública)
+// distinga credenciales inválidas de demasiados intentos o fallas de red.
+export const signInAndCheckPolicy = async (
+  email: string,
+  password: string,
+  router: AppRouterInstance
+): Promise<LoginOutcome> => {
+  localStorage.removeItem(STORAGE_TOKEN);
+  const { resetStore, setHydrated } = useAppStore.getState();
+  resetStore();
+  setHydrated();
+  await signInWithEmailAndPassword(auth, email.trim(), password);
+  return await continueLoginAfterAuth(router);
+};
+
 // Login por usuario y contraseña, igual que getAuth pero condicionado por la
 // política de seguridad del proyecto en vez de redirigir sin más.
 export const signInWithPolicyCheck = async (
@@ -176,7 +192,7 @@ export const completeLoginAfterPasswordChange = async (
 };
 
 const logOut = (router: AppRouterInstance) => {
-  window.location.href = "/auth/login";
+  window.location.href = "/";
   signOut(auth);
   localStorage.removeItem(STORAGE_TOKEN);
   const { resetStore } = useAppStore.getState();

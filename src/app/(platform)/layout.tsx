@@ -5,8 +5,8 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Poppins } from "@next/font/google";
 import esES from "antd/locale/es_ES";
 import { ModalProvider } from "@/context/ModalContext";
-import "../styles/globals.scss";
-import "../styles/tailwind.css";
+import "../../styles/globals.scss";
+import "../../styles/tailwind.css";
 
 const poppins = Poppins({
   subsets: ["latin"],
