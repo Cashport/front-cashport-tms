@@ -69,7 +69,8 @@ export default function CarrierTable({
           style={{ color: "blue", textDecorationLine: "none" }}
         >
           <Button type="link" style={{ padding: "0" }}>
-            {`${record.id_tr ?? record.id_transfer_request} - ${record.order_nro}`}
+            {/* Sin el consecutivo (order_nro): el proveedor no debe inferir a cuántos se les ofertó */}
+            {`${record.id_tr ?? record.id_transfer_request}`}
           </Button>
         </Link>
       ),
