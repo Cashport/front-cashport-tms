@@ -1,6 +1,12 @@
 /** Respuesta de GET /control-tower (Torre de control TMS). Fechas en hora de Colombia, 'YYYY-MM-DD HH:mm:ss'. */
 export interface IControlTowerApi {
   corte: string;
+  /**
+   * Meses del proyecto con sus fechas, incluidas ('YYYY-MM-DD'; m de 1 a 12): los 12 que
+   * terminan en el actual (actual = true) y los que faltan para cerrar el trimestre.
+   * Mes calendario o el corte que tenga configurado el proyecto (project_period).
+   */
+  periodos?: { y: number; m: number; desde: string; hasta: string; actual: boolean }[];
   tipos: { id: number; nombre: string }[];
   /** id de usuario de Cashport → nombre */
   usuarios: Record<string, string>;
