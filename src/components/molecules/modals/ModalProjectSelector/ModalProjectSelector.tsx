@@ -1,6 +1,6 @@
 import { Avatar, Modal } from "antd";
 import { Clipboard } from "phosphor-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { useAppStore } from "@/lib/store/store";
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
@@ -12,12 +12,17 @@ interface Props {
 }
 export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
   const path = usePathname();
-  const router = useRouter();
   const selectedProject = useAppStore((state) => state.selectedProject);
   const setSelectedProject = useAppStore((state) => state.setSelectedProject);
+  const clearCarrierForApproval = useAppStore((state) => state.clearCarrierForApproval);
   const projects = useAppStore((state) => state.projectsBasicInfo);
 
   const handleSelectProject = (project: ISelectedProject) => {
+    if (project.ID === selectedProject?.ID) {
+      onClose();
+      return;
+    }
+
     const projectInfo: ISelectedProject = {
       ID: project.ID,
       NAME: project.NAME,
@@ -28,11 +33,17 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
       isSuperAdmin: project.isSuperAdmin
     };
     setSelectedProject(projectInfo);
-    if (path.startsWith("/proyectos/review")) {
-      router.push(`/proyectos/review/${project.ID}`);
-    }
-
+    // Datos en memoria ligados al proyecto anterior (cotización en curso)
+    clearCarrierForApproval();
     onClose();
+
+    // Las consultas (SWR y useEffect) no dependen del proyecto: sin recargar,
+    // la vista se queda con los datos del proyecto anterior. El store ya quedó
+    // persistido en localStorage, así que la recarga arranca con el nuevo.
+    const target = path.startsWith("/proyectos/review")
+      ? `/proyectos/review/${project.ID}`
+      : `${window.location.pathname}${window.location.search}`;
+    window.location.assign(target);
   };
 
   if (projects?.length > 1) {
