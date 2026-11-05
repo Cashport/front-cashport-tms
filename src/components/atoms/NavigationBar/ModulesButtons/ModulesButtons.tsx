@@ -17,6 +17,7 @@ import {
 } from "phosphor-react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
+import { MAP_V1_ENABLED, MAP_V2_ENABLED } from "@/utils/constants/featureFlags";
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -170,15 +171,30 @@ export const ModulesButtons = ({
           </Button>
         </Link>
       )}
-      {checkUserViewPermissions(project, "TMS-Dashboard") && (
+      {MAP_V1_ENABLED && checkUserViewPermissions(project, "TMS-Dashboard") && (
         <Link href="/map" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"
             icon={<MapPin size={iconSize} />}
-            className={path.startsWith("/map") ? "buttonIcon" : "buttonIconActive"}
+            className={
+              path === "/map" || path.startsWith("/map/") ? "buttonIcon" : "buttonIconActive"
+            }
           >
             {isSideBarLarge && "Ajustes"}
+          </Button>
+        </Link>
+      )}
+      {MAP_V2_ENABLED && checkUserViewPermissions(project, "TMS-Dashboard") && (
+        <Link href="/map-v2" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<MapPin size={iconSize} />}
+            title="Mapa"
+            className={path.startsWith("/map-v2") ? "buttonIcon" : "buttonIconActive"}
+          >
+            {isSideBarLarge && "Mapa"}
           </Button>
         </Link>
       )}
