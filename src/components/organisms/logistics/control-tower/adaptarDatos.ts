@@ -7,7 +7,13 @@ import { IControlTowerApi } from "@/types/logistics/controlTower/controlTower";
  */
 
 const MN = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-const SIN = { psl: "Sin PSL", vp: "Sin VP", prov: "Sin proveedor", loc: "Sin ubicación", veh: "Sin vehículo" };
+const SIN = {
+  psl: "Sin PSL",
+  vp: "Sin VP",
+  prov: "Sin proveedor",
+  loc: "Sin ubicación",
+  veh: "Sin vehículo"
+};
 
 /** 'YYYY-MM-DD HH:mm:ss' (hora de Colombia) → Date local. */
 function parseLocal(s: string | null | undefined): Date | null {
@@ -20,6 +26,39 @@ function parseLocal(s: string | null | undefined): Date | null {
 
 const num = (v: unknown) => Number(v) || 0;
 
+/** 'YYYY-MM-DD' → Date local a medianoche. */
+function fechaLocal(s: string): Date {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** Días calendario de a hasta b (sin la hora; negativo si b es anterior). */
+function diasEntre(a: Date, b: Date): number {
+  return Math.round(
+    (new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime() -
+      new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime()) /
+      864e5
+  );
+}
+
+/** Periodos de la API; si no vienen, los 12 meses calendario que terminan en el del corte. */
+function periodosDe(api: IControlTowerApi, corte: Date) {
+  if (api.periodos?.length) return api.periodos;
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return Array.from({ length: 12 }, (_, i) => {
+    const ini = new Date(corte.getFullYear(), corte.getMonth() - 11 + i, 1);
+    const fin = new Date(ini.getFullYear(), ini.getMonth() + 1, 0);
+    return {
+      y: ini.getFullYear(),
+      m: ini.getMonth() + 1,
+      desde: iso(ini),
+      hasta: iso(fin),
+      actual: i === 11
+    };
+  });
+}
+
 function masFrecuente(valores: string[]) {
   const c: Record<string, number> = {};
   valores.forEach((v) => (c[v] = (c[v] || 0) + 1));
@@ -29,26 +68,47 @@ function masFrecuente(valores: string[]) {
 export function adaptarDatos(api: IControlTowerApi) {
   const NOW_T = parseLocal(api.corte) as Date;
 
-  // ---- calendario ----
-  const MONTHS = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(NOW_T.getFullYear(), NOW_T.getMonth() - 11 + i, 1);
-    const y = d.getFullYear();
-    const m = d.getMonth();
-    return { y, m, label: MN[m] + " " + String(y).slice(2), days: new Date(y, m + 1, 0).getDate() };
+  // ---- periodos: meses del proyecto (calendario o su corte, p. ej. 26 a 25) ----
+  // Cada uno con su fecha de inicio y de fin; "day" de un servicio es el día dentro de su periodo.
+  const PERIODOS = periodosDe(api, NOW_T).map((p) => {
+    const start = fechaLocal(p.desde);
+    const end = fechaLocal(p.hasta);
+    const m = p.m - 1;
+    return {
+      y: p.y,
+      m,
+      label: MN[m] + " " + String(p.y).slice(2),
+      start,
+      end,
+      days: diasEntre(start, end) + 1,
+      actual: p.actual
+    };
   });
-  const CUR = 11;
-  const ELAPSED = NOW_T.getDate();
+  const MONTHS = PERIODOS.slice(0, PERIODOS.findIndex((p) => p.actual) + 1);
+  const CUR = MONTHS.length - 1;
+  const diaDelPeriodo = (d: Date, i: number) => diasEntre(MONTHS[i].start, d) + 1;
+  const ELAPSED = diaDelPeriodo(NOW_T, CUR);
   const DAYS_CUR = MONTHS[CUR].days;
-  const monthIndex = (d: Date) => (d.getFullYear() - MONTHS[0].y) * 12 + (d.getMonth() - MONTHS[0].m);
+  const monthIndex = (d: Date) =>
+    MONTHS.findIndex((p) => diasEntre(p.start, d) >= 0 && diasEntre(d, p.end) >= 0);
 
   // ---- tipos de servicio ----
   const tipoNombre: Record<string, string> = {};
   api.tipos.forEach((t) => (tipoNombre[String(t.id)] = t.nombre));
-  const tipoDe = (id: number | null | undefined) => (id != null && tipoNombre[String(id)] ? String(id) : "0");
+  const tipoDe = (id: number | null | undefined) =>
+    id != null && tipoNombre[String(id)] ? String(id) : "0";
   if (!tipoNombre["0"]) tipoNombre["0"] = "Sin tipo";
 
   // ---- usuarios (solicitantes): índice propio, igual que el prototipo ----
-  const USERS: { id: number; name: string; psl: string; vp: string; cc: string; _psl: string[]; _vp: string[] }[] = [];
+  const USERS: {
+    id: number;
+    name: string;
+    psl: string;
+    vp: string;
+    cc: string;
+    _psl: string[];
+    _vp: string[];
+  }[] = [];
   const userIdx: Record<string, number> = {};
   const usuario = (u: number | null | undefined) => {
     const key = u == null ? "-" : String(u);
@@ -75,7 +135,7 @@ export function adaptarDatos(api: IControlTowerApi) {
     trnDeInterno[s.tr] = s.trn;
     const f = parseLocal(s.f) as Date;
     const m = monthIndex(f);
-    if (m < 0 || m > CUR) return;
+    if (m < 0) return;
     const user = usuario(s.u);
     const base = num(s.base);
     const sob = num(s.sob);
@@ -95,7 +155,7 @@ export function adaptarDatos(api: IControlTowerApi) {
       stb,
       cost: base + sob + stb,
       m,
-      day: f.getDate(),
+      day: diaDelPeriodo(f, m),
       veh: s.veh || SIN.veh,
       orig: s.orig || SIN.loc,
       dest: s.dest || SIN.loc,
@@ -108,14 +168,26 @@ export function adaptarDatos(api: IControlTowerApi) {
     USERS[user]._vp.push(t.vp);
     const tr =
       trsMap[s.trn] ||
-      (trsMap[s.trn] = { id: s.trn, user, psl: t.psl, vp: t.vp, m, day: t.day, trips: [], status: s.st, value: 0, type: t.type });
+      (trsMap[s.trn] = {
+        id: s.trn,
+        user,
+        psl: t.psl,
+        vp: t.vp,
+        m,
+        day: t.day,
+        trips: [],
+        status: s.st,
+        value: 0,
+        type: t.type
+      });
     tr.trips.push(t);
     tr.value += t.cost;
   });
   const TRS = Object.keys(trsMap).map((k) => trsMap[k]);
 
   // ---- TRs en operación (Solicitudes y En curso) ----
-  const hours = (a: Date | null, b: Date | null) => (a && b ? (b.getTime() - a.getTime()) / 36e5 : 0);
+  const hours = (a: Date | null, b: Date | null) =>
+    a && b ? (b.getTime() - a.getTime()) / 36e5 : 0;
   const OPS = api.operacion.map((r) => {
     const plan = parseLocal(r.salida) || parseLocal(r.creada) || NOW_T;
     const ult = parseLocal(r.ultSeg);
@@ -139,11 +211,22 @@ export function adaptarDatos(api: IControlTowerApi) {
       plate: r.plate || undefined,
       app: !!r.app,
       // sin ningún seguimiento: cuenta desde la salida programada
-      lastMin: r.st === "sin" ? null : ult ? hours(ult, NOW_T) * 60 : enCurso && plan < NOW_T ? hours(plan, NOW_T) * 60 : null,
+      lastMin:
+        r.st === "sin"
+          ? null
+          : ult
+            ? hours(ult, NOW_T) * 60
+            : enCurso && plan < NOW_T
+              ? hours(plan, NOW_T) * 60
+              : null,
       plan,
       created: parseLocal(r.creada) || plan,
-      stbH: r.st === "stb" ? Math.round(hours(parseLocal(r.iniStb) || ult || plan, NOW_T) * 2) / 2 : undefined,
-      detH: r.st === "det" ? Math.round(hours(parseLocal(r.iniDet) || ult || plan, NOW_T)) : undefined,
+      stbH:
+        r.st === "stb"
+          ? Math.round(hours(parseLocal(r.iniStb) || ult || plan, NOW_T) * 2) / 2
+          : undefined,
+      detH:
+        r.st === "det" ? Math.round(hours(parseLocal(r.iniDet) || ult || plan, NOW_T)) : undefined,
       detWhy: r.st === "det" ? r.motivoDet || "Sin motivo registrado" : undefined,
       durH: Math.max(0, hours(parseLocal(r.salida), parseLocal(r.llegada))),
       invAt: parseLocal(r.invitacion) || undefined,
@@ -199,9 +282,14 @@ export function adaptarDatos(api: IControlTowerApi) {
 
   // ---- catálogos para los filtros ----
   const todos = [...TRIPS, ...OPS, ...OPEN];
-  const unicos = (k: string) => Array.from(new Set(todos.map((x: any) => x[k]).filter(Boolean))).sort() as string[];
+  const unicos = (k: string) =>
+    Array.from(new Set(todos.map((x: any) => x[k]).filter(Boolean))).sort() as string[];
   const tiposUsados = unicos("type");
-  const TYPES = tiposUsados.map((id, k) => ({ id, name: tipoNombre[id], color: `var(--ty${(k % 4) + 1})` }));
+  const TYPES = tiposUsados.map((id, k) => ({
+    id,
+    name: tipoNombre[id],
+    color: `var(--ty${(k % 4) + 1})`
+  }));
   const CARGA = (TYPES.find((t) => /carga/i.test(t.name)) || TYPES[0] || { id: "0" }).id;
   const VEH: Record<string, string[]> = {};
   todos.forEach((x: any) => {
@@ -235,7 +323,11 @@ export function adaptarDatos(api: IControlTowerApi) {
   api.proveedoresKpi.forEach((p) => (PKX[p.prov] = { resp: p.resp, ontime: p.aTiempo }));
   const COMMENTS: Record<string, any[]> = {};
   Object.keys(api.comentarios).forEach((k) => {
-    COMMENTS[k] = api.comentarios[k].map((c) => ({ ...c, who: c.who || "TMS", at: parseLocal(c.at) || NOW_T }));
+    COMMENTS[k] = api.comentarios[k].map((c) => ({
+      ...c,
+      who: c.who || "TMS",
+      at: parseLocal(c.at) || NOW_T
+    }));
   });
   const FIN_AT: Record<string, Date> = {};
   Object.keys(api.finalizadas).forEach((id) => {
@@ -248,6 +340,7 @@ export function adaptarDatos(api: IControlTowerApi) {
 
   return {
     MONTHS,
+    PERIODOS,
     CUR,
     ELAPSED,
     DAYS_CUR,
