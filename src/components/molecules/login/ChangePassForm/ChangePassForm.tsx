@@ -99,7 +99,7 @@ export const ChangePassForm = ({ mode, email, onRequireOtp }: IChangePassFormPro
         mode === "change" ? "Tu contraseña ha sido restablecida" : "Tu invitación ha sido aceptada"
     });
     setTimeout(() => {
-      router.push("/auth/login");
+      router.push("/");
     }, 1500);
     setIsLoading(false);
   };
