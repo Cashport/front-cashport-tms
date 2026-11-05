@@ -1,0 +1,492 @@
+$mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+.mbox {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow: hidden;
+    background: var(--vt-surface);
+    border: 1px solid var(--vt-line);
+    border-radius: 12px;
+    box-shadow: var(--vt-shadow);
+    color: var(--vt-ink);
+    font-size: 13px;
+    line-height: 1.45;
+
+    :where(button) {
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+    }
+
+    :where(h3, h4, p) {
+        margin: 0;
+    }
+
+    :where(button):focus-visible {
+        outline: 2px solid var(--vt-ink);
+        outline-offset: 1px;
+    }
+}
+
+.mhead {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 11px 12px 10px 14px;
+    border-bottom: 1px solid var(--vt-line);
+}
+
+.mtitle {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.x,
+.back {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    color: var(--vt-ink-3);
+    border-radius: 7px;
+
+    &:hover {
+        background: var(--vt-surface-3);
+    }
+}
+
+.back {
+    width: 26px;
+    height: 26px;
+    margin-right: -2px;
+    color: var(--vt-ink-2);
+}
+
+.x {
+    margin-left: auto;
+}
+
+.mbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px 14px;
+    overflow-y: auto;
+}
+
+.h4 {
+    margin: 2px 0 -4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    color: var(--vt-ink-3);
+    text-transform: uppercase;
+}
+
+.num {
+    font-variant-numeric: tabular-nums;
+}
+
+.mono {
+    font-family: $mono;
+}
+
+.sub {
+    font-size: 11.5px;
+    color: var(--vt-ink-3);
+}
+
+.plate {
+    flex: none;
+    padding: 0 5px;
+    font-family: $mono;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 17px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    background: var(--vt-plate);
+    color: var(--vt-plate-ink);
+    border: 1.5px solid var(--vt-plate-ink);
+    border-radius: 4px;
+}
+
+.mkv {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+}
+
+.k {
+    font-size: 10.5px;
+    color: var(--vt-ink-3);
+}
+
+.v {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.cpy {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    color: var(--vt-ink-3);
+    border-radius: 8px;
+
+    &:hover {
+        background: var(--vt-surface-3);
+        color: var(--vt-ink);
+    }
+}
+
+.dhead {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 2px;
+}
+
+.dhead .h4 {
+    margin: 0;
+}
+
+.dsum {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ds {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+}
+
+.dsValid {
+    color: var(--vt-ok);
+}
+
+.dsExpiring {
+    color: var(--vt-med);
+}
+
+.dsExpired {
+    color: var(--vt-crit);
+}
+
+.seg {
+    display: flex;
+    align-self: flex-start;
+    padding: 2px;
+    background: var(--vt-surface-3);
+    border-radius: 8px;
+
+    button {
+        padding: 4px 11px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--vt-ink-3);
+        border-radius: 6px;
+    }
+}
+
+.seg .segOn {
+    background: var(--vt-surface);
+    color: var(--vt-ink);
+    box-shadow: 0 1px 2px var(--vt-shade-mid);
+}
+
+.docs {
+    display: flex;
+    flex-direction: column;
+    max-height: 250px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid var(--vt-line);
+    border-radius: 9px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.docr {
+    display: grid;
+    flex: none;
+    grid-template-columns: 22px minmax(0, 1fr) auto auto 10px;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 12px;
+    text-align: left;
+
+    & + & {
+        border-top: 1px solid var(--vt-line);
+    }
+
+    &:hover {
+        background: var(--vt-surface-2);
+    }
+}
+
+.di {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    color: var(--vt-ink-2);
+    background: var(--vt-surface-3);
+    border-radius: 6px;
+}
+
+.dn {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dv {
+    font-size: 11px;
+    color: var(--vt-ink-3);
+    white-space: nowrap;
+}
+
+.chev {
+    color: var(--vt-ink-3);
+}
+
+.dl {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    padding: 4px 9px;
+    font-size: 11.5px;
+    font-weight: 500;
+    border: 1px solid var(--vt-line-strong);
+    border-radius: 7px;
+
+    &:hover {
+        background: var(--vt-surface-3);
+    }
+}
+
+.docview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.paper {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 100%;
+    padding: 16px;
+    background: var(--vt-paper);
+    color: var(--vt-paper-ink);
+    border: 1px solid var(--vt-line);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 6px var(--vt-paper-frame);
+    aspect-ratio: 1 / 1.1;
+}
+
+.ph {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    font-size: 13px;
+    border-bottom: 2px solid var(--vt-paper-ink);
+
+    span {
+        font-size: 11px;
+        color: var(--vt-paper-ink-2);
+    }
+}
+
+.pkv {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 5px 14px;
+    font-size: 12px;
+
+    span {
+        color: var(--vt-paper-ink-3);
+    }
+}
+
+.plines {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: auto;
+
+    i {
+        display: block;
+        width: 100%;
+        height: 6px;
+        background: var(--vt-paper-line);
+        border-radius: 3px;
+    }
+}
+
+.docmeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ptab {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    th {
+        padding: 5px 6px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: var(--vt-ink-3);
+        text-align: left;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--vt-line);
+    }
+
+    td {
+        padding: 6px;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+        border-bottom: 1px solid var(--vt-line);
+    }
+
+    td.mono {
+        font-size: 11px;
+    }
+
+    tfoot td {
+        font-weight: 600;
+        border-bottom: 0;
+    }
+}
+
+.ptab .r {
+    text-align: right;
+}
+
+.otxFull {
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
+.rules {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--vt-line);
+    border-radius: 9px;
+}
+
+.rl {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 10px;
+
+    & + & {
+        border-top: 1px solid var(--vt-line);
+    }
+}
+
+.dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    border-radius: 50%;
+}
+
+.d_ok {
+    background: var(--vt-ok);
+}
+
+.d_crit {
+    background: var(--vt-crit);
+}
+
+.d_high {
+    background: var(--vt-high);
+}
+
+.d_med {
+    background: var(--vt-med);
+}
+
+.d_off {
+    background: var(--vt-off);
+    box-shadow: 0 0 0 3px var(--vt-off-bg);
+}
+
+.d_idle {
+    background: var(--vt-idle);
+}
+
+.rn {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.prk {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: var(--vt-surface-3);
+    border-radius: 5px;
+}
+
+.rr {
+    font-size: 11.5px;
+    color: var(--vt-ink-2);
+}
