@@ -194,7 +194,13 @@ function aiInsight(){
 
 /* ---- serie combinada: periodos ---- */
 var MSL=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-function tDate(t: any){var M=MONTHS[t.m];return new Date(M.y,M.m,t.day);}
+// fecha de un día de un periodo (day 1 = primer día del periodo, que no siempre es el 1 del mes)
+function pDate(i: any,day: any){var s=MONTHS[i].start;return new Date(s.getFullYear(),s.getMonth(),s.getDate()+day-1);}
+function tDate(t: any){return pDate(t.m,t.day);}
+// periodo de un mes (y, m de 0 a 11), incluidos los que faltan para cerrar el trimestre; si no viene, el mes calendario
+function perDe(y: any,m: any){var P=(__D.PERIODOS||[]).filter(function(p: any){return p.y===y&&p.m===m;})[0];return P||{start:new Date(y,m,1),end:new Date(y,m+1,0)};}
+// "26/10 a 25/11" cuando el periodo no es el mes calendario
+function rango(M: any){return M.start.getDate()===1?'':' · '+dd(M.start)+' a '+dd(M.end);}
 var TODAY: any=NOW;
 function dd(d: any){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');}
 function agg(f: any){var r: any={base:0,ext:0,cost:0,km:0,n:0,nt:{}};D.T.forEach(function(t: any){if(f(t)){r.base+=t.base;r.ext+=t.sob+t.stb;r.cost+=t.cost;r.km+=t.km;r.n++;r.nt[t.type]=(r.nt[t.type]||0)+1;}});return r;}
@@ -202,16 +208,16 @@ function buildRows(mode: any){
   var out: any=[];
   function push(l: any,tt: any,f: any,cur: any,totDays: any,elDays: any,future?: any){var a=agg(f);a.l=l;a.tt=tt;a.f=f;a.cur=!!cur;
     a.proj= cur&&elDays? a.cost*totDays/elDays : (future?D.byM[CUR].cost/ELAPSED:null); out.push(a);}
-  if(mode==='d'){for(var d=1;d<=DAYS_CUR;d++)(function(d){push(String(d),String(d).padStart(2,'0')+'/'+String(MONTHS[CUR].m+1).padStart(2,'0')+'/'+MONTHS[CUR].y,function(t: any){return t.m===CUR&&t.day===d;},false,0,0,d>ELAPSED);})(d);}
+  if(mode==='d'){for(var d=1;d<=DAYS_CUR;d++)(function(d){var x=pDate(CUR,d);push(String(x.getDate()),ddmmyyyy(x),function(t: any){return t.m===CUR&&t.day===d;},false,0,0,d>ELAPSED);})(d);}
   if(mode==='m'||mode==='m6'){for(var m=(mode==='m'?0:6);m<12;m++)(function(m){var M=MONTHS[m];
-    push(M.label,MSL[M.m].replace(/^\w/,function(c){return c.toUpperCase();})+' '+M.y+(m===CUR?' · al '+dd(TODAY):''),function(t: any){return t.m===m;},m===CUR,DAYS_CUR,ELAPSED);})(m);}
+    push(M.label,MSL[M.m].replace(/^\w/,function(c){return c.toUpperCase();})+' '+M.y+rango(M)+(m===CUR?' · al '+dd(TODAY):''),function(t: any){return t.m===m;},m===CUR,DAYS_CUR,ELAPSED);})(m);}
   if(mode==='w'){var mon=new Date(TODAY);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
     for(var k=11;k>=0;k--)(function(k){var a: any=new Date(mon);a.setDate(a.getDate()-7*k);var b=new Date(a);b.setDate(b.getDate()+7);var e=new Date(b);e.setDate(e.getDate()-1);
       var cur=k===0, el=Math.round((TODAY-a)/864e5)+1;
       push(dd(a),'Semana del '+dd(a)+' al '+dd(e)+(cur?' · en curso':''),function(t: any){var x=tDate(t);return x>=a&&x<b;},cur,7,el);})(k);}
   if(mode==='q'){var qs: any={};MONTHS.forEach(function(M: any,i: any){var q=Math.floor(M.m/3)+1,key=M.y+'-'+q;(qs[key]||(qs[key]={y:M.y,q:q,ms:[]})).ms.push(i);});
     Object.keys(qs).forEach(function(key){var Q=qs[key], cur=Q.ms.indexOf(CUR)>=0, full=Q.ms.length===3||cur;
-      var qStart: any=new Date(Q.y,(Q.q-1)*3,1), qEnd: any=new Date(Q.y,Q.q*3,0), tot=Math.round((qEnd-qStart)/864e5)+1, el=Math.round((TODAY-qStart)/864e5)+1;
+      var qStart: any=perDe(Q.y,(Q.q-1)*3).start, qEnd: any=perDe(Q.y,Q.q*3-1).end, tot=Math.round((qEnd-qStart)/864e5)+1, el=Math.round((TODAY-qStart)/864e5)+1;
       push('T'+Q.q+' '+String(Q.y).slice(2),'Trimestre '+Q.q+' de '+Q.y+(cur?' · al '+dd(TODAY):(!full?' · desde '+MSL[MONTHS[0].m]:'')),function(t: any){return Q.ms.indexOf(t.m)>=0;},cur,tot,el);});}
   return out;
 }
@@ -749,7 +755,7 @@ function opsData(){
   var trVal: any={};D.T.forEach(function(t: any){trVal[t.tr]=(trVal[t.tr]||0)+t.cost;});
   // fecha de finalización: evento Viaje finalizado / Enviado a por legalizar; si no hay, la fecha de servicio
   var fin=TRS.filter(function(tr: any){return trVal[tr.id]&&['leg','porac','acep','pre'].indexOf(tr.status)>=0;}).map(function(tr: any){var t0=tr.trips[0];
-    var ended=__D.FIN_AT[tr.id]||new Date(MONTHS[tr.m].y,MONTHS[tr.m].m,tr.day,18,0);
+    var ended=__D.FIN_AT[tr.id]||new Date(pDate(tr.m,tr.day).setHours(18,0));
     return{id:tr.id,st:tr.status,value:trVal[tr.id],user:tr.user,psl:tr.psl,vp:tr.vp,prov:t0.prov,drv:t0.drv,plate:t0.plate,orig:t0.orig,dest:t0.dest,veh:t0.veh,type:t0.type,
       an:tr.an,ended:ended,days:(NOW_T-ended)/864e5};});
   var all=ops.concat(fin);
@@ -899,8 +905,9 @@ document.getElementById('ops').addEventListener('mouseout',function(e: any){var 
 cmPop.addEventListener('mouseenter',function(){clearTimeout(cmT);});
 cmPop.addEventListener('mouseleave',hideCmSoon);
 document.getElementById('opsWrap').addEventListener('scroll',function(){cmPop.hidden=true;cmFor=null;});
-// en el TMS la página hace scroll dentro del contenedor, no en window: se escucha en captura
-document.addEventListener('scroll',function(){if(!cmPop.hidden){cmPop.hidden=true;cmFor=null;}},{passive:true,capture:true});
+// en el TMS la página hace scroll dentro del contenedor, no en window: se escucha en captura.
+// El scroll de la propia lista de comentarios no lo cierra.
+document.addEventListener('scroll',function(e: any){if(!cmPop.hidden&&!cmPop.contains(e.target)){cmPop.hidden=true;cmFor=null;}},{passive:true,capture:true});
 document.addEventListener('keydown',function(e: any){if(e.key==='Escape'&&!cmPop.hidden){cmPop.hidden=true;cmFor=null;}});
 
 document.getElementById('ops').addEventListener('mousedown',function(e: any){if(e.shiftKey&&e.target.closest('.ops-st'))e.preventDefault();});

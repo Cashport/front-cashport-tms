@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ConfigProvider, message, theme as antdTheme } from "antd";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
-import Loader from "@/components/atoms/loaders/loader";
+import ProfitLoader from "@/components/ui/profit-loader";
 import { ThemeMenuContext, ThemePreference } from "@/context/ThemeMenuContext";
 import { getControlTowerData } from "@/services/logistics/control-tower";
 import { IControlTowerApi } from "@/types/logistics/controlTower/controlTower";
@@ -154,7 +154,10 @@ export function ControlTower() {
           {error ? (
             <div style={{ padding: 24, color: "rgb(var(--cp-ink-3))" }}>{error}</div>
           ) : !data ? (
-            <Loader />
+            // Centrado en la pantalla, no en el contenido; deja usar el menú mientras carga.
+            <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+              <ProfitLoader size="large" />
+            </div>
           ) : (
             <div
               key={`page-${version}`}
