@@ -657,6 +657,8 @@
 /* Las acciones del header y el chip de corte van en su propio contenedor .torre para tomar los tokens del tema. */
 .torre.torre-hdr{background:transparent; display:flex; align-items:center; gap:8px; min-width:0}
 .torre.torre-hdr .fchips{max-width:420px}
+.torre.torre-hdr .hper{flex:none}
+.torre.torre-hdr .hper select{background:var(--ctrl); height:var(--control-h); max-width:400px; text-overflow:ellipsis}
 /* El contenido usa el ancho del ViewWrapper, que ya pone el padding lateral de la página (en celular no lo pone). */
 .torre.torre-body{background:transparent; min-height:100%}
 @media (min-width:769px){.torre.torre-body .page{padding-left:0; padding-right:0}}

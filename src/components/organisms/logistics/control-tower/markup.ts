@@ -10,7 +10,8 @@ export const HEADER_CUT_HTML = `<div class="cut">
         </div>`;
 
 /** Chips de filtros, Filtrar y buscador: acciones del header. El tema va en el menú del avatar (DESIGN.md §4.9). */
-export const HEADER_ACTIONS_HTML = `<div class="fchips" id="fchips"></div>
+export const HEADER_ACTIONS_HTML = `<label class="psel hper"><span class="sr">Periodo</span><select id="perSel" title="Periodo que analiza el tablero"></select><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></label>
+      <div class="fchips" id="fchips"></div>
       <button class="hbtn" id="filterBtn">Filtrar <span class="badge" id="fbadge" hidden>0</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Buscar usuario, PSL…" autocomplete="off"><button class="x" id="qx" hidden aria-label="Limpiar">×</button></label>`;
 

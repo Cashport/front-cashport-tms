@@ -523,6 +523,17 @@ ov.addEventListener('click',function(e: any){
 });
 document.addEventListener('keydown',function(e: any){if(e.key==='Escape'){if(!ov.hidden)closeModal();}});
 document.getElementById('filterBtn').addEventListener('click',openModal);
+/* ---- periodo que analiza el tablero ----
+   Por defecto el periodo en curso. Al elegir uno cerrado, KPIs, vista por día, usuarios, proveedores y
+   proyecciones pasan a ese periodo (completo) y se comparan con el anterior. Solo se listan los que ya
+   empezaron; el primero de la ventana no, porque no tiene periodo anterior con qué compararse. */
+var CUR0=CUR, ELAPSED0=ELAPSED, MESES_P=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function perTxt(i: any){var M=MONTHS[i];return MESES_P[M.m].replace(/^./,function(c){return c.toUpperCase();})+' '+M.y+' · '+dd(M.start)+' a '+dd(M.end)+(i===CUR0?' · en curso':'');}
+function setPeriodo(i: any){CUR=i;DAYS_CUR=MONTHS[i].days;ELAPSED=i===CUR0?ELAPSED0:DAYS_CUR;TODAY=i===CUR0?NOW:MONTHS[i].end;
+  MES_PREV=MESES_P[MONTHS[i-1].m];render();}
+var perSel=document.getElementById('perSel');
+perSel.innerHTML=MONTHS.map(function(M: any,i: any){return i;}).filter(function(i: any){return i>=1&&i<=CUR0;}).reverse().map(function(i: any){return '<option value="'+i+'">'+perTxt(i)+'</option>';}).join('');
+perSel.addEventListener('change',function(this: any){setPeriodo(+this.value);toast(+this.value===CUR0?'Periodo en curso.':'Analizando <b>'+esc(perTxt(+this.value))+'</b>. Las alertas y el seguimiento de la operación siguen siendo de hoy.');});
 /* ================= Sankey: a dónde se va el costo ================= */
 var SK_DIMS=[
  {id:'psl',l:'PSL'},
@@ -1056,7 +1067,7 @@ function libro(spec: {sheets: any[]; [k: string]: any}){
 var MES_L=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 function mesTxt(){var M=MONTHS[CUR];return MES_L[M.m].replace(/^./,function(c){return c.toUpperCase();})+' '+M.y;}
 function subtituloExcel(){var f: any=[];FILTER_CATS.forEach(function(c){var v=S.f[c.id];if(v.length)f.push(c.name+': '+v.map(function(x: any){return labelOf(c.id,x);}).join(', '));});
-  return 'Corte '+ddmmyyyy(TODAY)+' · '+(f.length?'Filtros: '+f.join(' · '):'Sin filtros');}
+  return (CUR===CUR0?'Corte '+ddmmyyyy(TODAY):'Periodo '+perTxt(CUR))+' · '+(f.length?'Filtros: '+f.join(' · '):'Sin filtros');}
 function resumenDe(spec: any){var main=spec.sheets[0], items=[[spec.reg||'Registros',main.rows.length,'i']];
   if(main.total)main.cols.forEach(function(c: any,ci: any){var v=main.total[ci];if(typeof v==='number'&&isFinite(v)&&c.f!=='s'&&c.f!=='k'&&!c.noRes)items.push([c.rt||c.t,v,c.f]);});
   return {resumen:true,name:'Resumen',title:spec.name+' · '+mesTxt(),subtitle:subtituloExcel(),items:items,hojas:spec.sheets.length>1?spec.sheets.map(function(x: any){return [x.name,x.rows.length];}):null};}
