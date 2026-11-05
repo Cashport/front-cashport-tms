@@ -65,3 +65,18 @@ export async function GET() {
 
   return NextResponse.json({ isLogged: true }, { status: 200 });
 }
+
+// Cierre de sesión: borra la cookie de sesión (httpOnly, el cliente no puede
+// tocarla). Sin esto la cookie sigue viva 14 días y el middleware devuelve al
+// usuario de / a /landing aunque ya haya cerrado sesión en Firebase.
+export async function DELETE() {
+  cookies().set({
+    name: COOKIE_NAME || "",
+    value: "",
+    maxAge: 0,
+    path: "/",
+    httpOnly: true,
+    secure: true
+  });
+  return NextResponse.json({ isLogged: false }, { status: 200 });
+}

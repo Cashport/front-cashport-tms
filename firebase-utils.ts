@@ -191,12 +191,18 @@ export const completeLoginAfterPasswordChange = async (
   return await continueLoginAfterAuth(router);
 };
 
-const logOut = (router: AppRouterInstance) => {
-  window.location.href = "/";
-  signOut(auth);
+// eslint-disable-next-line no-unused-vars
+const logOut = async (router?: AppRouterInstance) => {
   localStorage.removeItem(STORAGE_TOKEN);
   const { resetStore } = useAppStore.getState();
   resetStore();
+  // Primero se borra la cookie de sesión y se cierra Firebase; solo después se
+  // navega. Si se navega antes, / ve la cookie aún válida y redirige a /landing.
+  await Promise.allSettled([
+    fetch("/api/auth", { method: "DELETE", credentials: "same-origin" }),
+    signOut(auth)
+  ]);
+  window.location.replace("/");
 };
 
 const sendEmailResetPassword = async (email: string) => {
