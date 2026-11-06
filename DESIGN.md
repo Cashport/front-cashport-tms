@@ -6,6 +6,7 @@ Parte de los lineamientos generales de Cashport (`Brain/Desing/DESIGN.md`) y los
 
 ---
 
+
 ## 0. Contexto, punto de partida y objetivo
 
 - El 95% de los usuarios trabaja en **portátiles de 14" (1920×1080 con Windows al 150%)**. El navegador queda en **~1280 × 550 px útiles**.
