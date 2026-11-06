@@ -10,7 +10,7 @@ if [[  "$VERCEL_GIT_COMMIT_REF" == "logistics-staging" || "$VERCEL_GIT_COMMIT_RE
   exit 1;
 
 else
-  # Don't build
+  # Don't build 
   echo "🛑 - Build cancelled"
   exit 0;
 fi
