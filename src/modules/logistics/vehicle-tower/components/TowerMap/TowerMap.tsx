@@ -206,6 +206,9 @@ export function TowerMap({
     if (el) fitTo(fleetBounds(fleet, t), { padding: fitPadding(el), animate: false });
   }, [mapReady, fleet, t, fitTo]);
 
+  const selectedRouteLength =
+    fleet.find((x) => x.trip.tripId === selectedTripId)?.trip.routeGeometry.length ?? 0;
+
   useEffect(() => {
     const el = canvasRef.current;
     if (!mapReady || selectedTripId === null || !el) return;
@@ -214,7 +217,7 @@ export function TowerMap({
     if (!item) return;
     const drawer = window.innerWidth > DRAWER_MIN_SCREEN ? DRAWER_WIDTH * getAppZoom() : 0;
     fitTo(tripBounds(item.trip, now), { padding: fitPadding(el, drawer), duration: 550 });
-  }, [selectedTripId, mapReady, fitTo]);
+  }, [selectedTripId, selectedRouteLength, mapReady, fitTo]);
 
   const zoomBy = (delta: number) => {
     const map = mapRef.current;

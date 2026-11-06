@@ -1,7 +1,7 @@
 import { STATUS } from "@/utils/constants/globalConstants";
-import { CDOCS, earliestExpiration, condDocs, hasTrailer, vehDocs } from "../lib/documents";
+import { earliestExpiration, condDocs, vehDocs } from "../lib/documents";
 import type { DocEntry } from "../lib/documents";
-import { nearestFrac, curvy, posAt, routeMetrics, simEvents, stateAt } from "../lib/sim";
+import { nearestFrac, routeMetrics, stateAt } from "../lib/tracking";
 import { toTMS } from "../lib/rules";
 import { HR, offsetToIso } from "../lib/time";
 import type {
@@ -10,13 +10,14 @@ import type {
   IVehicleTowerMaterial,
   IVehicleTowerPassenger,
   IVehicleTowerTrackingEvent,
-  IVehicleTowerTrip,
   TowerSegmentState
 } from "../types/vehicleTower";
+import { curvy, mockPosAt, simEvents } from "./mockSim";
+import type { IMockTrip } from "./mockSim";
 
 export type LngLat = [number, number];
 
-export type MockSegment = [TowerSegmentState, number, number, number | string, number | string];
+export type MockSegment = [TowerSegmentState | "En parada", number, number, number | string, number | string];
 
 export interface IMockSeed {
   pl: string;
@@ -199,7 +200,7 @@ function commentFor(st: string, k: number): string {
   return L[k % L.length];
 }
 
-const EV_STATE: Partial<Record<TowerSegmentState, [boolean, string]>> = {
+const EV_STATE: Partial<Record<MockSegment[0], [boolean, string]>> = {
   "En parada": [true, "Llega a parada intermedia (app del conductor)"],
   Cargando: [true, "Inicio de cargue (app del conductor)"],
   "En ruta": [true, "Inicia recorrido (app del conductor)"],
@@ -709,8 +710,6 @@ export interface IMockUnassignedTr {
   psl: string;
 }
 
-// TODO(decisión): la HU no incluye en GET /api/vehicle-tower las TRs sin vehículo (pie del panel, "se gestionan
-// en Riesgo de retraso en la salida"); aquí salen aparte del mock, con la PSL que el prototipo les asigna.
 export const buildMockUnassignedTrs = (now: Date): IMockUnassignedTr[] =>
   UNASSIGNED_SEEDS.map((x, i) => ({
     transferRequest: x.tr,
@@ -810,14 +809,6 @@ const capacityOf = (type: string): string => {
   return "34 t";
 };
 
-const DOC_ISSUER: Record<string, string> = {
-  SOAT: "Seguros del Estado",
-  Tecnomecánica: "CDA Autos del Llano",
-  "Póliza RCE": "Sura",
-  "Licencia C3": "Ministerio de Transporte · RUNT",
-  "Mercancías peligrosas": "SENA",
-  "Seguridad social": "Planilla PILA"
-};
 const DOC_TERM_DAYS: Record<string, number> = {
   "Licencia C3": 3 * 365,
   "Seguridad social": 30,
@@ -827,15 +818,14 @@ const DOC_TERM_DAYS: Record<string, number> = {
 function documentsOf(
   list: DocEntry[],
   id: number,
-  carrier: string,
   nowMs: number
 ): IVehicleTowerDocument[] {
   return list.map(([name, h]) => ({
     name,
     expiresAt: new Date(nowMs + h * HR).toISOString(),
     issuedAt: new Date(nowMs + (h - (DOC_TERM_DAYS[name] || 365) * 24) * HR).toISOString(),
-    number: String(1000000 + id * 48311 + name.length * 977).slice(0, 7),
-    issuer: DOC_ISSUER[name] ?? (CDOCS.includes(name) ? "Centro de formación certificado" : carrier)
+    number: String(1000 + id * 37 + name.length),
+    issuer: "No identificado"
   }));
 }
 
@@ -844,7 +834,7 @@ export function seedToTrip(
   index: number,
   now: Date,
   contacts: Record<string, [string, string]>
-): IVehicleTowerTrip {
+): IMockTrip {
   const i = index;
   const nowMs = now.getTime();
   const iso = (h: number) => offsetToIso(nowMs, h);
@@ -880,7 +870,7 @@ export function seedToTrip(
   const stopFirst = stopNames[0];
   const stopLast = stopNames[stopNames.length - 1];
 
-  const trip: IVehicleTowerTrip = {
+  const trip: IMockTrip = {
     tripId: 118000 + i * 137 + (hasTr ? trNumber % 97 : 0),
     stateId: null,
     transferRequest: hasTr
@@ -919,9 +909,9 @@ export function seedToTrip(
       line: line.join(" "),
       year: Number(year),
       municipality: seed.mun,
-      trailerPlate: hasTrailer(seed.tipo) ? `R${String(30000 + i * 1379).slice(0, 5)}` : null,
+      trailerPlate: null,
       capacity: capacityOf(seed.tipo),
-      gpsProvider: ["Satrack", "Detektor", "Cellvi"][i % 3]
+      gpsProvider: "Reporte cada 30 segundos · Telefono Celular"
     },
     driver: {
       name: firstName,
@@ -939,13 +929,14 @@ export function seedToTrip(
     documents: {
       vehicleEarliestExpiration: new Date(earliestExpiration(vehicleDocs, nowMs)).toISOString(),
       driverEarliestExpiration: new Date(earliestExpiration(driverDocs, nowMs)).toISOString(),
-      vehicle: documentsOf(vehicleDocs, i, seed.prov, nowMs),
-      driver: documentsOf(driverDocs, i, seed.prov, nowMs)
+      vehicle: documentsOf(vehicleDocs, i, nowMs),
+      driver: documentsOf(driverDocs, i, nowMs)
     },
     materials: hasTr && serviceType !== "Personal" ? materialsOf(i) : [],
     passengers: hasTr && serviceType === "Personal" ? passengersOf(i) : [],
     segments: seed.s.map((x) => ({
-      state: x[0],
+      state: x[0] === "En parada" ? "En ruta" : x[0],
+      atStop: x[0] === "En parada",
       from: iso(x[1]),
       to: iso(x[2]),
       progressFrom: typeof x[3] === "string" ? fracOf(x[3]) : x[3],
@@ -957,7 +948,7 @@ export function seedToTrip(
     appEvents: []
   };
 
-  const [lng, lat] = posAt(trip, nowMs);
+  const [lng, lat] = mockPosAt(trip, nowMs);
   trip.lastPing.lat = lat;
   trip.lastPing.lng = lng;
 

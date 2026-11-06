@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { CaretRight, Check, Copy, DownloadSimple, FileText } from "phosphor-react";
 import type { MapThemeMode } from "@/theme/mapPalette";
 import { docStatus } from "../../lib/documents";
+import { driverName } from "../../lib/tracking";
 import type { DocStatus } from "../../lib/documents";
 import { HR, toMs } from "../../lib/time";
 import type { IVehicleTowerDocument, IVehicleTowerTrip } from "../../types/vehicleTower";
@@ -147,7 +148,7 @@ function DocDetail({
           <span>Entidad</span>
           <b>{doc.issuer}</b>
           <span>Vigente desde</span>
-          <b className={styles.num}>{date(doc.issuedAt)}</b>
+          <b className={styles.num}>{doc.issuedAt ? date(doc.issuedAt) : "--"}</b>
           <span>Vigente hasta</span>
           <b className={styles.num}>{date(doc.expiresAt)}</b>
         </div>
@@ -264,16 +265,24 @@ export function VehicleModal({ open, onClose, mode, trip, now }: IPartyModalProp
       docs={trip.documents.vehicle}
       cells={[
         { k: "Tipo", v: v.type },
-        { k: "Marca y modelo", v: `${v.brand} ${v.line} · ${v.year}` },
-        { k: "Matrícula", v: v.municipality.charAt(0) + v.municipality.slice(1).toLowerCase() },
+        {
+          k: "Marca y modelo",
+          v: [[v.brand, v.line].filter(Boolean).join(" "), v.year].filter(Boolean).join(" · ")
+        },
+        {
+          k: "Matrícula",
+          v: v.municipality
+            ? v.municipality.charAt(0) + v.municipality.slice(1).toLowerCase()
+            : "--"
+        },
         {
           k: "Remolque",
-          v: v.trailerPlate ? <span className={styles.plate}>{v.trailerPlate}</span> : "No aplica"
+          v: v.trailerPlate ? <span className={styles.plate}>{v.trailerPlate}</span> : "--"
         },
         { k: "Capacidad", v: v.capacity },
         { k: "Proveedor", v: trip.carrier.name },
-        { k: "GPS", v: `${v.gpsProvider} · reporte cada 5 min` },
-        { k: "Regional", v: trip.vp }
+        { k: "GPS", v: v.gpsProvider },
+        { k: "Regional", v: trip.vp ?? "--" }
       ]}
     />
   );
@@ -308,7 +317,9 @@ function CopyPhone({ phone }: { phone: string }) {
 
 export function DriverModal({ open, onClose, mode, trip, now }: IPartyModalProps) {
   const d = trip.driver;
-  const name = `${d.name} ${d.lastName}`;
+  if (!d) return null;
+  const name = driverName(trip);
+  const services = d.servicesThisYear;
   return (
     <DocumentsModal
       open={open}
@@ -323,16 +334,19 @@ export function DriverModal({ open, onClose, mode, trip, now }: IPartyModalProps
           k: "Celular",
           v: (
             <>
-              <span className={styles.mono}>{d.phone}</span>
-              <CopyPhone phone={d.phone} />
+              <span className={styles.mono}>{d.phone ?? "Sin información"}</span>
+              {d.phone && <CopyPhone phone={d.phone} />}
             </>
           )
         },
         { k: "Empresa", v: trip.carrier.name },
-        { k: "Categoría de licencia", v: d.licenseCategory },
+        { k: "Categoría de licencia", v: d.licenseCategory ?? "--" },
         {
-          k: "Servicios con Halliburton",
-          v: `${d.servicesThisYear} en ${new Date(now).getFullYear()}`
+          k: `Servicios con ${trip.client ?? "el cliente"}`,
+          v:
+            typeof services === "number"
+              ? `${services} en ${new Date(now).getFullYear()}`
+              : services
         }
       ]}
     />

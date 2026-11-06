@@ -1,30 +1,44 @@
 import type {
+  IVehicleTowerDriver,
   IVehicleTowerLogEvent,
+  IVehicleTowerPing,
+  IVehicleTowerStop,
+  IVehicleTowerTransferRequest,
   IVehicleTowerTrip,
-  TowerScreenState,
   TowerSegmentState
 } from "../types/vehicleTower";
-import { HR, offsetToIso, toMs } from "./time";
+import { departureOf, nearestFrac, routeMetrics, segmentsOf } from "../lib/tracking";
+import type { LngLat } from "../lib/tracking";
+import { HR, offsetToIso, toMs } from "../lib/time";
 
-type LngLat = [number, number];
-
-export interface ISimSegment {
+export interface IMockSegment {
   state: TowerSegmentState;
-  from: number;
-  to: number;
+  atStop: boolean;
+  from: string;
+  to: string;
   progressFrom: number;
   progressTo: number;
 }
 
-export const NO_FOLLOW_UP = -1e9 * HR;
+type ApiOnly =
+  | "vehicleId"
+  | "transferRequest"
+  | "stops"
+  | "segments"
+  | "lastPing"
+  | "recentPings"
+  | "trail"
+  | "positions"
+  | "lastAppEventAt"
+  | "lastNoveltyAt"
+  | "driver";
 
-export const dist = (a: LngLat, b: LngLat): number => {
-  const R = 6371;
-  const r = Math.PI / 180;
-  const dl = (b[1] - a[1]) * r;
-  const dn = (b[0] - a[0]) * r;
-  const x = Math.sin(dl / 2) ** 2 + Math.cos(a[1] * r) * Math.cos(b[1] * r) * Math.sin(dn / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(x));
+export type IMockTrip = Omit<IVehicleTowerTrip, ApiOnly> & {
+  transferRequest: Omit<IVehicleTowerTransferRequest, "internalId"> | null;
+  stops: Array<Omit<IVehicleTowerStop, "arrivedAt" | "departedAt">>;
+  segments: IMockSegment[];
+  lastPing: IVehicleTowerPing;
+  driver: Omit<IVehicleTowerDriver, "licenseExpiration">;
 };
 
 export function curvy(pts: LngLat[]): LngLat[] {
@@ -58,99 +72,15 @@ export function curvy(pts: LngLat[]): LngLat[] {
   return out;
 }
 
-interface IRouteMetrics {
-  cum: number[];
-  total: number;
-}
-
-export const routeMetrics = (path: LngLat[]): IRouteMetrics => {
-  const cum = [0];
-  for (let j = 1; j < path.length; j++) cum.push(cum[j - 1] + dist(path[j - 1], path[j]));
-  return { cum, total: cum[cum.length - 1] };
-};
-
-export const nearestFrac = (path: LngLat[], metrics: IRouteMetrics, q: LngLat): number => {
-  let bi = 0;
-  let bd = 1e9;
-  path.forEach((pt, j) => {
-    const d = Math.hypot(pt[0] - q[0], pt[1] - q[1]);
-    if (d < bd) {
-      bd = d;
-      bi = j;
-    }
-  });
-  return metrics.total ? metrics.cum[bi] / metrics.total : 0;
-};
-
-const metricsCache = new WeakMap<LngLat[], IRouteMetrics>();
-const metricsOf = (trip: IVehicleTowerTrip): IRouteMetrics => {
-  let m = metricsCache.get(trip.routeGeometry);
-  if (!m) {
-    m = routeMetrics(trip.routeGeometry);
-    metricsCache.set(trip.routeGeometry, m);
-  }
-  return m;
-};
-
-const stopFCache = new WeakMap<object, number[]>();
-export const stopFractions = (trip: IVehicleTowerTrip): number[] => {
-  let f = stopFCache.get(trip.stops);
-  if (!f) {
-    const m = metricsOf(trip);
-    f = trip.stops.map((s) => nearestFrac(trip.routeGeometry, m, [s.lng, s.lat]));
-    stopFCache.set(trip.stops, f);
-  }
-  return f;
-};
-
-const segCache = new WeakMap<object, ISimSegment[]>();
-export const simSegments = (trip: IVehicleTowerTrip): ISimSegment[] => {
-  let s = segCache.get(trip.segments);
-  if (!s) {
-    s = trip.segments.map((x) => ({
-      state: x.state,
-      from: toMs(x.from),
-      to: toMs(x.to),
-      progressFrom: x.progressFrom,
-      progressTo: x.progressTo
-    }));
-    segCache.set(trip.segments, s);
-  }
-  return s;
-};
-export const departureOf = (trip: IVehicleTowerTrip): number =>
-  trip.transferRequest ? toMs(trip.transferRequest.startDate) : NaN;
-
-export const durationHours = (trip: IVehicleTowerTrip): number => {
-  if (!trip.stops.length) return NaN;
-  return (toMs(trip.stops[trip.stops.length - 1].plannedAt) - departureOf(trip)) / HR;
-};
-
-export const pingMs = (trip: IVehicleTowerTrip): number => toMs(trip.lastPing.date);
-
-export function segAt(trip: IVehicleTowerTrip, t: number): ISimSegment {
-  const segs = simSegments(trip);
-  let s = segs[0];
-  for (const x of segs) {
-    if (t >= x.from) s = x;
-  }
-  return s;
-}
-
-export function stateAt(trip: IVehicleTowerTrip, t: number): TowerScreenState {
-  const segs = simSegments(trip);
-  if (!segs.length) return "Sin servicio";
-  return t < segs[0].from
-    ? trip.transferRequest
-      ? "Asignado"
-      : "Sin servicio"
-    : segAt(trip, t).state;
-}
-
-export function along(trip: IVehicleTowerTrip, f: number): LngLat {
+const routeOf = (trip: IMockTrip) => {
   const path = trip.routeGeometry;
+  return { path, metrics: routeMetrics(path) };
+};
+
+function along(trip: IMockTrip, f: number): LngLat {
+  const { path, metrics } = routeOf(trip);
   if (path.length === 1) return path[0];
-  const { cum, total } = metricsOf(trip);
+  const { cum, total } = metrics;
   const d = f * total;
   for (let j = 1; j < cum.length; j++) {
     if (d <= cum[j]) {
@@ -163,61 +93,54 @@ export function along(trip: IVehicleTowerTrip, f: number): LngLat {
   return path[path.length - 1];
 }
 
-export function fracAt(trip: IVehicleTowerTrip, t: number): number {
-  const segs = simSegments(trip);
+function fracAt(trip: IMockTrip, t: number): number {
+  const segs = trip.segments;
   if (!segs.length) return 0;
-  if (t < segs[0].from) return segs[0].progressFrom;
-  const s = segAt(trip, t);
-  const g = Math.max(0, Math.min(1, (t - s.from) / (s.to - s.from)));
+  if (t < toMs(segs[0].from)) return segs[0].progressFrom;
+  let s = segs[0];
+  for (const x of segs) if (t >= toMs(x.from)) s = x;
+  const from = toMs(s.from);
+  const g = Math.max(0, Math.min(1, (t - from) / (toMs(s.to) - from)));
   return s.progressFrom + (s.progressTo - s.progressFrom) * g;
 }
 
-export function posAt(trip: IVehicleTowerTrip, t: number): LngLat {
-  return along(trip, fracAt(trip, Math.min(t, pingMs(trip))));
-}
+export const mockPosAt = (trip: IMockTrip, t: number): LngLat =>
+  along(trip, fracAt(trip, Math.min(t, toMs(trip.lastPing.date))));
 
-export function markerPos(trip: IVehicleTowerTrip, t: number, jitter?: LngLat): LngLat {
-  const q = posAt(trip, t);
-  if (!jitter) return q;
-  const f = fracAt(trip, Math.min(t, pingMs(trip)));
-  const w = f < 0.03 || f > 0.97 ? 1 : 0;
-  return [q[0] + jitter[0] * w, q[1] + jitter[1] * w];
-}
+const AT_STOP: readonly TowerSegmentState[] = ["Cargando", "Descargando", "Stand by"];
 
-export function stopIdx(trip: IVehicleTowerTrip, f: number): number {
-  let bi = 0;
-  let bd = 9;
-  stopFractions(trip).forEach((x, i) => {
-    const d = Math.abs(x - f);
-    if (d < bd) {
-      bd = d;
-      bi = i;
-    }
-  });
-  return bi;
-}
-
-export function simSpeed(
-  trip: IVehicleTowerTrip,
-  state: TowerScreenState,
-  hasGpsAlert: boolean
-): number {
-  return state === "En ruta" && !hasGpsAlert ? 42 + ((trip.tripId * 7) % 28) : 0;
-}
-
-export function lastFollow(trip: IVehicleTowerTrip, t: number): number {
-  let m = NO_FOLLOW_UP;
-  const consider = (at: number) => {
-    if (at <= t && at > m) m = at;
+export function mockStopTimes(
+  trip: IMockTrip,
+  t: number
+): Array<{ arrivedAt: string | null; departedAt: string | null }> {
+  const { path, metrics } = routeOf(trip);
+  const fr = trip.stops.map((s) => nearestFrac(path, metrics, [s.lng, s.lat]));
+  const nearest = (f: number) => {
+    let bi = 0;
+    let bd = 9;
+    fr.forEach((x, i) => {
+      const d = Math.abs(x - f);
+      if (d < bd) {
+        bd = d;
+        bi = i;
+      }
+    });
+    return bi;
   };
-  for (const e of trip.appEvents) if (e.fromApp) consider(toMs(e.eventTime));
-  const seen = trip.followUps.length
-    ? trip.followUps
-    : trip.lastFollowUp
-      ? [trip.lastFollowUp]
-      : [];
-  for (const f of seen) if (f.contacted) consider(toMs(f.createdAt));
-  return m;
+  const rows = trip.stops.map(() => ({
+    arrivedAt: null as string | null,
+    departedAt: null as string | null
+  }));
+  if (!rows.length) return rows;
+  for (const seg of trip.segments) {
+    if (toMs(seg.from) > t) continue;
+    const r = rows[nearest(seg.progressFrom)];
+    if (seg.atStop || AT_STOP.includes(seg.state)) {
+      if (r.arrivedAt === null || toMs(seg.from) < toMs(r.arrivedAt)) r.arrivedAt = seg.from;
+    }
+    if (seg.state === "En ruta" && !seg.atStop && r.departedAt === null) r.departedAt = seg.from;
+  }
+  return rows;
 }
 
 const INVITED = [1, 2, 3, 3, 4, 5];
@@ -232,7 +155,7 @@ const OLD_DRIVERS = [
 const STAND_BY_DAY_COST = 1450000;
 
 export function simEvents(
-  trip: IVehicleTowerTrip,
+  trip: IMockTrip,
   index: number,
   now: number
 ): { events: IVehicleTowerLogEvent[]; pendingApproval: number } {
@@ -240,10 +163,10 @@ export function simEvents(
   const rel = (ms: number) => (ms - now) / HR;
   const iso = (h: number) => offsetToIso(now, h);
   const sal = rel(departureOf(trip));
-  const analyst = trip.analyst.name;
   const prov = trip.carrier.name;
   const plate = trip.vehicle.plate;
   const driver = `${trip.driver.name} ${trip.driver.lastName}`;
+  const analyst = trip.analyst?.name ?? "";
   const costo = trip.cost?.amount ?? 0;
   const inv = INVITED[i % INVITED.length];
   const out: IVehicleTowerLogEvent[] = [];
@@ -306,7 +229,7 @@ export function simEvents(
       role: "Proveedor"
     });
   }
-  const sbSeg = simSegments(trip).find((x) => x.state === "Stand by");
+  const sbSeg = segmentsOf(trip).find((x) => x.state === "Stand by");
   if (sbSeg) {
     const sbFrom = rel(sbSeg.from);
     const days = Math.max(1, Math.ceil(-sbFrom / 24));

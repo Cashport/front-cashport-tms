@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import type { KeyboardEvent } from "react";
 import { CaretLeft, Lock, WarningCircle } from "phosphor-react";
 import { List, useListRef } from "react-window";
@@ -9,9 +9,8 @@ import type { FilterChipItem } from "@/components/ui/page-header-controls/page-h
 import { FILTER_CATEGORIES, labelOf } from "../../lib/filters";
 import type { FilterCategoryId } from "../../lib/filters";
 import { dt, hhmm, HR } from "../../lib/time";
-import { buildMockUnassignedTrs } from "../../mocks/curatedFleet";
 import { useVehicleTowerStore } from "../../store/useVehicleTowerStore";
-import type { IFleetItem } from "../../types/vehicleTower";
+import type { IFleetItem, IVehicleTowerUnassignedTr } from "../../types/vehicleTower";
 import { FLEET_ROW_HEIGHT, FleetRow, fleetRowDomId } from "./FleetRow";
 import { StatusStrip } from "./StatusStrip";
 import type { IFilteredFleet } from "./useFilteredFleet";
@@ -20,6 +19,8 @@ import styles from "./FleetPanel.module.scss";
 export interface IFleetPanelProps {
   filtered: IFilteredFleet;
   t: number;
+  unassigned?: IVehicleTowerUnassignedTr[];
+  loading: boolean;
   onCollapse: () => void;
 }
 
@@ -47,7 +48,7 @@ function Row({ index, style, rows, t, selectedTripId, onSelect }: RowComponentPr
 
 const MAX_CHIP_VALUES = 2;
 
-export function FleetPanel({ filtered, t, onCollapse }: IFleetPanelProps) {
+export function FleetPanel({ filtered, t, unassigned, loading, onCollapse }: IFleetPanelProps) {
   const { rows, bucketCounts } = filtered;
   const mode = useVehicleTowerStore((s) => s.mode);
   const scope = useVehicleTowerStore((s) => s.scope);
@@ -60,10 +61,9 @@ export function FleetPanel({ filtered, t, onCollapse }: IFleetPanelProps) {
   const toggleIdle = useVehicleTowerStore((s) => s.toggleIdle);
   const clearFilter = useVehicleTowerStore((s) => s.clearFilter);
   const listRef = useListRef(null);
-  const [unassigned] = useState(() => buildMockUnassignedTrs(useVehicleTowerStore.getState().now));
   const pending = useMemo(
     () =>
-      unassigned.filter((x) => {
+      unassigned?.filter((x) => {
         const h = (new Date(x.departureAt).getTime() - t) / HR;
         return h < 24 && h > -2 && (!scope || x.psl === scope);
       }),
@@ -169,23 +169,27 @@ export function FleetPanel({ filtered, t, onCollapse }: IFleetPanelProps) {
           overscanCount={6}
         />
       ) : (
-        <div className={styles.empty}>Ningún vehículo cumple los filtros en este momento.</div>
+        <div className={styles.empty}>
+          {loading ? "Cargando la flota..." : "Ningún vehículo cumple los filtros en este momento."}
+        </div>
       )}
-      <div className={styles.foot}>
-        {pending.length ? (
-          <>
-            <span className={styles.footIc}>
-              <WarningCircle size={15} weight="bold" aria-hidden />
-            </span>
-            <p>
-              <b>{pending.length} TRs sin vehículo asignado</b> salen en menos de 24 h. No aparecen
-              en el mapa: se gestionan en Riesgo de retraso en la salida.
-            </p>
-          </>
-        ) : (
-          <p>Todas las TRs de las próximas 24 h tienen vehículo asignado.</p>
-        )}
-      </div>
+      {pending && (
+        <div className={styles.foot}>
+          {pending.length ? (
+            <>
+              <span className={styles.footIc}>
+                <WarningCircle size={15} weight="bold" aria-hidden />
+              </span>
+              <p>
+                <b>{pending.length} TRs sin vehículo asignado</b> salen en menos de 24 h. No
+                aparecen en el mapa: se gestionan en Riesgo de retraso en la salida.
+              </p>
+            </>
+          ) : (
+            <p>Todas las TRs de las próximas 24 h tienen vehículo asignado.</p>
+          )}
+        </div>
+      )}
     </aside>
   );
 }

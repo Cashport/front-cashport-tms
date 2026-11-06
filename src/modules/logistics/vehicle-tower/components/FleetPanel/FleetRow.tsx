@@ -2,8 +2,8 @@
 import { memo } from "react";
 import type { CSSProperties } from "react";
 import type { MapStatusTone } from "@/theme/mapPalette";
-import { departureOf, pingMs } from "../../lib/sim";
-import { ago, dt, hhmm, HR } from "../../lib/time";
+import { departureOf, driverName, gpsAgo } from "../../lib/tracking";
+import { dt, hhmm, HR } from "../../lib/time";
 import type { IFleetItem } from "../../types/vehicleTower";
 import styles from "./FleetPanel.module.scss";
 
@@ -26,7 +26,11 @@ function sideText({ trip, evaluation: e }: IFleetItem, t: number): IRowText {
     return { why: e.top.short, tone: e.top.lvl, when: trip.transferRequest?.id ?? "", more };
   }
   if (e.bucket === "ok") {
-    return { why: e.state, tone: "ok", when: `GPS ${ago((t - Math.min(t, pingMs(trip))) / HR)}` };
+    return {
+      why: e.state,
+      tone: "ok",
+      when: `GPS ${gpsAgo(trip, t)}`
+    };
   }
   if (e.isScheduled) {
     const dep = departureOf(trip);
@@ -36,7 +40,11 @@ function sideText({ trip, evaluation: e }: IFleetItem, t: number): IRowText {
       when: `Sale ${(dep - t) / HR < 20 ? hhmm(dep) : dt(dep)}`
     };
   }
-  return { why: "Sin servicio", tone: "idle", when: titleCase(trip.vehicle.municipality) };
+  return {
+    why: "Sin servicio",
+    tone: "idle",
+    when: trip.vehicle.municipality ? titleCase(trip.vehicle.municipality) : "--"
+  };
 }
 
 function routeText({ trip }: IFleetItem): string {
@@ -61,7 +69,7 @@ export interface IFleetRowProps {
 function FleetRowBase({ item, t, selected, onSelect, style, index, count }: IFleetRowProps) {
   const { trip, evaluation } = item;
   const side = sideText(item, t);
-  const driver = `${trip.driver.name} ${trip.driver.lastName}`;
+  const driver = driverName(trip);
   return (
     <div
       id={fleetRowDomId(trip.tripId)}

@@ -1,13 +1,10 @@
 import type { MapStatusTone } from "@/theme/mapPalette";
 
-/** Estados de un segmento. Son los del prototipo: "En ruta" y "En parada" son estados de pantalla (TMS "En curso" + GPS). */
-// TODO(decisión): la HU define "En ruta"/"En parada" por GPS (radio de la parada), pero el prototipo
-// los trae ya resueltos en los segmentos. Falta definir quién los resuelve en el backend (preguntas abiertas 1 y 2).
+/** "En ruta" es el estado En curso del TMS. El estado siempre viene del back: no se deriva del GPS. */
 export type TowerSegmentState =
   | "Sin iniciar"
   | "Cargando"
   | "En ruta"
-  | "En parada"
   | "Descargando"
   | "Stand by"
   | "Detenido"
@@ -21,13 +18,15 @@ export interface IVehicleTowerStop {
   plannedAt: string;
   /** location.precision_radio (m). Null: se usa PARAM.radioOrigenM. */
   precisionRadioM: number | null;
+  arrivedAt: string | null;
+  departedAt: string | null;
 }
 
 /** Fuente: carrier_request elegida -> carriers. */
 export interface IVehicleTowerCarrier {
   name: string;
   contactName: string;
-  phoneNumber: string;
+  phoneNumber: string | null;
 }
 
 /** Fuente: carrier_request.id_vehicle -> vehicles + vehicle_type + service_type. */
@@ -36,15 +35,11 @@ export interface IVehicleTowerVehicle {
   type: string;
   serviceType: "Carga" | "Izaje" | "Personal";
   brand: string;
-  line: string;
-  year: number;
-  // TODO(decisión): el prototipo muestra la matrícula (p. ej. "FUNZA") en las filas sin servicio y en la ficha
-  // del vehículo; la HU no dice de qué columna sale.
-  municipality: string;
+  line: string | null;
+  year: number | null;
+  municipality: string | null;
   trailerPlate: string | null;
-  // TODO(decisión): el prototipo deriva la capacidad del tipo de vehículo ("4 pasajeros", "34 t"); la HU no dice de qué columna sale.
   capacity: string;
-  // TODO(decisión): proveedor de GPS ("Satrack", "Detektor", "Cellvi"); la HU no lo trae. La periodicidad ("reporte cada 5 min") es un texto fijo del prototipo.
   gpsProvider: string;
   // Nunca se envían gps_user ni gps_password (GAP-052/068).
 }
@@ -53,18 +48,16 @@ export interface IVehicleTowerVehicle {
 export interface IVehicleTowerDriver {
   name: string;
   lastName: string;
-  phone: string;
-  // TODO(decisión): categoría de licencia ("C3"); el prototipo la muestra fija, la HU no la trae.
-  licenseCategory: string;
-  // TODO(decisión): "Servicios con Halliburton" en el año; el prototipo lo simula, la HU no define la fuente.
-  servicesThisYear: number;
+  phone: string | null;
+  licenseCategory: string | null;
+  licenseExpiration: string | null;
+  servicesThisYear: number | string;
 }
 
 /** Fuente: profit_2.user. */
 export interface IVehicleTowerContact {
   name: string;
-  // TODO(decisión): pregunta abierta 9, el teléfono puede venir de profit_2.user o de user_mail_uuid.phone.
-  phone: string;
+  phone: string | null;
 }
 
 /** Fuente: trip.fare + novelty aprobadas; pendientes en pendingApproval. */
@@ -74,12 +67,11 @@ export interface IVehicleTowerCost {
 }
 
 export interface IVehicleTowerTransferRequest {
-  // TODO(decisión): la HU usa transfer_request.id (numérico); el prototipo muestra el código "TR-40418".
   id: string;
+  internalId: number;
   startDate: string;
   /** transfer_request.fixed_rate (pregunta abierta 3) */
   fixedRate: boolean;
-  // TODO(decisión): el prototipo simula el texto; la HU no define la columna (¿transfer_request.observations?).
   observations: string;
 }
 
@@ -87,17 +79,16 @@ export interface IVehicleTowerTransferRequest {
 export interface IVehicleTowerDocument {
   name: string;
   expiresAt: string;
-  // TODO(decisión): fecha de inicio, número y entidad emisora; el prototipo los simula en el detalle del documento.
-  issuedAt: string;
+  issuedAt: string | null;
   number: string;
   issuer: string;
 }
 
 export interface IVehicleTowerDocumentsSummary {
   /** Menor certificates.expiration_date entre los documentos del vehículo */
-  vehicleEarliestExpiration: string;
+  vehicleEarliestExpiration: string | null;
   /** Menor certificates.expiration_date entre los documentos del conductor */
-  driverEarliestExpiration: string;
+  driverEarliestExpiration: string | null;
   vehicle: IVehicleTowerDocument[];
   driver: IVehicleTowerDocument[];
 }
@@ -113,17 +104,13 @@ export interface IVehicleTowerMaterial {
 export interface IVehicleTowerPassenger {
   name: string;
   psl: string;
-  phone: string;
+  phone: string | null;
 }
 
 export interface IVehicleTowerSegment {
   state: TowerSegmentState;
   from: string;
-  to: string;
-  // TODO(decisión): avance sobre la ruta (0..1) al inicio y fin del segmento. Es insumo del simulador del
-  // prototipo (posición en el histórico); en producción la posición sale de Mongo `locations` / GET history.
-  progressFrom: number;
-  progressTo: number;
+  to: string | null;
 }
 
 /** Último ping GPS. Fuente: Mongo `locations` (decisión del responsable, no trip_position). La velocidad es simulada. */
@@ -157,14 +144,11 @@ export interface IVehicleTowerFollowUpFile {
 /** Fuente: trip_tracking. */
 export interface IVehicleTowerTrackingEvent {
   eventTime: string;
-  // TODO(decisión): pregunta abierta 2, qué evento de tracking_type corresponde a cada estado.
   eventType: string;
   /** App del conductor (trip_tracking.created_by = drivers.email, GAP-073). false: evento del TMS. */
   fromApp: boolean;
 }
 
-// TODO(decisión): la HU entrega la bitácora completa en GET /api/vehicle-tower/:tripId. Se incluye aquí
-// (opcional) porque el prototipo la deriva con simEvents y la ficha la necesita.
 export interface IVehicleTowerLogEvent {
   at: string;
   kind: "assignment" | "resourceChange" | "cost";
@@ -178,9 +162,10 @@ export interface IVehicleTowerLogEvent {
 
 export interface IVehicleTowerTrip {
   tripId: number;
+  vehicleId: number;
   /** trip.state_id (FK a status, ver STATUS.TRIP en globalConstants). Null si el servicio ya terminó o no hay TR. */
   stateId: string | null;
-  /** TODO(decisión): el prototipo incluye 2 vehículos sin TR ("Sin servicio"); la HU §1 dice que solo entran trips. null = sin TR. */
+  /** Null en los vehículos sin trip, que llevan tripId = -vehicleId. */
   transferRequest: IVehicleTowerTransferRequest | null;
   /** Paradas ordenadas por order_tr. Vacío si no hay TR. */
   stops: IVehicleTowerStop[];
@@ -188,36 +173,39 @@ export interface IVehicleTowerTrip {
   routeGeometry: Array<[number, number]>;
   carrier: IVehicleTowerCarrier;
   vehicle: IVehicleTowerVehicle;
-  driver: IVehicleTowerDriver;
+  driver: IVehicleTowerDriver | null;
   /** Usuario de la TO más antigua de la TR */
   requester: IVehicleTowerContact | null;
-  analyst: IVehicleTowerContact;
+  analyst: IVehicleTowerContact | null;
   /** transfer_request_cost_center (mayor porcentaje) -> cost_center -> psl */
   psl: string | null;
   /** transfer_order.id_client -> clients */
   client: string | null;
-  // TODO(decisión): la HU saca la VP de cada punto (location.zone_id -> zone.name); el prototipo la trae por vehículo ("Regional").
-  vp: string;
+  vp: string | null;
   cost: IVehicleTowerCost | null;
   documents: IVehicleTowerDocumentsSummary;
-  // TODO(decisión): la HU no define de dónde salen los materiales ni los pasajeros; vienen vacíos si no hay TR
-  // (materiales en servicios de personal, pasajeros en los demás).
   materials: IVehicleTowerMaterial[];
   passengers: IVehicleTowerPassenger[];
   segments: IVehicleTowerSegment[];
-  lastPing: IVehicleTowerPing;
+  lastPing: IVehicleTowerPing | null;
+  recentPings: IVehicleTowerPing[];
+  /** Estela de la ficha */
+  trail: IVehicleTowerPing[];
+  /** Solo en histórico: [ms, lng, lat] ordenadas por tiempo */
+  positions?: Array<[number, number, number]>;
   lastFollowUp: IVehicleTowerFollowUp | null;
-  // TODO(decisión): la HU entrega solo el último seguimiento; el simulador del histórico necesita todos
-  // los anteriores al instante consultado (viene de GET history o de la ficha).
+  lastAppEventAt: string | null;
+  lastNoveltyAt: string | null;
   followUps: IVehicleTowerFollowUp[];
   appEvents: IVehicleTowerTrackingEvent[];
   logEvents?: IVehicleTowerLogEvent[];
 }
 
-export interface IVehicleTowerResponse {
-  // TODO(decisión): la HU acepta ?at= pero no define el campo de corte en la respuesta.
-  at: string;
-  trips: IVehicleTowerTrip[];
+export interface IVehicleTowerUnassignedTr {
+  transferRequest: string;
+  route: string;
+  departureAt: string;
+  psl: string | null;
 }
 
 /** PARAM del prototipo; en el futuro viene de vehicle_tower_param. */

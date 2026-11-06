@@ -1,4 +1,4 @@
-import { fracAt, pingMs, simSpeed } from "../../lib/sim";
+import { routeFraction } from "../../lib/tracking";
 import { dur, hhmm, HR, sdt } from "../../lib/time";
 import type { IFleetItem, IVehicleTowerParams } from "../../types/vehicleTower";
 import { etaOf, isDepartureOverdue, routeTotalKm, stopInfo, stopLabel } from "./drawerModel";
@@ -61,13 +61,8 @@ export function StopsBlock({ item, t, params }: IStopsBlockProps) {
   const rows = stopInfo(trip, t);
   const n = rows.length;
   if (!n) return null;
-  const frac = fracAt(trip, Math.min(t, pingMs(trip)));
+  const frac = routeFraction(trip, t);
   const km = Math.round(routeTotalKm(trip) * (1 - frac));
-  const speed = simSpeed(
-    trip,
-    e.state,
-    e.conditions.some((c) => c.code === "GPS")
-  );
   const done = rows.filter((r) => r.status === "done").length;
   const leg = Math.min(n - 1, Math.max(1, done));
   const pct = Math.round(frac * 100);
@@ -118,7 +113,7 @@ export function StopsBlock({ item, t, params }: IStopsBlockProps) {
           </div>
           <span className={styles.num}>
             {n > 2 ? `Tramo ${leg} de ${n - 1} · ` : ""}
-            <b>{pct}%</b> · faltan {km.toLocaleString("es-CO")} km · {speed} km/h
+            <b>{pct}%</b> · faltan {km.toLocaleString("es-CO")} km · -- km/h
           </span>
         </div>
       </div>
