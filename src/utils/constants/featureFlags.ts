@@ -3,3 +3,6 @@
 export const MAP_V1_ENABLED = process.env.NEXT_PUBLIC_MAP_V1_ENABLED !== "false";
 
 export const MAP_V2_ENABLED = process.env.NEXT_PUBLIC_MAP_V2_ENABLED === "true";
+
+export const MAP_V2_SOURCE: "mock" | "api" =
+  process.env.NEXT_PUBLIC_MAP_V2_SOURCE === "mock" ? "mock" : "api";

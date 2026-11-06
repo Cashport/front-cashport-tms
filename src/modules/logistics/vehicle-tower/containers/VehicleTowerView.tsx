@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ConfigProvider, theme as antdTheme } from "antd";
+import { Alert, Button, ConfigProvider, theme as antdTheme } from "antd";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import ProfitLoader from "@/components/ui/profit-loader";
 import { ThemeMenuContext } from "@/context/ThemeMenuContext";
 import { useModuleTheme } from "@/hooks/useModuleTheme";
 import { MAP_ANTD_DARK_TOKENS, MAP_PALETTE, paletteToCssVars } from "@/theme/mapPalette";
@@ -27,7 +28,8 @@ const COLLAPSED_KEY = "tc-collapsed";
 export function VehicleTowerView() {
   const { theme, setTheme, resolvedMode } = useModuleTheme();
   const isDark = resolvedMode === "dark";
-  const { fleet, t } = useVehicleTower();
+  const { fleet, t, ready, isLoading, error, retry, unassigned, detailLoading, detailError } =
+    useVehicleTower();
   const selectedTripId = useVehicleTowerStore((s) => s.selectedTripId);
   const selectTrip = useVehicleTowerStore((s) => s.selectTrip);
   const mode = useVehicleTowerStore((s) => s.mode);
@@ -83,10 +85,21 @@ export function VehicleTowerView() {
           headerActions={<TowerHeaderActions onOpenFilters={() => setModal("filters")} />}
           className={isDark ? "dark" : ""}
         >
+          {!ready && isLoading && (
+            <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+              <ProfitLoader size="large" />
+            </div>
+          )}
           <div className={styles.root} style={paletteToCssVars(resolvedMode)}>
             {!collapsed && (
               <div className={styles.fleetPanel}>
-                <FleetPanel filtered={filtered} t={t} onCollapse={() => setCollapsed(true)} />
+                <FleetPanel
+                  filtered={filtered}
+                  t={t}
+                  unassigned={unassigned}
+                  loading={!ready && isLoading}
+                  onCollapse={() => setCollapsed(true)}
+                />
               </div>
             )}
             <section className={styles.mapZone}>
@@ -95,6 +108,21 @@ export function VehicleTowerView() {
                   counts={filtered.bucketCounts}
                   onClick={() => setCollapsed(false)}
                 />
+              )}
+              {error && !ready && (
+                <div className={styles.status}>
+                  <Alert
+                    type="error"
+                    showIcon
+                    message="No se pudo cargar la flota"
+                    description={error.message}
+                    action={
+                      <Button size="small" onClick={retry}>
+                        Reintentar
+                      </Button>
+                    }
+                  />
+                </div>
               )}
               <TowerMap
                 fleet={filtered.mapFleet}
@@ -119,6 +147,10 @@ export function VehicleTowerView() {
                   onOpenRules={() => setModal("rules")}
                   footer={
                     <>
+                      {detailLoading && <ProfitLoader size="small" />}
+                      {detailError && (
+                        <Alert type="warning" showIcon message="No se pudo cargar el detalle" />
+                      )}
                       {mode === "now" && selectedItem.trip.transferRequest && (
                         <FollowUpForm key={selectedItem.trip.tripId} item={selectedItem} />
                       )}

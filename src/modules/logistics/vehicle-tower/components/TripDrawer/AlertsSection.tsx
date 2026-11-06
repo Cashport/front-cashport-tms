@@ -1,5 +1,5 @@
 import { ago, dt, dur, HR } from "../../lib/time";
-import { lastFollow, pingMs, departureOf } from "../../lib/sim";
+import { gpsAgo, lastFollow, departureOf } from "../../lib/tracking";
 import type { IFleetItem } from "../../types/vehicleTower";
 import styles from "./TripDrawer.module.scss";
 
@@ -34,8 +34,7 @@ export function AlertsSection({ item, t, onOpenRules }: IAlertsSectionProps) {
       <div className={`${styles.whyItem} ${styles.wy_ok}`}>
         <b>{e.state}</b>
         <span className={styles.whyText}>
-          Reporta GPS {ago((t - Math.min(t, pingMs(trip))) / HR)} · último seguimiento{" "}
-          {ago((t - lastFollow(trip, t)) / HR)}
+          Reporta GPS {gpsAgo(trip, t)} · último seguimiento {ago((t - lastFollow(trip, t)) / HR)}
         </span>
       </div>
     );

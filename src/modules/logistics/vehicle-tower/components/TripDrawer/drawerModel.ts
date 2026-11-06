@@ -1,13 +1,19 @@
 import type { MapStatusTone } from "@/theme/mapPalette";
-import { departureOf, routeMetrics, simSegments, stopIdx } from "../../lib/sim";
-import type { ISimSegment } from "../../lib/sim";
+import {
+  departureOf,
+  routeMetrics,
+  segmentsOf,
+  stopAt,
+  stopStatus,
+  stopTimes
+} from "../../lib/tracking";
+import type { ITrackSegment, StopStatus } from "../../lib/tracking";
 import { dur, HR, MIN, sdt, toMs } from "../../lib/time";
 import type {
   AlertLevel,
   IEvaluation,
   IVehicleTowerParams,
-  IVehicleTowerTrip,
-  TowerSegmentState
+  IVehicleTowerTrip
 } from "../../types/vehicleTower";
 
 export function pillText(e: IEvaluation): string {
@@ -25,8 +31,6 @@ export function pillText(e: IEvaluation): string {
 export const stopLabel = (i: number, n: number): string =>
   i === 0 ? "Origen" : i === n - 1 ? "Destino" : `Parada ${i}`;
 
-export type StopStatus = "done" | "here" | "pend";
-
 export interface IStopRow {
   index: number;
   name: string;
@@ -36,33 +40,14 @@ export interface IStopRow {
   status: StopStatus;
 }
 
-const AT_STOP: readonly TowerSegmentState[] = ["Cargando", "En parada", "Descargando", "Stand by"];
-
-export function stopInfo(trip: IVehicleTowerTrip, t: number): IStopRow[] {
-  const rows = trip.stops.map((s, index) => ({
+export const stopInfo = (trip: IVehicleTowerTrip, t: number): IStopRow[] =>
+  trip.stops.map((s, index) => ({
     index,
     name: s.name,
     plan: toMs(s.plannedAt),
-    arrival: null as number | null,
-    departure: null as number | null
+    ...stopTimes(s, t),
+    status: stopStatus(s, t)
   }));
-  if (!rows.length) return [];
-  for (const seg of simSegments(trip)) {
-    if (seg.from > t) continue;
-    if ((AT_STOP as readonly string[]).includes(seg.state)) {
-      const r = rows[stopIdx(trip, seg.progressFrom)];
-      if (r.arrival === null || seg.from < r.arrival) r.arrival = seg.from;
-    }
-    if (seg.state === "En ruta") {
-      const r = rows[stopIdx(trip, seg.progressFrom)];
-      if (r.departure === null) r.departure = seg.from;
-    }
-  }
-  return rows.map((r) => ({
-    ...r,
-    status: r.departure !== null && r.departure <= t ? "done" : r.arrival !== null ? "here" : "pend"
-  }));
-}
 
 const metricsCache = new WeakMap<object, number>();
 export function routeTotalKm(trip: IVehicleTowerTrip): number {
@@ -90,7 +75,6 @@ export const etaOf = (
 ) => (isLast && notStarted ? row.plan + Math.max(0, t - departureOf(trip)) : row.plan);
 
 export const STATE_KEY: Record<string, string> = {
-  "En parada": "par",
   "Sin iniciar": "sin",
   Cargando: "carg",
   "En ruta": "ruta",
@@ -131,7 +115,7 @@ export function buildTimeline(
   params: IVehicleTowerParams
 ): ITimeline {
   const sal = departureOf(trip);
-  const segs = simSegments(trip).filter((x) => x.from <= t);
+  const segs = segmentsOf(trip).filter((x) => x.from <= t);
   if (!segs.length || e.isScheduled) {
     return {
       scheduled: true,
@@ -141,21 +125,15 @@ export function buildTimeline(
   }
   const cur = segs[segs.length - 1];
   const top = e.top;
-  const stateName = (x: ISimSegment): string => {
+  const stateName = (x: ITrackSegment): string => {
     const n = trip.stops.length;
-    if (x.state === "En parada") {
-      const k = stopIdx(trip, x.progressFrom);
-      return k === n - 1
-        ? `En destino · ${trip.stops[k]?.name}`
-        : `Parada ${k} · ${trip.stops[k]?.name}`;
-    }
     if (x.state === "En ruta" && n > 2) {
-      const k = Math.min(n - 1, stopIdx(trip, x.progressFrom) + 1);
+      const k = Math.min(n - 1, stopAt(trip, Math.min(x.to, t)) + 1);
       return `En ruta → ${trip.stops[k]?.name}`;
     }
     return x.state;
   };
-  const stateRow = (x: ISimSegment, until: number): ITimelineRow => ({
+  const stateRow = (x: ITrackSegment, until: number): ITimelineRow => ({
     kind: "state",
     at: x.from + 1e-6,
     name: stateName(x),
@@ -181,7 +159,7 @@ export function buildTimeline(
       );
   });
   rows.push({ kind: "marker", at: sal, name: "Salida programada", date: sdt(sal) });
-  const all = simSegments(trip);
+  const all = segmentsOf(trip);
   const ini = all.find((x) => x.state === "Cargando" || x.state === "En ruta");
   const out = all.find((x) => x.state === "En ruta");
   const overdue = sal + params.salidaVencidaMin * MIN;

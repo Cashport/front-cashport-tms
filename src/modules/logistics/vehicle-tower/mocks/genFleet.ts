@@ -1,6 +1,6 @@
-import type { IVehicleTowerResponse } from "../types/vehicleTower";
 import { CARRIER_CONTACTS, CITY_COORDS, CURATED_SEEDS, seedToTrip } from "./curatedFleet";
 import type { IMockSeed, MockSegment } from "./curatedFleet";
+import type { IMockTrip } from "./mockSim";
 
 const REAL: Record<string, [number, number]> = {
   "Sin iniciar": [101, 350170711],
@@ -338,24 +338,8 @@ export function genFleet(base: IMockSeed[]): IGeneratedFleet {
   return { seeds: out, newContacts };
 }
 
-export type MockMarkerJitter = Record<number, [number, number]>;
-
-export function buildMockVehicleTower(now: Date): IVehicleTowerResponse {
-  return buildMockVehicleTowerWithJitter(now).response;
-}
-
-export function buildMockVehicleTowerWithJitter(now: Date): {
-  response: IVehicleTowerResponse;
-  jitter: MockMarkerJitter;
-} {
+export function buildMockTrips(now: Date): IMockTrip[] {
   const { seeds, newContacts } = genFleet(CURATED_SEEDS);
-  const all = CURATED_SEEDS.concat(seeds);
   const contacts = { ...CARRIER_CONTACTS, ...newContacts };
-  const jitter: MockMarkerJitter = {};
-  const trips = all.map((seed, i) => {
-    const trip = seedToTrip(seed, i, now, contacts);
-    if (seed.jit) jitter[trip.tripId] = seed.jit;
-    return trip;
-  });
-  return { response: { at: now.toISOString(), trips }, jitter };
+  return CURATED_SEEDS.concat(seeds).map((seed, i) => seedToTrip(seed, i, now, contacts));
 }

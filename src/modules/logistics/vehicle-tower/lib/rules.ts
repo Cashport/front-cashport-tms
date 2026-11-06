@@ -11,14 +11,23 @@ import type {
   TowerScreenState,
   TowerSegmentState
 } from "../types/vehicleTower";
-import { departureOf, durationHours, lastFollow, pingMs, segAt, stateAt, stopIdx } from "./sim";
+import {
+  atOrigin,
+  currentStop,
+  departureOf,
+  durationHours,
+  lastFollow,
+  pingMs,
+  segAt,
+  stateAt,
+  stopTimes,
+  stoppedSince
+} from "./tracking";
 import { dt, dur, HR, hhmm, MIN } from "./time";
-
 
 export const EN_CURSO: readonly TowerSegmentState[] = [
   "Cargando",
   "En ruta",
-  "En parada",
   "Descargando",
   "Stand by",
   "Detenido"
@@ -117,7 +126,6 @@ export const toTMS = (st: TowerScreenState): string =>
   (
     ({
       "En ruta": "En curso",
-      "En parada": "En curso",
       Programado: "Sin iniciar",
       Asignado: "Sin iniciar"
     }) as Record<string, string>
@@ -151,7 +159,7 @@ export function evaluate(
     C.push({ code, ...ALERTAS[code], since, short, detail });
   const lim = durationHours(trip) <= 24 ? params.segCorto : params.segLargo;
   const lf = lastFollow(trip, t);
-  const ping = pingMs(trip);
+  const ping = pingMs(trip, t);
   const sinceSal = (t - sal) / HR;
   const inState = (t - sg.from) / HR;
 
@@ -163,7 +171,9 @@ export function evaluate(
       `${dur(inState)} en stand by desde ${hhmm(sg.from)}`
     );
   }
-  if (sinSalir && sinceSal > params.riesgoSBh) {
+  const fixedRate = trip.transferRequest.fixedRate;
+  const inOrigin = atOrigin(trip, t, params.radioOrigenM);
+  if (sinSalir && !fixedRate && inOrigin && sinceSal > params.riesgoSBh) {
     add(
       "RSB",
       sal + params.riesgoSBh * HR,
@@ -171,20 +181,23 @@ export function evaluate(
       `En origen (radio ${params.radioOrigenM} m) ${dur(sinceSal)} después de la salida programada`
     );
   }
-  if (st === "En parada" && !trip.transferRequest.fixedRate && inState > params.riesgoSBh) {
-    const k = stopIdx(trip, sg.progressFrom);
-    const last = k === trip.stops.length - 1;
-    const name = trip.stops[k]?.name;
-    add(
-      "RSB",
-      sg.from + params.riesgoSBh * HR,
-      `Riesgo stand by · ${dur(inState)}`,
-      last
-        ? `En destino (${name}) hace ${dur(inState)} y la TR sigue En curso`
-        : `En parada ${k} (${name}) hace ${dur(inState)} sin salir`
-    );
+  const stop = currentStop(trip, t);
+  if (st === "En ruta" && !fixedRate && stop > 0) {
+    const arrival = stopTimes(trip.stops[stop], t).arrival as number;
+    const inStop = (t - arrival) / HR;
+    const name = trip.stops[stop].name;
+    if (inStop > params.riesgoSBh) {
+      add(
+        "RSB",
+        arrival + params.riesgoSBh * HR,
+        `Riesgo stand by · ${dur(inStop)}`,
+        stop === trip.stops.length - 1
+          ? `En destino (${name}) hace ${dur(inStop)} y la TR sigue En curso`
+          : `En parada ${stop} (${name}) hace ${dur(inStop)} sin salir`
+      );
+    }
   }
-  if (st === "Descargando" && inState > params.riesgoSBh) {
+  if (st === "Descargando" && !fixedRate && inState > params.riesgoSBh) {
     add(
       "RSB",
       sg.from + params.riesgoSBh * HR,
@@ -192,16 +205,30 @@ export function evaluate(
       `En destino hace ${dur(inState)} sin finalizar el descargue`
     );
   }
-  if (st === "Detenido" && (t - sg.from) / MIN > params.detenidoMin) {
+  const signalAt = Number.isFinite(ping) ? Math.min(t, ping) : sg.from;
+  const noSignal = (t - signalAt) / MIN > params.sinSenalMin;
+  const stoppedAt =
+    st === "Detenido"
+      ? sg.from
+      : st === "En ruta" && stop < 0 && !noSignal
+        ? stoppedSince(trip, t, params.radioDetenidoM)
+        : null;
+  if (stoppedAt !== null && (t - stoppedAt) / MIN > params.detenidoMin) {
+    const stopped = (t - stoppedAt) / HR;
     add(
       "DET",
-      sg.from + params.detenidoMin * MIN,
-      `Detenido · ${dur(inState)}`,
-      `Dentro de ${params.radioDetenidoM} m hace ${dur(inState)}`
+      stoppedAt + params.detenidoMin * MIN,
+      `Detenido · ${dur(stopped)}`,
+      `Dentro de ${params.radioDetenidoM} m hace ${dur(stopped)}`
     );
   }
-  if (enCurso && st !== "Cargando" && (t - Math.min(t, ping)) / MIN > params.sinSenalMin) {
-    add("GPS", ping, `Sin señal · ${dur((t - ping) / HR)}`, `Último punto recibido el ${dt(ping)}`);
+  if (enCurso && st !== "Cargando" && noSignal) {
+    add(
+      "GPS",
+      signalAt,
+      `Sin señal · ${dur((t - signalAt) / HR)}`,
+      Number.isFinite(ping) ? `Último punto recibido el ${dt(ping)}` : "Sin posiciones reportadas"
+    );
   }
   if (st === "Sin iniciar" && (t - sal) / MIN > params.salidaVencidaMin) {
     add(
@@ -211,7 +238,7 @@ export function evaluate(
       `Debía salir el ${dt(sal)} y no ha iniciado en la app`
     );
   }
-  if (st === "Cargando" && (t - sal) / MIN > params.salidaVencidaMin) {
+  if (st === "Cargando" && inOrigin && (t - sal) / MIN > params.salidaVencidaMin) {
     add(
       "DEM",
       sal + params.salidaVencidaMin * MIN,

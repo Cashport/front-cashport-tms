@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { CaretRight } from "phosphor-react";
 import { docSumAt } from "../../lib/documents";
 import { ago, cop, HR, toMs } from "../../lib/time";
-import { lastFollow, pingMs } from "../../lib/sim";
+import { driverName, gpsAgo, lastFollow } from "../../lib/tracking";
 import type { IFleetItem, IVehicleTowerParams } from "../../types/vehicleTower";
 import { tons } from "../Modals/TripItemsModal";
 import { StopsBlock } from "./StopsBlock";
@@ -47,7 +47,8 @@ function Row({
   );
 }
 
-function DocSummary({ earliest, now }: { earliest: string; now: number }) {
+function DocSummary({ earliest, now }: { earliest: string | null; now: number }) {
+  if (!earliest) return null;
   const s = docSumAt(toMs(earliest), now);
   return <span className={`${styles.ds} ${styles[`ds_${s.status}`]}`}>{s.label}</span>;
 }
@@ -65,7 +66,6 @@ export function TripSection({
   const { trip } = item;
   const tr = trip.transferRequest;
   if (!tr) return null;
-  const driver = `${trip.driver.name} ${trip.driver.lastName}`;
   const personal = trip.vehicle.serviceType === "Personal";
   const items = personal ? trip.passengers : trip.materials;
   const first = personal ? trip.passengers[0]?.name : trip.materials[0]?.description;
@@ -126,7 +126,7 @@ export function TripSection({
           <DocSummary earliest={trip.documents.vehicleEarliestExpiration} now={now} />
         </Row>
         <Row label="Conductor" onOpen={onOpenDriver}>
-          <span>{driver}</span>
+          <span>{driverName(trip)}</span>
           <DocSummary earliest={trip.documents.driverEarliestExpiration} now={now} />
         </Row>
         {items.length > 0 && (
@@ -152,7 +152,7 @@ export function TripSection({
           )}
         </div>
         <div className={`${styles.tfoot} ${styles.num}`}>
-          <span>GPS {ago((t - Math.min(t, pingMs(trip))) / HR)}</span>
+          <span>GPS {gpsAgo(trip, t)}</span>
           <span>Último seguimiento {ago((t - lastFollow(trip, t)) / HR)}</span>
         </div>
       </div>

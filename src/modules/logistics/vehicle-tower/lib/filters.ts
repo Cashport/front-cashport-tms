@@ -1,13 +1,22 @@
 import type { IFleetItem, IVehicleTowerParams, IVehicleTowerTrip } from "../types/vehicleTower";
 import { ALERTAS, evaluate } from "./rules";
+import { driverName } from "./tracking";
 
 export type FilterCategoryId =
-  "vp" | "psl" | "type" | "prov" | "user" | "veh" | "mod" | "orig" | "dest" | "an" | "alerta";
+  | "psl"
+  | "type"
+  | "prov"
+  | "user"
+  | "veh"
+  | "mod"
+  | "orig"
+  | "dest"
+  | "an"
+  | "alerta";
 
 export type TowerFilters = Record<FilterCategoryId, string[]>;
 
 export const emptyFilters = (): TowerFilters => ({
-  vp: [],
   psl: [],
   type: [],
   prov: [],
@@ -20,8 +29,6 @@ export const emptyFilters = (): TowerFilters => ({
   alerta: []
 });
 
-export const VP_CODES = ["VRC", "VRN", "VAO", "VRO", "VPI"];
-
 export const MODALITIES: Record<string, string> = { rf: "Renta fija", co: "Call out" };
 
 export const modalityOf = (t: IVehicleTowerTrip): "rf" | "co" =>
@@ -33,10 +40,10 @@ const uniq = (a: string[]): string[] =>
   Array.from(new Set(a)).sort((x, y) => String(x).localeCompare(String(y), "es"));
 
 const hasTr = (t: IVehicleTowerTrip) => !!t.transferRequest;
-const origin = (t: IVehicleTowerTrip) => (hasTr(t) ? (t.stops[0]?.name ?? null) : null);
+const origin = (t: IVehicleTowerTrip) => (hasTr(t) ? t.stops[0]?.name ?? null : null);
 const destination = (t: IVehicleTowerTrip) =>
-  hasTr(t) ? (t.stops[t.stops.length - 1]?.name ?? null) : null;
-const requesterOf = (t: IVehicleTowerTrip) => (hasTr(t) ? (t.requester?.name ?? null) : null);
+  hasTr(t) ? t.stops[t.stops.length - 1]?.name ?? null : null;
+const requesterOf = (t: IVehicleTowerTrip) => (hasTr(t) ? t.requester?.name ?? null : null);
 
 export interface IFilterCategory {
   id: FilterCategoryId;
@@ -49,7 +56,6 @@ export interface IFilterCategory {
 const present = (a: Array<string | null>): string[] => a.filter((x): x is string => !!x);
 
 export const FILTER_CATEGORIES: IFilterCategory[] = [
-  { id: "vp", name: "Vicepresidencia", get: (t) => t.vp, options: () => VP_CODES },
   {
     id: "psl",
     name: "PSL",
@@ -103,8 +109,8 @@ export const FILTER_CATEGORIES: IFilterCategory[] = [
   {
     id: "an",
     name: "Analista",
-    get: (t) => t.analyst.name,
-    options: (trips) => Array.from(new Set(trips.map((t) => t.analyst.name)))
+    get: (t) => t.analyst?.name ?? null,
+    options: (trips) => uniq(present(trips.map((t) => t.analyst?.name ?? null)))
   },
   {
     id: "alerta",
@@ -155,13 +161,13 @@ export function matches(item: IFleetItem, query: string, filters: TowerFilters):
     const haystack = [
       plate,
       plate.replace(" ", ""),
-      `${v.driver.name} ${v.driver.lastName}`,
+      driverName(v),
       v.transferRequest?.id ?? "",
       tripLabel(v),
       v.carrier.name,
       requesterOf(v) ?? "",
-      hasTr(v) ? (v.psl ?? "") : "",
-      v.analyst.name
+      hasTr(v) ? v.psl ?? "" : "",
+      v.analyst?.name ?? ""
     ];
     if (!haystack.some((s) => s.toLowerCase().includes(q))) return false;
   }

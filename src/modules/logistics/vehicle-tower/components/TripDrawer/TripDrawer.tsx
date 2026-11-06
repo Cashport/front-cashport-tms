@@ -96,7 +96,8 @@ export function TripDrawer({
           </button>
         </div>
         <div className={styles.headSub}>
-          {trip.vehicle.type} · {trip.carrier.name} · Regional {trip.vp}
+          {trip.vehicle.type} · {trip.carrier.name}
+          {trip.vp && ` · Regional ${trip.vp}`}
         </div>
       </header>
       <div ref={bodyRef} className={styles.body}>
